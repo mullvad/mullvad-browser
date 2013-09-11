@@ -147,6 +147,9 @@ js/src/Y.js
 # Fuzzing code for testing only, targeting the JS shell
 js/src/fuzz-tests/
 
+# uses `#include`
+mobile/android/app/000-tor-browser-android.js
+
 # Uses `#filter substitution`
 mobile/android/app/mobile.js
 mobile/android/app/geckoview-prefs.js
