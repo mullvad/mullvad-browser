@@ -96,3 +96,5 @@ pref("pdfjs.handleOctetStream", true);
 pref("browser.download.open_pdf_attachments_inline", true);
 pref("pdfjs.annotationEditorMode", -1);
 pref("pdfjs.enableFloatingToolbar", true);
+
+#include 000-tor-browser-android.js
