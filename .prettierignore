@@ -1708,3 +1708,5 @@ tools/ts/error_list.json
 tools/ts/test/baselines/
 try_task_config.json
 xpcom/idl-parser/xpidl/fixtures/xpctest.d.json
+
+browser/app/profile/001-base-profile.js

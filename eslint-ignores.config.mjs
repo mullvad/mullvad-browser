@@ -311,4 +311,6 @@ export default [
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1944290
   "netwerk/test/mochitests/test_import_json_module.mjs",
   "dom/tests/browser/page_bytecode_cache_json_module.html",
+
+  "browser/app/profile/001-base-profile.js",
 ];
