@@ -1811,3 +1811,5 @@ tools/ts/test/baselines/
 try_task_config.json
 xpcom/idl-parser/xpidl/fixtures/xpctest.d.json
 **/package-lock.json
+
+browser/app/profile/001-base-profile.js

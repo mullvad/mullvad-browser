@@ -307,4 +307,6 @@ export default [
   "dom/base/test/jsmodules/import_circular_1.mjs",
   "dom/base/test/jsmodules/importmaps/multiple/import_circular.mjs",
   "dom/base/test/jsmodules/importmaps/multiple/import_circular_1.mjs",
+
+  "browser/app/profile/001-base-profile.js",
 ];
