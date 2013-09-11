@@ -1528,3 +1528,5 @@ tools/browsertime/package-lock.json
 tools/ts/error_list.json
 try_task_config.json
 xpcom/idl-parser/xpidl/fixtures/xpctest.d.json
+
+browser/app/profile/001-base-profile.js
