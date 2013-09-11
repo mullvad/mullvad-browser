@@ -93,3 +93,5 @@ pref("extensions.formautofill.addresses.capture.enabled", true);
 // Debug prefs.
 pref("browser.formfill.debug", false);
 pref("extensions.formautofill.loglevel", "Warn");
+
+#include 000-tor-browser-android.js
