@@ -2777,6 +2777,8 @@ static nsresult ProfileMissingDialog(nsINativeAppSupport* aNative) {
 #endif    // MOZ_WIDGET_ANDROID
 }
 
+// If aUnlocker is NULL, it is also OK for the following arguments to be NULL:
+//   aProfileDir, aProfileLocalDir, aResult.
 static ReturnAbortOnError ProfileLockedDialog(nsIFile* aProfileDir,
                                               nsIFile* aProfileLocalDir,
                                               nsIProfileUnlocker* aUnlocker,
@@ -2784,17 +2786,19 @@ static ReturnAbortOnError ProfileLockedDialog(nsIFile* aProfileDir,
                                               nsIProfileLock** aResult) {
   nsresult rv;
 
-  bool exists;
-  aProfileDir->Exists(&exists);
-  if (!exists) {
-    return ProfileMissingDialog(aNative);
+  if (aProfileDir) {
+    bool exists;
+    aProfileDir->Exists(&exists);
+    if (!exists) {
+      return ProfileMissingDialog(aNative);
+    }
   }
 
   ScopedXPCOMStartup xpcom;
   rv = xpcom.Initialize();
   NS_ENSURE_SUCCESS(rv, rv);
 
-  mozilla::Telemetry::WriteFailedProfileLock(aProfileDir);
+  if (aProfileDir) mozilla::Telemetry::WriteFailedProfileLock(aProfileDir);
 
   rv = xpcom.SetWindowCreator(aNative);
   NS_ENSURE_SUCCESS(rv, NS_ERROR_FAILURE);
