@@ -1025,6 +1025,25 @@ set_config("BASE_BROWSER", True, when="--enable-base-browser")
 set_define("BASE_BROWSER", True, when="--enable-base-browser")
 
 
+option(
+    "--with-relative-profile",
+    nargs=1,
+    help="Sets the directory of the profile, relative to the application directory"
+)
+
+
+@depends("--with-relative-profile", target)
+@imports("json")
+def relative_profile(value, target):
+    if value and target.os == "Android":
+        die("--with-relative-profile is not supported on Android")
+    if value:
+        return json.dumps(value[0])
+
+
+set_define("RELATIVE_PROFILE_DIRECTORY", relative_profile)
+
+
 # Please do not add configure checks from here on.
 
 # Fallthrough to autoconf-based configure

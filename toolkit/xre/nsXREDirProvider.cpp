@@ -234,9 +234,6 @@ nsresult nsXREDirProvider::GetUserProfilesRootDir(nsIFile** aResult) {
   nsresult rv = GetUserDataDirectory(getter_AddRefs(file), false);
 
   if (NS_SUCCEEDED(rv)) {
-#if !defined(XP_UNIX) || defined(XP_MACOSX)
-    rv = file->AppendNative("Profiles"_ns);
-#endif
     // We must create the profile directory here if it does not exist.
     nsresult tmp = EnsureDirectoryExists(file);
     if (NS_FAILED(tmp)) {
@@ -252,9 +249,6 @@ nsresult nsXREDirProvider::GetUserProfilesLocalDir(nsIFile** aResult) {
   nsresult rv = GetUserDataDirectory(getter_AddRefs(file), true);
 
   if (NS_SUCCEEDED(rv)) {
-#if !defined(XP_UNIX) || defined(XP_MACOSX)
-    rv = file->AppendNative("Profiles"_ns);
-#endif
     // We must create the profile directory here if it does not exist.
     nsresult tmp = EnsureDirectoryExists(file);
     if (NS_FAILED(tmp)) {
@@ -1328,6 +1322,7 @@ nsresult nsXREDirProvider::GetUserDataDirectoryHome(nsIFile** aFile,
                                                     bool aLocal) {
   // Copied from nsAppFileLocationProvider (more or less)
   nsresult rv;
+  NS_ENSURE_ARG_POINTER(aFile);
   nsCOMPtr<nsIFile> localDir;
 
   if (aLocal && gDataDirHomeLocal) {
@@ -1337,7 +1332,21 @@ nsresult nsXREDirProvider::GetUserDataDirectoryHome(nsIFile** aFile,
     return gDataDirHome->Clone(aFile);
   }
 
-#if defined(XP_MACOSX)
+#if defined(RELATIVE_PROFILE_DIRECTORY)
+  RefPtr<nsXREDirProvider> singleton = GetSingleton();
+  if (!singleton) {
+    return NS_ERROR_OUT_OF_MEMORY;
+  }
+  rv = singleton->GetAppRootDir(getter_AddRefs(localDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+  nsAutoCString profileDir(RELATIVE_PROFILE_DIRECTORY);
+  rv = localDir->SetRelativePath(localDir.get(), profileDir);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (aLocal) {
+    rv = localDir->AppendNative("Caches"_ns);
+    NS_ENSURE_SUCCESS(rv, rv);
+  }
+#elif defined(XP_MACOSX)
   FSRef fsRef;
   OSType folderType;
   if (aLocal) {
@@ -1480,6 +1489,25 @@ nsresult nsXREDirProvider::GetUserDataDirectory(nsIFile** aFile, bool aLocal) {
   return NS_OK;
 }
 
+nsresult nsXREDirProvider::GetAppRootDir(nsIFile** aFile) {
+  bool persistent = false;
+  nsCOMPtr<nsIFile> file, appRootDir;
+  nsresult rv = GetFile(XRE_EXECUTABLE_FILE, &persistent, getter_AddRefs(file));
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = file->Normalize();
+  NS_ENSURE_SUCCESS(rv, rv);
+  int levelsToRemove = 1;
+#if defined(XP_MACOSX)
+  levelsToRemove += 2;
+#endif
+  while (levelsToRemove-- > 0) {
+    rv = file->GetParent(getter_AddRefs(appRootDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+    file = appRootDir;
+  }
+  return appRootDir->Clone(aFile);
+}
+
 nsresult nsXREDirProvider::EnsureDirectoryExists(nsIFile* aDirectory) {
   nsresult rv = aDirectory->Create(nsIFile::DIRECTORY_TYPE, 0700);
 
@@ -1531,13 +1559,8 @@ nsresult nsXREDirProvider::AppendProfilePath(nsIFile* aFile, bool aLocal) {
   }
 
   nsAutoCString profile;
-  nsAutoCString appName;
-  nsAutoCString vendor;
   if (gAppData->profile) {
     profile = gAppData->profile;
-  } else {
-    appName = gAppData->name;
-    vendor = gAppData->vendor;
   }
 
   nsresult rv = NS_OK;
@@ -1545,23 +1568,12 @@ nsresult nsXREDirProvider::AppendProfilePath(nsIFile* aFile, bool aLocal) {
 #if defined(XP_MACOSX)
   if (!profile.IsEmpty()) {
     rv = AppendProfileString(aFile, profile.get());
-  } else {
-    // Note that MacOS ignores the vendor when creating the profile hierarchy -
-    // all application preferences directories live alongside one another in
-    // ~/Library/Application Support/
-    rv = aFile->AppendNative(appName);
   }
   NS_ENSURE_SUCCESS(rv, rv);
 
 #elif defined(XP_WIN)
   if (!profile.IsEmpty()) {
     rv = AppendProfileString(aFile, profile.get());
-  } else {
-    if (!vendor.IsEmpty()) {
-      rv = aFile->AppendNative(vendor);
-      NS_ENSURE_SUCCESS(rv, rv);
-    }
-    rv = aFile->AppendNative(appName);
   }
   NS_ENSURE_SUCCESS(rv, rv);
 
@@ -1573,11 +1585,6 @@ nsresult nsXREDirProvider::AppendProfilePath(nsIFile* aFile, bool aLocal) {
   rv = aFile->AppendNative(nsDependentCString("mozilla"));
   NS_ENSURE_SUCCESS(rv, rv);
 #elif defined(XP_UNIX)
-  nsAutoCString folder;
-  // Make it hidden (by starting with "."), except when local (the
-  // profile is already under ~/.cache or XDG_CACHE_HOME).
-  if (!aLocal) folder.Assign('.');
-
   if (!profile.IsEmpty()) {
     // Skip any leading path characters
     const char* profileStart = profile.get();
@@ -1585,30 +1592,14 @@ nsresult nsXREDirProvider::AppendProfilePath(nsIFile* aFile, bool aLocal) {
 
     // On the off chance that someone wanted their folder to be hidden don't
     // let it become ".."
-    if (*profileStart == '.' && !aLocal) profileStart++;
+    if (*profileStart == '.') profileStart++;
 
+    // Make it hidden (by starting with ".").
+    nsAutoCString folder(".");
     folder.Append(profileStart);
     ToLowerCase(folder);
 
     rv = AppendProfileString(aFile, folder.BeginReading());
-  } else {
-    if (!vendor.IsEmpty()) {
-      folder.Append(vendor);
-      ToLowerCase(folder);
-
-      rv = aFile->AppendNative(folder);
-      NS_ENSURE_SUCCESS(rv, rv);
-
-      folder.Truncate();
-    }
-
-    // This can be the case in tests.
-    if (!appName.IsEmpty()) {
-      folder.Append(appName);
-      ToLowerCase(folder);
-
-      rv = aFile->AppendNative(folder);
-    }
   }
   NS_ENSURE_SUCCESS(rv, rv);
 
