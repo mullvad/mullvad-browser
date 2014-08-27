@@ -182,6 +182,10 @@ nsHttpNegotiateAuth::ChallengeReceived(nsIHttpAuthenticableChannel* authChannel,
                                        nsISupports** continuationState,
                                        bool* identityInvalid) {
   *identityInvalid = false;
+
+  /* Always fail Negotiate auth for Tor Browser. We don't need it. */
+  return NS_ERROR_ABORT;
+
   if (*continuationState) {
     nsCOMPtr<nsIAuthModule> existing = do_QueryInterface(*continuationState);
     return existing ? NS_OK : NS_ERROR_UNEXPECTED;
