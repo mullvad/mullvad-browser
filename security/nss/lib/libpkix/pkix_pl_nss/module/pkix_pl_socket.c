@@ -1322,6 +1322,9 @@ pkix_pl_Socket_Create(
         PKIX_PL_Socket **pSocket,
         void *plContext)
 {
+#ifdef MOZ_PROXY_BYPASS_PROTECTION
+        PKIX_ERROR(PKIX_PRNEWTCPSOCKETFAILED);
+#else
         PKIX_PL_Socket *socket = NULL;
 
         PKIX_ENTER(SOCKET, "pkix_pl_Socket_Create");
@@ -1369,6 +1372,7 @@ cleanup:
         }
 
         PKIX_RETURN(SOCKET);
+#endif
 }
 
 /*
@@ -1418,6 +1422,9 @@ pkix_pl_Socket_CreateByName(
         PKIX_PL_Socket **pSocket,
         void *plContext)
 {
+#ifdef MOZ_PROXY_BYPASS_PROTECTION
+        PKIX_ERROR(PKIX_PRNEWTCPSOCKETFAILED);
+#else
         PRNetAddr netAddr;
         PKIX_PL_Socket *socket = NULL;
         char *sepPtr = NULL;
@@ -1520,6 +1527,7 @@ cleanup:
         }
 
         PKIX_RETURN(SOCKET);
+#endif
 }
 
 /*
@@ -1571,6 +1579,9 @@ pkix_pl_Socket_CreateByHostAndPort(
         PKIX_PL_Socket **pSocket,
         void *plContext)
 {
+#ifdef MOZ_PROXY_BYPASS_PROTECTION
+        PKIX_ERROR(PKIX_PRNEWTCPSOCKETFAILED);
+#else
         PRNetAddr netAddr;
         PKIX_PL_Socket *socket = NULL;
         char *sepPtr = NULL;
@@ -1658,6 +1669,7 @@ cleanup:
         }
 
         PKIX_RETURN(SOCKET);
+#endif
 }
 
 /*
