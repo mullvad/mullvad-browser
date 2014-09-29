@@ -2926,6 +2926,9 @@ loser:
 static PRFileDesc *
 ocsp_ConnectToHost(const char *host, PRUint16 port)
 {
+#ifdef MOZ_PROXY_BYPASS_PROTECTION
+    return NULL;
+#else
     PRFileDesc *sock = NULL;
     PRIntervalTime timeout;
     PRNetAddr addr;
@@ -2984,6 +2987,7 @@ loser:
     if (netdbbuf != NULL)
         PORT_Free(netdbbuf);
     return NULL;
+#endif
 }
 
 /*
