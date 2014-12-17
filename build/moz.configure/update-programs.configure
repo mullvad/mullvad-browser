@@ -32,6 +32,14 @@ set_config(
     "MOZ_VERIFY_MAR_SIGNATURE", depends_if("--enable-verify-mar")(lambda _: True)
 )
 
+# Use NSS for MAR signatures even on platforms where system libraries are
+# supported (currently Windows and macOS).
+# ==============================================================
+
+option("--enable-nss-mar", help="Always use NSS for MAR signatures")
+
+set_config("MOZ_USE_NSS_FOR_MAR", True, when="--enable-nss-mar")
+
 # Maintenance service (Windows only)
 # ==============================================================
 
