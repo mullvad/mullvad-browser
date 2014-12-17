@@ -65,7 +65,7 @@ static void print_usage() {
       "signed_input_archive.mar base_64_encoded_signature_file "
       "changed_signed_output.mar\n");
   printf("(i) is the index of the certificate to extract\n");
-#  if defined(XP_MACOSX) || (defined(XP_WIN) && !defined(MAR_NSS))
+#  if (defined(XP_MACOSX) || defined(XP_WIN)) && !defined(MAR_NSS)
   printf("Verify a MAR file:\n");
   printf("  mar [-C workingDir] -D DERFilePath -v signed_archive.mar\n");
   printf(
@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
   memset((void*)certBuffers, 0, sizeof(certBuffers));
 #endif
 #if !defined(NO_SIGN_VERIFY) && \
-    ((!defined(MAR_NSS) && defined(XP_WIN)) || defined(XP_MACOSX))
+    (!defined(MAR_NSS) && (defined(XP_WIN) || defined(XP_MACOSX)))
   memset(DERFilePaths, 0, sizeof(DERFilePaths));
   memset(fileSizes, 0, sizeof(fileSizes));
 #endif
@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
       argc -= 2;
     }
 #if !defined(NO_SIGN_VERIFY)
-#  if (!defined(MAR_NSS) && defined(XP_WIN)) || defined(XP_MACOSX)
+#  if (!defined(MAR_NSS) && (defined(XP_WIN) || defined(XP_MACOSX)))
     /* -D DERFilePath, also matches -D[index] DERFilePath
        We allow an index for verifying to be symmetric
        with the import and export command line arguments. */
