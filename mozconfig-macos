@@ -2,5 +2,8 @@
 
 ac_add_options --enable-strip
 
+# See bug #13379
+ac_add_options --enable-nss-mar
+
 # See bug #41131
 ac_add_options --disable-update-agent
