@@ -106,9 +106,11 @@ struct UpdateServerThreadArgs {
 #  define stat64 stat
 #endif
 
-#if defined(MOZ_VERIFY_MAR_SIGNATURE) && !defined(XP_WIN) && !defined(XP_MACOSX)
-#  include "nss.h"
-#  include "prerror.h"
+#if defined(MOZ_VERIFY_MAR_SIGNATURE)
+#  if defined(MAR_NSS) || (!defined(XP_WIN) && !defined(XP_MACOSX))
+#    include "nss.h"
+#    include "prerror.h"
+#  endif
 #endif
 
 #include "crctable.h"
@@ -2899,17 +2901,17 @@ int NS_main(int argc, NS_tchar** argv) {
   if (!isDMGInstall) {
     // Skip update-related code path for DMG installs.
 
-#if defined(MOZ_VERIFY_MAR_SIGNATURE) && !defined(XP_WIN) && !defined(XP_MACOSX)
-    // On Windows and Mac we rely on native APIs to do verifications so we don't
-    // need to initialize NSS at all there.
-    // Otherwise, minimize the amount of NSS we depend on by avoiding all the
-    // NSS databases.
+#if defined(MOZ_VERIFY_MAR_SIGNATURE)
+#  if defined(MAR_NSS) || (!defined(XP_WIN) && !defined(XP_MACOSX))
+    // If using NSS for signature verification, initialize NSS but minimize
+    // the portion we depend on by avoiding all of the NSS databases.
     if (NSS_NoDB_Init(nullptr) != SECSuccess) {
       PRErrorCode error = PR_GetError();
       fprintf(stderr, "Could not initialize NSS: %s (%d)",
               PR_ErrorToName(error), (int)error);
       _exit(1);
     }
+#  endif
 #endif
 
     // To process an update the updater command line must at a minimum have the
