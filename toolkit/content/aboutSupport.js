@@ -1931,13 +1931,14 @@ function populateActionBox() {
   if (ResetProfile.resetSupported()) {
     $("reset-box").style.display = "block";
   }
-  if (!Services.appinfo.inSafeMode && AppConstants.platform !== "android") {
+  // tor-browser#41755: Do not show safe mode, as it would disable NoScript.
+  /*if (!Services.appinfo.inSafeMode && AppConstants.platform !== "android") {
     $("safe-mode-box").style.display = "block";
 
     if (Services.policies && !Services.policies.isAllowed("safeMode")) {
       $("restart-in-safe-mode-button").setAttribute("disabled", "true");
     }
-  }
+  }*/
 }
 
 // Prompt user to restart the browser in safe mode
