@@ -7,6 +7,13 @@
 
 var gSafeBrowsing = {
   setReportPhishingMenu() {
+    // tor-browser#18905: hide these menu entries
+    if (
+      !Services.prefs.getBoolPref("browser.safebrowsing.phishing.enabled", true)
+    ) {
+      return;
+    }
+
     // In order to detect whether or not we're at the phishing warning
     // page, we have to check the documentURI instead of the currentURI.
     // This is because when the DocShell loads an error page, the
