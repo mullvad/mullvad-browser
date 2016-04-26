@@ -666,7 +666,8 @@ export var ReportBrokenSite = new (class ReportBrokenSite {
     // Altering the disabled attribute on the command does not propagate
     // the change to the related menuitems (see bug 805653), so we change them all.
     const cmd = document.getElementById("cmd_reportBrokenSite");
-    const allowedByPolicy = Services.policies.isAllowed("feedbackCommands");
+    // Hide the items in base-browser. tor-browser#43903.
+    const allowedByPolicy = false;
     cmd.toggleAttribute("hidden", !allowedByPolicy);
     const app = document.documentGlobal.PanelMultiView.getViewNode(
       document,
