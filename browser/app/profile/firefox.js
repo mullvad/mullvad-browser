@@ -139,7 +139,6 @@ pref("app.update.elevation.promptMaxAttempts", 2);
 // an update is being downloaded.
 pref("app.update.notifyDuringDownload", false);
 
-// If set to true, the Update Service will automatically download updates if the
 // user can apply updates. This pref is no longer used on Windows, except as the
 // default value to migrate to the new location that this data is now stored
 // (which is in a file in the update directory). Because of this, this pref

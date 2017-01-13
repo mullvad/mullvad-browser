@@ -3521,6 +3521,11 @@ static bool CheckCompatibility(nsIFile* aProfileDir, const nsCString& aVersion,
   gLastAppBuildID.Assign(gAppData->buildID);
 
   nsAutoCString buf;
+
+  nsAutoCString forkVersion(BASE_BROWSER_VERSION_QUOTED);
+  rv = parser.GetString("Compatibility", "LastBaseBrowserVersion", buf);
+  if (NS_FAILED(rv) || !forkVersion.Equals(buf)) return false;
+
   rv = parser.GetString("Compatibility", "LastOSABI", buf);
   if (NS_FAILED(rv) || !aOSABI.Equals(buf)) return false;
 
@@ -3605,6 +3610,12 @@ static void WriteVersion(nsIFile* aProfileDir, const nsCString& aVersion,
 
   PR_Write(fd, kHeader, sizeof(kHeader) - 1);
   PR_Write(fd, aVersion.get(), aVersion.Length());
+
+  nsAutoCString forkVersion(BASE_BROWSER_VERSION_QUOTED);
+  static const char kForkVersionHeader[] =
+      NS_LINEBREAK "LastBaseBrowserVersion=";
+  PR_Write(fd, kForkVersionHeader, sizeof(kForkVersionHeader) - 1);
+  PR_Write(fd, forkVersion.get(), forkVersion.Length());
 
   static const char kOSABIHeader[] = NS_LINEBREAK "LastOSABI=";
   PR_Write(fd, kOSABIHeader, sizeof(kOSABIHeader) - 1);
@@ -5043,8 +5054,18 @@ int XREMain::XRE_mainStartup(bool* aExitFlag) {
     NS_ENSURE_SUCCESS(rv, 1);
     rv = exeFile->GetParent(getter_AddRefs(exeDir));
     NS_ENSURE_SUCCESS(rv, 1);
+
+#  ifdef BASE_BROWSER_VERSION_QUOTED
+    nsAutoCString compatVersion(BASE_BROWSER_VERSION_QUOTED);
+#  endif
     ProcessUpdates(mDirProvider.GetGREDir(), exeDir, updRoot, gRestartArgc,
-                   gRestartArgv, mAppData->version);
+                   gRestartArgv,
+#  ifdef BASE_BROWSER_VERSION_QUOTED
+                   compatVersion.get()
+#  else
+                   mAppData->version
+#  endif
+    );
     if (EnvHasValue("MOZ_TEST_PROCESS_UPDATES")) {
       SaveToEnv("MOZ_TEST_PROCESS_UPDATES=");
       *aExitFlag = true;

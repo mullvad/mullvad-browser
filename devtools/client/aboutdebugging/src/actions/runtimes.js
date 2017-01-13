@@ -71,6 +71,11 @@ async function getRuntimeIcon(runtime, channel) {
     }
   }
 
+  // Use the release build skin for devtools within Tor Browser alpha releases.
+  if (channel === "alpha") {
+    return "chrome://devtools/skin/images/aboutdebugging-firefox-release.svg";
+  }
+
   return channel === "release" || channel === "beta" || channel === "aurora"
     ? `chrome://devtools/skin/images/aboutdebugging-firefox-${channel}.svg`
     : "chrome://devtools/skin/images/aboutdebugging-firefox-nightly.svg";
