@@ -43,10 +43,10 @@ function init() {
   }
 
   // Include the build ID and display warning if this is an "a#" (nightly or aurora) build
-  let versionId = "aboutDialog-version";
+  let versionId = "basebrowser-about-dialog-version";
   let versionAttributes = {
-    version: AppConstants.MOZ_APP_VERSION_DISPLAY,
-    bits: Services.appinfo.is64Bit ? 64 : 32,
+    version: AppConstants.BASE_BROWSER_VERSION,
+    firefoxVersion: AppConstants.MOZ_APP_VERSION_DISPLAY,
   };
 
   let version = Services.appinfo.version;
