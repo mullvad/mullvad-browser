@@ -701,6 +701,11 @@ function areDirectoryEntriesWriteable(aDir) {
  * @return true if elevation is required, false otherwise
  */
 function getElevationRequired() {
+  if (AppConstants.BASE_BROWSER_UPDATE) {
+    // To avoid potential security holes associated with running the updater
+    // process with elevated privileges, Tor Browser does not support elevation.
+    return false;
+  }
   if (AppConstants.platform != "macosx") {
     return false;
   }
@@ -780,7 +785,7 @@ function getCanApplyUpdates() {
     return false;
   }
 
-  if (AppConstants.platform == "macosx") {
+  if (!AppConstants.BASE_BROWSER_UPDATE && AppConstants.platform == "macosx") {
     LOG(
       "getCanApplyUpdates - bypass the write since elevation can be used " +
         "on Mac OS X"
@@ -788,7 +793,7 @@ function getCanApplyUpdates() {
     return true;
   }
 
-  if (shouldUseService()) {
+  if (!AppConstants.BASE_BROWSER_UPDATE && shouldUseService()) {
     LOG(
       "getCanApplyUpdates - bypass the write checks because the Windows " +
         "Maintenance Service can be used"
@@ -1643,7 +1648,12 @@ function handleUpdateFailure(update) {
     );
     cancelations++;
     Services.prefs.setIntPref(PREF_APP_UPDATE_CANCELATIONS, cancelations);
-    if (AppConstants.platform == "macosx") {
+    if (AppConstants.platform == "macosx" && AppConstants.BASE_BROWSER_UPDATE) {
+      cleanupActiveUpdates();
+      update.statusText = lazy.gUpdateBundle.GetStringFromName(
+        "elevationFailure"
+      );
+    } else if (AppConstants.platform == "macosx") {
       let osxCancelations = Services.prefs.getIntPref(
         PREF_APP_UPDATE_CANCELATIONS_OSX,
         0
@@ -1916,13 +1926,22 @@ function updateIsAtLeastAsOldAs(update, version, buildID) {
 }
 
 /**
+ * This returns the current version of the browser to use to check updates.
+ */
+function getCompatVersion() {
+  return AppConstants.BASE_BROWSER_VERSION
+    ? AppConstants.BASE_BROWSER_VERSION
+    : Services.appinfo.version;
+}
+
+/**
  * This returns true if the passed update is the same version or older than
  * currently installed Firefox version.
  */
 function updateIsAtLeastAsOldAsCurrentVersion(update) {
   return updateIsAtLeastAsOldAs(
     update,
-    Services.appinfo.version,
+    getCompatVersion(),
     Services.appinfo.appBuildID
   );
 }
@@ -2293,7 +2312,31 @@ function Update(update) {
     this._patches.push(patch);
   }
 
-  if (!this._patches.length && !update.hasAttribute("unsupported")) {
+  if (update.hasAttribute("unsupported")) {
+    this.unsupported = "true" == update.getAttribute("unsupported");
+  } else if (update.hasAttribute("minSupportedOSVersion")) {
+    let minOSVersion = update.getAttribute("minSupportedOSVersion");
+    try {
+      let osVersion = Services.sysinfo.getProperty("version");
+      this.unsupported = Services.vc.compare(osVersion, minOSVersion) < 0;
+    } catch (e) {}
+  }
+  if (!this.unsupported && update.hasAttribute("minSupportedInstructionSet")) {
+    let minInstructionSet = update.getAttribute("minSupportedInstructionSet");
+    if (
+      ["MMX", "SSE", "SSE2", "SSE3", "SSE4A", "SSE4_1", "SSE4_2"].includes(
+        minInstructionSet
+      )
+    ) {
+      try {
+        this.unsupported = !Services.sysinfo.getProperty(
+          "has" + minInstructionSet
+        );
+      } catch (e) {}
+    }
+  }
+
+  if (!this._patches.length && !this.unsupported) {
     throw Components.Exception("", Cr.NS_ERROR_ILLEGAL_VALUE);
   }
 
@@ -2331,9 +2374,7 @@ function Update(update) {
       if (!isNaN(attr.value)) {
         this.promptWaitTime = parseInt(attr.value);
       }
-    } else if (attr.name == "unsupported") {
-      this.unsupported = attr.value == "true";
-    } else {
+    } else if (attr.name != "unsupported") {
       switch (attr.name) {
         case "appVersion":
         case "buildID":
@@ -2358,7 +2399,7 @@ function Update(update) {
   }
 
   if (!this.previousAppVersion) {
-    this.previousAppVersion = Services.appinfo.version;
+    this.previousAppVersion = getCompatVersion();
   }
 
   if (!this.elevationFailure) {
@@ -4083,7 +4124,7 @@ UpdateService.prototype = {
         "UpdateService:downloadUpdate - Skipping download of update since " +
           "it is for an earlier or same application version and build ID.\n" +
           "current application version: " +
-          Services.appinfo.version +
+          getCompatVersion() +
           "\n" +
           "update application version : " +
           update.appVersion +
@@ -4944,7 +4985,7 @@ export class CheckerService {
   }
 
   #getCanMigrate() {
-    if (AppConstants.platform != "win") {
+    if (AppConstants.platform != "win" || AppConstants.BASE_BROWSER_UPDATE) {
       return false;
     }
 
