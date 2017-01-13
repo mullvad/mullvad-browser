@@ -198,7 +198,7 @@ Preferences.addSetting(
 Preferences.addSetting({
   id: "updateAppInfo",
   getControlConfig(config) {
-    let version = AppConstants.MOZ_APP_VERSION_DISPLAY;
+    let version = AppConstants.BASE_BROWSER_VERSION;
     let distribution;
     let distributionId;
     let releaseNotesURL = "";

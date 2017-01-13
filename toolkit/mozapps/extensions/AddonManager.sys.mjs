@@ -39,6 +39,7 @@ const PREF_GLEAN_PING_ADDONS_UPDATED_IDLE_TIMEOUT_MS =
   "extensions.gleanPingAddons.updated.idleTimeout";
 const PREF_GLEAN_PING_ADDONS_UPDATED_TESTING =
   "extensions.gleanPingAddons.updated.testing";
+const PREF_EM_LAST_FORK_VERSION = "extensions.lastBaseBrowserVersion";
 
 const PREF_MIN_WEBEXT_PLATFORM_VERSION =
   "extensions.webExtensionsMinPlatformVersion";
@@ -687,6 +688,24 @@ var AddonManagerInternal = {
         Services.prefs.setIntPref(
           PREF_BLOCKLIST_PINGCOUNTVERSION,
           appChanged === undefined ? 0 : -1
+        );
+      }
+
+      // To ensure that extension and plugin code gets a chance to run after
+      // each browser update, set appChanged = true when BASE_BROWSER_VERSION
+      // has changed even if the Mozilla app version has not changed.
+      const forkChanged =
+        AppConstants.BASE_BROWSER_VERSION !==
+        Services.prefs.getCharPref(PREF_EM_LAST_FORK_VERSION, "");
+      if (forkChanged) {
+        // appChanged could be undefined (in case of a new profile)
+        if (appChanged === false) {
+          appChanged = true;
+        }
+
+        Services.prefs.setCharPref(
+          PREF_EM_LAST_FORK_VERSION,
+          AppConstants.BASE_BROWSER_VERSION
         );
       }
 
