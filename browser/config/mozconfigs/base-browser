@@ -17,6 +17,7 @@ ac_add_options --enable-rust-simd
 # Bug 13379: Sign our MAR files.
 ac_add_options --enable-verify-mar
 ac_add_options --enable-nss-mar
+ac_add_options --enable-base-browser-update
 
 ac_add_options --enable-bundled-fonts
 

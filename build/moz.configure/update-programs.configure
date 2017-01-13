@@ -120,3 +120,15 @@ def default_agent_flag(enabled):
 
 
 set_config("MOZ_DEFAULT_BROWSER_AGENT", default_agent_flag)
+
+
+# Enable updater customization for Base Browser-based browsers
+# ==============================================================================
+
+option(
+    "--enable-base-browser-update",
+    help="Enable Base Browser update"
+)
+
+set_config("BASE_BROWSER_UPDATE", True, when="--enable-base-browser-update")
+set_define("BASE_BROWSER_UPDATE", True, when="--enable-base-browser-update")
