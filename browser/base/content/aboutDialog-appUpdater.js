@@ -206,7 +206,7 @@ appUpdater.prototype = {
       if (aChildID == "downloadAndInstall") {
         let updateVersion = gAppUpdater.update.displayVersion;
         // Include the build ID if this is an "a#" (nightly or aurora) build
-        if (/a\d+$/.test(updateVersion)) {
+        if (!AppConstants.BASE_BROWSER_UPDATE && /a\d+$/.test(updateVersion)) {
           let buildID = gAppUpdater.update.buildID;
           let year = buildID.slice(0, 4);
           let month = buildID.slice(4, 6);
