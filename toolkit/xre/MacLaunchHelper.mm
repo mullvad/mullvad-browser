@@ -146,6 +146,7 @@ void LaunchMacApp(int aArgc, char** aArgv) {
   LaunchMacAppWithBundle(launchPath, arguments);
 }
 
+#ifndef BASE_BROWSER_UPDATE
 bool InstallPrivilegedHelperWithId(const char* helperId, os_log_t logger) {
   AuthorizationRef authRef = nullptr;
   OSStatus status = AuthorizationCreate(
@@ -240,3 +241,4 @@ bool LaunchElevatedUpdate(int aArgc, char** aArgv, pid_t* aPid) {
   }
   return didSucceed;
 }
+#endif
