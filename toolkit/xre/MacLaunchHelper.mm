@@ -39,6 +39,7 @@ void LaunchChildMac(int aArgc, char** aArgv, pid_t* aPid) {
   }
 }
 
+#ifndef BASE_BROWSER_UPDATE
 bool InstallPrivilegedHelper() {
   AuthorizationRef authRef = NULL;
   OSStatus status = AuthorizationCreate(
@@ -115,3 +116,4 @@ bool LaunchElevatedUpdate(int aArgc, char** aArgv, pid_t* aPid) {
   }
   return didSucceed;
 }
+#endif
