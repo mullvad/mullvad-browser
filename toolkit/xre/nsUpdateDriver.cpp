@@ -52,7 +52,6 @@
 #  include "commonupdatedir.h"
 #  include "nsWindowsHelpers.h"
 #  include "pathhash.h"
-#  include "WinUtils.h"
 #  define getcwd(path, size) _getcwd(path, size)
 #  define getpid() GetCurrentProcessId()
 #elif defined(XP_UNIX)
@@ -161,6 +160,13 @@ static nsresult GetInstallDirPath(nsIFile* appDir, nsACString& installDirPath) {
   return NS_OK;
 }
 
+#ifdef DEBUG
+static void dump_argv(const char* aPrefix, char** argv, int argc) {
+  printf("%s - %d args\n", aPrefix, argc);
+  for (int i = 0; i < argc; ++i) printf("  %d: %s\n", i, argv[i]);
+}
+#endif
+
 static bool GetFile(nsIFile* dir, const nsACString& name,
                     nsCOMPtr<nsIFile>& result) {
   nsresult rv;
@@ -221,6 +227,34 @@ enum UpdateStatus {
   eAppliedUpdate,
   eAppliedService,
 };
+
+#ifdef DEBUG
+static const char* UpdateStatusToString(UpdateStatus aStatus) {
+  const char* rv = "unknown";
+  switch (aStatus) {
+    case eNoUpdateAction:
+      rv = "NoUpdateAction";
+      break;
+    case ePendingUpdate:
+      rv = "PendingUpdate";
+      break;
+    case ePendingService:
+      rv = "PendingService";
+      break;
+    case ePendingElevate:
+      rv = "PendingElevate";
+      break;
+    case eAppliedUpdate:
+      rv = "AppliedUpdate";
+      break;
+    case eAppliedService:
+      rv = "AppliedService";
+      break;
+  }
+
+  return rv;
+}
+#endif
 
 /**
  * Returns a value indicating what needs to be done in order to handle an
@@ -293,6 +327,11 @@ static bool IsOlderVersion(nsIFile* versionFile, const char* appVersion) {
   if (strncmp(buf, kNull, sizeof(kNull) - 1) == 0) {
     return false;
   }
+
+#ifdef DEBUG
+  printf("IsOlderVersion checking appVersion %s against updateVersion %s\n",
+         appVersion, buf);
+#endif
 
   return mozilla::Version(appVersion) > buf;
 }
@@ -443,6 +482,7 @@ static void ApplyUpdate(nsIFile* greDir, nsIFile* updateDir, nsIFile* appDir,
     gfxPlatformMac::WaitForFontRegistration();
   }
 
+#  ifndef BASE_BROWSER_UPDATE
   // We need to detect whether elevation is required for this update. This can
   // occur when an admin user installs the application, but another admin
   // user attempts to update (see bug 394984).
@@ -469,6 +509,7 @@ static void ApplyUpdate(nsIFile* greDir, nsIFile* updateDir, nsIFile* appDir,
       }
     }
   }
+#  endif
 #endif
 
   nsAutoCString applyToDirPath;
@@ -577,6 +618,9 @@ static void ApplyUpdate(nsIFile* greDir, nsIFile* updateDir, nsIFile* appDir,
   }
 
   LOG(("spawning updater process [%s]\n", updaterPath.get()));
+#ifdef DEBUG
+  dump_argv("ApplyUpdate updater", argv, argc);
+#endif
 
 #if defined(XP_UNIX) && !defined(XP_MACOSX)
   // We use execv to spawn the updater process on all UNIX systems except Mac
@@ -615,6 +659,13 @@ static void ApplyUpdate(nsIFile* greDir, nsIFile* updateDir, nsIFile* appDir,
   }
 #elif defined(XP_MACOSX)
 UpdateDriverSetupMacCommandLine(argc, argv, restart);
+#  ifdef DEBUG
+dump_argv("ApplyUpdate after SetupMacCommandLine", argv, argc);
+#  endif
+#  ifndef BASE_BROWSER_UPDATE
+// We need to detect whether elevation is required for this update. This can
+// occur when an admin user installs the application, but another admin
+// user attempts to update (see bug 394984).
 if (restart && needElevation) {
   bool hasLaunched = LaunchElevatedUpdate(argc, argv, outpid);
   free(argv);
@@ -624,6 +675,7 @@ if (restart && needElevation) {
   }
   exit(0);
 }
+#  endif
 
 if (isStaged) {
   // Launch the updater to replace the installation with the staged updated.
@@ -694,14 +746,25 @@ nsresult ProcessUpdates(nsIFile* greDir, nsIFile* appDir, nsIFile* updRootDir,
                         bool restart, ProcessType* pid) {
   nsresult rv;
 
-#ifdef XP_WIN
-  // If we're in a package, we know any updates that we find are not for us.
-  if (mozilla::widget::WinUtils::HasPackageIdentity()) {
-    return NS_OK;
+#if defined(XP_WIN) && defined(BASE_BROWSER_UPDATE)
+  // Try to remove the "tobedeleted" directory which, if present, contains
+  // files that could not be removed during a previous update (e.g., DLLs
+  // that were in use and therefore locked by Windows).
+  nsCOMPtr<nsIFile> deleteDir;
+  nsresult winrv = appDir->Clone(getter_AddRefs(deleteDir));
+  if (NS_SUCCEEDED(winrv)) {
+    winrv = deleteDir->AppendNative("tobedeleted"_ns);
+    if (NS_SUCCEEDED(winrv)) {
+      winrv = deleteDir->Remove(true);
+    }
   }
 #endif
 
   nsCOMPtr<nsIFile> updatesDir;
+#ifdef DEBUG
+  printf("ProcessUpdates updateRootDir: %s appVersion: %s\n",
+         updRootDir->HumanReadablePath().get(), appVersion);
+#endif
   rv = updRootDir->Clone(getter_AddRefs(updatesDir));
   NS_ENSURE_SUCCESS(rv, rv);
   rv = updatesDir->AppendNative("updates"_ns);
@@ -721,6 +784,12 @@ nsresult ProcessUpdates(nsIFile* greDir, nsIFile* appDir, nsIFile* updRootDir,
 
   nsCOMPtr<nsIFile> statusFile;
   UpdateStatus status = GetUpdateStatus(updatesDir, statusFile);
+#ifdef DEBUG
+  printf("ProcessUpdates status: %s (%d)\n", UpdateStatusToString(status),
+         status);
+  printf("ProcessUpdates updatesDir: %s\n",
+         updatesDir->HumanReadablePath().get());
+#endif
   switch (status) {
     case ePendingUpdate:
     case ePendingService: {
@@ -788,13 +857,16 @@ nsUpdateProcessor::ProcessUpdate() {
     NS_ENSURE_SUCCESS(rv, rv);
   }
 
+  nsAutoCString appVersion;
+#ifdef BASE_BROWSER_VERSION_QUOTED
+  appVersion = BASE_BROWSER_VERSION_QUOTED;
+#else
   nsCOMPtr<nsIXULAppInfo> appInfo =
       do_GetService("@mozilla.org/xre/app-info;1", &rv);
   NS_ENSURE_SUCCESS(rv, rv);
-
-  nsAutoCString appVersion;
   rv = appInfo->GetVersion(appVersion);
   NS_ENSURE_SUCCESS(rv, rv);
+#endif
 
   // Copy the parameters to the StagedUpdateInfo structure shared with the
   // worker thread.

@@ -36,7 +36,9 @@
 ; Mac bundle stuff
 @APPNAME@/Contents/Info.plist
 #ifdef MOZ_UPDATER
+#ifndef BASE_BROWSER_UPDATE
 @APPNAME@/Contents/Library/LaunchServices
+#endif
 #endif
 @APPNAME@/Contents/PkgInfo
 @RESPATH@/firefox.icns
