@@ -339,6 +339,9 @@ for var in (
 ):
     DEFINES[f"{var}_BOOL"] = "true" if CONFIG[var] else "false"
 
+if CONFIG["BASE_BROWSER_UPDATE"]:
+    DEFINES["BASE_BROWSER_UPDATE"] = True
+
 JAR_MANIFESTS += ["jar.mn"]
 
 DEFINES["TOPOBJDIR"] = TOPOBJDIR

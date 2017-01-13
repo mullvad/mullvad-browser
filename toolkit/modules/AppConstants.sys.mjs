@@ -272,4 +272,11 @@ export var AppConstants = Object.freeze({
 #endif
 
   USE_LIBZ_RS: @USE_LIBZ_RS_BOOL@,
+
+  BASE_BROWSER_UPDATE:
+#ifdef BASE_BROWSER_UPDATE
+    true,
+#else
+    false,
+#endif
 });
