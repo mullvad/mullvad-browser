@@ -81,7 +81,7 @@ export var UpdateUtils = {
           replacement = Services.appinfo.name;
           break;
         case "VERSION":
-          replacement = Services.appinfo.version;
+          replacement = AppConstants.BASE_BROWSER_VERSION;
           break;
         case "BUILD_ID":
           replacement = Services.appinfo.appBuildID;
@@ -169,7 +169,8 @@ export var UpdateUtils = {
    * downloads and installs updates. This corresponds to whether or not the user
    * has selected "Automatically install updates" in about:preferences.
    *
-   * On Windows, this setting is shared across all profiles for the installation
+   * On Windows (except in Base Browser and derivatives), this setting is shared
+   * across all profiles for the installation
    * and is read asynchronously from the file. On other operating systems, this
    * setting is stored in a pref and is thus a per-profile setting.
    *
@@ -185,7 +186,8 @@ export var UpdateUtils = {
    * updates" and "Check for updates but let you choose to install them" options
    * in about:preferences.
    *
-   * On Windows, this setting is shared across all profiles for the installation
+   * On Windows (except in Base Browser and derivatives), this setting is shared
+   * across all profiles for the installation
    * and is written asynchronously to the file. On other operating systems, this
    * setting is stored in a pref and is thus a per-profile setting.
    *
@@ -257,7 +259,10 @@ export var UpdateUtils = {
     // setting is just to propagate it from a pref observer. This ensures that
     // the expected observers still get notified, even if a user manually
     // changes the pref value.
-    if (!UpdateUtils.PER_INSTALLATION_PREFS_SUPPORTED) {
+    if (
+      AppConstants.BASE_BROWSER_UPDATE ||
+      !UpdateUtils.PER_INSTALLATION_PREFS_SUPPORTED
+    ) {
       let initialConfig = {};
       for (const [prefName, pref] of Object.entries(
         UpdateUtils.PER_INSTALLATION_PREFS
@@ -326,7 +331,10 @@ export var UpdateUtils = {
       }
     }
 
-    if (!this.PER_INSTALLATION_PREFS_SUPPORTED) {
+    if (
+      AppConstants.BASE_BROWSER_UPDATE ||
+      !this.PER_INSTALLATION_PREFS_SUPPORTED
+    ) {
       // If we don't have per-installation prefs, we use regular preferences.
       let prefValue = prefTypeFns.getProfilePref(prefName, pref.defaultValue);
       return Promise.resolve(prefValue);
@@ -421,7 +429,10 @@ export var UpdateUtils = {
       );
     }
 
-    if (!this.PER_INSTALLATION_PREFS_SUPPORTED) {
+    if (
+      AppConstants.BASE_BROWSER_UPDATE ||
+      !this.PER_INSTALLATION_PREFS_SUPPORTED
+    ) {
       // If we don't have per-installation prefs, we use regular preferences.
       if (options.setDefaultOnly) {
         prefTypeFns.setProfileDefaultPref(prefName, value);
@@ -557,14 +568,6 @@ UpdateUtils.PER_INSTALLATION_PREFS = {
     migrate: true,
     observerTopic: "auto-update-config-change",
     policyFn: () => {
-      if (!Services.policies.isAllowed("app-auto-updates-off")) {
-        // We aren't allowed to turn off auto-update - it is forced on.
-        return true;
-      }
-      if (!Services.policies.isAllowed("app-auto-updates-on")) {
-        // We aren't allowed to turn on auto-update - it is forced off.
-        return false;
-      }
       return null;
     },
   },
