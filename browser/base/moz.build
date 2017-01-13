@@ -88,4 +88,7 @@ if CONFIG["OS_ARCH"] == "WINNT" and CONFIG["MOZ_DEFAULT_BROWSER_AGENT"]:
     # Impacts `/toolkit/content/license.html`.
     DEFINES["MOZ_DEFAULT_BROWSER_AGENT"] = True
 
+if CONFIG["BASE_BROWSER_UPDATE"]:
+    DEFINES["BASE_BROWSER_UPDATE"] = True
+
 JAR_MANIFESTS += ["jar.mn"]
