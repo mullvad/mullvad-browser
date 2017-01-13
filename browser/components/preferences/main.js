@@ -566,7 +566,7 @@ var gMainPane = {
         .setAttribute("style", "display: none !important");
     }
     // Initialize the Firefox Updates section.
-    let version = AppConstants.MOZ_APP_VERSION_DISPLAY;
+    let version = AppConstants.BASE_BROWSER_VERSION;
 
     // Include the build ID if this is an "a#" (nightly) build
     if (/a\d+$/.test(version)) {
