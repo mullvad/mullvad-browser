@@ -78,8 +78,13 @@ if [ $# = 0 ]; then
   exit 1
 fi
 
-# force update to channel-prefs.js for bug 1804303
-requested_forced_updates='Contents/MacOS/firefox Contents/Resources/defaults/pref/channel-prefs.js'
+# Firefox uses requested_forced_updates='Contents/MacOS/firefox Contents/Resources/defaults/pref/channel-prefs.js'
+# - 'Contents/MacOS/firefox' is required for Bugzilla 770996 but Base Browser and derivatives do not need that fix.
+# - 'Contents/Resources/defaults/pref/channel-prefs.js' is required for 1804303 to avoid a failed code signing signature
+#   check on macOS aarch64; it is unlikely that users will run into this issue but there's no harm in including it
+requested_forced_updates="Contents/Resources/defaults/pref/channel-prefs.js"
+directories_to_remove=""
+extra_files_to_remove=""
 
 while getopts "hqf:" flag
 do
