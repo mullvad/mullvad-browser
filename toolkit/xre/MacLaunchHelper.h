@@ -27,11 +27,13 @@ extern "C" {
  */
 void LaunchChildMac(int aArgc, char** aArgv, pid_t* aPid = 0);
 void LaunchMacApp(int aArgc, char** aArgv);
+#ifndef BASE_BROWSER_UPDATE
 bool LaunchElevatedUpdate(int aArgc, char** aArgv, pid_t* aPid = nullptr);
 bool InstallPrivilegedHelperWithId(const char* helperId,
                                    os_log_t logger = OS_LOG_DEFAULT);
 bool InstallElevatedUpdater();
 void AbortElevatedUpdate();
+#endif
 }
 
 #endif

@@ -79,4 +79,7 @@ DEFINES["MOZ_APP_VERSION_DISPLAY"] = CONFIG["MOZ_APP_VERSION_DISPLAY"]
 # Do not include the Firefox app-license.html in about:license.
 # tor-browser#43901.
 
+if CONFIG["BASE_BROWSER_UPDATE"]:
+    DEFINES["BASE_BROWSER_UPDATE"] = True
+
 JAR_MANIFESTS += ["jar.mn"]

@@ -134,6 +134,9 @@ nsURLFormatterService.prototype = {
     DISTRIBUTION_VERSION() {
       return this.distribution.version;
     },
+    BB_VERSION() {
+      return AppConstants.BASE_BROWSER_VERSION;
+    },
   },
 
   formatURL: function uf_formatURL(aFormat) {
