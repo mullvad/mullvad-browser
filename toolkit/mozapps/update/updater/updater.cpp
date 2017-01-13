@@ -75,7 +75,9 @@ bool IsRecursivelyWritable(const char* aPath);
 void LaunchChild(int argc, const char** argv);
 void LaunchMacPostProcess(const char* aAppBundle);
 bool ObtainUpdaterArguments(int* argc, char*** argv);
+#  ifndef BASE_BROWSER_UPDATE
 bool ServeElevatedUpdate(int argc, const char** argv);
+#  endif
 void SetGroupOwnershipAndPermissions(const char* aAppBundle);
 bool PerformInstallationFromDMG(int argc, char** argv);
 struct UpdateServerThreadArgs {
@@ -853,6 +855,11 @@ static int ensure_copy_recursive(const NS_tchar* path, const NS_tchar* dest,
   if (S_ISLNK(sInfo.st_mode)) {
     return ensure_copy_symlink(path, dest);
   }
+
+  // Ignore Unix domain sockets. See #20691.
+  if (S_ISSOCK(sInfo.st_mode)) {
+    return 0;
+  }
 #endif
 
   if (!S_ISDIR(sInfo.st_mode)) {
@@ -948,7 +955,7 @@ static int rename_file(const NS_tchar* spath, const NS_tchar* dpath,
   return OK;
 }
 
-#ifdef XP_WIN
+#if defined(XP_WIN) && !defined(BASE_BROWSER_UPDATE)
 // Remove the directory pointed to by path and all of its files and
 // sub-directories. If a file is in use move it to the tobedeleted directory
 // and attempt to schedule removal of the file on reboot
@@ -1081,6 +1088,8 @@ static int backup_discard(const NS_tchar* path, const NS_tchar* relPath) {
            relBackup, relPath));
       return WRITE_ERROR_DELETE_BACKUP;
     }
+
+#  if !defined(BASE_BROWSER_UPDATE)
     // The MoveFileEx call to remove the file on OS reboot will fail if the
     // process doesn't have write access to the HKEY_LOCAL_MACHINE registry key
     // but this is ok since the installer / uninstaller will delete the
@@ -1097,6 +1106,7 @@ static int backup_discard(const NS_tchar* path, const NS_tchar* relPath) {
            "file: " LOG_S,
            relPath));
     }
+#  endif
   }
 #else
   if (rv) {
@@ -2420,6 +2430,7 @@ static int CopyInstallDirToDestDir() {
 #  define SKIPLIST_COUNT 2
 #endif
   copy_recursive_skiplist<SKIPLIST_COUNT> skiplist;
+
 #ifndef XP_MACOSX
   skiplist.append(0, gInstallDirPath, NS_T("updated"));
   skiplist.append(1, gInstallDirPath, NS_T("updates/0"));
@@ -2565,7 +2576,9 @@ static int ProcessReplaceRequest() {
     if (NS_taccess(deleteDir, F_OK)) {
       NS_tmkdir(deleteDir, 0755);
     }
+#  if !defined(BASE_BROWSER_UPDATE)
     remove_recursive_on_reboot(tmpDir, deleteDir);
+#  endif
 #endif
   }
 
@@ -2648,8 +2661,14 @@ static void UpdateThreadFunc(void* param) {
         if (ReadMARChannelIDs(updateSettingsPath, &MARStrings) != OK) {
           rv = UPDATE_SETTINGS_FILE_CHANNEL;
         } else {
+#  ifdef BASE_BROWSER_VERSION_QUOTED
+          // Use the base browser version to prevent downgrade attacks.
+          const char* appVersion = BASE_BROWSER_VERSION_QUOTED;
+#  else
+          const char* appVersion = MOZ_APP_VERSION;
+#  endif
           rv = gArchiveReader.VerifyProductInformation(
-              MARStrings.MARChannelID.get(), MOZ_APP_VERSION);
+              MARStrings.MARChannelID.get(), appVersion);
         }
       }
     }
@@ -2754,11 +2773,15 @@ static void UpdateThreadFunc(void* param) {
 
 #ifdef XP_MACOSX
 static void ServeElevatedUpdateThreadFunc(void* param) {
+#  ifdef BASE_BROWSER_UPDATE
+  WriteStatusFile(ELEVATION_CANCELED);
+#  else
   UpdateServerThreadArgs* threadArgs = (UpdateServerThreadArgs*)param;
   gSucceeded = ServeElevatedUpdate(threadArgs->argc, threadArgs->argv);
   if (!gSucceeded) {
     WriteStatusFile(ELEVATION_CANCELED);
   }
+#  endif
   QuitProgressUI();
 }
 
@@ -2788,7 +2811,7 @@ int LaunchCallbackAndPostProcessApps(int argc, NS_tchar** argv,
 #endif
 
   if (argc > callbackIndex) {
-#if defined(XP_WIN)
+#if defined(XP_WIN) && !defined(BASE_BROWSER_UPDATE)
     if (gSucceeded) {
       if (!LaunchWinPostProcess(gInstallDirPath, gPatchDirPath)) {
         fprintf(stderr, "The post update process was not launched");
@@ -2883,8 +2906,12 @@ int NS_main(int argc, NS_tchar** argv) {
   mozilla::UniquePtr<UmaskContext> umaskContext(new UmaskContext(0));
 
   bool isElevated =
+#  ifdef BASE_BROWSER_UPDATE
+      false;
+#  else
       strstr(argv[0], "/Library/PrivilegedHelperTools/org.mozilla.updater") !=
       0;
+#  endif
   if (isElevated) {
     if (!ObtainUpdaterArguments(&argc, &argv)) {
       // Won't actually get here because ObtainUpdaterArguments will terminate
@@ -3624,6 +3651,13 @@ int NS_main(int argc, NS_tchar** argv) {
         if (!useService && !noServiceFallback &&
             (updateLockFileHandle == INVALID_HANDLE_VALUE ||
              forceServiceFallback)) {
+#  ifdef BASE_BROWSER_UPDATE
+          // To avoid potential security issues such as CVE-2015-0833, do not
+          // attempt to elevate privileges. Instead, write a "failed" message to
+          // the update status file (this function will return immediately after
+          // the CloseHandle(elevatedFileHandle) call below).
+          WriteStatusFile(WRITE_ERROR_ACCESS_DENIED);
+#  else
           // Get the secure ID before trying to update so it is possible to
           // determine if the updater has created a new one.
           char uuidStringBefore[UUID_LEN] = {'\0'};
@@ -3693,6 +3727,7 @@ int NS_main(int argc, NS_tchar** argv) {
             gCopyOutputFiles = false;
             WriteStatusFile(ELEVATION_CANCELED);
           }
+#  endif /* BASE_BROWSER_UPDATE */
         }
 
         // If we started the elevated updater, and it finished, check the secure
@@ -4063,6 +4098,7 @@ int NS_main(int argc, NS_tchar** argv) {
     if (!sStagedUpdate && !sReplaceRequest && _wrmdir(gDeleteDirPath)) {
       LOG(("NS_main: unable to remove directory: " LOG_S ", err: %d",
            DELETE_DIR, errno));
+#  if !defined(BASE_BROWSER_UPDATE)
       // The directory probably couldn't be removed due to it containing files
       // that are in use and will be removed on OS reboot. The call to remove
       // the directory on OS reboot is done after the calls to remove the files
@@ -4082,6 +4118,7 @@ int NS_main(int argc, NS_tchar** argv) {
              "directory: " LOG_S,
              DELETE_DIR));
       }
+#  endif /* BASE_BROWSER_UPDATE */
     }
 #endif /* XP_WIN */
 
