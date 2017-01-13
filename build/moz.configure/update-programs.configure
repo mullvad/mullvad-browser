@@ -196,3 +196,28 @@ option(
 )
 
 set_config("MOZ_NOTIFICATION_SERVER", True, when="--enable-notification-server")
+
+
+# Enable updater customization for Base Browser-based browsers
+# ==============================================================================
+
+option("--enable-base-browser-update", help="Enable Base Browser update")
+
+set_config("BASE_BROWSER_UPDATE", True, when="--enable-base-browser-update")
+set_define("BASE_BROWSER_UPDATE", True, when="--enable-base-browser-update")
+
+
+# Updater URL
+# ==============================================================
+
+option(
+    "--with-updater-url",
+    default="https://aus1.torproject.org/torbrowser/update_3/",
+    nargs=1,
+    help="Set the updater URL",
+)
+
+set_config(
+    "BB_UPDATER_URL",
+    depends("--with-updater-url")(lambda x: x[0].rstrip("/")),
+)
