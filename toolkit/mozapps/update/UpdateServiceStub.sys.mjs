@@ -93,10 +93,15 @@ export class UpdateServiceStub {
 
   #initOnlyStub(updateDir) {
     // We may need to migrate update data
+    // In Base Browser and derivatives, we skip this because we do not use an
+    // update agent and we do not want to store any data outside of the browser
+    // installation directory.
+    // For more info, see https://bugzilla.mozilla.org/show_bug.cgi?id=1458314
     let prefUpdateDirMigrated =
       PREF_PREFIX_UPDATE_DIR_MIGRATED + updateDir.leafName;
     if (
       AppConstants.platform == "win" &&
+      !AppConstants.BASE_BROWSER_UPDATE &&
       !Services.prefs.getBoolPref(prefUpdateDirMigrated, false)
     ) {
       Services.prefs.setBoolPref(prefUpdateDirMigrated, true);
