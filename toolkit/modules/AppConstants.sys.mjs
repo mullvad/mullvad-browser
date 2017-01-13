@@ -466,6 +466,13 @@ export var AppConstants = Object.freeze({
     false,
 #endif
 
+  BASE_BROWSER_UPDATE:
+#ifdef BASE_BROWSER_UPDATE
+    true,
+#else
+    false,
+#endif
+
   // Returns true for CN region build when distibution id set as 'MozillaOnline'
   isChinaRepack() {
     return (

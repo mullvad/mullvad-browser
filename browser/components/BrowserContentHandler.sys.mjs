@@ -42,6 +42,9 @@ XPCOMUtils.defineLazyGetter(lazy, "gWindowsAlertsService", () => {
     ?.QueryInterface(Ci.nsIWindowsAlertsService);
 });
 
+const FORK_VERSION_PREF =
+  "browser.startup.homepage_override.basebrowser.version";
+
 // One-time startup homepage override configurations
 const ONCE_DOMAINS = ["mozilla.org", "firefox.com"];
 const ONCE_PREF = "browser.startup.homepage_override.once";
@@ -105,7 +108,8 @@ const OVERRIDE_NEW_BUILD_ID = 3;
  * Returns:
  *  OVERRIDE_NEW_PROFILE if this is the first run with a new profile.
  *  OVERRIDE_NEW_MSTONE if this is the first run with a build with a different
- *                      Gecko milestone (i.e. right after an upgrade).
+ *                      Gecko milestone or fork version (i.e. right after an
+ *                      upgrade).
  *  OVERRIDE_NEW_BUILD_ID if this is the first run with a new build ID of the
  *                        same Gecko milestone (i.e. after a nightly upgrade).
  *  OVERRIDE_NONE otherwise.
@@ -121,6 +125,8 @@ function needHomepageOverride(prefb) {
   }
 
   var mstone = Services.appinfo.platformVersion;
+
+  var savedForkVersion = prefb.getCharPref(FORK_VERSION_PREF, null);
 
   var savedBuildID = prefb.getCharPref(
     "browser.startup.homepage_override.buildID",
@@ -143,7 +149,14 @@ function needHomepageOverride(prefb) {
 
     prefb.setCharPref("browser.startup.homepage_override.mstone", mstone);
     prefb.setCharPref("browser.startup.homepage_override.buildID", buildID);
+    prefb.setCharPref(FORK_VERSION_PREF, AppConstants.BASE_BROWSER_VERSION);
     return savedmstone ? OVERRIDE_NEW_MSTONE : OVERRIDE_NEW_PROFILE;
+  }
+
+  if (AppConstants.BASE_BROWSER_VERSION != savedForkVersion) {
+    prefb.setCharPref("browser.startup.homepage_override.buildID", buildID);
+    prefb.setCharPref(FORK_VERSION_PREF, AppConstants.BASE_BROWSER_VERSION);
+    return OVERRIDE_NEW_MSTONE;
   }
 
   if (buildID != savedBuildID) {
@@ -671,6 +684,10 @@ nsBrowserContentHandler.prototype = {
         "browser.startup.homepage_override.buildID",
         "unknown"
       );
+
+      // We do the same for the fork version.
+      let old_forkVersion = prefb.getCharPref(FORK_VERSION_PREF, null);
+
       override = needHomepageOverride(prefb);
       if (override != OVERRIDE_NONE) {
         switch (override) {
@@ -702,9 +719,10 @@ nsBrowserContentHandler.prototype = {
               "startup.homepage_override_url"
             );
             let update = lazy.UpdateManager.readyUpdate;
+            let old_version = old_forkVersion ? old_forkVersion : old_mstone;
             if (
               update &&
-              Services.vc.compare(update.appVersion, old_mstone) > 0
+              Services.vc.compare(update.appVersion, old_version) > 0
             ) {
               overridePage = getPostUpdateOverridePage(update, overridePage);
               // Send the update ping to signal that the update was successful.
@@ -712,6 +730,10 @@ nsBrowserContentHandler.prototype = {
             }
 
             overridePage = overridePage.replace("%OLD_VERSION%", old_mstone);
+            overridePage = overridePage.replace(
+              "%OLD_BASE_BROWSER_VERSION%",
+              old_forkVersion
+            );
             break;
           case OVERRIDE_NEW_BUILD_ID:
             if (lazy.UpdateManager.readyUpdate) {
