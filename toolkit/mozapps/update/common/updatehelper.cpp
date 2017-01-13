@@ -66,6 +66,13 @@ BOOL PathGetSiblingFilePath(LPWSTR destinationBuffer, LPCWSTR siblingFilePath,
  * @return TRUE if successful
  */
 BOOL GetSecureOutputDirectoryPath(LPWSTR outBuf) {
+#ifdef BASE_BROWSER_UPDATE
+  // This function is used to support the maintenance service and elevated
+  // updates and is therefore not called by Base Browser's updater. We stub
+  // it out to avoid any chance that the Base Browser updater will create
+  // files under C:\Program Files (x86)\ or a similar location.
+  return FALSE;
+#else
   PWSTR progFilesX86;
   if (FAILED(SHGetKnownFolderPath(FOLDERID_ProgramFilesX86, KF_FLAG_CREATE,
                                   nullptr, &progFilesX86))) {
@@ -99,6 +106,7 @@ BOOL GetSecureOutputDirectoryPath(LPWSTR outBuf) {
   }
 
   return TRUE;
+#endif
 }
 
 /**
