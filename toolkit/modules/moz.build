@@ -297,6 +297,9 @@ for var in (
     if CONFIG[var]:
         DEFINES[var] = True
 
+if CONFIG["BASE_BROWSER_UPDATE"]:
+    DEFINES["BASE_BROWSER_UPDATE"] = True
+
 JAR_MANIFESTS += ["jar.mn"]
 
 DEFINES["TOPOBJDIR"] = TOPOBJDIR
