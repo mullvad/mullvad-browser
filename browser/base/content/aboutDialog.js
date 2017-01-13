@@ -54,15 +54,15 @@ async function init(aEvent) {
     bits: Services.appinfo.is64Bit ? 64 : 32,
   };
 
+  // Adjust version text to show the Tor Browser version
+  versionAttributes.version =
+    AppConstants.BASE_BROWSER_VERSION +
+    " (based on Mozilla Firefox " +
+    AppConstants.MOZ_APP_VERSION_DISPLAY +
+    ")";
+
   let version = Services.appinfo.version;
   if (/a\d+$/.test(version)) {
-    versionId = "aboutDialog-version-nightly";
-    let buildID = Services.appinfo.appBuildID;
-    let year = buildID.slice(0, 4);
-    let month = buildID.slice(4, 6);
-    let day = buildID.slice(6, 8);
-    versionAttributes.isodate = `${year}-${month}-${day}`;
-
     document.getElementById("experimental").hidden = false;
     document.getElementById("communityDesc").hidden = true;
   }

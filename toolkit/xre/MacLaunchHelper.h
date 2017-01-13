@@ -17,7 +17,9 @@ extern "C" {
  * pid of the terminated process to confirm that it executed successfully.
  */
 void LaunchChildMac(int aArgc, char** aArgv, pid_t* aPid = 0);
+#ifndef BASE_BROWSER_UPDATE
 bool LaunchElevatedUpdate(int aArgc, char** aArgv, pid_t* aPid = 0);
+#endif
 }
 
 #endif

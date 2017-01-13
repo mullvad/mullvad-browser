@@ -954,11 +954,10 @@ def version_path(path):
     return path
 
 
-# set RELEASE_OR_BETA and NIGHTLY_BUILD variables depending on the cycle we're in
-# The logic works like this:
-# - if we have "a1" in GRE_MILESTONE, we're building Nightly (define NIGHTLY_BUILD)
-# - otherwise, if we have "a" in GRE_MILESTONE, we're building Nightly or Aurora
-# - otherwise, we're building Release/Beta (define RELEASE_OR_BETA)
+# Firefox looks for "a" or "a1" in the milestone to detect whether nightly
+# features should be enabled. We do not want them, because we want our nightly
+# builds to be as close as possible to actual releases.
+# So we set always is_release_or_beta to True.
 @depends(build_environment, build_project, version_path, "--help")
 @imports(_from="__builtin__", _import="open")
 @imports("os")
@@ -1002,10 +1001,8 @@ def milestone(build_env, build_project, version_path, _):
 
     is_nightly = is_release_or_beta = is_early_beta_or_earlier = None
 
-    if "a1" in milestone:
-        is_nightly = True
-    elif "a" not in milestone:
-        is_release_or_beta = True
+    # Do not enable extra nightly features
+    is_release_or_beta = True
 
     major_version = milestone.split(".")[0]
     m = re.search(r"([ab]\d+)", milestone)
