@@ -1209,10 +1209,44 @@ nsresult nsXREDirProvider::GetUpdateRootDir(nsIFile** aResult,
   bool per = false;
   nsresult rv = GetFile(XRE_EXECUTABLE_FILE, &per, getter_AddRefs(appFile));
   NS_ENSURE_SUCCESS(rv, rv);
-  rv = appFile->GetParent(getter_AddRefs(updRoot));
+
+#if defined(BASE_BROWSER_UPDATE)
+  nsCOMPtr<nsIFile> dataDir;
+  // For Base Browser and derivatives, we store update history, etc. within the
+  // UpdateInfo directory under the user data directory.
+#  if defined(ANDROID)
+#    error "The Base Browser updater is not supported on Android."
+#  else
+  rv = GetUserDataDirectoryHome(getter_AddRefs(dataDir), false);
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = dataDir->GetParent(getter_AddRefs(updRoot));
+  NS_ENSURE_SUCCESS(rv, rv);
+#  endif
+  rv = updRoot->AppendNative("UpdateInfo"_ns);
   NS_ENSURE_SUCCESS(rv, rv);
 
-#ifdef XP_MACOSX
+#  if defined(XP_MACOSX)
+  // Since the data directory may be shared among different installations of the
+  // application, embed the app path in the update dir so that the update
+  // history is partitioned. This is much less likely to be an issue on Linux or
+  // Windows, because our packages for those platforms include a "container"
+  // folder that provides partitioning by default, and we do not support use of
+  // a shared, OS-recommended area for user data on those platforms.
+  nsAutoString appPath;
+  rv = appFile->GetPath(appPath);
+  NS_ENSURE_SUCCESS(rv, rv);
+  int32_t dotIndex = appPath.RFind(".app");
+  if (dotIndex == kNotFound) {
+    dotIndex = appPath.Length();
+  }
+  appPath = Substring(appPath, 1, dotIndex - 1);
+  rv = updRoot->AppendRelativePath(appPath);
+  NS_ENSURE_SUCCESS(rv, rv);
+#  endif
+#else  // ! BASE_BROWSER_UPDATE
+  rv = appFile->GetParent(getter_AddRefs(updRoot));
+  NS_ENSURE_SUCCESS(rv, rv);
+#  ifdef XP_MACOSX
   nsCOMPtr<nsIFile> appRootDirFile;
   nsCOMPtr<nsIFile> localDir;
   nsAutoString appDirPath;
@@ -1246,7 +1280,7 @@ nsresult nsXREDirProvider::GetUpdateRootDir(nsIFile** aResult,
   localDir.forget(aResult);
   return NS_OK;
 
-#elif XP_WIN
+#  elif XP_WIN
   nsAutoString installPath;
   rv = updRoot->GetPath(installPath);
   NS_ENSURE_SUCCESS(rv, rv);
@@ -1266,7 +1300,8 @@ nsresult nsXREDirProvider::GetUpdateRootDir(nsIFile** aResult,
   nsAutoString updatePathStr;
   updatePathStr.Assign(updatePath.get());
   updRoot->InitWithPath(updatePathStr);
-#endif  // XP_WIN
+#  endif  // XP_WIN
+#endif    // ! BASE_BROWSER_UPDATE
   updRoot.forget(aResult);
   return NS_OK;
 }
