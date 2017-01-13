@@ -12,3 +12,4 @@ ac_add_options --disable-strip
 ac_add_options --disable-install-strip
 
 ac_add_options --with-base-browser-version=dev-build
+ac_add_options --disable-base-browser-update
