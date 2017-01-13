@@ -1100,7 +1100,51 @@ nsresult nsXREDirProvider::GetUpdateRootDir(nsIFile** aResult,
   rv = appFile->GetParent(getter_AddRefs(updRoot));
   NS_ENSURE_SUCCESS(rv, rv);
 
-#ifdef XP_MACOSX
+#if defined(BASE_BROWSER_UPDATE)
+  // For Base Browser and derivatives, we store update history, etc. within the
+  // UpdateInfo directory under the user data directory.
+#  if defined(ANDROID)
+#    error "The Base Browser updater is not supported on Android."
+#  elif defined(XP_MACOSX)
+  rv = GetUserDataDirectory(getter_AddRefs(updRoot), false);
+  NS_ENSURE_SUCCESS(rv, rv);
+#  else
+  bool isPortable = true;
+  rv = GetIsPortableMode(&isPortable);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (isPortable) {
+    rv = GetUserDataDirectoryHome(getter_AddRefs(updRoot), false);
+  } else {
+    rv = GetUserDataDirectory(getter_AddRefs(updRoot), true);
+  }
+  NS_ENSURE_SUCCESS(rv, rv);
+#  endif
+  rv = updRoot->AppendNative("UpdateInfo"_ns);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+#  if defined(XP_MACOSX)
+  // Since the data directory may be shared among different installations of the
+  // application, embed the app path in the update dir so that the update
+  // history is partitioned. This is much less likely to be an issue on Linux or
+  // Windows, because our packages for those platforms include a "container"
+  // folder that provides partitioning by default, and we do not support use of
+  // a shared, OS-recommended area for user data on those platforms.
+  nsAutoString appPath;
+  rv = appFile->GetPath(appPath);
+  NS_ENSURE_SUCCESS(rv, rv);
+  int32_t dotIndex = appPath.RFind(u".app");
+  if (dotIndex == kNotFound) {
+    dotIndex = appPath.Length();
+  }
+  appPath = Substring(appPath, 1, dotIndex - 1);
+  rv = updRoot->AppendRelativePath(appPath);
+  NS_ENSURE_SUCCESS(rv, rv);
+#  endif
+
+  updRoot.forget(aResult);
+  return NS_OK;
+// The rest of the function is for ! BASE_BROWSER_UPDATE
+#elif defined(XP_MACOSX)
   nsCOMPtr<nsIFile> appRootDirFile;
   nsCOMPtr<nsIFile> localDir;
   nsAutoString appDirPath;
