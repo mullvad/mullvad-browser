@@ -438,8 +438,8 @@ bin/libfreebl_64int_3.so
 #endif
 
 ; media
-@RESPATH@/gmp-clearkey/0.1/@DLL_PREFIX@clearkey@DLL_SUFFIX@
-@RESPATH@/gmp-clearkey/0.1/manifest.json
+;@RESPATH@/gmp-clearkey/0.1/@DLL_PREFIX@clearkey@DLL_SUFFIX@
+;@RESPATH@/gmp-clearkey/0.1/manifest.json
 
 #ifdef MOZ_DMD
 ; DMD
