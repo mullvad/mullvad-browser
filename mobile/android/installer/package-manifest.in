@@ -84,7 +84,7 @@
 #endif
 
 ; GMP clearkey plugin
-@BINPATH@/@DLL_PREFIX@clearkey@DLL_SUFFIX@
+;@BINPATH@/@DLL_PREFIX@clearkey@DLL_SUFFIX@
 
 [browser]
 ; [Base Browser Files]
