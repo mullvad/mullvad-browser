@@ -42,10 +42,3 @@
 % locale browser-region @AB_CD@ %locale/browser-region/
 # the following files are browser-specific overrides
     locale/browser/netError.dtd                (%chrome/overrides/netError.dtd)
-
-#ifdef XPI_NAME
-# Bug 1240628, restructure how l10n repacks work with feature addons
-# This is hacky, but ensures the chrome.manifest chain is complete
-[.] chrome.jar:
-% manifest features/chrome.manifest
-#endif
