@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<meta charset="UTF-8">
+<html>
+<head>
+  <title>Test for Tor Bug #23104: CSS line-height reveals the platform Tor browser is running</title>
+  <script type="application/javascript" src="/tests/SimpleTest/SimpleTest.js"></script>
+  <script type="application/javascript" src="/tests/SimpleTest/SpawnTask.js"></script>
+  <style type="text/css">
+    span {
+      background-color: #000;
+      color: #fff;
+      font-size: 16.5px;
+    }
+  </style>
+</head>
+<body>
+<span id="test1">Test1</span>
+<span id="test2">كلمة</span>
+<span id="test3">ação</span>
+<script>
+
+let setPref = async function (key, value) {
+  await SpecialPowers.pushPrefEnv({"set": [[key, value]]});
+}
+
+function getStyle(el, styleprop) {
+  el = document.getElementById(el);
+  return document.defaultView.getComputedStyle(el, null).getPropertyValue(styleprop);
+}
+
+function validateElement(elementName, isFingerprintResistent) {
+  var fontSize = getStyle(elementName, 'font-size');
+  var lineHeight = getStyle(elementName, 'line-height');
+  var validationCb = isFingerprintResistent ? is : isnot;
+  validationCb(parseFloat(lineHeight), Math.round(parseFloat(fontSize)) * 1.2, 'Line Height validation');
+}
+
+add_task(async function() {
+  await setPref("layout.css.line-height.normal-as-resolved-value.enabled", false);
+  for (let resistFingerprintingValue of [true, false]) {
+    await setPref("privacy.resistFingerprinting", resistFingerprintingValue);
+    for (let elementId of ['test1', 'test2', 'test3']) {
+      validateElement(elementId, resistFingerprintingValue);
+    }
+  }
+});
+
+</script>
+</body>
+</html>
