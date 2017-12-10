@@ -34,6 +34,7 @@
 #include "nsTableCellFrame.h"
 #include "nsTableFrame.h"
 #include "StickyScrollContainer.h"
+#include "nsContentUtils.h"
 
 using namespace mozilla;
 using namespace mozilla::css;
@@ -2727,7 +2728,8 @@ static nscoord GetNormalLineHeight(nsFontMetrics* aFontMetrics) {
   nscoord externalLeading = aFontMetrics->ExternalLeading();
   nscoord internalLeading = aFontMetrics->InternalLeading();
   nscoord emHeight = aFontMetrics->EmHeight();
-  if (!internalLeading && !externalLeading) {
+  if ((!internalLeading && !externalLeading) ||
+      nsContentUtils::ShouldResistFingerprinting()) {
     return NSToCoordRound(emHeight * kNormalLineHeightFactor);
   }
   return emHeight + internalLeading + externalLeading;
