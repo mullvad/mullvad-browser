@@ -218,3 +218,15 @@ def check_host_bin_prog(var, prog, toolchain=None):
 
 check_host_bin_prog("EMBEDDED_UNIFFI_BINDGEN", "embedded-uniffi-bindgen")
 check_host_bin_prog("NIMBUS_FML", "nimbus-fml")
+
+project_flag(
+    "MOZ_ANDROID_NETWORK_STATE",
+    help="Include permission for accessing WiFi/network state on Android",
+    default=False,
+)
+
+project_flag(
+    "MOZ_ANDROID_LOCATION",
+    help="Include permission for accessing fine and course-grain Location on Android",
+    default=False,
+)
