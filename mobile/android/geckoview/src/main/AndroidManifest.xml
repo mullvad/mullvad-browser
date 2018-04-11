@@ -6,21 +6,33 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="org.mozilla.geckoview">
 
+<!--#ifdef MOZ_ANDROID_NETWORK_STATE-->
+    <!--
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    -->
+<!--#endif-->
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+<!--#ifdef MOZ_ANDROID_LOCATION-->
+    <!--
     <uses-feature
             android:name="android.hardware.location"
             android:required="false"/>
     <uses-feature
             android:name="android.hardware.location.gps"
             android:required="false"/>
+    -->
+<!--#endif-->
     <uses-feature
             android:name="android.hardware.touchscreen"
             android:required="false"/>
+<!--#ifdef MOZ_WEBRTC-->
+    <!-- TODO preprocess AndroidManifest.xml so that we can
+         conditionally include WebRTC permissions based on MOZ_WEBRTC. -->
+    <!--
     <uses-feature
             android:name="android.hardware.camera"
             android:required="false"/>
@@ -37,6 +49,8 @@
     <uses-feature
             android:name="android.hardware.camera.any"
             android:required="false"/>
+    -->
+<!--#endif-->
 
     <!-- GeckoView requires OpenGL ES 2.0 -->
     <uses-feature
