@@ -493,55 +493,7 @@ public class GeckoMediaDrmBridgeV21 implements GeckoMediaDrm {
 
     @Override
     protected Void doInBackground(final Void... params) {
-      HttpURLConnection urlConnection = null;
-      BufferedReader in = null;
-      try {
-        final URI finalURI =
-            new URI(mURL + "&signedRequest=" + URLEncoder.encode(new String(mDrmRequest), "UTF-8"));
-        urlConnection = (HttpURLConnection) ProxySelector.openConnectionWithProxy(finalURI);
-        urlConnection.setRequestMethod("POST");
-        if (DEBUG) Log.d(LOGTAG, "Provisioning, posting url =" + finalURI.toString());
-
-        // Add data
-        urlConnection.setRequestProperty("Accept", "*/*");
-        urlConnection.setRequestProperty("User-Agent", getCDMUserAgent());
-        urlConnection.setRequestProperty("Content-Type", "application/json");
-
-        // Execute HTTP Post Request
-        urlConnection.connect();
-
-        final int responseCode = urlConnection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-          in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), UTF_8));
-          String inputLine;
-          final StringBuffer response = new StringBuffer();
-
-          while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-          }
-          in.close();
-          mResponseBody = String.valueOf(response).getBytes(UTF_8);
-          if (DEBUG) Log.d(LOGTAG, "Provisioning, response received.");
-          if (mResponseBody != null) Log.d(LOGTAG, "response length=" + mResponseBody.length);
-        } else {
-          Log.d(LOGTAG, "Provisioning, server returned HTTP error code :" + responseCode);
-        }
-      } catch (final IOException e) {
-        Log.e(LOGTAG, "Got exception during posting provisioning request ...", e);
-      } catch (final URISyntaxException e) {
-        Log.e(LOGTAG, "Got exception during creating uri ...", e);
-      } finally {
-        if (urlConnection != null) {
-          urlConnection.disconnect();
-        }
-        try {
-          if (in != null) {
-            in.close();
-          }
-        } catch (final IOException e) {
-          Log.e(LOGTAG, "Exception during closing in ...", e);
-        }
-      }
+      Log.i(LOGTAG, "This is Tor Browser. Skipping.");
       return null;
     }
 
