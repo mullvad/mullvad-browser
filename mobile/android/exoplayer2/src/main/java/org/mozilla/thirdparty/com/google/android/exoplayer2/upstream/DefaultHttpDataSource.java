@@ -531,50 +531,8 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
       boolean followRedirects,
       Map<String, String> requestParameters)
       throws IOException, URISyntaxException {
-    /**
-     * Tor Project modified the way the connection object was created. For the sake of
-     * simplicity, instead of duplicating the whole file we changed the connection object
-     * to use the ProxySelector.
-     */
-    HttpURLConnection connection = (HttpURLConnection) openConnectionWithProxy(url.toURI());
-
-    connection.setConnectTimeout(connectTimeoutMillis);
-    connection.setReadTimeout(readTimeoutMillis);
-
-    Map<String, String> requestHeaders = new HashMap<>();
-    if (defaultRequestProperties != null) {
-      requestHeaders.putAll(defaultRequestProperties.getSnapshot());
-    }
-    requestHeaders.putAll(requestProperties.getSnapshot());
-    requestHeaders.putAll(requestParameters);
-
-    for (Map.Entry<String, String> property : requestHeaders.entrySet()) {
-      connection.setRequestProperty(property.getKey(), property.getValue());
-    }
-
-    if (!(position == 0 && length == C.LENGTH_UNSET)) {
-      String rangeRequest = "bytes=" + position + "-";
-      if (length != C.LENGTH_UNSET) {
-        rangeRequest += (position + length - 1);
-      }
-      connection.setRequestProperty("Range", rangeRequest);
-    }
-    connection.setRequestProperty("User-Agent", userAgent);
-    connection.setRequestProperty("Accept-Encoding", allowGzip ? "gzip" : "identity");
-    connection.setInstanceFollowRedirects(followRedirects);
-    connection.setDoOutput(httpBody != null);
-    connection.setRequestMethod(DataSpec.getStringForHttpMethod(httpMethod));
-
-    if (httpBody != null) {
-      connection.setFixedLengthStreamingMode(httpBody.length);
-      connection.connect();
-      OutputStream os = connection.getOutputStream();
-      os.write(httpBody);
-      os.close();
-    } else {
-      connection.connect();
-    }
-    return connection;
+    Log.i(TAG, "This is Tor Browser. Skipping.");
+    throw new IOException();
   }
 
   /** Creates an {@link HttpURLConnection} that is connected with the {@code url}. */
