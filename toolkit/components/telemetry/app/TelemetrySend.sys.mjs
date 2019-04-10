@@ -1657,6 +1657,8 @@ export var TelemetrySendImpl = {
   },
 
   runPingSender(pings, observer) {
+    throw Components.Exception("", Cr.NS_ERROR_NOT_IMPLEMENTED);
+
     if (AppConstants.platform === "android") {
       throw Components.Exception("", Cr.NS_ERROR_NOT_IMPLEMENTED);
     }
