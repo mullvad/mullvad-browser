@@ -4904,6 +4904,14 @@ bool ClientWebGLContext::ReadPixels_SharedPrecheck(
     return false;
   }
 
+  // Security check passed, but don't let content readPixel calls through for
+  // now, if Resist Fingerprinting Mode is enabled.
+  if (nsContentUtils::ResistFingerprinting(aCallerType)) {
+    JsWarning("readPixels: Not allowed in Resist Fingerprinting Mode");
+    out_error.Throw(NS_ERROR_DOM_NOT_SUPPORTED_ERR);
+    return false;
+  }
+
   return true;
 }
 
