@@ -46,7 +46,6 @@ category browser-first-window-ready resource:///modules/PageActions.sys.mjs Page
 category browser-first-window-ready resource://gre/modules/DoHController.sys.mjs DoHController.init
 category browser-first-window-ready moz-src:///toolkit/profile/ProfilesDatastoreService.sys.mjs ProfilesDatastoreService.init
 category browser-first-window-ready resource:///modules/profiles/SelectableProfileService.sys.mjs SelectableProfileService.init
-category browser-first-window-ready moz-src:///browser/components/protections/ContentBlockingPrefs.sys.mjs ContentBlockingPrefs.init
 category browser-first-window-ready resource://gre/modules/CaptchaDetectionPingUtils.sys.mjs CaptchaDetectionPingUtils.init
 #ifdef MOZ_SANDBOX
 #ifdef XP_LINUX
