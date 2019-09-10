@@ -230,6 +230,9 @@
 /* TRACKING PROTECTION ICON */
 
 #tracking-protection-icon-container {
+  /* Always hide the tracking toolbar button in Base Browser.
+   * tor-browser#26345. */
+  display: none !important;
   padding-inline: var(--urlbar-icon-padding);
   border-radius: var(--urlbar-icon-border-radius);
   /* This is needed in order to position the blue dot indicator. */
