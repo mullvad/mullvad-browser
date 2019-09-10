@@ -65,6 +65,10 @@
 
 /* Content Blocking */
 
+#trackingGroup {
+  display: none;
+}
+
 /* Override styling that sets descriptions as grey */
 #trackingGroup description.indent,
 #trackingGroup .indent > description {
