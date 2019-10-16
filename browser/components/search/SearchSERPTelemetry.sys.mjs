@@ -229,7 +229,7 @@ class TelemetryHandler {
    * can be tracked.
    */
   async init() {
-    if (this._initialized) {
+    if (this._initialized || true) {
       return;
     }
 
@@ -2501,6 +2501,7 @@ class DomainToCategoriesMap {
    * reuse the store if the version in each record matches the store.
    */
   async #setupClientAndStore() {
+    return;
     if (this.#client && !this.empty) {
       return;
     }

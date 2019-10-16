@@ -1332,10 +1332,6 @@ export class SearchService {
     // start listening straight away.
     Services.obs.addObserver(this, lazy.Region.REGION_TOPIC);
 
-    this.#getIgnoreListAndSubscribe().catch(ex =>
-      console.error(ex, "Search Service could not get the ignore list.")
-    );
-
     if (lazy.SearchUtils.newSearchConfigEnabled) {
       this.#engineSelector = new lazy.SearchEngineSelector(
         this.#handleConfigurationUpdated.bind(this)
