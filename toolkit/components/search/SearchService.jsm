@@ -247,8 +247,6 @@ SearchService.prototype = {
       // See if we have a settings file so we don't have to parse a bunch of XML.
       let settings = await this._settings.get();
 
-      this._setupRemoteSettings().catch(Cu.reportError);
-
       await this._loadEngines(settings);
 
       // If we've got this far, but the application is now shutting down,
