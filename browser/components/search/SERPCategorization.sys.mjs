@@ -913,6 +913,8 @@ class DomainToCategoriesMap {
    * reuse the store if the version in each record matches the store.
    */
   async #setupClientAndStore() {
+    return;
+    // eslint-disable-next-line no-unreachable
     if (this.#client && !this.empty) {
       return;
     }
