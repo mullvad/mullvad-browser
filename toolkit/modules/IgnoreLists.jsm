@@ -8,19 +8,19 @@ const { XPCOMUtils } = ChromeUtils.import(
 );
 
 XPCOMUtils.defineLazyModuleGetters(this, {
-  RemoteSettings: "resource://services-settings/remote-settings.js",
   RemoteSettingsClient: "resource://services-settings/RemoteSettingsClient.jsm",
 });
 
+Cu.importGlobalProperties(["fetch"]);
+
 var EXPORTED_SYMBOLS = ["IgnoreLists"];
 
-const SETTINGS_IGNORELIST_KEY = "hijack-blocklists";
-
 class IgnoreListsManager {
+  _ignoreListSettings = null;
+
   async init() {
-    if (!this._ignoreListSettings) {
-      this._ignoreListSettings = RemoteSettings(SETTINGS_IGNORELIST_KEY);
-    }
+    // TODO: Restore the initialization, once we use only the local dumps for
+    // the remote settings.
   }
 
   async getAndSubscribe(listener) {
@@ -30,7 +30,7 @@ class IgnoreListsManager {
     const settings = await this._getIgnoreList();
 
     // Listen for future updates after we first get the values.
-    this._ignoreListSettings.on("sync", listener);
+    this._ignoreListSettings?.on("sync", listener);
 
     return settings;
   }
@@ -70,6 +70,14 @@ class IgnoreListsManager {
    *   could be obtained.
    */
   async _getIgnoreListSettings(firstTime = true) {
+    if (!this._ignoreListSettings) {
+      const dump = await fetch(
+        "resource:///defaults/settings/main/hijack-blocklists.json"
+      );
+      const { data } = await dump.json();
+      return data;
+    }
+
     let result = [];
     try {
       result = await this._ignoreListSettings.get({
