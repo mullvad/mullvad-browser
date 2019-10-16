@@ -22,9 +22,6 @@ XPCOMUtils.defineLazyModuleGetters(this, {
   ActorManagerParent: "resource://gre/modules/ActorManagerParent.jsm",
   AddonManager: "resource://gre/modules/AddonManager.jsm",
   AppMenuNotifications: "resource://gre/modules/AppMenuNotifications.jsm",
-  ASRouterDefaultConfig:
-    "resource://activity-stream/lib/ASRouterDefaultConfig.jsm",
-  ASRouterNewTabHook: "resource://activity-stream/lib/ASRouterNewTabHook.jsm",
   ASRouter: "resource://activity-stream/lib/ASRouter.jsm",
   AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
   BackgroundUpdate: "resource://gre/modules/BackgroundUpdate.jsm",
@@ -715,27 +712,6 @@ let JSWINDOWACTORS = {
       },
     },
     matches: ["about:studies*"],
-  },
-
-  ASRouter: {
-    parent: {
-      moduleURI: "resource:///actors/ASRouterParent.jsm",
-    },
-    child: {
-      moduleURI: "resource:///actors/ASRouterChild.jsm",
-      events: {
-        // This is added so the actor instantiates immediately and makes
-        // methods available to the page js on load.
-        DOMDocElementInserted: {},
-      },
-    },
-    matches: [
-      "about:home*",
-      "about:newtab*",
-      "about:welcome*",
-      "about:privatebrowsing",
-    ],
-    remoteTypes: ["privilegedabout"],
   },
 
   SwitchDocumentDirection: {
@@ -2006,7 +1982,6 @@ BrowserGlue.prototype = {
       () => NewTabUtils.uninit(),
       () => Normandy.uninit(),
       () => RFPHelper.uninit(),
-      () => ASRouterNewTabHook.destroy(),
       () => UpdateListener.reset(),
     ];
 
@@ -2712,12 +2687,6 @@ BrowserGlue.prototype = {
           ) {
             await PlacesUIUtils.maybeAddImportButton();
           }
-        },
-      },
-
-      {
-        task: () => {
-          ASRouterNewTabHook.createInstance(ASRouterDefaultConfig());
         },
       },
 
