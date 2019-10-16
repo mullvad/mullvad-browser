@@ -154,13 +154,7 @@ class TelemetryHandler {
       return;
     }
 
-    this._telemetrySettings = lazy.RemoteSettings(TELEMETRY_SETTINGS_KEY);
     let rawProviderInfo = [];
-    try {
-      rawProviderInfo = await this._telemetrySettings.get();
-    } catch (ex) {
-      lazy.logConsole.error("Could not get settings:", ex);
-    }
 
     // Send the provider info to the child handler.
     this._contentHandler.init(rawProviderInfo);
