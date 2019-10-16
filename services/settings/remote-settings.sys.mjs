@@ -198,10 +198,15 @@ function remoteSettingsFunction() {
       return;
     }
     // When running in full mode, we ignore last polling status.
-    if (full) {
+    if (full || AppConstants.BASE_BROWSER_VERSION) {
       lazy.gPrefs.clearUserPref(PREF_SETTINGS_SERVER_BACKOFF);
       lazy.gPrefs.clearUserPref(PREF_SETTINGS_LAST_UPDATE);
       lazy.gPrefs.clearUserPref(PREF_SETTINGS_LAST_ETAG);
+    }
+
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // tor-browser#41704: pollChanges is always online, so do not allow it.
+      return;
     }
 
     let pollTelemetryArgs = {
