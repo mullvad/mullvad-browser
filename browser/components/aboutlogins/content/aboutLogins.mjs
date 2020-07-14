@@ -24,6 +24,9 @@ const gElements = {
       ".menuitem-remove-all-logins"
     );
   },
+  get createNewLoginButton() {
+    return this.loginList.shadowRoot.querySelector(".create-login-button");
+  },
 };
 
 let numberOfLogins = 0;
@@ -126,6 +129,9 @@ window.addEventListener("AboutLoginsChromeToContent", event => {
       gElements.loginList.setSortDirection(event.detail.value.selectedSort);
       document.documentElement.classList.add("initialized");
       gElements.loginList.classList.add("initialized");
+      if (!event.detail.value.canCreateLogins) {
+        gElements.createNewLoginButton.disabled = true;
+      }
       break;
     }
     case "ShowLoginItemError": {
