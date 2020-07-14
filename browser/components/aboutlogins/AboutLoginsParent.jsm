@@ -62,6 +62,7 @@ XPCOMUtils.defineLazyGetter(this, "AboutLoginsL10n", () => {
 const ABOUT_LOGINS_ORIGIN = "about:logins";
 const AUTH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 const PRIMARY_PASSWORD_NOTIFICATION_ID = "primary-password-login-required";
+const NOCERTDB_PREF = "security.nocertdb";
 
 // about:logins will always use the privileged content process,
 // even if it is disabled for other consumers such as about:newtab.
@@ -323,6 +324,7 @@ class AboutLoginsParent extends JSWindowActorParent {
         importVisible:
           Services.policies.isAllowed("profileImport") &&
           AppConstants.platform != "linux",
+        canCreateLogins: !Services.prefs.getBoolPref(NOCERTDB_PREF, false),
       });
 
       await AboutLogins.sendAllLoginRelatedObjects(
