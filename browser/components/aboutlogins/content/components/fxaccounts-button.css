@@ -8,6 +8,11 @@
   align-items: center;
 }
 
+/* Do not promote Mozilla Sync. */
+.logged-out-view {
+  display: none !important;
+}
+
 .fxaccounts-extra-text {
   /* Only show at most 3 lines of text to limit the
      text from overflowing the header. */
