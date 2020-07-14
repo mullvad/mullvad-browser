@@ -143,6 +143,7 @@ window.addEventListener("AboutLoginsChromeToContent", event => {
       }
       document.documentElement.classList.add("initialized");
       gElements.loginList.classList.add("initialized");
+      gElements.loginList.canCreateLogins = event.detail.value.canCreateLogins;
       break;
     }
     case "ShowLoginItemError": {
