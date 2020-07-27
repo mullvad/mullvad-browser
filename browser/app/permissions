@@ -6,20 +6,3 @@
 # * permission is an integer between 1 and 15
 # Permissions defined here will also be set for private browsing.
 # See PermissionManager.cpp for more...
-
-# UITour
-origin	uitour	1	https://www.mozilla.org
-origin	uitour	1	https://support.mozilla.org
-origin	uitour	1	about:home
-origin	uitour	1	about:newtab
-# Bug 1942328: firefox.com needs the same privileges as mozilla.org
-origin	uitour	1	https://www.firefox.com
-
-# XPInstall
-origin	install	1	https://addons.mozilla.org
-
-# Remote troubleshooting
-origin	remote-troubleshooting	1	https://support.mozilla.org
-
-# autoplay video/audio
-origin	autoplay-media	1	about:welcome
