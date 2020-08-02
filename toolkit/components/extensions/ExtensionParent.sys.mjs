@@ -254,6 +254,8 @@ const ProxyMessenger = {
   /** @type {Map<number, ParentPort>} */
   ports: new Map(),
 
+  _torRuntimeMessageListeners: [],
+
   init() {
     this.conduit = new lazy.BroadcastConduit(ProxyMessenger, {
       id: "ProxyMessenger",
@@ -345,6 +347,10 @@ const ProxyMessenger = {
   },
 
   async recvRuntimeMessage(arg, { sender }) {
+    // We need to listen to some extension messages in Tor Browser
+    for (const listener of this._torRuntimeMessageListeners) {
+      listener(arg);
+    }
     arg.firstResponse = true;
     let kind = await this.normalizeArgs(arg, sender);
     let result = await this.conduit.castRuntimeMessage(kind, arg);
@@ -2261,6 +2267,44 @@ for (let name of StartupCache.STORE_NAMES) {
   StartupCache[name] = new CacheStore(name);
 }
 
+async function torSendExtensionMessage(extensionId, message) {
+  // This should broadcast the message to all children "conduits"
+  // listening for a "RuntimeMessage". Those children conduits
+  // will either be extension background pages or other extension
+  // pages listening to browser.runtime.onMessage.
+  const result = await ProxyMessenger.conduit.castRuntimeMessage("messenger", {
+    extensionId,
+    holder: new StructuredCloneHolder("torSendExtensionMessage", null, message),
+    firstResponse: true,
+    sender: {
+      id: extensionId,
+      envType: "addon_child",
+    },
+  });
+  return result
+    ? result.value
+    : Promise.reject({ message: ERROR_NO_RECEIVERS });
+}
+
+async function torWaitForExtensionMessage(extensionId, checker) {
+  return new Promise(resolve => {
+    const msgListener = msg => {
+      try {
+        if (msg && msg.extensionId === extensionId) {
+          const deserialized = msg.holder.deserialize({});
+          if (checker(deserialized)) {
+            const idx =
+              ProxyMessenger._torRuntimeMessageListeners.indexOf(msgListener);
+            ProxyMessenger._torRuntimeMessageListeners.splice(idx, 1);
+            resolve(deserialized);
+          }
+        }
+      } catch (e) {}
+    };
+    ProxyMessenger._torRuntimeMessageListeners.push(msgListener);
+  });
+}
+
 export var ExtensionParent = {
   GlobalManager,
   HiddenExtensionPage,
@@ -2273,6 +2317,8 @@ export var ExtensionParent = {
   watchExtensionProxyContextLoad,
   watchExtensionWorkerContextLoaded,
   DebugUtils,
+  torSendExtensionMessage,
+  torWaitForExtensionMessage,
 };
 
 // browserPaintedPromise and browserStartupPromise are promises that
