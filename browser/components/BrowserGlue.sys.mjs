@@ -2303,8 +2303,6 @@ BrowserGlue.prototype = {
     this._monitorScreenshotsPref();
     this._monitorWebcompatReporterPref();
     this._monitorHTTPSOnlyPref();
-    this._monitorIonPref();
-    this._monitorIonStudies();
     this._setupSearchDetection();
 
     this._monitorGPCPref();
