@@ -40,7 +40,6 @@ DIRS += [
     "migration",
     "newtab",
     "originattributes",
-    "ion",
     "places",
     "pocket",
     "preferences",
