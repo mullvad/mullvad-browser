@@ -37,7 +37,6 @@ DIRS += [
     "enterprisepolicies",
     "extensions",
     "firefoxview",
-    "ion",
     "messagepreview",
     "migration",
     "newtab",
