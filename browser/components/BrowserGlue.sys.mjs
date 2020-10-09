@@ -1283,6 +1283,20 @@ BrowserGlue.prototype = {
     // handle any UI migration
     this._migrateUI();
 
+    // Clear possibly auto enabled enterprise_roots prefs (see bug 40166)
+    if (
+      !Services.prefs.getBoolPref(
+        "security.certerrors.mitm.auto_enable_enterprise_roots"
+      ) &&
+      Services.prefs.getBoolPref(
+        "security.enterprise_roots.auto-enabled",
+        false
+      )
+    ) {
+      Services.prefs.clearUserPref("security.enterprise_roots.enabled");
+      Services.prefs.clearUserPref("security.enterprise_roots.auto-enabled");
+    }
+
     if (!Services.prefs.prefHasUserValue(PREF_PDFJS_ISDEFAULT_CACHE_STATE)) {
       lazy.PdfJs.checkIsDefault(this._isNewProfile);
     }
