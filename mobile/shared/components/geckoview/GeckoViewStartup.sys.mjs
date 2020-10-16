@@ -11,6 +11,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ActorManagerParent: "resource://gre/modules/ActorManagerParent.sys.mjs",
   EventDispatcher: "resource://gre/modules/Messaging.sys.mjs",
   PdfJs: "resource://pdf.js/PdfJs.sys.mjs",
+  RFPHelper: "resource://gre/modules/RFPHelper.sys.mjs",
 });
 
 const { debug, warn } = GeckoViewUtils.initLogging("Startup");
@@ -338,6 +339,10 @@ export class GeckoViewStartup {
       case "GeckoView:SetLocale":
         if (aData.requestedLocales) {
           Services.locale.requestedLocales = aData.requestedLocales;
+        }
+        lazy.RFPHelper._handleSpoofEnglishChanged();
+        if (Services.prefs.getIntPref("privacy.spoof_english", 0) === 2) {
+          break;
         }
         const pls = Cc["@mozilla.org/pref-localizedstring;1"].createInstance(
           Ci.nsIPrefLocalizedString
