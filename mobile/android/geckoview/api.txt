@@ -886,6 +886,7 @@ package org.mozilla.geckoview {
     method public boolean getRemoteDebuggingEnabled();
     method @Nullable public GeckoRuntime getRuntime();
     method @Nullable public Rect getScreenSizeOverride();
+    method public boolean getSpoofEnglish();
     method public boolean getTranslationsOfferPopup();
     method @NonNull public String getTrustedRecursiveResolverUri();
     method public int getTrustedRecusiveResolverMode();
@@ -915,6 +916,7 @@ package org.mozilla.geckoview {
     method @NonNull public GeckoRuntimeSettings setLoginAutofillEnabled(boolean);
     method @NonNull public GeckoRuntimeSettings setPreferredColorScheme(int);
     method @NonNull public GeckoRuntimeSettings setRemoteDebuggingEnabled(boolean);
+    method @NonNull public GeckoRuntimeSettings setSpoofEnglish(boolean);
     method @NonNull public GeckoRuntimeSettings setTranslationsOfferPopup(boolean);
     method @NonNull public GeckoRuntimeSettings setTrustedRecursiveResolverMode(int);
     method @NonNull public GeckoRuntimeSettings setTrustedRecursiveResolverUri(@NonNull String);
@@ -968,6 +970,7 @@ package org.mozilla.geckoview {
     method @NonNull public GeckoRuntimeSettings.Builder preferredColorScheme(int);
     method @NonNull public GeckoRuntimeSettings.Builder remoteDebuggingEnabled(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder screenSizeOverride(int, int);
+    method @NonNull public GeckoRuntimeSettings.Builder spoofEnglish(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder translationsOfferPopup(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder trustedRecursiveResolverMode(int);
     method @NonNull public GeckoRuntimeSettings.Builder trustedRecursiveResolverUri(@NonNull String);
