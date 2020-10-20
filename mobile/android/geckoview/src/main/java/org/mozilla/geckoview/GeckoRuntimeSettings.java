@@ -792,19 +792,25 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
   private String computeAcceptLanguages() {
     final ArrayList<String> locales = new ArrayList<String>();
 
-    // Explicitly-set app prefs come first:
-    if (mRequestedLocales != null) {
-      for (final String locale : mRequestedLocales) {
-        locales.add(locale.toLowerCase(Locale.ROOT));
+    // In Desktop, these are defined in the `intl.accept_languages` localized property.
+    // At some point we should probably use the same values here, but for now we use a simple
+    // strategy which will hopefully result in reasonable acceptLanguage values.
+    if (mRequestedLocales != null && mRequestedLocales.length > 0) {
+      String locale = mRequestedLocales[0].toLowerCase(Locale.ROOT);
+      // No need to include `en-us` twice.
+      if (!locale.equals("en-us")) {
+        locales.add(locale);
+        if (locale.contains("-")) {
+          String lang = locale.split("-")[0];
+          // No need to include `en` twice.
+          if (!lang.equals("en")) {
+            locales.add(lang);
+          }
+        }
       }
     }
-    // OS prefs come second:
-    for (final String locale : getDefaultLocales()) {
-      final String localeLowerCase = locale.toLowerCase(Locale.ROOT);
-      if (!locales.contains(localeLowerCase)) {
-        locales.add(localeLowerCase);
-      }
-    }
+    locales.add("en-us");
+    locales.add("en");
 
     return TextUtils.join(",", locales);
   }
