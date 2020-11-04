@@ -402,6 +402,14 @@ nsresult WebExecutorSupport::CreateStreamLoader(
   MOZ_ASSERT(cookieJarSettings);
 
   nsCOMPtr<nsILoadInfo> loadInfo = channel->LoadInfo();
+  if (const auto origin = req->Origin(); origin) {
+    RefPtr<nsIURI> originUri;
+    rv = NS_NewURI(getter_AddRefs(originUri), origin->ToString());
+    NS_ENSURE_SUCCESS(rv, NS_ERROR_MALFORMED_URI);
+    OriginAttributes attrs = loadInfo->GetOriginAttributes();
+    attrs.SetFirstPartyDomain(true, originUri);
+    loadInfo->SetOriginAttributes(attrs);
+  }
   loadInfo->SetCookieJarSettings(cookieJarSettings);
 
   // setup http/https specific things
