@@ -935,6 +935,15 @@ class AddonInternal {
       }
     }
 
+    // Bug 41598: prevent NoScript from being uninstalled/disabled
+    if (this.id === "{73a6fe31-595d-460b-a920-fcc0f8843232}") {
+      permissions &= ~(
+        lazy.AddonManager.PERM_CAN_UNINSTALL |
+        lazy.AddonManager.PERM_CAN_DISABLE |
+        lazy.AddonManager.PERM_CAN_CHANGE_PRIVATEBROWSING_ACCESS
+      );
+    }
+
     return permissions;
   }
 
