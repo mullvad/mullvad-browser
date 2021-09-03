@@ -2954,6 +2954,15 @@ class Extension extends ExtensionData {
         this.permissions.add(PRIVATE_ALLOWED_PERMISSION);
       }
 
+      // Bug 40253: Explicitly allow NoScript in Private Browsing mode.
+      if (this.id === "{73a6fe31-595d-460b-a920-fcc0f8843232}") {
+        ExtensionPermissions.add(this.id, {
+          permissions: [PRIVATE_ALLOWED_PERMISSION],
+          origins: [],
+        });
+        this.permissions.add(PRIVATE_ALLOWED_PERMISSION);
+      }
+
       // We only want to update the SVG_CONTEXT_PROPERTIES_PERMISSION during install and
       // upgrade/downgrade startups.
       if (INSTALL_AND_UPDATE_STARTUP_REASONS.has(this.startupReason)) {
