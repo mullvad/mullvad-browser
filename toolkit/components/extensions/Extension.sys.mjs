@@ -944,6 +944,15 @@ export class ExtensionData {
   }
 
   /**
+   * Whether this is the NoScript extension.
+   *
+   * @type {boolean}
+   */
+  get isNoScript() {
+    return this.id === "{73a6fe31-595d-460b-a920-fcc0f8843232}";
+  }
+
+  /**
    * A factory function that allows the construction of ExtensionData, with
    * the isPrivileged flag computed asynchronously.
    *
@@ -3789,6 +3798,15 @@ export class Extension extends ExtensionData {
         });
         this.permissions.delete(PRIVATE_ALLOWED_PERMISSION);
       }
+    }
+
+    // Bug 40253: Explicitly allow NoScript in Private Browsing mode.
+    if (this.isNoScript) {
+      lazy.ExtensionPermissions.add(this.id, {
+        permissions: [PRIVATE_ALLOWED_PERMISSION],
+        origins: [],
+      });
+      this.permissions.add(PRIVATE_ALLOWED_PERMISSION);
     }
 
     // We only want to update the SVG_CONTEXT_PROPERTIES_PERMISSION during
