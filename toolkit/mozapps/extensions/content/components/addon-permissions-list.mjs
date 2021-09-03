@@ -87,7 +87,15 @@ class AddonPermissionsList extends AboutAddonsHTMLElement {
       },
       {
         buildOptionalOrigins: true,
-        includeFileSchemeAccess: lazy.fileSchemeAccessRequiresOptIn,
+        // tor-browser#45157: prevent "access local files" from being accidentally
+        // toggled off in NoScript, causing Safer and Safest security levels to
+        // fail on file:// URLs.
+        includeFileSchemeAccess:
+          lazy.fileSchemeAccessRequiresOptIn &&
+          !(
+            fileSchemeAllowed &&
+            this.addon.id == "{73a6fe31-595d-460b-a920-fcc0f8843232}"
+          ),
       }
     );
     let optionalEntries = [
