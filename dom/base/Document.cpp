@@ -16095,18 +16095,6 @@ nsAutoSyncOperation::~nsAutoSyncOperation() {
   }
 }
 
-void Document::SetIsInSyncOperation(bool aSync) {
-  if (CycleCollectedJSContext* ccjs = CycleCollectedJSContext::Get()) {
-    ccjs->UpdateMicroTaskSuppressionGeneration();
-  }
-
-  if (aSync) {
-    ++mInSyncOperationCount;
-  } else {
-    --mInSyncOperationCount;
-  }
-}
-
 gfxUserFontSet* Document::GetUserFontSet() {
   if (!mFontFaceSet) {
     return nullptr;
