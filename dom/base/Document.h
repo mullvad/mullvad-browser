@@ -3253,7 +3253,13 @@ class Document : public nsINode,
 
   bool IsInSyncOperation() { return mInSyncOperationCount != 0; }
 
-  void SetIsInSyncOperation(bool aSync);
+  void SetIsInSyncOperation(bool aSync) {
+    if (aSync) {
+      ++mInSyncOperationCount;
+    } else {
+      --mInSyncOperationCount;
+    }
+  }
 
   bool CreatingStaticClone() const { return mCreatingStaticClone; }
 

@@ -885,7 +885,7 @@ class WorkerJSContext final : public mozilla::CycleCollectedJSContext {
     MOZ_ASSERT(!NS_IsMainThread());
     MOZ_ASSERT(runnable);
 
-    std::deque<RefPtr<MicroTaskRunnable>>* microTaskQueue = nullptr;
+    std::queue<RefPtr<MicroTaskRunnable>>* microTaskQueue = nullptr;
 
     JSContext* cx = Context();
     NS_ASSERTION(cx, "This should never be null!");
@@ -907,7 +907,7 @@ class WorkerJSContext final : public mozilla::CycleCollectedJSContext {
     }
 
     JS::JobQueueMayNotBeEmpty(cx);
-    microTaskQueue->push_back(std::move(runnable));
+    microTaskQueue->push(std::move(runnable));
   }
 
   bool IsSystemCaller() const override {
