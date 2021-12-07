@@ -4443,7 +4443,7 @@ void WorkerPrivate::EnterDebuggerEventLoop() {
     {
       MutexAutoLock lock(mMutex);
 
-      std::deque<RefPtr<MicroTaskRunnable>>& debuggerMtQueue =
+      std::queue<RefPtr<MicroTaskRunnable>>& debuggerMtQueue =
           ccjscx->GetDebuggerMicroTaskQueue();
       while (mControlQueue.IsEmpty() &&
              !(debuggerRunnablesPending = !mDebuggerQueue.IsEmpty()) &&
