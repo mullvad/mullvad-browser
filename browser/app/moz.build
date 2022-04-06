@@ -76,7 +76,8 @@ if CONFIG["CC_TYPE"] == "clang-cl":
 if CONFIG["OS_ARCH"] == "WINNT":
     RCINCLUDE = "splash.rc"
     DIRS += [
-        "pbproxy",
+        # tor-browser#41798 don't build private_browsing.exe on Windows
+        # "pbproxy",
         "winlauncher",
     ]
     USE_LIBS += [
