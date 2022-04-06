@@ -198,7 +198,7 @@ ext.configureVariantWithGeckoBinaries = { variant ->
     def distDir = "${topobjdir}/dist/geckoview"
 
     def syncOmnijarFromDistDir
-    if (hasCompileArtifacts()) {
+    if (hasCompileArtifacts() || true) {
         syncOmnijarFromDistDir = task("syncOmnijarFromDistDirFor${variant.name.capitalize()}", type: Sync) {
             onlyIf {
                 if (source.empty) {
@@ -254,7 +254,7 @@ ext.configureVariantWithGeckoBinaries = { variant ->
     } }()
 
     syncLibsFromDistDir.onlyIf { task ->
-        if (!hasCompileArtifacts()) {
+        if (!hasCompileArtifacts() || true) {
             // We won't have JNI libraries if we're not compiling and we're not downloading
             // artifacts.  Such a configuration is used for running lints, generating docs, etc.
             return true
@@ -272,7 +272,7 @@ ext.configureVariantWithGeckoBinaries = { variant ->
         }
     }
 
-    if (hasCompileArtifacts()) {
+    if (hasCompileArtifacts() || true) {
         // Local (read, not 'official') builds want to reflect developer changes to
         // the omnijar sources, and (when compiling) to reflect developer changes to
         // the native binaries.  To do this, the Gradle build calls out to the
