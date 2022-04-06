@@ -16,7 +16,7 @@ def hasCompileArtifacts() {
 }
 
 ext.configureVariantWithGeckoBinaries = { variant ->
-    if (hasCompileArtifacts()) {
+    if (hasCompileArtifacts() || true) {
         // Local (read, not 'official') builds want to reflect developer changes to
         // the omnijar sources, and (when compiling) to reflect developer changes to
         // the native binaries.  To do this, the Gradle build calls out to the
