@@ -197,8 +197,7 @@ def android_archive_geckoview(command_context, args):
 
     if ret != 0:
         return ret
-    if "MOZ_AUTOMATION" in os.environ:
-        create_maven_archive(command_context.topobjdir)
+    create_maven_archive(command_context.topobjdir)
 
     return 0
 

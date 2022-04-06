@@ -20,7 +20,7 @@ ext.configureVariantWithGeckoBinaries = { variantName ->
     // the native binaries.  To do this, the Gradle build calls out to the
     // moz.build system, which can be re-entrant.  Official builds are driven by
     // the moz.build system and should never be re-entrant in this way.
-    if (hasCompileArtifacts() && !mozconfig.substs.MOZILLA_OFFICIAL && !mozconfig.substs.ENABLE_MOZSEARCH_PLUGIN) {
+    if (!mozconfig.substs.MOZILLA_OFFICIAL && !mozconfig.substs.ENABLE_MOZSEARCH_PLUGIN) {
         // `onVariants` runs before AGP creates these tasks, so defer the wiring with `configureEach`.
         ["generate${variantName.capitalize()}Assets", "merge${variantName.capitalize()}JniLibFolders"].each { taskName ->
             tasks.matching { it.name == taskName }.configureEach {

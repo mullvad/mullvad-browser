@@ -3962,6 +3962,10 @@ include("../build/moz.configure/update-programs.configure")
 
 # Per-format extra args passed to mozbuild.action.package
 # ==============================================================
+option(env="MOZ_PKG_MAC_DSSTORE", nargs=1, help="Path to the .dsstore file for DMG packaging")
+option(env="MOZ_PKG_MAC_BACKGROUND", nargs=1, help="Path to the background image for DMG packaging")
+option(env="MOZ_PKG_MAC_ICON", nargs=1, help="Path to the disk icon for DMG packaging")
+
 @depends(
     moz_pkg_format,
     toolkit,
@@ -3970,6 +3974,9 @@ include("../build/moz.configure/update-programs.configure")
     moz_branding_directory,
     moz_app_displayname,
     build_environment.topsrcdir,
+    "MOZ_PKG_MAC_DSSTORE",
+    "MOZ_PKG_MAC_BACKGROUND",
+    "MOZ_PKG_MAC_ICON",
 )
 @imports(_from="os.path", _import="join")
 @imports("shlex")
@@ -3981,6 +3988,9 @@ def moz_package_extra_args(
     branding_dir,
     app_displayname,
     topsrcdir,
+    dmg_dsstore,
+    dmg_background,
+    dmg_icon,
 ):
     args = []
     # For non-shippable builds, we would rather finish the build sooner
@@ -3992,9 +4002,9 @@ def moz_package_extra_args(
     if pkg_format == "DMG" and branding_dir:
         brand = join(topsrcdir, branding_dir)
         args += [
-            "--dsstore", join(brand, "dsstore"),
-            "--background", join(brand, "background.png"),
-            "--icon", join(brand, "disk.icns"),
+            "--dsstore", dmg_dsstore[0] if dmg_dsstore else join(brand, "dsstore"),
+            "--background", dmg_background[0] if dmg_background else join(brand, "background.png"),
+            "--icon", dmg_icon[0] if dmg_icon else join(brand, "disk.icns"),
             "--volume-name", app_displayname,
         ]
     return " ".join(shlex.quote(a) for a in args)
