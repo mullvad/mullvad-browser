@@ -2855,6 +2855,10 @@ def package_l10n(command_context, verbose=False, locales=[]):
     target = ["package"]
     if command_context.substs["MOZ_BUILD_APP"] == "mobile/android":
         target.append("AB_CD=multi")
+    else:
+        # tor-browser#41458 and tor-browser-build#40687: do not actually
+        # create the package (at least on desktop)
+        return 0
 
     command_context._run_make(
         directory=command_context.topobjdir,
