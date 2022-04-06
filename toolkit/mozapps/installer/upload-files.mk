@@ -205,9 +205,9 @@ ifeq ($(MOZ_PKG_FORMAT),DMG)
 
   _ABS_MOZSRCDIR = $(shell cd $(MOZILLA_DIR) && pwd)
   PKG_DMG_SOURCE = $(MOZ_PKG_DIR)
-  MOZ_PKG_MAC_DSSTORE=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/dsstore
-  MOZ_PKG_MAC_BACKGROUND=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/background.png
-  MOZ_PKG_MAC_ICON=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/disk.icns
+  MOZ_PKG_MAC_DSSTORE?=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/dsstore
+  MOZ_PKG_MAC_BACKGROUND?=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/background.png
+  MOZ_PKG_MAC_ICON?=$(topsrcdir)/$(MOZ_BRANDING_DIRECTORY)/disk.icns
   INNER_MAKE_PACKAGE = \
     $(call py_action,make_dmg, \
         $(if $(MOZ_PKG_MAC_DSSTORE),--dsstore '$(MOZ_PKG_MAC_DSSTORE)') \
