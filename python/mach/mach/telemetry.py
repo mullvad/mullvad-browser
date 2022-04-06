@@ -277,6 +277,7 @@ def prompt_telemetry_message_contributor():
 
 def initialize_telemetry_setting(settings, topsrcdir: str, state_dir: str):
     """Enables telemetry for employees or prompts the user."""
+    return
     # If the user doesn't care about telemetry for this invocation, then
     # don't make requests to Bugzilla and/or prompt for whether the
     # user wants to opt-in.
