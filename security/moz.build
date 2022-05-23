@@ -89,7 +89,8 @@ gyp_vars["nss_dist_obj_dir"] = "$PRODUCT_DIR/dist/bin"
 gyp_vars["disable_tests"] = 1
 gyp_vars["disable_dbm"] = 1
 gyp_vars["disable_libpkix"] = 1
-gyp_vars["enable_sslkeylogfile"] = 1
+# tor-browser#18885, tor-browser#21849
+gyp_vars["enable_sslkeylogfile"] = 0
 # Whether we're using system NSS or Rust nssckbi, we don't need
 # to build C nssckbi
 gyp_vars["disable_ckbi"] = 1
