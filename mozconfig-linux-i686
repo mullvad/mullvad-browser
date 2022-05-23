@@ -1,0 +1,9 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --target=i686-linux-gnu
+
+ac_add_options --enable-default-toolkit=cairo-gtk3
+
+# Bug 31448: ld.gold fails if we don't disable debug-symbols.
+# Also, we keep strip enabled.
+ac_add_options --disable-debug-symbols
