@@ -1,0 +1,33 @@
+# -*- Mode: python; indent-tabs-mode: nil; tab-width: 40 -*-
+# vim: set filetype=python:
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# Set Base Browser default config
+# See tor-browser#25741 and tor-browser#41584.
+
+imply_option("MOZ_ANDROID_EXCLUDE_FONTS", False)
+
+# Disable uploading crash reports and dump files to an external server
+# This is still configured in old-configure. Uncomment when this moves
+# to the python config
+# imply_option("MOZ_CRASHREPORTER", False)
+
+# Disable uploading information about the browser configuration and
+# performance to an external server. See tor-browser#32493.
+imply_option("MOZ_SERVICES_HEALTHREPORT", False)
+
+# Disable creating telemetry and data reports that are uploaded to an
+# external server
+# These aren't actually configure options. These are disabled in
+# confvars.sh, but they look like configure options so we'll document
+# them here, as well.
+# XXX: no confvars.sh here
+# imply_option("MOZ_TELEMETRY_REPORTING", False)
+# imply_option("MOZ_DATA_REPORTING", False)
+
+# tor-browser#24796: This controls some permissions in GeckoView's
+# AndroidManifest.xml
+imply_option("MOZ_ANDROID_NETWORK_STATE", False)
+imply_option("MOZ_ANDROID_LOCATION", False)
