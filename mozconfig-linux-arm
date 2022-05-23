@@ -1,0 +1,18 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --target=arm-linux-gnueabihf
+
+ac_add_options --enable-default-toolkit=cairo-gtk3
+
+# Bug 31448: ld.gold fails if we don't disable debug-symbols.
+# Also, we keep strip enabled.
+ac_add_options --disable-debug-symbols
+
+# From Arch Linux ARM for Firefox 102.0.1
+# https://github.com/archlinuxarm/PKGBUILDs/blob/6da804f4020487c112f59ea067e6644a309c4338/extra/firefox/PKGBUILD
+ac_add_options --disable-elf-hack
+ac_add_options --disable-av1
+ac_add_options --enable-optimize="-g0 -O2"
+# One of the following two lines (not sure which) prevents "read-only segment has dynamic relocations" linker error.
+export MOZ_DEBUG_FLAGS=" "
+export RUSTFLAGS="-Cdebuginfo=0"
