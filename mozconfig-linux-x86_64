@@ -1,0 +1,13 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+# Moz switched to lld for all Linux targets in Bug 1839739.
+ac_add_options --enable-linker=lld
+
+ac_add_options --disable-strip
+ac_add_options --disable-install-strip
+
+ac_add_options --enable-default-toolkit=cairo-gtk3
+
+# Let's make sure no preference is enabling either Adobe's or Google's CDM.
+ac_add_options --disable-eme
+
