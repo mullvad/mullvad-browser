@@ -1,0 +1,49 @@
+export MOZILLA_OFFICIAL=1
+
+ac_add_options --enable-optimize
+ac_add_options --enable-rust-simd
+ac_add_options --enable-official-branding
+
+ac_add_options --enable-application=mobile/android
+
+CC="clang"
+CXX="clang++"
+ac_add_options --with-java-bin-path=$JAVA_HOME/bin
+ac_add_options --with-android-sdk=$ANDROID_HOME
+ac_add_options --with-android-ndk=$ANDROID_NDK_HOME
+ac_add_options --with-android-min-sdk=21
+ac_add_options --with-gradle=$GRADLE_HOME/bin/gradle
+
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1758568
+ac_add_options --enable-minify=properties
+
+ac_add_options --enable-strip
+ac_add_options --enable-install-strip
+ac_add_options --disable-tests
+ac_add_options --disable-debug
+ac_add_options --disable-rust-debug
+
+ac_add_options --disable-updater
+ac_add_options --disable-crashreporter
+ac_add_options --disable-webrtc
+ac_add_options --disable-parental-controls
+
+ac_add_options --enable-proxy-bypass-protection
+ac_add_options --disable-system-policies
+
+ac_add_options --enable-base-browser
+
+# Disable telemetry
+ac_add_options MOZ_TELEMETRY_REPORTING=
+
+if test -n "$LOCAL_DEV_BUILD"; then
+    # You must use the "default" bogus channel for dev builds
+    ac_add_options --enable-update-channel=default
+else
+    # We only use beta GeckoView for now, for official builds
+    ac_add_options --enable-update-channel=beta
+fi
+
+if test -z "$WASI_SYSROOT"; then
+    ac_add_options --without-wasm-sandboxed-libraries
+fi

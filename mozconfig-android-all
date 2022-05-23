@@ -1,0 +1,23 @@
+export MOZILLA_OFFICIAL=1
+
+ac_add_options --enable-application=mobile/android
+ac_add_options --disable-compile-environment
+
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1758568
+ac_add_options --enable-minify=properties
+
+if test -n "$LOCAL_DEV_BUILD"; then
+    # You must use the "default" bogus channel for dev builds
+    ac_add_options --enable-update-channel=default
+    ac_add_options --without-wasm-sandboxed-libraries
+else
+    # We want to have a similar fat .aar versioning as Mozilla and make it clear
+    # we are on the beta channel for GeckoView
+    ac_add_options --enable-update-channel=beta
+fi
+
+ac_add_options --with-tor-browser-version=dev-build
+
+ac_add_options --with-java-bin-path=$JAVA_HOME/bin
+ac_add_options --with-android-sdk=$ANDROID_HOME
+ac_add_options --with-gradle=$GRADLE_HOME/bin/gradle
