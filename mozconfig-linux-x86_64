@@ -1,0 +1,9 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --enable-default-toolkit=cairo-gtk3
+
+ac_add_options --disable-strip
+ac_add_options --disable-install-strip
+
+# We want to bundle an own geckodriver, so we can use it for QA and other work
+ac_add_options --enable-geckodriver
