@@ -85,7 +85,8 @@ gyp_vars["nss_dist_obj_dir"] = "$PRODUCT_DIR/dist/bin"
 gyp_vars["disable_tests"] = 1
 gyp_vars["disable_dbm"] = 1
 gyp_vars["disable_libpkix"] = 1
-gyp_vars["enable_sslkeylogfile"] = 1
+# tor-browser#18885, tor-browser#21849
+gyp_vars["enable_sslkeylogfile"] = 0
 # pkg-config won't reliably find zlib on our builders, so just force it.
 # System zlib is only used for modutil and signtool unless
 # SSL zlib is enabled, which we are disabling immediately below this.
