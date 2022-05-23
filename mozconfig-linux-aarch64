@@ -1,0 +1,12 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --target=aarch64-unknown-linux-gnu
+
+# Moz switched to lld for all Linux targets in Bug 1839739.
+ac_add_options --enable-linker=lld
+
+ac_add_options --disable-strip
+ac_add_options --disable-install-strip
+
+ac_add_options --enable-default-toolkit=cairo-gtk3
+
