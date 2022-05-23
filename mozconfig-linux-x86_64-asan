@@ -1,0 +1,22 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+export CFLAGS="-fsanitize=address -Dxmalloc=myxmalloc"
+export CXXFLAGS="-fsanitize=address -Dxmalloc=myxmalloc"
+# We need to add -ldl explicitely due to bug 1213698
+export LDFLAGS="-fsanitize=address -ldl"
+
+# Define HOST_CFLAGS, etc. to avoid compiling programs such as mbsdiff
+# (which is part of mar-tools and is not distributed to end-users) with
+# ASan. See bug 17858.
+export HOST_CFLAGS=""
+export HOST_CXXFLAGS=""
+export HOST_LDFLAGS="-ldl"
+
+ac_add_options --enable-address-sanitizer
+ac_add_options --disable-jemalloc
+ac_add_options --disable-elf-hack
+
+ac_add_options --enable-default-toolkit=cairo-gtk3
+
+ac_add_options --disable-strip
+ac_add_options --disable-install-strip
