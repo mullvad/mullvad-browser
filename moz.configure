@@ -1016,6 +1016,14 @@ def zlib_in_mozglue(system_zlib, js_shared, linker, os):
 set_config("ZLIB_IN_MOZGLUE", zlib_in_mozglue)
 set_define("ZLIB_IN_MOZGLUE", zlib_in_mozglue)
 
+option(
+    "--enable-base-browser",
+    help="Enable Base Browser"
+)
+
+set_config("BASE_BROWSER", True, when="--enable-base-browser")
+set_define("BASE_BROWSER", True, when="--enable-base-browser")
+
 
 # Please do not add configure checks from here on.
 
