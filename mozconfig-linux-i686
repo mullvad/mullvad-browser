@@ -1,0 +1,16 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --target=i686-linux-gnu
+
+# Moz switched to lld for all Linux targets in Bug 1839739.
+# Also, gold used not to work with debug symbols (tor-browser#42146).
+ac_add_options --enable-linker=lld
+
+ac_add_options --disable-strip
+ac_add_options --disable-install-strip
+
+ac_add_options --enable-default-toolkit=cairo-gtk3
+
+# Let's make sure no preference is enabling either Adobe's or Google's CDM.
+ac_add_options --disable-eme
+
