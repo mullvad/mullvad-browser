@@ -1,0 +1,25 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --target=x86_64-w64-mingw32
+ac_add_options --with-toolchain-prefix=x86_64-w64-mingw32-
+
+ac_add_options --enable-strip
+
+# Bits is Background Intelligent Transfer Service
+ac_add_options --disable-bits-download
+ac_add_options --disable-maintenance-service
+ac_add_options --disable-default-browser-agent
+
+# See bug #13379
+ac_add_options --enable-nss-mar
+
+# See bug #41131
+ac_add_options --disable-update-agent
+
+# Bug 1782837: Not supported because Mozilla (and therefore also us) build
+# libc++ with LIBCXX_ENABLE_FILESYSTEM disabled.
+ac_add_options --disable-notification-server
+
+# Let's make sure no preference is enabling either Adobe's or Google's CDM.
+ac_add_options --disable-eme
+
