@@ -1,0 +1,51 @@
+# Shared build settings and settings to enhance security and privacy.
+
+. $topsrcdir/browser/config/mozconfig
+
+if test -f "$topsrcdir/mozconfig-toolchain"; then
+    . $topsrcdir/mozconfig-toolchain
+fi
+
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-@CONFIG_GUESS@
+
+ac_add_options --enable-official-branding
+export MOZILLA_OFFICIAL=1
+
+ac_add_options --enable-optimize
+ac_add_options --enable-rust-simd
+
+ac_add_options --disable-unverified-updates
+
+ac_add_options --enable-bundled-fonts
+
+# See bug #41587
+ac_add_options --disable-updater
+
+ac_add_options --disable-tests
+ac_add_options --disable-debug
+
+ac_add_options --disable-crashreporter
+# Before removing, please notice that WebRTC does not work on mingw (Bug 1393901)
+ac_add_options --disable-webrtc
+ac_add_options --disable-parental-controls
+ac_add_options --enable-proxy-bypass-protection
+# See bugs #30575 and #32418: system policies are harmful either because they
+# could allow proxy bypass, and override a number of other preferences we set
+ac_add_options --disable-system-policies
+
+# See bug #41131
+ac_add_options --disable-backgroundtasks
+
+# Disable telemetry
+ac_add_options MOZ_TELEMETRY_REPORTING=
+
+# Disable the creation of a <something>.default that Firefox by default creates
+# for old version that could not use dedicated profiles. See tor-browser#41542.
+ac_add_options --disable-legacy-profile-creation
+
+if test -z "$WASI_SYSROOT"; then
+    ac_add_options --without-wasm-sandboxed-libraries
+fi
+
+# tor-browser#42337
+ac_add_options --enable-geckodriver
