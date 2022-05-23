@@ -1,0 +1,14 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --target=i686-w64-mingw32
+ac_add_options --with-toolchain-prefix=i686-w64-mingw32-
+
+ac_add_options --enable-strip
+
+# Bits is Background Intelligent Transfer Service
+ac_add_options --disable-bits-download
+ac_add_options --disable-maintenance-service
+ac_add_options --disable-default-browser-agent
+
+# See bug #41131
+ac_add_options --disable-update-agent
