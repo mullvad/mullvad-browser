@@ -10,10 +10,11 @@ project_flag(
     default=True,
 )
 
+# tor-browser#29859
 project_flag(
     "MOZ_ANDROID_HLS_SUPPORT",
     help="Enable HLS (HTTP Live Streaming) support (currently using the ExoPlayer library)",
-    default=True,
+    default=False,
 )
 
 option(
@@ -58,7 +59,10 @@ option(
 set_config("MOZ_ANDROID_GECKOVIEW_LITE", True, when="--enable-geckoview-lite")
 
 imply_option("MOZ_NORMANDY", False)
-imply_option("MOZ_SERVICES_HEALTHREPORT", True)
+# Comment this so we can imply |False| in basebrowser.configure
+# The Build system doesn't allow multiple imply_option()
+# calls with the same key.
+# imply_option("MOZ_SERVICES_HEALTHREPORT", True)
 imply_option("MOZ_GECKOVIEW_HISTORY", True)
 
 
@@ -75,6 +79,8 @@ def check_target(target):
             "for more information about the necessary options."
         )
 
+
+include("basebrowser.configure")
 
 include("../../toolkit/moz.configure")
 include("../../build/moz.configure/android-sdk.configure")
