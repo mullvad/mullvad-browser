@@ -1,0 +1,12 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+ac_add_options --enable-strip
+
+# See bug #13379
+ac_add_options --enable-nss-mar
+
+# See bug #41131
+ac_add_options --disable-update-agent
+
+# Let's make sure no preference is enabling either Adobe's or Google's CDM.
+ac_add_options --disable-eme
