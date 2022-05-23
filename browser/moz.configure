@@ -5,12 +5,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 imply_option("MOZ_PLACES", True)
-imply_option("MOZ_SERVICES_HEALTHREPORT", True)
+# tor-browser#32493
+imply_option("MOZ_SERVICES_HEALTHREPORT", False)
 imply_option("MOZ_SERVICES_SYNC", True)
 imply_option("MOZ_DEDICATED_PROFILES", True)
 imply_option("MOZ_BLOCK_PROFILE_DOWNGRADE", True)
-imply_option("MOZ_NORMANDY", True)
-imply_option("MOZ_PROFILE_MIGRATOR", True)
+# tor-browser#33734
+imply_option("MOZ_NORMANDY", False)
+imply_option("MOZ_PROFILE_MIGRATOR", False)
 
 
 imply_option("MOZ_APP_VENDOR", "Mozilla")
@@ -64,7 +66,7 @@ def requires_stub_installer(
             "USE_STUB_INSTALLER is not specified in the environment"
         )
 
-    return True
+    return False
 
 
 imply_option("MOZ_STUB_INSTALLER", True, when=requires_stub_installer)
