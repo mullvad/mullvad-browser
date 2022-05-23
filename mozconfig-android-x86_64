@@ -1,0 +1,4 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser-android
+
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-x86_64-linux-android
+ac_add_options --target=x86_64-linux-android
