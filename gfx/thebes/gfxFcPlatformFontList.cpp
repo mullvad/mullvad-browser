@@ -2189,11 +2189,12 @@ void gfxFcPlatformFontList::GetFontList(nsAtom* aLangGroup,
 FontFamily gfxFcPlatformFontList::GetDefaultFontForPlatform(
     nsPresContext* aPresContext, const gfxFontStyle* aStyle,
     nsAtom* aLanguage) {
-  // Get the default font by using a fake name to retrieve the first
-  // scalable font that fontconfig suggests for the given language.
-  PrefFontList* prefFonts =
-      FindGenericFamilies(aPresContext, "-moz-default"_ns,
-                          aLanguage ? aLanguage : nsGkAtoms::x_western);
+  // We hardcode Arimo also in preferences, and using the original code that
+  // tried to resolve a non-existing font did not play well with our fontconfig
+  // configuration. See
+  // https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41043
+  PrefFontList* prefFonts = FindGenericFamilies(
+      aPresContext, "Arimo"_ns, aLanguage ? aLanguage : nsGkAtoms::x_western);
   NS_ASSERTION(prefFonts, "null list of generic fonts");
   if (prefFonts && !prefFonts->IsEmpty()) {
     return (*prefFonts)[0];
