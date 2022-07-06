@@ -3596,6 +3596,10 @@ int NS_main(int argc, NS_tchar** argv) {
     return 1;
   }
 
+#if defined(XP_UNIX) && !defined(XP_MACOSX)
+  unsetenv("FONTCONFIG_PATH");
+#endif
+
   if (argc == 2 && NS_tstrcmp(argv[1], NS_T("--channels-allowed")) == 0) {
 #ifdef MOZ_VERIFY_MAR_SIGNATURE
     int rv = PopulategMARStrings();
