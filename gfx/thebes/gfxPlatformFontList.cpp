@@ -2055,6 +2055,11 @@ static void GetSystemUIFontFamilies(const nsPresContext* aPresContext,
 #if defined(XP_MACOSX) || defined(MOZ_WIDGET_UIKIT)
     *aFamilies.AppendElement() = "-apple-system"_ns;
     return;
+#elif defined(MOZ_WIDGET_GTK)
+    // tor-browser#43141: Hardcode Arimo in case our custom fontconfig is
+    // missing.
+    *aFamilies.AppendElement() = "Arimo"_ns;
+    return;
 #elif !defined(MOZ_WIDGET_ANDROID)
     *aFamilies.AppendElement() = "sans-serif"_ns;
     return;
