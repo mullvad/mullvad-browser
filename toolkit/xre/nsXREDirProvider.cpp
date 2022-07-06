@@ -738,6 +738,25 @@ void nsXREDirProvider::FinishInitializingUserPrefs() {
   }
 }
 
+#ifdef MOZ_WIDGET_GTK
+static nsresult SetFontconfigConfigFile(nsCOMPtr<nsIFile> appDir) {
+  NS_ENSURE_TRUE(appDir, NS_ERROR_NULL_POINTER);
+  nsCOMPtr<nsIFile> confDir;
+  nsresult rv = appDir->Clone(getter_AddRefs(confDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = confDir->AppendNative("fonts"_ns);
+  NS_ENSURE_SUCCESS(rv, rv);
+  nsAutoCString confPath;
+  rv = confDir->GetNativePath(confPath);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (NS_WARN_IF(setenv("FONTCONFIG_PATH", confPath.BeginReading(), 1) != 0 ||
+                 setenv("FONTCONFIG_FILE", "fonts.conf", 1) != 0)) {
+    return NS_ERROR_FAILURE;
+  }
+  return NS_OK;
+}
+#endif
+
 NS_IMETHODIMP
 nsXREDirProvider::DoStartup() {
   nsresult rv;
@@ -755,6 +774,13 @@ nsXREDirProvider::DoStartup() {
        other code run from this notification since they may cause crashes.
     */
     MOZ_ASSERT(mPrefsInitialized);
+
+#ifdef MOZ_WIDGET_GTK
+    // FontConfig might be initialized by GTK/Pango, so we need to define its
+    // config variables before doing anything.
+    rv = SetFontconfigConfigFile(mGREDir);
+    NS_ENSURE_SUCCESS(rv, rv);
+#endif
 
     bool safeModeNecessary = false;
     nsCOMPtr<nsIAppStartup> appStartup(
