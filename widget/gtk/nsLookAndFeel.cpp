@@ -1278,6 +1278,16 @@ static void GetSystemFontInfo(GtkStyleContext* aStyle, nsString* aFontName,
 
   aFontStyle->systemFont = true;
 
+#ifdef BASE_BROWSER_VERSION
+  // tor-browser#44410: Set a few properties (especially the font name), but not
+  // the size, as strange scale methods might be in use in the system.
+  // We normalize the font size with RFP anyway, so this should not enable
+  // fingerprinting.
+  *aFontName = u"\"Arimo\"";
+  aFontStyle->systemFont = true;
+  aFontStyle->weight = FontWeight::NORMAL;
+  aFontStyle->stretch = FontStretch::NORMAL;
+#else
   constexpr auto quote = u"\""_ns;
   NS_ConvertUTF8toUTF16 family(pango_font_description_get_family(desc));
   *aFontName = quote + family + quote;
@@ -1287,6 +1297,7 @@ static void GetSystemFontInfo(GtkStyleContext* aStyle, nsString* aFontName,
 
   // FIXME: Set aFontStyle->stretch correctly!
   aFontStyle->stretch = FontStretch::NORMAL;
+#endif
 
   float size = float(pango_font_description_get_size(desc)) / PANGO_SCALE;
 
