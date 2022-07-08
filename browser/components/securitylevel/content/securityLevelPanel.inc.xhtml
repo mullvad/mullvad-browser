@@ -1,0 +1,26 @@
+<panel id="securityLevel-panel"
+       role="dialog"
+       aria-labelledby="securityLevel-header"
+       aria-describedby="securityLevel-subheading securityLevel-summary"
+       type="arrow"
+       orient="vertical"
+       level="top"
+       class="cui-widget-panel panel-no-padding">
+  <box class="panel-header">
+    <html:h1 id="securityLevel-header"></html:h1>
+  </box>
+  <toolbarseparator id="securityLevel-separator"></toolbarseparator>
+  <vbox id="securityLevel-background" class="panel-subview-body">
+    <html:p id="securityLevel-subheading">
+      <html:span id="securityLevel-level"></html:span>
+      <html:span id="securityLevel-custom"></html:span>
+    </html:p>
+    <html:p id="securityLevel-summary"></html:p>
+    <html:a id="securityLevel-learnMore" href="about:manual#security-settings">
+    </html:a>
+  </vbox>
+  <hbox class="panel-footer">
+    <button id="securityLevel-settings"/>
+    <button id="securityLevel-restoreDefaults"/>
+  </hbox>
+</panel>
