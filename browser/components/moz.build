@@ -55,6 +55,7 @@ DIRS += [
     "resistfingerprinting",
     "screenshots",
     "search",
+    "securitylevel",
     "sessionstore",
     "shell",
     "shopping",

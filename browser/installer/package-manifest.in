@@ -223,6 +223,9 @@
 @RESPATH@/browser/chrome/icons/default/default128.png
 #endif
 
+; Base Browser
+@RESPATH@/components/SecurityLevel.manifest
+
 ; [DevTools Startup Files]
 @RESPATH@/browser/chrome/devtools-startup@JAREXT@
 @RESPATH@/browser/chrome/devtools-startup.manifest
