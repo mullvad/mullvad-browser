@@ -1,0 +1,58 @@
+#securityLevel-groupbox {
+  --section-highlight-background-color: color-mix(in srgb, var(--in-content-accent-color) 20%, transparent);
+}
+
+#securityLevel-customNotification {
+  /* Spacing similar to #fpiIncompatibilityWarning. */
+  margin-block: 16px;
+}
+
+.info-icon.securityLevel-custom-warning-icon {
+  list-style-image: url("chrome://global/skin/icons/warning.svg");
+}
+
+#securityLevel-customHeading {
+  font-weight: bold;
+}
+
+/* Overwrite indent rule from preferences.css */
+#securityLevel-radiogroup description.indent {
+  color: var(--in-content-page-color);
+}
+
+#securityLevel-radiogroup radio {
+  font-weight: bold;
+}
+
+#securityLevel-radiogroup[disabled] {
+  opacity: 0.5;
+}
+
+/* Overwrite the rule in common-shared.css so we don't get 0.25 opacity overall
+ * on the radio text. */
+#securityLevel-radiogroup[disabled] radio[disabled] {
+  opacity: 1.0;
+}
+
+.securityLevel-radio-option {
+  border: 1px solid var(--in-content-box-border-color);
+  border-radius: 4px;
+  margin: 3px 0;
+  padding: 9px;
+}
+
+.securityLevel-radio-option.securityLevel-radio-option-selected {
+  background-color: var(--section-highlight-background-color);
+  border: 1px solid var(--in-content-accent-color);
+
+}
+
+.securityLevel-radio-option:not(
+  .securityLevel-radio-option-selected
+) .securityLevel-descriptionList {
+  display: none;
+}
+
+.securityLevel-descriptionList description {
+  display: list-item;
+}
