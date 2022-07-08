@@ -273,5 +273,6 @@
   "gFindBar",
   "gFindBarInitialized",
   "gFindBarPromise",
-  "BrowserSearch"
+  "BrowserSearch",
+  "SecurityLevelButton"
 ]
