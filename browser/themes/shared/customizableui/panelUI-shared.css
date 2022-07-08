@@ -1323,7 +1323,8 @@ panelview .toolbarbutton-1 {
 #editBookmarkPanel toolbarseparator,
 #downloadsFooterButtons > toolbarseparator,
 .cui-widget-panelview menuseparator,
-.cui-widget-panel toolbarseparator {
+.cui-widget-panel toolbarseparator,
+#securityLevel-panel toolbarseparator {
   appearance: none;
   min-height: 0;
   border-top: 1px solid var(--panel-separator-color);
