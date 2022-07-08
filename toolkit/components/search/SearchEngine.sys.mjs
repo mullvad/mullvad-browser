@@ -12,6 +12,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   NimbusFeatures: "resource://nimbus/ExperimentAPI.sys.mjs",
   SearchUtils: "resource://gre/modules/SearchUtils.sys.mjs",
+  SecurityLevelPrefs: "resource://gre/modules/SecurityLevel.sys.mjs",
 });
 
 const BinaryInputStream = Components.Constructor(
@@ -433,7 +434,17 @@ export class EngineURL {
   }
 
   getSubmission(searchTerms, engine, purpose) {
-    var url = ParamSubstitution(this.template, searchTerms, engine);
+    let urlTemplate = this.template;
+    if (
+      engine &&
+      (engine._extensionID === "ddg@search.mozilla.org" ||
+        engine._extensionID === "ddg-onion@search.mozilla.org") &&
+      this.type === lazy.SearchUtils.URL_TYPE.SEARCH &&
+      lazy.SecurityLevelPrefs?.securityLevel === "safest"
+    ) {
+      urlTemplate += "html";
+    }
+    var url = ParamSubstitution(urlTemplate, searchTerms, engine);
     // Default to searchbar if the purpose is not provided
     var requestPurpose = purpose || "searchbar";
 
