@@ -1,0 +1,67 @@
+/* Security Level CSS */
+
+#securityLevel-background {
+  min-height: 10em;
+  padding-inline: 16px;
+  padding-block: 16px 8px;
+  gap: 16px;
+  background-repeat: no-repeat;
+  background-position-y: top 0.4em;
+  /* Icon center should be in-line with end padding.
+   * We set the right-to-left position here, and the left-to-right position
+   * below. */
+  --background-inline-offset: calc(16px - 4.5em);
+  background-position-x: left var(--background-inline-offset);
+  background-size: 9em 9em;
+  -moz-context-properties: fill, fill-opacity;
+  fill-opacity: 1;
+  fill: var(--button-bgcolor);
+}
+
+/* NOTE: Use ":dir" instead of ":-moz-locale-dir" when panel switches to HTML. */
+#securityLevel-background:-moz-locale-dir(ltr) {
+  background-position-x: right var(--background-inline-offset);
+}
+
+#securityLevel-background[level="standard"] {
+  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
+}
+
+#securityLevel-background[level="safer"] {
+  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer");
+}
+
+#securityLevel-background[level="safest"] {
+  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
+}
+
+#securityLevel-background p {
+  margin: 0;
+}
+
+/* Override margin in panelUI-shared.css */
+#securityLevel-panel toolbarseparator#securityLevel-separator {
+  margin-inline: 16px;
+}
+
+#securityLevel-level {
+  font-size: 1.25em;
+  font-weight: 600;
+}
+
+#securityLevel-custom {
+  border-radius: 4px;
+  background-color: var(--warning-icon-bgcolor);
+  color: black;
+  padding: 0.4em 0.5em;
+  margin-inline-start: 1em;
+}
+
+#securityLevel-summary {
+  padding-inline-end: 5em;
+  max-width: 20em;
+}
+
+#securityLevel-learnMore {
+  align-self: start;
+}
