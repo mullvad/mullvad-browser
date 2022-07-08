@@ -126,6 +126,7 @@ EXTRA_JS_MODULES += [
     "PermissionUI.sys.mjs",
     "ProcessHangMonitor.sys.mjs",
     "Sanitizer.sys.mjs",
+    "SecurityLevelRestartNotification.sys.mjs",
     "SelectionChangedMenulist.sys.mjs",
     "SiteDataManager.sys.mjs",
     "SitePermissions.sys.mjs",
