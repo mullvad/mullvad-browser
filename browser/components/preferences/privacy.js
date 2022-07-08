@@ -48,6 +48,13 @@ XPCOMUtils.defineLazyGetter(this, "AlertsServiceDND", function() {
   }
 });
 
+// TODO: module import via ChromeUtils.defineModuleGetter
+XPCOMUtils.defineLazyScriptGetter(
+  this,
+  ["SecurityLevelPreferences"],
+  "chrome://browser/content/securitylevel/securityLevel.js"
+);
+
 XPCOMUtils.defineLazyPreferenceGetter(
   this,
   "OS_AUTH_ENABLED",
@@ -315,6 +322,16 @@ var gPrivacyPane = {
   _pane: null,
 
   /**
+   * Show the Security Level UI
+   */
+  _initSecurityLevel() {
+    SecurityLevelPreferences.init();
+    window.addEventListener("unload", () => SecurityLevelPreferences.uninit(), {
+      once: true,
+    });
+  },
+
+  /**
    * Whether the prompt to restart Firefox should appear when changing the autostart pref.
    */
   _shouldPromptForRestart: true,
@@ -523,6 +540,7 @@ var gPrivacyPane = {
     this.trackingProtectionReadPrefs();
     this.networkCookieBehaviorReadPrefs();
     this._initTrackingProtectionExtensionControl();
+    this._initSecurityLevel();
 
     Services.telemetry.setEventRecordingEnabled("pwmgr", true);
 
