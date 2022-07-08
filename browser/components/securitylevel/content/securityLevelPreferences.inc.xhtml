@@ -1,0 +1,128 @@
+<groupbox id="securityLevel-groupbox"
+          data-category="panePrivacy"
+          data-subcategory="securitylevel"
+          hidden="true">
+  <label>
+    <html:h2 data-l10n-id="security-level-preferences-heading"></html:h2>
+  </label>
+  <vbox flex="1">
+    <description class="description-deemphasized" flex="1">
+      <html:span
+        id="securityLevel-overview"
+        data-l10n-id="security-level-preferences-overview"
+      ></html:span>
+      <html:a
+        is="moz-support-link"
+        tor-manual-page="security-settings"
+        data-l10n-id="security-level-preferences-learn-more-link"
+      ></html:a>
+    </description>
+    <hbox
+      id="securityLevel-customNotification"
+      class="info-box-container"
+      flex="1"
+    >
+      <hbox class="info-icon-container">
+        <image class="info-icon securityLevel-custom-warning-icon"/>
+      </hbox>
+      <vbox flex="1">
+        <label
+          id="securityLevel-customHeading"
+          data-l10n-id="security-level-preferences-custom-heading"
+        />
+        <description
+          id="securityLevel-customDescription"
+          data-l10n-id="security-level-summary-custom"
+          flex="1"
+        />
+      </vbox>
+      <hbox align="center">
+        <button
+          id="securityLevel-restoreDefaults"
+          data-l10n-id="security-level-restore-defaults-button"
+        />
+      </hbox>
+    </hbox>
+    <radiogroup id="securityLevel-radiogroup">
+      <vbox class="securityLevel-radio-option privacy-detailedoption info-box-container">
+        <radio
+          value="standard"
+          data-l10n-id="security-level-preferences-level-standard"
+          aria-describedby="securityLevelSummary-standard"
+        />
+        <vbox id="securityLevelSummary-standard" class="indent">
+          <label data-l10n-id="security-level-summary-standard" />
+        </vbox>
+      </vbox>
+      <vbox class="securityLevel-radio-option privacy-detailedoption info-box-container">
+        <!-- NOTE: We point the accessible description to the wrapping vbox
+          - rather than its first description element. This means that when the
+          - privacy-extra-information is shown or hidden, its text content is
+          - included or excluded from the accessible description, respectively.
+          -->
+        <radio
+          value="safer"
+          data-l10n-id="security-level-preferences-level-safer"
+          aria-describedby="securityLevelSummary-safer"
+        />
+        <vbox id="securityLevelSummary-safer" class="indent">
+          <label data-l10n-id="security-level-summary-safer" />
+          <vbox class="privacy-extra-information">
+            <vbox class="indent">
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-https-only-javascript"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-media"
+                />
+              </hbox>
+            </vbox>
+          </vbox>
+        </vbox>
+      </vbox>
+      <vbox class="securityLevel-radio-option privacy-detailedoption info-box-container">
+        <radio
+          value="safest"
+          data-l10n-id="security-level-preferences-level-safest"
+          aria-describedby="securityLevelSummary-safest"
+        />
+        <vbox id="securityLevelSummary-safest" class="indent">
+          <label data-l10n-id="security-level-summary-safest" />
+          <vbox class="privacy-extra-information">
+            <vbox class="indent">
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-disabled-javascript"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols-and-images"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-media"
+                />
+              </hbox>
+            </vbox>
+          </vbox>
+        </vbox>
+      </vbox>
+    </radiogroup>
+  </vbox>
+</groupbox>

@@ -1,0 +1,11 @@
+EXTRA_JS_MODULES += [
+    "SecurityLevel.sys.mjs",
+]
+
+XPCOM_MANIFESTS += [
+    "components.conf",
+]
+
+EXTRA_COMPONENTS += [
+    "SecurityLevel.manifest",
+]
