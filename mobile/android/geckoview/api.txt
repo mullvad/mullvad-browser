@@ -812,6 +812,7 @@ package org.mozilla.geckoview {
     method @Nullable public Rect getScreenSizeOverride();
     method public boolean getSpoofEnglish();
     method @Nullable public RuntimeTelemetry.Delegate getTelemetryDelegate();
+    method public int getTorSecurityLevel();
     method public boolean getUseMaxScreenDepth();
     method public boolean getWebFontsEnabled();
     method public boolean getWebManifestEnabled();
@@ -833,6 +834,7 @@ package org.mozilla.geckoview {
     method @NonNull public GeckoRuntimeSettings setPreferredColorScheme(int);
     method @NonNull public GeckoRuntimeSettings setRemoteDebuggingEnabled(boolean);
     method @NonNull public GeckoRuntimeSettings setSpoofEnglish(boolean);
+    method @NonNull public GeckoRuntimeSettings setTorSecurityLevel(int);
     method @NonNull public GeckoRuntimeSettings setWebFontsEnabled(boolean);
     method @NonNull public GeckoRuntimeSettings setWebManifestEnabled(boolean);
     field public static final int ALLOW_ALL = 0;
@@ -874,6 +876,7 @@ package org.mozilla.geckoview {
     method @NonNull public GeckoRuntimeSettings.Builder screenSizeOverride(int, int);
     method @NonNull public GeckoRuntimeSettings.Builder spoofEnglish(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder telemetryDelegate(@NonNull RuntimeTelemetry.Delegate);
+    method @NonNull public GeckoRuntimeSettings.Builder torSecurityLevel(int);
     method @NonNull public GeckoRuntimeSettings.Builder useMaxScreenDepth(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder webFontsEnabled(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder webManifest(boolean);
