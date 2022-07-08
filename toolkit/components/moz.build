@@ -65,6 +65,7 @@ DIRS += [
     "reputationservice",
     "resistfingerprinting",
     "search",
+    "securitylevel",
     "sessionstore",
     "shell",
     "startup",
