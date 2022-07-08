@@ -22,10 +22,12 @@ import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.feature.webnotifications.WebNotificationIntentProcessor
 import org.mozilla.fenix.customtabs.FennecWebAppIntentProcessor
+import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.home.intent.FennecBookmarkShortcutsIntentProcessor
 import org.mozilla.fenix.intent.ExternalDeepLinkIntentProcessor
 import org.mozilla.fenix.perf.lazyMonitored
 import org.mozilla.fenix.shortcut.PasswordManagerIntentProcessor
+import org.mozilla.fenix.tor.TorSecurityLevel
 
 /**
  * Component group for miscellaneous components.
@@ -45,14 +47,14 @@ class IntentProcessors(
      * Provides intent processing functionality for ACTION_VIEW and ACTION_SEND intents.
      */
     val intentProcessor by lazyMonitored {
-        TabIntentProcessor(tabsUseCases, searchUseCases.newTabSearch, isPrivate = false, engine = engine)
+        TabIntentProcessor(tabsUseCases, searchUseCases.newTabSearch, isPrivate = false, engine = engine, jsEnabled = context.components.settings.torSecurityLevel != TorSecurityLevel.safest.level)
     }
 
     /**
      * Provides intent processing functionality for ACTION_VIEW and ACTION_SEND intents in private tabs.
      */
     val privateIntentProcessor by lazyMonitored {
-        TabIntentProcessor(tabsUseCases, searchUseCases.newPrivateTabSearch, isPrivate = true, engine = engine)
+        TabIntentProcessor(tabsUseCases, searchUseCases.newPrivateTabSearch, isPrivate = true, engine = engine, jsEnabled = context.components.settings.torSecurityLevel != TorSecurityLevel.safest.level)
     }
 
     val customTabIntentProcessor by lazyMonitored {

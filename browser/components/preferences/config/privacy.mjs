@@ -8,6 +8,10 @@ import { SettingGroupManager } from "chrome://browser/content/preferences/config
 import { Preferences } from "chrome://global/content/preferences/Preferences.mjs";
 
 ChromeUtils.importESModule(
+  "chrome://browser/content/securitylevel/config/security-level.mjs",
+  { global: "current" }
+);
+ChromeUtils.importESModule(
   "chrome://browser/content/preferences/config/protections-from-apps.mjs",
   { global: "current" }
 );

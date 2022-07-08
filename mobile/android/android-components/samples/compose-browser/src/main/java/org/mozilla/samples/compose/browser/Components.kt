@@ -50,7 +50,9 @@ class Components(
 
     val sessionUseCases by lazy { SessionUseCases(store) }
     val tabsUseCases by lazy { TabsUseCases(store) }
-    val searchUseCases by lazy { SearchUseCases(store, tabsUseCases, sessionUseCases) }
+
+    // tb-45109 Set jsEnabled to true as this is Sample code
+    val searchUseCases by lazy { SearchUseCases(store, tabsUseCases, sessionUseCases, true) }
 
     val locationService by lazy { LocationService.default() }
 

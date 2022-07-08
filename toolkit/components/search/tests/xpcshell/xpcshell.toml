@@ -207,6 +207,10 @@ support-files = [
 
 ["test_searchUrlDomain.js"]
 
+["test_security_level.js"]
+prefs = ["browser.security_level.security_slider=1"]
+tags = "base-browser"
+
 ["test_selectedEngine.js"]
 
 ["test_sendSubmissionURL.js"]

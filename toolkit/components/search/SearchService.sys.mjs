@@ -25,6 +25,8 @@ const lazy = XPCOMUtils.declareLazy({
     "moz-src:///toolkit/components/search/PolicySearchEngine.sys.mjs",
   Region: "resource://gre/modules/Region.sys.mjs",
   RemoteSettings: "resource://services-settings/remote-settings.sys.mjs",
+  SecurityLevelPrefs:
+    "moz-src:///toolkit/components/securitylevel/SecurityLevel.sys.mjs",
   SearchEngine: "moz-src:///toolkit/components/search/SearchEngine.sys.mjs",
   SearchEngineInstallError:
     "moz-src:///toolkit/components/search/SearchUtils.sys.mjs",
@@ -70,6 +72,7 @@ const lazy = XPCOMUtils.declareLazy({
 
 const TOPIC_LOCALES_CHANGE = "intl:app-locales-changed";
 const QUIT_APPLICATION_TOPIC = "quit-application";
+const TOPIC_JSENABLED_CHANGED = "SecurityLevel:JavascriptEnabledChanged";
 
 // The update timer for OpenSearch engines checks in once a day.
 const OPENSEARCH_UPDATE_TIMER_TOPIC = "search-engine-update-timer";
@@ -2814,6 +2817,7 @@ export const SearchService = new (class SearchService {
       channel: lazy.SearchUtils.MODIFIED_APP_CHANNEL,
       experiment: this.#lazyPrefs.experimentPrefValue,
       distroID: lazy.SearchUtils.distroID ?? "",
+      javascriptEnabled: lazy.SecurityLevelPrefs.javascriptEnabled,
     };
 
     for (let [key, value] of Object.entries(searchEngineSelectorProperties)) {
@@ -3749,6 +3753,7 @@ export const SearchService = new (class SearchService {
     Services.obs.addObserver(this, lazy.SearchUtils.TOPIC_ENGINE_MODIFIED);
     Services.obs.addObserver(this, QUIT_APPLICATION_TOPIC);
     Services.obs.addObserver(this, TOPIC_LOCALES_CHANGE);
+    Services.obs.addObserver(this, TOPIC_JSENABLED_CHANGED);
 
     this._settings.addObservers();
 
@@ -3809,6 +3814,7 @@ export const SearchService = new (class SearchService {
     Services.obs.removeObserver(this, lazy.SearchUtils.TOPIC_ENGINE_MODIFIED);
     Services.obs.removeObserver(this, QUIT_APPLICATION_TOPIC);
     Services.obs.removeObserver(this, TOPIC_LOCALES_CHANGE);
+    Services.obs.removeObserver(this, TOPIC_JSENABLED_CHANGED);
     this.#observersAdded = false;
     this.#earlyObserversAdded = false;
   }
@@ -3887,6 +3893,13 @@ export const SearchService = new (class SearchService {
       case lazy.Region.REGION_TOPIC:
         lazy.logConsole.debug("Region updated:", lazy.Region.home);
         this.#maybeReloadEngines(this.CHANGE_REASON.REGION).catch(
+          console.error
+        );
+        break;
+
+      case TOPIC_JSENABLED_CHANGED:
+        lazy.logConsole.debug("JavaScript toggled");
+        this.#maybeReloadEngines(this.CHANGE_REASON.CONFIG).catch(
           console.error
         );
         break;

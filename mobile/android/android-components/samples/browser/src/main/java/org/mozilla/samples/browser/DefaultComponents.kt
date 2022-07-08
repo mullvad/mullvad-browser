@@ -234,7 +234,8 @@ open class DefaultComponents(private val applicationContext: Context) {
     }
 
     val searchUseCases by lazy {
-        SearchUseCases(store, tabsUseCases, sessionUseCases)
+        // tb-45109 Set jsEnabled to true as this is Sample code
+        SearchUseCases(store, tabsUseCases, sessionUseCases, true)
     }
 
     val defaultSearchUseCase by lazy {
@@ -277,7 +278,8 @@ open class DefaultComponents(private val applicationContext: Context) {
 
     // Intent
     val tabIntentProcessor by lazy {
-        TabIntentProcessor(tabsUseCases, searchUseCases.newTabSearch)
+        // tb-45109 Set jsEnabled to true as this is Sample code
+        TabIntentProcessor(tabsUseCases, searchUseCases.newTabSearch, jsEnabled = true)
     }
     val externalAppIntentProcessors by lazy {
         listOf(

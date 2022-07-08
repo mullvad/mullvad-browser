@@ -235,5 +235,6 @@
   "ToolbarDropHandler",
   "ProfilesDatastoreService",
   "gTrustPanelHandler",
-  "ContentSharingUtils"
+  "ContentSharingUtils",
+  "SecurityLevelButton"
 ]
