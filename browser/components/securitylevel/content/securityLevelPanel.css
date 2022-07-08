@@ -1,0 +1,71 @@
+/* Security Level CSS */
+
+panelview#securityLevel-panelview {
+  width: 25em;
+}
+
+vbox#securityLevel-vbox > vbox {
+  background-repeat: no-repeat;
+  /* icon center-line should be in-line with right margin */
+  /* -margin + panelWidth - imageWidth/2 */
+  background-position: calc(-16px + 25em - 4.5em) 0.4em;
+  background-size: 9em 9em;
+  -moz-context-properties: fill, fill-opacity;
+  fill-opacity: 1;
+  fill: var(--button-bgcolor);
+  min-height: 10em;
+}
+
+vbox#securityLevel-vbox > vbox[level="standard"] {
+  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
+}
+vbox#securityLevel-vbox > vbox[level="safer"] {
+  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer");
+}
+vbox#securityLevel-vbox > vbox[level="safest"] {
+  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
+}
+
+vbox#securityLevel-vbox > toolbarseparator {
+  margin-inline: 16px;
+}
+
+vbox#securityLevel-vbox > vbox {
+  margin-inline: 0;
+  padding-inline: 16px;
+}
+
+vbox#securityLevel-vbox > vbox * {
+  margin-inline: 0;
+}
+
+label#securityLevel-level {
+  font-size: 1.25em;
+  font-weight: 600;
+  padding-top: 0.15em;
+}
+
+label#securityLevel-custom {
+  border-radius: 4px;
+  background-color: var(--warning-color);
+  color: black;
+  font-size: 1em;
+  height: 1.6em;
+  line-height: 1.0em;
+  padding: 0.4em 0.5em;
+  margin-inline-start: 1em !important;
+}
+
+description#securityLevel-summary {
+  margin-top: 1em;
+  padding-inline-end: 5em;
+}
+
+vbox#securityLevel-vbox > hbox.panel-footer {
+  display: flex;
+}
+
+
+button#securityLevel-advancedSecuritySettings {
+  margin-block: 0;
+}

@@ -1,0 +1,65 @@
+<groupbox id="securityLevel-groupbox"
+          data-category="panePrivacy"
+          data-subcategory="securitylevel"
+          hidden="true">
+  <label><html:h2/></label>
+  <vbox flex="1">
+    <description flex="1">
+      <html:span id="securityLevel-overview" class="tail-with-learn-more"/>
+      <label id="securityLevel-learnMore"
+             class="learnMore text-link"
+             is="text-link"
+             href="about:manual#security-settings"
+             useoriginprincipal="true"/>
+    </description>
+    <radiogroup id="securityLevel-radiogroup">
+      <vbox id="securityLevel-vbox-standard">
+        <hbox>
+          <radio value="standard"/>
+          <vbox>
+            <spacer flex="1"/>
+            <label class="securityLevel-customWarning"/>
+            <spacer flex="1"/>
+          </vbox>
+          <spacer flex="1"/>
+        </hbox>
+        <description flex="1" class="indent">
+          <html:span class="summary tail-with-learn-more"/>
+          <label class="securityLevel-restoreDefaults learnMore text-link"/>
+        </description>
+      </vbox>
+      <vbox id="securityLevel-vbox-safer">
+        <hbox>
+          <radio value="safer"/>
+          <vbox>
+            <spacer flex="1"/>
+            <label class="securityLevel-customWarning"/>
+            <spacer flex="1"/>
+          </vbox>
+        </hbox>
+        <description flex="1" class="indent">
+          <html:span class="summary tail-with-learn-more"/>
+          <label class="securityLevel-restoreDefaults learnMore text-link"/>
+        </description>
+        <vbox class="securityLevel-descriptionList indent">
+        </vbox>
+      </vbox>
+      <vbox id="securityLevel-vbox-safest">
+        <hbox>
+          <radio value="safest"/>
+          <vbox>
+            <spacer flex="1"/>
+            <label class="securityLevel-customWarning"/>
+            <spacer flex="1"/>
+          </vbox>
+        </hbox>
+        <description flex="1" class="indent">
+          <html:span class="summary tail-with-learn-more"/>
+          <label class="securityLevel-restoreDefaults learnMore text-link"/>
+        </description>
+        <vbox class="securityLevel-descriptionList indent">
+        </vbox>
+      </vbox>
+    </radiogroup>
+  </vbox>
+</groupbox>
