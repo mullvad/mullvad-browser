@@ -60,6 +60,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ScreenshotsUtils: "resource:///modules/ScreenshotsUtils.sys.mjs",
   SearchSERPTelemetry:
     "moz-src:///browser/components/search/SearchSERPTelemetry.sys.mjs",
+  SecurityLevelRestartNotification:
+    "resource:///modules/SecurityLevelRestartNotification.sys.mjs",
   SessionStartup: "resource:///modules/sessionstore/SessionStartup.sys.mjs",
   SessionStore: "resource:///modules/sessionstore/SessionStore.sys.mjs",
   ShortcutUtils: "resource://gre/modules/ShortcutUtils.sys.mjs",
@@ -813,6 +815,8 @@ BrowserGlue.prototype = {
     if (Services.prefs.prefHasUserValue("services.sync.username")) {
       lazy.WeaveService.init();
     }
+
+    lazy.SecurityLevelRestartNotification.ready();
 
     lazy.BrowserUtils.callModulesFromCategory(
       {

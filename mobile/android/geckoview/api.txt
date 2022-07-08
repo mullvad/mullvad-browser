@@ -976,6 +976,7 @@ package org.mozilla.geckoview {
     method @NonNull public String getSameDocumentNavigationOverridesLoadTypeForceDisable();
     method @Nullable public Rect getScreenSizeOverride();
     method public boolean getSpoofEnglish();
+    method public int getTorSecurityLevel();
     method public boolean getTranslationsOfferPopup();
     method @NonNull public List<String> getTrustedRecursiveResolverExcludedDomains();
     method @NonNull public String getTrustedRecursiveResolverUri();
@@ -1024,6 +1025,7 @@ package org.mozilla.geckoview {
     method @NonNull public GeckoRuntimeSettings setSameDocumentNavigationOverridesLoadType(boolean);
     method @NonNull public GeckoRuntimeSettings setSameDocumentNavigationOverridesLoadTypeForceDisable(@NonNull String);
     method @NonNull public GeckoRuntimeSettings setSpoofEnglish(boolean);
+    method @NonNull public GeckoRuntimeSettings setTorSecurityLevel(int);
     method @NonNull public GeckoRuntimeSettings setTranslationsOfferPopup(boolean);
     method @NonNull public GeckoRuntimeSettings setTrustedRecursiveResolverExcludedDomains(@NonNull List<String>);
     method @NonNull public GeckoRuntimeSettings setTrustedRecursiveResolverMode(int);
@@ -1090,6 +1092,7 @@ package org.mozilla.geckoview {
     method @NonNull public GeckoRuntimeSettings.Builder setSameDocumentNavigationOverridesLoadType(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder setSameDocumentNavigationOverridesLoadTypeForceDisable(@NonNull String);
     method @NonNull public GeckoRuntimeSettings.Builder spoofEnglish(boolean);
+    method @NonNull public GeckoRuntimeSettings.Builder torSecurityLevel(int);
     method @NonNull public GeckoRuntimeSettings.Builder translationsOfferPopup(boolean);
     method @NonNull public GeckoRuntimeSettings.Builder trustedRecursiveResolverMode(int);
     method @NonNull public GeckoRuntimeSettings.Builder trustedRecursiveResolverUri(@NonNull String);

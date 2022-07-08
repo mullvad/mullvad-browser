@@ -1,0 +1,75 @@
+/* Security Level CSS */
+
+#securityLevel-background {
+  min-height: 10em;
+  padding-inline: 16px;
+  column-gap: 0.5em;
+  display: grid;
+  grid-template:
+    "top-pad icon" 16px
+    "title icon" auto
+    "body icon" auto
+    "learn-more icon" auto
+    "bottom-pad icon" minmax(8px, 1fr)
+    / auto auto;
+}
+
+#securityLevel-background-image {
+  grid-area: icon;
+  --security-level-icon-size: 9em;
+  width: var(--security-level-icon-size);
+  height: var(--security-level-icon-size);
+  margin-block: 0.4em;
+  /* Middle of shield aligns with the panel padding: */
+  margin-inline-end: calc(-0.5 * var(--security-level-icon-size));
+  align-self: start;
+  justify-self: end;
+  /* This icon is meant to act as background, so disable dragging or interfering
+   * with clicks. */
+  pointer-events: none;
+  -moz-context-properties: fill, fill-opacity;
+  fill-opacity: 1;
+  fill: var(--border-color-card);
+}
+
+/* NOTE: Use ":dir" instead of ":-moz-locale-dir" when panel switches to HTML. */
+#securityLevel-background-image:-moz-locale-dir(rtl) {
+  transform: scaleX(-1);
+}
+
+#securityLevel-panel:is([level="standard"], [level="custom"]) #securityLevel-background-image {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
+}
+
+#securityLevel-panel[level="safer"] #securityLevel-background-image {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer");
+}
+
+#securityLevel-panel[level="safest"] #securityLevel-background-image {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
+}
+
+#securityLevel-background p {
+  margin-block: 0 16px;
+}
+
+/* Override margin in panelUI-shared.css */
+#securityLevel-panel toolbarseparator#securityLevel-separator {
+  margin-inline: 16px;
+}
+
+#securityLevel-level {
+  font-size: 1.25em;
+  font-weight: 600;
+  grid-area: title;
+}
+
+#securityLevel-summary {
+  max-width: 20em;
+  grid-area: body;
+}
+
+#securityLevel-learnMore {
+  align-self: start;
+  grid-area: learn-more;
+}

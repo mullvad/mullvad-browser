@@ -1,0 +1,34 @@
+<panel id="securityLevel-panel"
+       role="dialog"
+       aria-labelledby="securityLevel-header"
+       aria-describedby="securityLevel-level securityLevel-summary"
+       type="arrow"
+       orient="vertical"
+       class="cui-widget-panel panel-no-padding">
+  <box class="panel-header">
+    <html:h1
+      id="securityLevel-header"
+      data-l10n-id="security-level-panel-heading"
+    ></html:h1>
+  </box>
+  <toolbarseparator id="securityLevel-separator"></toolbarseparator>
+  <vbox id="securityLevel-background" class="panel-subview-body">
+    <html:p id="securityLevel-level"></html:p>
+    <html:p id="securityLevel-summary"></html:p>
+    <html:a
+      is="moz-support-link"
+      id="securityLevel-learnMore"
+      tor-manual-page="security-settings"
+      data-l10n-id="security-level-panel-learn-more-link"
+    ></html:a>
+    <html:img id="securityLevel-background-image" alt="" />
+  </vbox>
+  <html:moz-button-group class="panel-footer">
+    <button
+      id="securityLevel-settings"
+      class="footer-button"
+      default="true"
+      data-l10n-id="security-level-panel-open-settings-button"
+    />
+  </html:moz-button-group>
+</panel>

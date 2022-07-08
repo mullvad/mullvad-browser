@@ -62,6 +62,13 @@ ChromeUtils.defineLazyGetter(lazy, "gParentalControlsService", () =>
     : null
 );
 
+// TODO: module import via ChromeUtils.defineModuleGetter
+XPCOMUtils.defineLazyScriptGetter(
+  this,
+  ["SecurityLevelPreferences"],
+  "chrome://browser/content/securitylevel/securityLevel.js"
+);
+
 XPCOMUtils.defineLazyPreferenceGetter(
   this,
   "gIsFirstPartyIsolated",
@@ -368,6 +375,16 @@ function initTCPStandardSection() {
 
 var gPrivacyPane = {
   _pane: null,
+
+  /**
+   * Show the Security Level UI
+   */
+  _initSecurityLevel() {
+    SecurityLevelPreferences.init();
+    window.addEventListener("unload", () => SecurityLevelPreferences.uninit(), {
+      once: true,
+    });
+  },
 
   /**
    * Whether the prompt to restart Firefox should appear when changing the autostart pref.
@@ -945,6 +962,7 @@ var gPrivacyPane = {
     this._initTrackingProtectionExtensionControl();
     this._initThirdPartyCertsToggle();
     this._initProfilesInfo();
+    this._initSecurityLevel();
 
     Preferences.get("privacy.trackingprotection.enabled").on(
       "change",

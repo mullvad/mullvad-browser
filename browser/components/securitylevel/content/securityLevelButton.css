@@ -1,0 +1,19 @@
+#security-level-button[level="standard"] {
+  list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
+}
+
+#security-level-button[level="safer"] {
+  list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer");
+}
+
+#security-level-button[level="safest"] {
+  list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
+}
+
+#security-level-button[level="custom"] {
+  list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard_custom");
+}
+
+#security-level-button:-moz-locale-dir(rtl) .toolbarbutton-icon {
+  transform: scaleX(-1);
+}

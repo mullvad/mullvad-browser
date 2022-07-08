@@ -14,6 +14,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   SearchSettings: "moz-src:///toolkit/components/search/SearchSettings.sys.mjs",
   SearchUtils: "moz-src:///toolkit/components/search/SearchUtils.sys.mjs",
+  SecurityLevelPrefs: "resource://gre/modules/SecurityLevel.sys.mjs",
   OpenSearchEngine:
     "moz-src:///toolkit/components/search/OpenSearchEngine.sys.mjs",
 });
@@ -353,6 +354,28 @@ export class EngineURL {
       escapedSearchTerms,
       queryCharset
     );
+
+    if (
+      lazy.SecurityLevelPrefs?.securityLevel === "safest" &&
+      this.type === lazy.SearchUtils.URL_TYPE.SEARCH
+    ) {
+      let host = templateURI.host;
+      try {
+        host = Services.eTLD.getBaseDomainFromHost(host);
+      } catch (ex) {
+        lazy.logConsole.warn("Failed to get a FPD", ex, host);
+      }
+      if (host === "duckduckgo.com") {
+        templateURI.host = "html.duckduckgo.com";
+        templateURI.pathname = "/html";
+      } else if (
+        host ===
+        "duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion"
+      ) {
+        templateURI.pathname = "/html";
+      }
+    }
+
     if (this.method == "GET" && paramString) {
       // Query parameters may be specified in the template url AND in `this.params`.
       // Thus, we need to supply both with the search terms and join them.
