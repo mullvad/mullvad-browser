@@ -1,0 +1,61 @@
+<groupbox id="securityLevel-groupbox"
+          data-category="panePrivacy"
+          data-subcategory="securitylevel"
+          hidden="true">
+  <label><html:h2></html:h2></label>
+  <vbox flex="1">
+    <description flex="1">
+      <html:span id="securityLevel-overview" class="tail-with-learn-more">
+      </html:span>
+      <label id="securityLevel-learnMore"
+             class="learnMore text-link"
+             is="text-link"
+             href="about:manual#security-settings"
+             useoriginprincipal="true"/>
+    </description>
+    <hbox id="securityLevel-customNotification"
+          class="info-box-container"
+          flex="1">
+      <hbox class="info-icon-container">
+        <image class="info-icon securityLevel-custom-warning-icon"/>
+      </hbox>
+      <vbox flex="1">
+        <label id="securityLevel-customHeading"/>
+        <description id="securityLevel-customDescription" flex="1"/>
+      </vbox>
+      <hbox align="center">
+        <button id="securityLevel-restoreDefaults"/>
+      </hbox>
+    </hbox>
+    <radiogroup id="securityLevel-radiogroup">
+      <vbox class="securityLevel-radio-option">
+        <radio value="standard"
+               aria-describedby="securityLevelSummary-standard"/>
+        <vbox id="securityLevelSummary-standard">
+          <description class="summary indent" flex="1"/>
+        </vbox>
+      </vbox>
+      <vbox class="securityLevel-radio-option">
+        <!-- NOTE: We point the accessible description to the wrapping vbox
+          - rather than its first description element. This means that when the
+          - securityLevel-descriptionList is shown or hidden, its text content
+          - is included or excluded from the accessible description,
+          - respectively. -->
+        <radio value="safer"
+               aria-describedby="securityLevelSummary-safer"/>
+        <vbox id="securityLevelSummary-safer">
+          <description class="summary indent" flex="1"/>
+          <vbox class="securityLevel-descriptionList indent"/>
+        </vbox>
+      </vbox>
+      <vbox class="securityLevel-radio-option">
+        <radio value="safest"
+               aria-describedby="securityLevelSummary-safest"/>
+        <vbox id="securityLevelSummary-safest">
+          <description class="summary indent" flex="1"/>
+          <vbox class="securityLevel-descriptionList indent"/>
+        </vbox>
+      </vbox>
+    </radiogroup>
+  </vbox>
+</groupbox>
