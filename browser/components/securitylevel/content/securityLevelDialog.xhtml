@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+
+<?csp default-src chrome: ?>
+
+<window
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  data-l10n-id="security-level-dialog-window"
+>
+  <dialog id="security-level-dialog" buttons="accept,cancel">
+    <linkset>
+      <html:link rel="stylesheet" href="chrome://global/skin/global.css" />
+      <html:link
+        rel="stylesheet"
+        href="chrome://browser/skin/preferences/preferences.css"
+      />
+      <html:link
+        rel="stylesheet"
+        href="chrome://browser/skin/preferences/privacy.css"
+      />
+      <html:link
+        rel="stylesheet"
+        href="chrome://browser/content/securitylevel/securityLevelDialog.css"
+      />
+
+      <html:link rel="localization" href="branding/brand.ftl" />
+      <html:link rel="localization" href="toolkit/global/base-browser.ftl" />
+    </linkset>
+
+    <html:script
+      type="module"
+      src="chrome://global/content/elements/moz-radio-group.mjs"
+    ></html:script>
+    <html:script
+      type="module"
+      src="chrome://browser/content/securitylevel/widgets/security-level-description.mjs"
+    ></html:script>
+    <script src="chrome://browser/content/securitylevel/securityLevelDialog.js" />
+
+    <description data-l10n-id="security-level-dialog-restart-description" />
+
+    <moz-radio-group
+      xmlns="http://www.w3.org/1999/xhtml"
+      id="security-level-radiogroup"
+      data-l10n-id="security-level-dialog-radio-group"
+    >
+      <moz-radio value="standard" use-label-slot="">
+        <span class="security-level-radio-label" slot="label">
+          <span data-l10n-id="security-level-panel-level-standard"></span>
+          <!-- TODO: Use <moz-badge> widget once bugzilla bug 2065204 is
+             - resolved. See tor-browser#45229. -->
+          <span class="moz-badge" hidden="hidden">
+            <span
+              class="moz-badge-label"
+              data-l10n-id="security-level-preferences-current-badge"
+            ></span>
+          </span>
+        </span>
+        <security-level-description
+          slot="description"
+          value="standard"
+        ></security-level-description>
+      </moz-radio>
+      <moz-radio value="safer" use-label-slot="">
+        <span class="security-level-radio-label" slot="label">
+          <span data-l10n-id="security-level-panel-level-safer"></span>
+          <span class="moz-badge" hidden="hidden">
+            <span
+              class="moz-badge-label"
+              data-l10n-id="security-level-preferences-current-badge"
+            ></span>
+          </span>
+        </span>
+        <security-level-description
+          slot="description"
+          value="safer"
+        ></security-level-description>
+      </moz-radio>
+      <moz-radio value="safest" use-label-slot="">
+        <span class="security-level-radio-label" slot="label">
+          <span data-l10n-id="security-level-panel-level-safest"></span>
+          <span class="moz-badge" hidden="hidden">
+            <span
+              class="moz-badge-label"
+              data-l10n-id="security-level-preferences-current-badge"
+            ></span>
+          </span>
+        </span>
+        <security-level-description
+          slot="description"
+          value="safest"
+        ></security-level-description>
+      </moz-radio>
+    </moz-radio-group>
+  </dialog>
+</window>

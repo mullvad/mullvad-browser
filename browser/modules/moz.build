@@ -153,6 +153,7 @@ MOZ_SRC_FILES += [
     "ContextId.sys.mjs",
     "ObserverForwarder.sys.mjs",
     "PrivateBrowsingUI.sys.mjs",
+    "SecurityLevelNotification.sys.mjs",
 ]
 
 if CONFIG["MOZ_WIDGET_TOOLKIT"] == "windows":
