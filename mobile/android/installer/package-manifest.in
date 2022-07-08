@@ -124,6 +124,9 @@
 @BINPATH@/chrome/devtools@JAREXT@
 @BINPATH@/chrome/devtools.manifest
 
+; Base Browser
+@BINPATH@/components/SecurityLevel.manifest
+
 ; [Default Preferences]
 ; All the pref files must be part of base to prevent migration bugs
 #ifndef MOZ_ANDROID_FAT_AAR_ARCHITECTURES
