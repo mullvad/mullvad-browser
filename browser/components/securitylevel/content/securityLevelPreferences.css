@@ -1,0 +1,26 @@
+#securityLevel-groupbox {
+  --section-highlight-background-color: color-mix(in srgb, var(--in-content-accent-color) 20%, transparent);
+}
+
+#securityLevel-customNotification {
+  /* Spacing similar to #fpiIncompatibilityWarning. */
+  margin-block: 16px;
+}
+
+.info-icon.securityLevel-custom-warning-icon {
+  list-style-image: url("chrome://global/skin/icons/warning.svg");
+}
+
+#securityLevel-customHeading {
+  font-weight: bold;
+}
+
+#securityLevel-radiogroup[disabled] {
+  opacity: 0.5;
+}
+
+/* Overwrite the rule in common-shared.css so we don't get 0.25 opacity overall
+ * on the radio text. */
+#securityLevel-radiogroup[disabled] radio[disabled] .radio-label-box {
+  opacity: 1.0;
+}

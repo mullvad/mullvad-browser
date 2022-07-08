@@ -344,6 +344,16 @@ void nsNodeInfoManager::RemoveNodeInfo(NodeInfo* aNodeInfo) {
 }
 
 static bool IsSystemOrAddonOrAboutPrincipal(nsIPrincipal* aPrincipal) {
+#ifdef ANDROID
+  if (aPrincipal->SchemeIs("resource")) {
+    nsAutoCString spec;
+    aPrincipal->GetAsciiSpec(spec);
+    if (StringBeginsWith(spec, "resource://android/assets/"_ns)) {
+      return true;
+    }
+  }
+#endif
+
   return aPrincipal->IsSystemPrincipal() ||
          BasePrincipal::Cast(aPrincipal)->AddonPolicy() ||
          // NOTE: about:blank and about:srcdoc inherit the principal of their
