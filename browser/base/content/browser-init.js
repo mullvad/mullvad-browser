@@ -219,6 +219,9 @@ var gBrowserInit = {
     // doesn't flicker as the window is being shown.
     DownloadsButton.init();
 
+    // Init the SecurityLevelButton
+    SecurityLevelButton.init();
+
     // Certain kinds of automigration rely on this notification to complete
     // their tasks BEFORE the browser window is shown. SessionStore uses it to
     // restore tabs into windows AFTER important parts like gMultiProcessBrowser
@@ -1022,6 +1025,8 @@ var gBrowserInit = {
     SidebarController.uninit();
 
     DownloadsButton.uninit();
+
+    SecurityLevelButton.uninit();
 
     if (gToolbarKeyNavEnabled) {
       ToolbarKeyboardNavigator.uninit();
