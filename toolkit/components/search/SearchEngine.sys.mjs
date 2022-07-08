@@ -14,6 +14,12 @@ ChromeUtils.defineESModuleGetters(lazy, {
   SearchUtils: "resource://gre/modules/SearchUtils.sys.mjs",
 });
 
+ChromeUtils.defineModuleGetter(
+  lazy,
+  "SecurityLevelPrefs",
+  "resource://gre/modules/SecurityLevel.jsm"
+);
+
 const BinaryInputStream = Components.Constructor(
   "@mozilla.org/binaryinputstream;1",
   "nsIBinaryInputStream",
@@ -433,7 +439,17 @@ export class EngineURL {
   }
 
   getSubmission(searchTerms, engine, purpose) {
-    var url = ParamSubstitution(this.template, searchTerms, engine);
+    let urlTemplate = this.template;
+    if (
+      engine &&
+      (engine._extensionID === "ddg@search.mozilla.org" ||
+        engine._extensionID === "ddg-onion@search.mozilla.org") &&
+      this.type === lazy.SearchUtils.URL_TYPE.SEARCH &&
+      lazy.SecurityLevelPrefs?.securityLevel === "safest"
+    ) {
+      urlTemplate += "html";
+    }
+    var url = ParamSubstitution(urlTemplate, searchTerms, engine);
     // Default to searchbar if the purpose is not provided
     var requestPurpose = purpose || "searchbar";
 
