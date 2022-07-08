@@ -636,6 +636,7 @@ var gPrivacyPane = {
     initSettingGroup("etpReset");
     initSettingGroup("etpCustomize");
     initSettingGroup("networkProxy");
+    initSettingGroup("securityLevelGroup");
 
     /* Initialize Content Blocking */
     this.initContentBlocking();

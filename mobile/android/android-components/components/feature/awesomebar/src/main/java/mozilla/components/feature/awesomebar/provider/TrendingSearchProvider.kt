@@ -110,7 +110,10 @@ class TrendingSearchProvider private constructor(
 
     private fun maybeCallSpeculativeConnect(searchTerms: String) {
         client.getSearchEngine()?.let { searchEngine ->
-            engine?.speculativeConnect(searchEngine.buildSearchUrl(searchTerms))
+            // We don't use this feature, default jsEnabled to true. If we want this feature in the
+            // future, we should pipe it from components.settings.torSecurityLevel != TorSecurityLevel.safest.level
+            // https://gitlab.torproject.org/tpo/applications/tor-browser/-/merge_requests/1940
+            engine?.speculativeConnect(searchEngine.buildSearchUrl(searchTerms, jsEnabled = true))
         }
     }
 

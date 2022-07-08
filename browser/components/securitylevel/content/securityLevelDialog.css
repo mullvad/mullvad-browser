@@ -1,0 +1,29 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+
+/* Hack to gain the internal styling of <moz-badge>.
+ * TODO: Drop this once we can use moz-badge. tor-browser#45229. */
+@import url("chrome://global/content/elements/moz-badge.css");
+
+#security-level-radiogroup {
+  margin-block: var(--space-large) var(--space-xlarge);
+}
+
+.security-level-radio-label {
+  display: inline flex;
+  gap: var(--space-small);
+}
+
+.security-level-radio-label .moz-badge-label > span {
+  /* Still accessible to screen reader, but not visual.
+   * Keep inline, but with no layout width. */
+  display: inline-block;
+  width: 1px;
+  margin-inline-end: -1px;
+  clip-path: inset(50%);
+}
+
+.moz-badge[hidden] {
+  display: none;
+}

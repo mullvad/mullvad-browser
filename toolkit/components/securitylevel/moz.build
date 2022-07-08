@@ -1,0 +1,11 @@
+MOZ_SRC_FILES += [
+    "SecurityLevel.sys.mjs",
+]
+
+XPCOM_MANIFESTS += [
+    "components.conf",
+]
+
+EXTRA_COMPONENTS += [
+    "SecurityLevel.manifest",
+]

@@ -34,6 +34,7 @@ class FenixBrowserUseCases(
     private val searchUseCases: SearchUseCases,
     private val homepageTitle: String,
     private val profiler: Profiler?,
+    private val jsEnabled: Boolean = true,
 ) {
     /**
      * Loads a URL or performs a search depending on the value of [searchTermOrURL].
@@ -94,6 +95,7 @@ class FenixBrowserUseCases(
                     searchEngine = searchEngine,
                     flags = flags,
                     additionalHeaders = additionalHeaders,
+                    jsEnabled = jsEnabled,
                 )
             } else {
                 searchUseCases.defaultSearch.invoke(

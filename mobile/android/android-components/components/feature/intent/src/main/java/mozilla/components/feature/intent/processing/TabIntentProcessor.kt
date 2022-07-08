@@ -48,6 +48,7 @@ class TabIntentProcessor(
     private val newTabSearchUseCase: SearchUseCases.NewTabSearchUseCase,
     private val isPrivate: Boolean = false,
     private val engine: Engine? = null,
+    private val jsEnabled: Boolean = true,
 ) : IntentProcessor {
 
     private val logger = Logger("TabIntentProcessor")
@@ -162,7 +163,7 @@ class TabIntentProcessor(
             if (url != null) {
                 addNewTab(url, source)
             } else {
-                newTabSearchUseCase(extraText, source)
+                newTabSearchUseCase(extraText, source, jsEnabled = jsEnabled)
             }
             true
         }
@@ -178,7 +179,7 @@ class TabIntentProcessor(
             if (searchQuery.isUrl()) {
                 addNewTab(searchQuery, source)
             } else {
-                newTabSearchUseCase(searchQuery, source)
+                newTabSearchUseCase(searchQuery, source, jsEnabled = jsEnabled)
             }
             true
         }

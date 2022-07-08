@@ -201,6 +201,9 @@ export class SearchEngineSelector {
    *   The name of the application.
    * @param {string} [options.version]
    *   The version of the application.
+   * @param {boolean} [options.javascriptEnabled]
+   *   Tell whether JS is enabled. If not, we will prefer plain HTML version of
+   *   search engines, when available.
    * @returns {Promise<RefinedSearchConfig>}
    *   An object which contains the refined configuration with a filtered list
    *   of search engines, and the identifiers for the application default engines.
@@ -213,6 +216,7 @@ export class SearchEngineSelector {
     experiment,
     appName = Services.appinfo.name ?? "",
     version = Services.appinfo.version ?? "",
+    javascriptEnabled = true,
   }) {
     if (!this.#configuration) {
       await this.getEngineConfiguration();
@@ -238,6 +242,17 @@ export class SearchEngineSelector {
     refinedSearchConfig.engines = refinedSearchConfig.engines.filter(
       e => !e.optional
     );
+
+    if (!javascriptEnabled) {
+      refinedSearchConfig.engines = refinedSearchConfig.engines.map(e => {
+        if (e.identifier === "ddg") {
+          e.urls.search.base = "https://html.duckduckgo.com/html";
+        } else if (e.identifier === "ddg-onion") {
+          e.urls.search.base += "html";
+        }
+        return e;
+      });
+    }
 
     if (
       !refinedSearchConfig.appDefaultEngineId ||

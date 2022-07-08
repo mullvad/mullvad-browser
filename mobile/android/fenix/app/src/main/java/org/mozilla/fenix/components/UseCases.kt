@@ -48,6 +48,10 @@ import org.mozilla.fenix.perf.lazyMonitored
 import org.mozilla.fenix.settings.downloads.DownloadLocationManager
 import org.mozilla.fenix.wallpapers.WallpapersUseCases
 
+// Tor imports
+import org.mozilla.fenix.ext.components
+import org.mozilla.fenix.tor.TorSecurityLevel
+
 /**
  * Component group for all use cases. Use cases are provided by feature
  * modules and can be triggered by UI interactions.
@@ -94,6 +98,7 @@ class UseCases(
             store.value,
             tabsUseCases,
             sessionUseCases,
+            context.components.settings.torSecurityLevel != TorSecurityLevel.safest.level,
         )
     }
 
@@ -178,6 +183,7 @@ class UseCases(
             searchUseCases = searchUseCases,
             homepageTitle = context.getString(R.string.tab_tray_homepage_tab),
             profiler = engine.value.profiler,
+            jsEnabled = context.components.settings.torSecurityLevel != TorSecurityLevel.safest.level,
         )
     }
 
