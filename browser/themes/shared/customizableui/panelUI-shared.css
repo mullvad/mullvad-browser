@@ -1268,6 +1268,16 @@ panelview .toolbarbutton-1 {
   border-image: var(--panel-separator-zap-gradient, none) 1;
 }
 
+/* TODO: Check if we can/should merge with the above rule */
+#securityLevel-panel toolbarseparator {
+  appearance: none;
+  min-height: 0;
+  border-top: 1px solid var(--panel-separator-color);
+  border-bottom: none;
+  margin: var(--panel-separator-margin);
+  padding: 0;
+}
+
 .PanelUI-remotetabs-clientcontainer > toolbarbutton[itemtype="tab"],
 #PanelUI-historyItems > toolbarbutton {
   list-style-image: url("chrome://global/skin/icons/defaultFavicon.svg");
