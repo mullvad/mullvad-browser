@@ -249,5 +249,6 @@
   "SelectableProfileService",
   "ActionsProviderContextualSearch",
   "ToolbarDropHandler",
-  "ProfilesDatastoreService"
+  "ProfilesDatastoreService",
+  "SecurityLevelButton"
 ]

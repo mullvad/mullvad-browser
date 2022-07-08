@@ -136,6 +136,7 @@ EXTRA_JS_MODULES += [
     "PopupBlockerObserver.sys.mjs",
     "ProcessHangMonitor.sys.mjs",
     "Sanitizer.sys.mjs",
+    "SecurityLevelRestartNotification.sys.mjs",
     "SelectionChangedMenulist.sys.mjs",
     "SharingUtils.sys.mjs",
     "SiteDataManager.sys.mjs",
