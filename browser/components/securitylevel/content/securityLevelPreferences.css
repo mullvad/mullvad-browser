@@ -1,0 +1,51 @@
+label.securityLevel-customWarning {
+  border-radius: 4px;
+  background-color: var(--yellow-50);
+  color: black;
+  font-size: 1em;
+  height: 1.6em;
+  padding: 0.4em 0.5em;
+}
+
+radiogroup#securityLevel-radiogroup description {
+  color: var(--in-content-page-color)!important;
+}
+
+radiogroup#securityLevel-radiogroup radio {
+  font-weight: bold;
+}
+
+radiogroup#securityLevel-radiogroup > vbox {
+  border: 1px solid var(--in-content-box-border-color);
+  border-radius: 4px;
+  margin: 3px 0;
+  padding: 9px;
+}
+
+radiogroup#securityLevel-radiogroup[value=standard] > vbox#securityLevel-vbox-standard,
+radiogroup#securityLevel-radiogroup[value=safer] > vbox#securityLevel-vbox-safer,
+radiogroup#securityLevel-radiogroup[value=safest] > vbox#securityLevel-vbox-safest {
+  --section-highlight-background-color: color-mix(in srgb, var(--in-content-accent-color) 20%, transparent);
+  background-color: var(--section-highlight-background-color);
+  border: 1px solid var(--in-content-accent-color);
+
+}
+
+vbox.securityLevel-descriptionList {
+  display: none;
+}
+
+radiogroup#securityLevel-radiogroup[value=safer] vbox#securityLevel-vbox-safer vbox.securityLevel-descriptionList,
+radiogroup#securityLevel-radiogroup[value=safest] vbox#securityLevel-vbox-safest vbox.securityLevel-descriptionList {
+  display: inherit;
+}
+
+vbox.securityLevel-descriptionList description {
+  display: list-item;
+}
+
+vbox#securityLevel-vbox-standard,
+vbox#securityLevel-vbox-safer,
+vbox#securityLevel-vbox-safest {
+  margin-top: 0.4em;
+}
