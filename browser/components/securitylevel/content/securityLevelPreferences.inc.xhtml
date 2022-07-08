@@ -1,0 +1,125 @@
+<groupbox id="securityLevel-groupbox"
+          data-category="panePrivacy"
+          data-subcategory="securitylevel"
+          hidden="true">
+  <label>
+    <html:h2 data-l10n-id="security-level-preferences-heading"></html:h2>
+  </label>
+  <vbox flex="1">
+    <description flex="1">
+      <html:span
+        id="securityLevel-overview"
+        class="tail-with-learn-more"
+        data-l10n-id="security-level-preferences-overview"
+      ></html:span>
+      <html:a
+        is="moz-support-link"
+        tor-manual-page="security-settings"
+        data-l10n-id="security-level-preferences-learn-more-link"
+      ></html:a>
+    </description>
+    <hbox
+      id="securityLevel-customNotification"
+      class="info-box-container"
+      flex="1"
+    >
+      <hbox class="info-icon-container">
+        <image class="info-icon securityLevel-custom-warning-icon"/>
+      </hbox>
+      <vbox flex="1">
+        <label
+          id="securityLevel-customHeading"
+          data-l10n-id="security-level-preferences-custom-heading"
+        />
+        <description
+          id="securityLevel-customDescription"
+          data-l10n-id="security-level-summary-custom"
+          flex="1"
+        />
+      </vbox>
+      <hbox align="center">
+        <button
+          id="securityLevel-restoreDefaults"
+          data-l10n-id="security-level-restore-defaults-button"
+        />
+      </hbox>
+    </hbox>
+    <radiogroup id="securityLevel-radiogroup">
+      <vbox class="securityLevel-radio-option">
+        <radio
+          value="standard"
+          data-l10n-id="security-level-preferences-level-standard"
+          aria-describedby="securityLevelSummary-standard"
+        />
+        <vbox id="securityLevelSummary-standard">
+          <description
+            class="summary indent"
+            flex="1"
+            data-l10n-id="security-level-summary-standard"
+          />
+        </vbox>
+      </vbox>
+      <vbox class="securityLevel-radio-option">
+        <!-- NOTE: We point the accessible description to the wrapping vbox
+          - rather than its first description element. This means that when the
+          - securityLevel-descriptionList is shown or hidden, its text content
+          - is included or excluded from the accessible description,
+          - respectively. -->
+        <radio
+          value="safer"
+          data-l10n-id="security-level-preferences-level-safer"
+          aria-describedby="securityLevelSummary-safer"
+        />
+        <vbox id="securityLevelSummary-safer">
+          <description
+            class="summary indent"
+            flex="1"
+            data-l10n-id="security-level-summary-safer"
+          />
+          <vbox class="securityLevel-descriptionList indent">
+            <description
+              class="indent"
+              data-l10n-id="security-level-preferences-bullet-https-only-javascript"
+            />
+            <description
+              class="indent"
+              data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols"
+            />
+            <description
+              class="indent"
+              data-l10n-id="security-level-preferences-bullet-limit-media"
+            />
+          </vbox>
+        </vbox>
+      </vbox>
+      <vbox class="securityLevel-radio-option">
+        <radio
+          value="safest"
+          data-l10n-id="security-level-preferences-level-safest"
+          aria-describedby="securityLevelSummary-safest"
+        />
+        <vbox id="securityLevelSummary-safest">
+          <description
+            class="summary indent"
+            flex="1"
+            data-l10n-id="security-level-summary-safest"
+          />
+          <vbox class="securityLevel-descriptionList indent">
+            <description
+              class="indent"
+              data-l10n-id="security-level-preferences-bullet-disabled-javascript"
+            />
+            <description
+              class="indent"
+              data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols-and-images"
+            />
+            <description
+              class="indent"
+              data-l10n-id="security-level-preferences-bullet-limit-media"
+            />
+          </vbox>
+        </vbox>
+      </vbox>
+    </radiogroup>
+  </vbox>
+</groupbox>
