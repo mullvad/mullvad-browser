@@ -28,6 +28,10 @@
                 <menuitem id="menu_newPrivateWindow"
                           command="Tools:PrivateBrowsing"
                           key="key_privatebrowsing" data-l10n-id="menu-file-new-private-window"/>
+                <menuseparator/>
+                <menuitem id="menu_newIdentity"
+                          key="new-identity-key"/>
+                <menuseparator/>
                 <menuitem id="menu_openLocation"
                           hidden="true"
                           command="Browser:OpenLocation"
