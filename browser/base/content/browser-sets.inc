@@ -388,4 +388,5 @@
          modifiers="accel,alt"
          internal="true"/>
 #endif
+    <key id="new-identity-key" modifiers="accel shift" key="U" oncommand="NewIdentityButton.onCommand(event)"/>
   </keyset>
