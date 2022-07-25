@@ -1,0 +1,13 @@
+browser.jar:
+    content/browser/newidentity.js       (content/newidentity.js)
+
+newidentity.jar:
+# We need to list at least one locale here, to make Firefox load the localized
+# copy of properties at chrome://newidentity/locale/newIdentity.properties.
+# Ideally, we should use @AB_CD@.jar to automatically copy all the locales
+# Firefox is built with. But we only provide English here, and injecting the
+# translated files directly to the omni.ja works better for us, for the time
+# being. In addition to inject the properties files, we also add the
+# corresponding locale line to chrome/chrome.manifest.
+% locale newidentity en-US %locale/en-US/
+    locale/en-US/newIdentity.properties  (locale/en-US/newIdentity.properties)
