@@ -39,6 +39,7 @@ DIRS += [
     "firefoxview",
     "messagepreview",
     "migration",
+    "newidentity",
     "newtab",
     "originattributes",
     "pagedata",
