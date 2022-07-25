@@ -38,6 +38,7 @@ DIRS += [
     "extensions",
     "pagedata",
     "migration",
+    "newidentity",
     "newtab",
     "originattributes",
     "places",
