@@ -250,5 +250,6 @@
   "ActionsProviderContextualSearch",
   "ToolbarDropHandler",
   "ProfilesDatastoreService",
-  "SecurityLevelButton"
+  "SecurityLevelButton",
+  "NewIdentityButton"
 ]

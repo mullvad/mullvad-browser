@@ -112,6 +112,8 @@
 #ifdef XP_MACOSX
     <command id="zoomWindow" data-l10n-id="window-zoom-command" />
 #endif
+
+    <command id="cmd_newIdentity" />
   </commandset>
 #include ../../components/places/content/placesCommands.inc.xhtml
 
@@ -404,4 +406,5 @@
          modifiers="accel,alt"
          internal="true"/>
 #endif
+    <key id="new-identity-key" modifiers="accel shift" key="U" command="cmd_newIdentity"/>
   </keyset>
