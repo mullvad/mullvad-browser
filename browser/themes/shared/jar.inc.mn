@@ -285,3 +285,5 @@
   skin/classic/browser/weather/night-partly-cloudy-with-showers.svg (../shared/weather/night-partly-cloudy-with-showers.svg)
   skin/classic/browser/weather/night-partly-cloudy-with-thunderstorms.svg (../shared/weather/night-partly-cloudy-with-thunderstorms.svg)
   skin/classic/browser/weather/night-mostly-cloudy-with-flurries.svg (../shared/weather/night-mostly-cloudy-with-flurries.svg)
+
+  skin/classic/browser/new_identity.svg                        (../shared/icons/new_identity.svg)
