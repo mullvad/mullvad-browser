@@ -133,6 +133,7 @@ export default [
       "testing/mochitest/browser-test.js",
       "toolkit/components/printing/content/printPreviewPagination.js",
       "toolkit/components/printing/content/printUtils.js",
+      "browser/components/newidentity/content/newidentity.js",
     ],
     languageOptions: {
       globals: mozilla.environments["browser-window"].globals,
