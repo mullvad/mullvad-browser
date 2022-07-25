@@ -404,4 +404,5 @@
          modifiers="accel,alt"
          internal="true"/>
 #endif
+    <key id="new-identity-key" modifiers="accel shift" key="U" command="cmd_newIdentity"/>
   </keyset>
