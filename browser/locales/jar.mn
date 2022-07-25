@@ -40,6 +40,7 @@
     locale/browser/feeds/subscribe.properties       (%chrome/browser/feeds/subscribe.properties)
     locale/browser/syncSetup.properties         (%chrome/browser/syncSetup.properties)
     locale/browser/securityLevel.properties        (%chrome/browser/securityLevel.properties)
+    locale/browser/newIdentity.properties          (%chrome/browser/newIdentity.properties)
 % locale browser-region @AB_CD@ %locale/browser-region/
 # the following files are browser-specific overrides
     locale/browser/netError.dtd                (%chrome/overrides/netError.dtd)
