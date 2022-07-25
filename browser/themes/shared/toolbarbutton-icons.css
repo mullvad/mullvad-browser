@@ -246,6 +246,10 @@ toolbar[brighttext]:-moz-lwtheme {
   list-style-image: url("chrome://browser/skin/new-tab.svg");
 }
 
+#new-identity-button {
+  list-style-image: url("chrome://browser/skin/new_identity.svg");
+}
+
 #privatebrowsing-button {
   list-style-image: url("chrome://browser/skin/privateBrowsing.svg");
 }
