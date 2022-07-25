@@ -1,0 +1,5 @@
+browser.jar:
+    content/browser/newidentity.js             (content/newidentity.js)
+    content/browser/newIdentityDialog.xhtml    (content/newIdentityDialog.xhtml)
+    content/browser/newIdentityDialog.css      (content/newIdentityDialog.css)
+    content/browser/newIdentityDialog.js       (content/newIdentityDialog.js)
