@@ -243,6 +243,11 @@ XPCOMUtils.defineLazyScriptGetter(
 );
 XPCOMUtils.defineLazyScriptGetter(
   this,
+  ["NewIdentityButton"],
+  "chrome://browser/content/newidentity.js"
+);
+XPCOMUtils.defineLazyScriptGetter(
+  this,
   "gEditItemOverlay",
   "chrome://browser/content/places/editBookmark.js"
 );
@@ -1713,6 +1718,9 @@ var gBrowserInit = {
     // Init the SecuritySettingsButton
     SecurityLevelButton.init();
 
+    // Init the NewIdentityButton
+    NewIdentityButton.init();
+
     // Certain kinds of automigration rely on this notification to complete
     // their tasks BEFORE the browser window is shown. SessionStore uses it to
     // restore tabs into windows AFTER important parts like gMultiProcessBrowser
@@ -2483,6 +2491,8 @@ var gBrowserInit = {
     DownloadsButton.uninit();
 
     SecurityLevelButton.uninit();
+
+    NewIdentityButton.uninit();
 
     if (gToolbarKeyNavEnabled) {
       ToolbarKeyboardNavigator.uninit();
@@ -4536,7 +4546,7 @@ function OpenBrowserWindow(options) {
   var extraFeatures = "";
   if (options && options.private && PrivateBrowsingUtils.enabled) {
     extraFeatures = ",private";
-    if (!PrivateBrowsingUtils.permanentPrivateBrowsing) {
+    if (!PrivateBrowsingUtils.permanentPrivateBrowsing || options.private === "no-home") {
       // Force the new window to load about:privatebrowsing instead of the default home page
       defaultArgs = "about:privatebrowsing";
     }

@@ -38,6 +38,7 @@ DIRS += [
     "extensions",
     "messagepreview",
     "migration",
+    "newidentity",
     "newtab",
     "originattributes",
     "pagedata",
