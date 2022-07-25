@@ -260,3 +260,5 @@
   skin/classic/browser/privatebrowsing/favicon.svg             (../shared/privatebrowsing/favicon.svg)
 
   skin/classic/browser/syncedtabs/sidebar.css                  (../shared/syncedtabs/sidebar.css)
+
+  skin/classic/browser/new_identity.svg                        (../shared/icons/new_identity.svg)
