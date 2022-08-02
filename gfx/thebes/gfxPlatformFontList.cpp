@@ -279,6 +279,7 @@ gfxPlatformFontList::gfxPlatformFontList(bool aNeedFullnamePostscriptNames)
   mFontPrefs = MakeUnique<FontPrefs>();
 
   gfxFontUtils::GetPrefsFontList(kFontSystemWhitelistPref, mEnabledFontsList);
+  mFontFamilyWhitelistActive = !mEnabledFontsList.IsEmpty();
 
   // pref changes notification setup
   NS_ASSERTION(!gFontListPrefObserver,
@@ -340,7 +341,6 @@ void gfxPlatformFontList::FontWhitelistPrefChanged(const char* aPref,
 
 void gfxPlatformFontList::ApplyWhitelist() {
   uint32_t numFonts = mEnabledFontsList.Length();
-  mFontFamilyWhitelistActive = (numFonts > 0);
   if (!mFontFamilyWhitelistActive) {
     return;
   }
@@ -382,7 +382,6 @@ void gfxPlatformFontList::ApplyWhitelist() {
 void gfxPlatformFontList::ApplyWhitelist(
     nsTArray<fontlist::Family::InitData>& aFamilies) {
   mLock.AssertCurrentThreadIn();
-  mFontFamilyWhitelistActive = !mEnabledFontsList.IsEmpty();
   if (!mFontFamilyWhitelistActive) {
     return;
   }
@@ -534,6 +533,7 @@ bool gfxPlatformFontList::InitFontList() {
     }
 
     gfxFontUtils::GetPrefsFontList(kFontSystemWhitelistPref, mEnabledFontsList);
+    mFontFamilyWhitelistActive = !mEnabledFontsList.IsEmpty();
   }
 
   // From here, gfxPlatformFontList::IsInitialized will return true,
