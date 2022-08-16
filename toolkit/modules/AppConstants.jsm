@@ -453,6 +453,13 @@ this.AppConstants = Object.freeze({
     false,
 #endif
 
+  MOZ_SYSTEM_POLICIES:
+#ifdef MOZ_SYSTEM_POLICIES
+    true,
+#else
+    false,
+#endif
+
   // Returns true for CN region build when distibution id set as 'MozillaOnline'
   isChinaRepack() {
     return (
