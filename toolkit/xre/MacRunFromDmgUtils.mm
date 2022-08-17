@@ -279,6 +279,7 @@ static void ShowInstallFailedDialog() {
   NS_OBJC_END_TRY_IGNORE_BLOCK;
 }
 
+#ifndef BASE_BROWSER_VERSION
 // Install the DMGInstallHelper as an elevated helper and use it to install
 bool LaunchElevatedDmgInstall(NSString* aBundlePath, NSString* aDestPath) {
   NS_OBJC_BEGIN_TRY_BLOCK_RETURN;
@@ -355,6 +356,7 @@ bool LaunchElevatedDmgInstall(NSString* aBundlePath, NSString* aDestPath) {
 
   NS_OBJC_END_TRY_BLOCK_RETURN(false);
 }
+#endif
 
 // Note: both arguments are expected to contain the app name (to end with
 // '.app').
@@ -381,6 +383,7 @@ static bool InstallFromPath(NSString* aBundlePath, NSString* aDestPath) {
   os_log_info(runFromDMGLogger, "Unelevated installation: %s",
               installSuccessful ? "success" : "failed");
 
+#ifndef BASE_BROWSER_VERSION
   // The installation may have been unsuccessful if the user did not have the
   // rights to write to the Applications directory. Check for this situation and
   // launch an elevated helper application.
@@ -396,6 +399,7 @@ static bool InstallFromPath(NSString* aBundlePath, NSString* aDestPath) {
       return false;
     }
   }
+#endif
 
   if (!installSuccessful) {
     os_log_error(runFromDMGLogger, "Unknown install failure.");
