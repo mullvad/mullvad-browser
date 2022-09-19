@@ -1901,7 +1901,8 @@ static void GetSystemUIFontFamilies([[maybe_unused]] nsAtom* aLangGroup,
   nsFont systemFont;
   gfxFontStyle fontStyle;
   nsAutoString systemFontName;
-  if (!LookAndFeel::GetFont(StyleSystemFont::Menu, systemFontName, fontStyle)) {
+  if (!LookAndFeel::GetFont(StyleSystemFont::Menu, systemFontName, fontStyle,
+                            nsContentUtils::ShouldResistFingerprinting())) {
     return;
   }
   systemFontName.Trim("\"'");

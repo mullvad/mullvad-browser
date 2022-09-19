@@ -40,7 +40,8 @@ class nsXPLookAndFeel : public mozilla::LookAndFeel {
   nsresult GetFloatValue(FloatID aID, float& aResult);
   // Same, but returns false if there is no platform-specific value.
   // (There are no override prefs for font values.)
-  bool GetFontValue(FontID aID, nsString& aName, gfxFontStyle& aStyle);
+  bool GetFontValue(FontID aID, nsString& aName, gfxFontStyle& aStyle,
+                    bool aRFP);
 
   virtual nsresult NativeGetInt(IntID aID, int32_t& aResult) = 0;
   virtual nsresult NativeGetFloat(FloatID aID, float& aResult) = 0;
