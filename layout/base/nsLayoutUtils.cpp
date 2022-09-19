@@ -9564,7 +9564,47 @@ void nsLayoutUtils::ComputeSystemFont(nsFont* aSystemFont,
                                       const Document* aDocument) {
   gfxFontStyle fontStyle;
   nsAutoString systemFontName;
-  if (!LookAndFeel::GetFont(aFontID, systemFontName, fontStyle)) {
+  if (aDocument->ShouldResistFingerprinting()) {
+#if defined(XP_MACOSX)
+    systemFontName = u"-apple-system"_ns;
+    // Values taken from a macOS 10.15 system.
+    switch (aFontID) {
+      case LookAndFeel::FontID::Caption:
+      case LookAndFeel::FontID::Menu:
+        fontStyle.size = 13;
+        break;
+      case LookAndFeel::FontID::SmallCaption:
+        fontStyle.weight = gfxFontStyle::FontWeight(700);
+        // fall-through
+      case LookAndFeel::FontID::MessageBox:
+      case LookAndFeel::FontID::StatusBar:
+        fontStyle.size = 11;
+        break;
+      default:
+        fontStyle.size = 12;
+        break;
+    }
+#elif defined(XP_WIN) || defined(MOZ_WIDGET_ANDROID)
+    // Windows uses Segoe UI for Latin alphabets, but other fonts for some RTL
+    // languages, so we fallback to sans-serif to fall back to the user's
+    // default sans-serif. Size is 12px for all system fonts (tried in an en-US
+    // system).
+    // Several Android systems reported Roboto 12px, so similar to what Windows
+    // does.
+    systemFontName = u"sans-serif"_ns;
+    fontStyle.size = 12;
+#else
+    // On Linux, there is not a default. For example, GNOME on Debian uses
+    // Cantarell, 14.667px. Ubuntu Mate uses the Ubuntu font, but also 14.667px.
+    // Fedora with KDE uses Noto Sans, 13.3333px, but it uses Noto Sans on
+    // GNOME, too.
+    // In general, Linux uses some sans-serif, but its size can vary between
+    // 12px and 16px. We chose 15px because it is what Firefox is doing for the
+    // UI font-size.
+    systemFontName = u"sans-serif"_ns;
+    fontStyle.size = 15;
+#endif
+  } else if (!LookAndFeel::GetFont(aFontID, systemFontName, fontStyle)) {
     return;
   }
   systemFontName.Trim("\"'");
