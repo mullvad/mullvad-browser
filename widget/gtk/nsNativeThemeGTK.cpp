@@ -1369,11 +1369,14 @@ nsNativeThemeGTK::GetMinimumWidgetSize(nsPresContext* aPresContext,
       // smaller than the default one. This prevents <input type=text
       // style="font-size: .5em"> from keeping a ridiculously large size, for
       // example.
-      const gfxFloat fieldFontSizeInCSSPixels = [] {
+      const gfxFloat fieldFontSizeInCSSPixels = [aPresContext] {
+        const bool rfp = (aPresContext && aPresContext->Document())
+                             ? aPresContext->Document()->ShouldResistFingerprinting()
+                             : nsContentUtils::ShouldResistFingerprinting();
         gfxFontStyle fieldFontStyle;
         nsAutoString unusedFontName;
         DebugOnly<bool> result = LookAndFeel::GetFont(
-            LookAndFeel::FontID::MozField, unusedFontName, fieldFontStyle);
+            LookAndFeel::FontID::MozField, unusedFontName, fieldFontStyle, rfp);
         MOZ_ASSERT(result, "GTK look and feel supports the field font");
         // NOTE: GetFont returns font sizes in CSS pixels, and we want just
         // that.

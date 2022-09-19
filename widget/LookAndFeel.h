@@ -486,8 +486,10 @@ class LookAndFeel {
    * @param aID    Which system-theme font is wanted.
    * @param aName  The name of the font to use.
    * @param aStyle Styling to apply to the font.
+   * @param aRFP   Whether RFP is enabled in the caller's context
    */
-  static bool GetFont(FontID aID, nsString& aName, gfxFontStyle& aStyle);
+  static bool GetFont(FontID aID, nsString& aName, gfxFontStyle& aStyle,
+                      bool aRFP);
 
   /**
    * GetPasswordCharacter() returns a unicode character which should be used

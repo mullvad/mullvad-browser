@@ -999,7 +999,18 @@ widget::LookAndFeelFont nsXPLookAndFeel::StyleToLookAndFeelFont(
 }
 
 bool nsXPLookAndFeel::GetFontValue(FontID aID, nsString& aName,
-                                   gfxFontStyle& aStyle) {
+                                   gfxFontStyle& aStyle, bool aRFP) {
+  if (aRFP) {
+#ifdef XP_MACOSX
+    aName = u"-apple-system"_ns;
+#else
+    aName = u"sans-serif"_ns;
+#endif
+    aStyle = gfxFontStyle();
+    aStyle.size = 12;
+    return true;
+  }
+
   if (const LookAndFeelFont* cached = sFontCache.Get(aID)) {
     return LookAndFeelFontToStyle(*cached, aName, aStyle);
   }
@@ -1350,8 +1361,9 @@ nsresult LookAndFeel::GetFloat(FloatID aID, float* aResult) {
 }
 
 // static
-bool LookAndFeel::GetFont(FontID aID, nsString& aName, gfxFontStyle& aStyle) {
-  return nsLookAndFeel::GetInstance()->GetFontValue(aID, aName, aStyle);
+bool LookAndFeel::GetFont(FontID aID, nsString& aName, gfxFontStyle& aStyle,
+                          bool aRFP) {
+  return nsLookAndFeel::GetInstance()->GetFontValue(aID, aName, aStyle, aRFP);
 }
 
 // static
