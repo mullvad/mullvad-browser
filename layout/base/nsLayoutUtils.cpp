@@ -9564,7 +9564,10 @@ void nsLayoutUtils::ComputeSystemFont(nsFont* aSystemFont,
                                       const Document* aDocument) {
   gfxFontStyle fontStyle;
   nsAutoString systemFontName;
-  if (!LookAndFeel::GetFont(aFontID, systemFontName, fontStyle)) {
+  const bool rfp = aDocument
+                       ? aDocument->ShouldResistFingerprinting()
+                       : nsContentUtils::ShouldResistFingerprinting();
+  if (!LookAndFeel::GetFont(aFontID, systemFontName, fontStyle, rfp)) {
     return;
   }
   systemFontName.Trim("\"'");
