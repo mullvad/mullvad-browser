@@ -1901,6 +1901,14 @@ static void GetSystemUIFontFamilies([[maybe_unused]] nsAtom* aLangGroup,
   nsFont systemFont;
   gfxFontStyle fontStyle;
   nsAutoString systemFontName;
+  if (nsContentUtils::ShouldResistFingerprinting()) {
+#ifdef XP_MACOSX
+    *aFamilies.AppendElement() = "-apple-system"_ns;
+#else
+    *aFamilies.AppendElement() = "sans-serif"_ns;
+#endif
+    return;
+  }
   if (!LookAndFeel::GetFont(StyleSystemFont::Menu, systemFontName, fontStyle)) {
     return;
   }
