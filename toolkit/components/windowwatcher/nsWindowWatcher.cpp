@@ -63,6 +63,7 @@
 #include "mozilla/NullPrincipal.h"
 #include "mozilla/Preferences.h"
 #include "mozilla/ResultExtensions.h"
+#include "mozilla/StaticPrefs_browser.h"
 #include "mozilla/StaticPrefs_full_screen_api.h"
 #include "mozilla/dom/Element.h"
 #include "mozilla/dom/Storage.h"
@@ -495,7 +496,7 @@ nsWindowWatcher::OpenWindowWithRemoteTab(nsIRemoteTab* aRemoteTab,
 
   bool isFissionWindow = FissionAutostart();
   bool isPrivateBrowsingWindow =
-      Preferences::GetBool("browser.privatebrowsing.autostart");
+      StaticPrefs::browser_privatebrowsing_autostart();
 
   nsCOMPtr<nsPIDOMWindowOuter> parentWindowOuter;
   RefPtr<BrowsingContext> parentBC = aOpenWindowInfo->GetParent();
@@ -1128,7 +1129,7 @@ nsresult nsWindowWatcher::OpenWindowInternal(
     }
 
     bool autoPrivateBrowsing =
-        Preferences::GetBool("browser.privatebrowsing.autostart");
+        StaticPrefs::browser_privatebrowsing_autostart();
 
     if (!autoPrivateBrowsing &&
         (chromeFlags & nsIWebBrowserChrome::CHROME_NON_PRIVATE_WINDOW)) {
