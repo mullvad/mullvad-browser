@@ -67,6 +67,7 @@
 #include "mozilla/MouseEvents.h"
 #include "mozilla/PresShell.h"
 #include "mozilla/ScopeExit.h"
+#include "mozilla/StaticPrefs_browser.h"
 #include "mozilla/SwipeTracker.h"
 #include "mozilla/TouchEvents.h"
 #include "mozilla/TimeStamp.h"
@@ -1050,7 +1051,7 @@ nsresult nsWindow::Create(nsIWidget* aParent, nsNativeWidget aNativeParent,
   }
 
   if (aInitData->mIsPrivate) {
-    if (Preferences::GetBool("browser.privacySegmentation.enabled", false)) {
+    if (!StaticPrefs::browser_privatebrowsing_autostart()) {
       RefPtr<IPropertyStore> pPropStore;
       if (!FAILED(SHGetPropertyStoreForWindow(mWnd, IID_IPropertyStore,
                                               getter_AddRefs(pPropStore)))) {
