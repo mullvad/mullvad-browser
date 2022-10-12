@@ -48,7 +48,8 @@
                 <menuitem id="menu_savePage"
                           key="key_savePage"
                           command="Browser:SavePage" data-l10n-id="menu-file-save-page"/>
-#ifndef XP_MACOSX
+# bug 41117 - don't allow sharing as there is a proxy bypass theoretical risk, so restore send link in that case
+#if !defined(XP_MACOSX) || defined(MOZ_PROXY_BYPASS_PROTECTION)
                 <menuitem id="menu_sendLink"
                           command="Browser:SendLink" data-l10n-id="menu-file-email-link"/>
 #endif

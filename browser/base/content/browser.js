@@ -4807,6 +4807,10 @@ let gShareUtils = {
    * Updates a sharing item in a given menu, creating it if necessary.
    */
   updateShareURLMenuItem(browser, insertAfterEl) {
+    if (!Services.prefs.getBoolPref("browser.share_menu.allow", false)) {
+      return false;
+    }
+
     // We only support "share URL" on macOS and on Windows 10:
     if (
       AppConstants.platform != "macosx" &&
