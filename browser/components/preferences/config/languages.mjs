@@ -56,7 +56,7 @@ export const Multilingual = {
       /** @type {LocaleCode[]} */ (await LangPackMatcher.getAvailableLocales()),
       code => code,
       (code, label) => ({ code, label })
-    );
+    ).sort((a, b) => (a.code > b.code ? 1 : -1));
   },
 
   /**
@@ -209,6 +209,20 @@ Preferences.addSetting({
  * @returns {SettingOptionConfig}
  */
 function makeBrowserLanguageOption({ code, label }) {
+  if (code === "ja-JP-macos") {
+    // Mozilla codebases handle Japanese in macOS in different ways, sometimes
+    // they call it ja-JP-mac and sometimes they call it ja-JP-macos.
+    // The former is translated to Japanese when specifying preferNative to
+    // true, the latter is not. Since seeing ja-JP-macos would be confusing
+    // anyway, we treat it as a special case.
+    // See tor-browser#41372 and Bug 1726586.
+    label =
+      Services.intl.getLocaleDisplayNames(undefined, ["ja"], {
+        preferNative: true,
+      })[0] + " (ja)";
+  } else {
+    label += ` (${code})`;
+  }
   return {
     value: code,
     controlAttrs: {
@@ -849,6 +863,7 @@ SettingGroupManager.registerGroups({
     inProgress: true,
     l10nId: "browser-language-heading",
     headingLevel: 2,
+    subcategory: "browser-languages",
     iconSrc: "chrome://browser/skin/sidebar/firefox.svg",
     items: [
       {
