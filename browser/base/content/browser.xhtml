@@ -125,6 +125,7 @@
   Services.scriptloader.loadSubScript("chrome://browser/content/search/autocomplete-popup.js", this);
   Services.scriptloader.loadSubScript("chrome://browser/content/search/searchbar.js", this);
   // Removed shopping-sidebar.js. tor-browser#42831.
+  Services.scriptloader.loadSubScript("chrome://browser/content/languageNotification.js", this);
 
   window.onload = gBrowserInit.onLoad.bind(gBrowserInit);
   window.onunload = gBrowserInit.onUnload.bind(gBrowserInit);
