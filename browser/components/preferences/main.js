@@ -1448,8 +1448,30 @@ var gMainPane = {
       available,
       { preferNative: true }
     );
-    let locales = available.map((code, i) => ({ code, name: localeNames[i] }));
-    locales.sort((a, b) => a.name > b.name);
+    let locales = available.map((code, i) => {
+      let name = localeNames[i].replace(/\s*\(.+\)$/g, "");
+      if (code === "ja-JP-macos") {
+        // Mozilla codebases handle Japanese in macOS in different ways,
+        // sometimes they call it ja-JP-mac and sometimes they call it
+        // ja-JP-macos. The former is translated to Japanese when specifying
+        // preferNative to true, the latter is not. Since seeing ja-JP-macos
+        // would be confusing anyway, we treat it as a special case.
+        // See tor-browser#41372 and Bug 1726586.
+        name =
+          Services.intl.getLocaleDisplayNames(undefined, ["ja"], {
+            preferNative: true,
+          })[0] + " (ja)";
+      } else {
+        name += ` (${code})`;
+      }
+      return {
+        code,
+        name,
+      };
+    });
+    // tor-browser#42335: Sort language codes independently from the locale,
+    // so do not use localeCompare.
+    locales.sort((a, b) => a.code > b.code);
 
     let fragment = document.createDocumentFragment();
     for (let { code, name } of locales) {
