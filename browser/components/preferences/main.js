@@ -1010,6 +1010,23 @@ var gMainPane = {
       gMainPane.onPrimaryBrowserLanguageMenuChange(event);
     });
 
+    // Temporary hack to cause the menu popup to resize itself just after being
+    // shown. See tor-browser#41371
+    // We get ~one frame of a potentially badly sized popup, and then the popup
+    // should re-adjust to the new size.
+    // TODO: Remove with firefox 115 since this is fixed properly in
+    // mozilla-central 107.
+    menulist.addEventListener("popupshown", () => {
+      const popupBox = menulist.menupopup;
+      // We change a layout parameter and then force a relayout. We choose
+      // "min-height: 0" since we expect this won't change the displayed result
+      // but is enough to force the relayout.
+      const minHeight = popupBox.style.minHeight;
+      popupBox.style.minHeight = 0;
+      popupBox.getBoundingClientRect();
+      popupBox.style.minHeight = minHeight;
+    });
+
     gMainPane.updatePrimaryBrowserLanguageUI(Services.locale.appLocaleAsBCP47);
   },
 
