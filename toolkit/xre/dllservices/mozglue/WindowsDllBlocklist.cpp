@@ -531,7 +531,7 @@ continue_loading:
   return ret;
 }
 
-#if defined(NIGHTLY_BUILD)
+#if defined(NIGHTLY_BUILD) || defined(BASE_BROWSER)
 // Map of specific thread proc addresses we should block. In particular,
 // LoadLibrary* APIs which indicate DLL injection
 static void* gStartAddressesToBlock[4];
@@ -544,7 +544,7 @@ static bool ShouldBlockThread(void* aStartAddress) {
     return false;
   }
 
-#if defined(NIGHTLY_BUILD)
+#if defined(NIGHTLY_BUILD) || defined(BASE_BROWSER)
   for (auto p : gStartAddressesToBlock) {
     if (p == aStartAddress) {
       return true;
@@ -618,7 +618,7 @@ MFBT_API void DllBlocklist_Initialize(uint32_t aInitFlags) {
     }
   }
 
-#if defined(NIGHTLY_BUILD)
+#if defined(NIGHTLY_BUILD) || defined(BASE_BROWSER)
   // Populate a list of thread start addresses to block.
   HMODULE hKernel = GetModuleHandleW(L"kernel32.dll");
   if (hKernel) {
