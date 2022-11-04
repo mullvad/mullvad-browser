@@ -1216,17 +1216,16 @@ var gMainPane = {
     gMainPane.recordBrowserLanguagesTelemetry("reorder");
 
     switch (gMainPane.getLanguageSwitchTransitionType(newLocales)) {
+      // tor-browser#41417: Always prompt for the restart, until we switch to
+      // Fluent, since the current way we use to update languages does not allow
+      // live-reload. We could also call showConfirmLanguageChangeMessageBar in
+      // the official live-reload case, but the result is inconsistent and makes
+      // handling the locales-match case harder.
       case "requires-restart":
+      case "live-reload":
         // Prepare to change the locales, as they were different.
         gMainPane.showConfirmLanguageChangeMessageBar(newLocales);
         gMainPane.updatePrimaryBrowserLanguageUI(newLocales[0]);
-        break;
-      case "live-reload":
-        Services.locale.requestedLocales = newLocales;
-        gMainPane.updatePrimaryBrowserLanguageUI(
-          Services.locale.appLocaleAsBCP47
-        );
-        gMainPane.hideConfirmLanguageChangeMessageBar();
         break;
       case "locales-match":
         // They matched, so we can reset the UI.
@@ -1480,17 +1479,11 @@ var gMainPane = {
     }
 
     switch (gMainPane.getLanguageSwitchTransitionType(selected)) {
+      // tor-browser#41417: see onPrimaryBrowserLanguageMenuChange
       case "requires-restart":
+      case "live-reload":
         gMainPane.showConfirmLanguageChangeMessageBar(selected);
         gMainPane.updatePrimaryBrowserLanguageUI(selected[0]);
-        break;
-      case "live-reload":
-        Services.locale.requestedLocales = selected;
-
-        gMainPane.updatePrimaryBrowserLanguageUI(
-          Services.locale.appLocaleAsBCP47
-        );
-        gMainPane.hideConfirmLanguageChangeMessageBar();
         break;
       case "locales-match":
         // They matched, so we can reset the UI.
