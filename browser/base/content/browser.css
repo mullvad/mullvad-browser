@@ -4,6 +4,19 @@
 
 @namespace html url("http://www.w3.org/1999/xhtml");
 
+/**
+  Never modify the following selector without synchronizing
+  LETTERBOX_CSS_SELECTOR in RFPHelper.sys.mjs!
+  And you will need to update the JS also if you move the rules to another file.
+**/
+.letterboxing .browserStack > browser:not(.exclude-letterboxing) {
+  margin: 0; /* to be dynamically set by RFHelper.sys.mjs */
+}
+
+browser.exclude-letterboxing {
+  margin: 0 !important;
+}
+
 panelmultiview {
   align-items: flex-start;
   min-width: 0;
