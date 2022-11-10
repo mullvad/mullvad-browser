@@ -386,7 +386,9 @@ class _RFPHelper {
       // ... privileged pages
       contentPrincipal.isSystemPrincipal ||
       // ... about: URIs EXCEPT about:blank
-      (currentURI.schemeIs("about") && currentURI.filePath !== "blank")
+      (currentURI.schemeIs("about") && currentURI.filePath !== "blank") ||
+      // ... browser extensions
+      contentPrincipal.addonPolicy
     );
   }
 
