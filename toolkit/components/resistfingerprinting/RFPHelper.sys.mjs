@@ -426,8 +426,8 @@ class _RFPHelper {
    * content viewport.
    */
   async _roundContentView(aBrowser, isNewTab = false) {
-    let logId = Math.random();
-    log("_roundContentView[" + logId + "]");
+    let logPrefix = `_roundContentView[${Math.random()}]`;
+    log(logPrefix);
     aBrowser.classList.remove("exclude-letterboxing");
     let win = aBrowser.ownerGlobal;
     let browserContainer = aBrowser
@@ -446,17 +446,9 @@ class _RFPHelper {
     );
 
     log(
-      "_roundContentView[" +
-        logId +
-        "] contentWidth=" +
-        contentWidth +
-        " contentHeight=" +
-        contentHeight +
-        " containerWidth=" +
-        containerWidth +
-        " containerHeight=" +
-        containerHeight +
-        " "
+      `${logPrefix} contentWidth=${contentWidth} contentHeight=${contentHeight} parentWidth=${parentWidth} parentHeight=${parentHeight} containerWidth=${containerWidth} containerHeight=${containerHeight}${
+        isNewTab ? " (new tab)." : "."
+      }`
     );
 
     if (containerWidth === 0) {
@@ -466,16 +458,7 @@ class _RFPHelper {
 
     const calcMargins = (aWidth, aHeight) => {
       let result;
-      log(
-        "_roundContentView[" +
-          logId +
-          "] calcMargins(" +
-          aWidth +
-          ", " +
-          aHeight +
-          ")"
-      );
-
+      log(`${logPrefix} calcMargins(${aWidth}, ${aHeight})`);
       // If the set is empty, we will round the content with the default
       // stepping size.
       if (!this._letterboxingDimensions.length) {
@@ -484,16 +467,7 @@ class _RFPHelper {
           height: this.steppedRange(aHeight),
         };
         log(
-          "_roundContentView[" +
-            logId +
-            "] calcMargins(" +
-            aWidth +
-            ", " +
-            aHeight +
-            ") = " +
-            result.width +
-            " x " +
-            result.height
+          `${logPrefix}  calcMargins(${aWidth}, ${aHeight}) = ${result.width} x ${result.height}`
         );
         return result;
       }
@@ -534,16 +508,7 @@ class _RFPHelper {
       }
 
       log(
-        "_roundContentView[" +
-          logId +
-          "] calcMargins(" +
-          aWidth +
-          ", " +
-          aHeight +
-          ") = " +
-          result.width +
-          " x " +
-          result.height
+        `${logPrefix} calcMargins(${aWidth}, ${aHeight}) = ${result.width} x ${result.height}`
       );
       return result;
     };
@@ -599,12 +564,10 @@ class _RFPHelper {
 
     // If the size of the content is already quantized, we do nothing.
     if (!marginChanges.length) {
-      log("_roundContentView[" + logId + "] is_rounded == true");
+      log(`${logPrefix} is_rounded == true`);
       if (this._isLetterboxingTesting) {
         log(
-          "_roundContentView[" +
-            logId +
-            "] is_rounded == true test:letterboxing:update-margin-finish"
+          `${logPrefix} is_rounded == true test:letterboxing:update-margin-finish`
         );
         Services.obs.notifyObservers(
           null,
@@ -614,9 +577,7 @@ class _RFPHelper {
       return;
     }
 
-    log(
-      "_roundContentView[" + logId + "] setting margins to " + marginStyleString
-    );
+    log(`${logPrefix} setting margins to ${marginStyleString}`);
     // One cannot (easily) control the color of a margin unfortunately.
     // An initial attempt to use a border instead of a margin resulted
     // in offset event dispatching; so for now we use a colorless margin.
