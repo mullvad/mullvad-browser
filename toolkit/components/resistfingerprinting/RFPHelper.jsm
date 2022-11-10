@@ -107,7 +107,7 @@ class _RFPHelper {
     switch (aMessage.type) {
       case "TabOpen": {
         let tab = aMessage.target;
-        this._addOrClearContentMargin(tab.linkedBrowser);
+        this._addOrClearContentMargin(tab.linkedBrowser, /* isNewTab = */ true);
         break;
       }
       default:
@@ -352,20 +352,49 @@ class _RFPHelper {
     });
   }
 
-  _addOrClearContentMargin(aBrowser) {
-    let tab = aBrowser.getTabBrowser().getTabForBrowser(aBrowser);
+  getLetterboxingDefaultRule(aBrowser) {
+    let document = aBrowser.ownerDocument;
+    return (document._letterboxingMarginsRule ||= (() => {
+      // If not already cached on the document object, traverse the CSSOM and
+      // find the rule applying the default letterboxing styles to browsers
+      // preemptively in order to beat race conditions on tab/window creation
+      const LETTERBOX_CSS_URL = "chrome://browser/content/browser.css";
+      const LETTERBOX_CSS_SELECTOR =
+        ".letterboxing .browserStack > browser:not(.exclude-letterboxing)";
+      for (let ss of document.styleSheets) {
+        if (ss.href !== LETTERBOX_CSS_URL) {
+          continue;
+        }
+        for (let rule of ss.rules) {
+          if (rule.selectorText === LETTERBOX_CSS_SELECTOR) {
+            return rule;
+          }
+        }
+      }
+      return null; // shouldn't happen
+    })());
+  }
 
+  _noLetterBoxingFor({ contentPrincipal, currentURI }) {
+    // we don't want letterboxing on...
+    return (
+      // ... privileged pages
+      contentPrincipal.isSystemPrincipal ||
+      // ... about: URIs EXCEPT about:blank
+      (currentURI.schemeIs("about") && currentURI.filePath !== "blank")
+    );
+  }
+
+  _addOrClearContentMargin(aBrowser, isNewTab = false) {
     // We won't do anything for lazy browsers.
     if (!aBrowser.isConnected) {
       return;
     }
-
-    // We should apply no margin around an empty tab or a tab with system
-    // principal.
-    if (tab.isEmpty || aBrowser.contentPrincipal.isSystemPrincipal) {
+    if (this._noLetterBoxingFor(aBrowser)) {
+      // this tab doesn't need letterboxing
       this._clearContentViewMargin(aBrowser);
     } else {
-      this._roundContentView(aBrowser);
+      this._roundContentView(aBrowser, isNewTab);
     }
   }
 
@@ -391,44 +420,25 @@ class _RFPHelper {
    * The function will round the given browser by adding margins around the
    * content viewport.
    */
-  async _roundContentView(aBrowser) {
+  async _roundContentView(aBrowser, isNewTab = false) {
     let logId = Math.random();
     log("_roundContentView[" + logId + "]");
+    aBrowser.classList.remove("exclude-letterboxing");
     let win = aBrowser.ownerGlobal;
     let browserContainer = aBrowser
       .getTabBrowser()
       .getBrowserContainer(aBrowser);
-
-    let {
-      contentWidth,
-      contentHeight,
-      containerWidth,
-      containerHeight,
-    } = await win.promiseDocumentFlushed(() => {
-      let contentWidth = aBrowser.clientWidth;
-      let contentHeight = aBrowser.clientHeight;
-      let containerWidth = browserContainer.clientWidth;
-      let containerHeight = browserContainer.clientHeight;
-
-      // If the findbar or devtools are out, we need to subtract their height (plus 1
-      // for the separator) from the container height, because we need to adjust our
-      // letterboxing to account for it; however it is not included in that dimension
-      // (but rather is subtracted from the content height.)
-      let findBar = win.gFindBarInitialized ? win.gFindBar : undefined;
-      let findBarOffset =
-        findBar && !findBar.hidden ? findBar.clientHeight + 1 : 0;
-      let devtools = browserContainer.getElementsByClassName(
-        "devtools-toolbox-bottom-iframe"
-      );
-      let devtoolsOffset = devtools.length ? devtools[0].clientHeight : 0;
-
-      return {
-        contentWidth,
-        contentHeight,
-        containerWidth,
-        containerHeight: containerHeight - findBarOffset - devtoolsOffset,
-      };
-    });
+    let browserParent = aBrowser.parentElement;
+    let [
+      [contentWidth, contentHeight],
+      [parentWidth, parentHeight],
+      [containerWidth, containerHeight],
+    ] = await win.promiseDocumentFlushed(() =>
+      // Read layout info only inside this callback and do not write, to avoid additional reflows
+      [aBrowser, browserParent, browserContainer]
+        .map(e => e.getBoundingClientRect())
+        .map(r => [r.width, r.height])
+    );
 
     log(
       "_roundContentView[" +
@@ -444,7 +454,12 @@ class _RFPHelper {
         " "
     );
 
-    let calcMargins = (aWidth, aHeight) => {
+    if (containerWidth === 0) {
+      // race condition: tab already be closed, bail out
+      return;
+    }
+
+    const calcMargins = (aWidth, aHeight) => {
       let result;
       log(
         "_roundContentView[" +
@@ -455,6 +470,7 @@ class _RFPHelper {
           aHeight +
           ")"
       );
+
       // If the set is empty, we will round the content with the default
       // stepping size.
       if (!this._letterboxingDimensions.length) {
@@ -530,10 +546,54 @@ class _RFPHelper {
     // Calculating the margins around the browser element in order to round the
     // content viewport. We will use a 200x100 stepping if the dimension set
     // is not given.
-    let margins = calcMargins(containerWidth, containerHeight);
+
+    const buildMarginStyleString = (aWidth, aHeight) => {
+      const marginDims = calcMargins(aWidth, aHeight);
+
+      // snap browser element to top
+      const top = 0,
+        // and leave 'double' margin at the bottom
+        bottom = 2 * marginDims.height,
+        // identical margins left and right
+        left = marginDims.width,
+        right = marginDims.width;
+
+      return `${top}px ${right}px ${bottom}px ${left}px`;
+    };
+
+    const marginChanges = Object.assign([], {
+      queueIfNeeded({ style }, margin) {
+        if (style.margin !== margin) {
+          this.push(() => {
+            style.margin = margin;
+          });
+        }
+      },
+      perform() {
+        win.requestAnimationFrame(() => {
+          for (let change of this) {
+            change();
+          }
+        });
+      },
+    });
+
+    marginChanges.queueIfNeeded(
+      this.getLetterboxingDefaultRule(aBrowser),
+      buildMarginStyleString(containerWidth, containerHeight)
+    );
+
+    const marginStyleString =
+      !isNewTab && // new tabs cannot have extra UI components
+      (containerHeight > parentHeight || containerWidth > parentWidth)
+        ? // optional UI components such as the notification box, the find bar
+          // or devtools are constraining this browser's size: recompute custom
+          buildMarginStyleString(parentWidth, parentHeight)
+        : ""; // otherwise we can keep the default letterboxing margins
+    marginChanges.queueIfNeeded(aBrowser, marginStyleString);
 
     // If the size of the content is already quantized, we do nothing.
-    if (aBrowser.style.margin == `${margins.height}px ${margins.width}px`) {
+    if (!marginChanges.length) {
       log("_roundContentView[" + logId + "] is_rounded == true");
       if (this._isLetterboxingTesting) {
         log(
@@ -549,30 +609,23 @@ class _RFPHelper {
       return;
     }
 
-    win.requestAnimationFrame(() => {
-      log(
-        "_roundContentView[" +
-          logId +
-          "] setting margins to " +
-          margins.width +
-          " x " +
-          margins.height
-      );
-      // One cannot (easily) control the color of a margin unfortunately.
-      // An initial attempt to use a border instead of a margin resulted
-      // in offset event dispatching; so for now we use a colorless margin.
-      aBrowser.style.margin = `${margins.height}px ${margins.width}px`;
-    });
+    log(
+      "_roundContentView[" + logId + "] setting margins to " + marginStyleString
+    );
+    // One cannot (easily) control the color of a margin unfortunately.
+    // An initial attempt to use a border instead of a margin resulted
+    // in offset event dispatching; so for now we use a colorless margin.
+    marginChanges.perform();
   }
 
   _clearContentViewMargin(aBrowser) {
-    aBrowser.ownerGlobal.requestAnimationFrame(() => {
-      aBrowser.style.margin = "";
-    });
+    aBrowser.classList.add("exclude-letterboxing");
   }
 
   _updateMarginsForTabsInWindow(aWindow) {
     let tabBrowser = aWindow.gBrowser;
+
+    tabBrowser.tabpanels?.classList.add("letterboxing");
 
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
@@ -607,7 +660,10 @@ class _RFPHelper {
     tabBrowser.removeTabsProgressListener(this);
     aWindow.removeEventListener("TabOpen", this);
 
-    // Clear all margins and tooltip for all browsers.
+    // revert tabpanel's style to default
+    tabBrowser.tabpanels?.classList.remove("letterboxing");
+
+    // and restore default margins on each browser element
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
       this._clearContentViewMargin(browser);
