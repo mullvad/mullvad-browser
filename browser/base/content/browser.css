@@ -98,6 +98,18 @@ body {
   -moz-window-dragging: drag;
 }
 
+/**
+  Never modify the following selector without synchronizing
+  LETTERBOX_CSS_SELECTOR in RFPHelper.jsm!
+**/
+.letterboxing .browserStack > browser:not(.exclude-letterboxing) {
+  margin: 0; /* to be dynamically set by RFHelper.jsm */
+}
+
+browser.exclude-letterboxing {
+  margin: 0 !important;
+}
+
 #toolbar-menubar[autohide="true"] {
   overflow: hidden;
 }
