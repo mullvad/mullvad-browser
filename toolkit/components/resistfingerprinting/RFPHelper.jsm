@@ -382,6 +382,8 @@ class _RFPHelper {
       contentPrincipal.isSystemPrincipal ||
       // ... about: URIs EXCEPT about:blank
       (currentURI.schemeIs("about") && currentURI.filePath !== "blank") ||
+      // ... source code
+      currentURI.schemeIs("view-source") ||
       // ... browser extensions
       contentPrincipal.addonPolicy
     );
