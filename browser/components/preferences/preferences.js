@@ -460,6 +460,17 @@ async function scrollAndHighlight(subcategory, category) {
   }
   let header = getClosestDisplayedHeader(element);
 
+  // We assign a tabindex=-1 to the element so that we can focus it. This allows
+  // us to move screen reader's focus to an arbitrary position on the page.
+  // See tor-browser#41454 and bug 1799153.
+  element.setAttribute("tabindex", "-1");
+  // The element is not always immediately focusable, so we wait until the next
+  // loop.
+  setTimeout(() => {
+    Services.focus.setFocus(element, Services.focus.FLAG_NOSCROLL);
+    element.removeAttribute("tabindex");
+  });
+
   scrollContentTo(header);
   element.classList.add("spotlight");
 }
