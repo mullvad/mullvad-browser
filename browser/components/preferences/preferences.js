@@ -939,6 +939,30 @@ function scrollAndHighlight(subcategory) {
     return;
   }
 
+  // We focus the first element that we can focus.
+  // See tor-browser#41454, tor-browser#45195 and mozilla bug 1799153.
+  let focusTarget = elements[0];
+  if (focusTarget.tagName === "setting-group") {
+    focusTarget = focusTarget.fieldsetEl;
+    // Make the heading focusable.
+    focusTarget.focusableHeading = true;
+    focusTarget.updateComplete.then(() => {
+      focusTarget.focusHeading();
+    });
+  } else {
+    // Try focus directly using the focus method, which can be overridden.
+    focusTarget.focus();
+    if (!focusTarget.contains(document.activeElement)) {
+      // Else, try focus the first focusable target.
+      Services.focus.moveFocus(
+        window,
+        focusTarget,
+        Services.focus.MOVEFOCUS_FIRST,
+        Services.focus.FLAG_NOSCROLL
+      );
+    }
+  }
+
   elements[0].scrollIntoView({
     behavior: "smooth",
     block: "center",
