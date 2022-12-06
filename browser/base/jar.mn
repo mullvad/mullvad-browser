@@ -104,6 +104,3 @@ browser.jar:
         content/browser/spotlight.html                (content/spotlight.html)
         content/browser/spotlight.js                  (content/spotlight.js)
 *       content/browser/default-bookmarks.html        (content/default-bookmarks.html)
-
-# L10n resources and overrides.
-% override chrome://global/locale/appstrings.properties chrome://browser/locale/appstrings.properties
