@@ -109,5 +109,4 @@ browser.jar:
 % override chrome://global/content/netError.xhtml chrome://browser/content/certerror/aboutNetError.xhtml
 
 # L10n resources and overrides.
-% override chrome://global/locale/appstrings.properties chrome://browser/locale/appstrings.properties
 % override chrome://global/locale/netError.dtd chrome://browser/locale/netError.dtd

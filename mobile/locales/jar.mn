@@ -11,4 +11,3 @@
 
 # Fennec-specific overrides of generic strings
   locale/@AB_CD@/browser/netError.dtd             (%overrides/netError.dtd)
-  locale/@AB_CD@/browser/appstrings.properties    (%overrides/appstrings.properties)
