@@ -437,6 +437,10 @@ pref("security.remote_settings.intermediates.enabled", false);
 pref("dom.use_components_shim", false);
 // Enable letterboxing
 pref("privacy.resistFingerprinting.letterboxing", true);
+// tor-browser#41917: Center letterboxed area vertically
+pref("privacy.resistFingerprinting.letterboxing.vcenter", true);
+// tor-browser#41917: Letterboxing gradient background
+pref("privacy.resistFingerprinting.letterboxing.gradient", true);
 // Enforce Network Information API as disabled
 pref("dom.netinfo.enabled", false);
 pref("network.http.referer.defaultPolicy", 2); // Bug 32948: Make referer behavior consistent regardless of private browing mode status
