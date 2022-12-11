@@ -80,8 +80,6 @@ FINAL_TARGET_FILES.actors += [
     "PromptParent.jsm",
     "RefreshBlockerChild.jsm",
     "RefreshBlockerParent.jsm",
-    "RFPHelperChild.jsm",
-    "RFPHelperParent.jsm",
     "ScreenshotsComponentChild.jsm",
     "SearchSERPTelemetryChild.jsm",
     "SearchSERPTelemetryParent.jsm",
