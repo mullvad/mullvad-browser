@@ -39,6 +39,14 @@ xul|findbar {
     transition-duration: 0s;
     transition-delay: 0s;
   }
+
+  /* When letterboxing is in use, we do not transition to avoid layout jank.
+   * This has an additional benefit that the find bar cannot be used to
+   * fingerprint prefers-reduced-motion. See tor-browser#42764. */
+  .letterboxing & {
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
 }
 
 .findbar-container {
