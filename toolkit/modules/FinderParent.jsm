@@ -27,15 +27,6 @@ ChromeUtils.defineModuleGetter(
   "resource://gre/modules/Geometry.jsm"
 );
 
-const kPrefLetterboxing = "privacy.resistFingerprinting.letterboxing";
-
-XPCOMUtils.defineLazyPreferenceGetter(
-  this,
-  "isLetterboxingEnabled",
-  kPrefLetterboxing,
-  false
-);
-
 XPCOMUtils.defineLazyPreferenceGetter(
   this,
   "isSoundEnabled",
@@ -586,24 +577,10 @@ FinderParent.prototype = {
   onFindbarClose() {
     this._lastFoundBrowsingContext = null;
     this.sendMessageToAllContexts("Finder:FindbarClose");
-
-    if (isLetterboxingEnabled) {
-      let window = this._browser.ownerGlobal;
-      if (window.RFPHelper) {
-        window.RFPHelper.contentSizeUpdated(window);
-      }
-    }
   },
 
   onFindbarOpen() {
     this.sendMessageToAllContexts("Finder:FindbarOpen");
-
-    if (isLetterboxingEnabled) {
-      let window = this._browser.ownerGlobal;
-      if (window.RFPHelper) {
-        window.RFPHelper.contentSizeUpdated(window);
-      }
-    }
   },
 
   onModalHighlightChange(aUseModalHighlight) {
