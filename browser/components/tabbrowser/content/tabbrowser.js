@@ -2232,6 +2232,10 @@
       stack.className = "browserStack";
       stack.appendChild(b);
 
+      let decorator = document.createXULElement("hbox");
+      decorator.className = "browserDecorator";
+      stack.appendChild(decorator);
+
       let browserContainer = document.createXULElement("vbox");
       browserContainer.className = "browserContainer";
       browserContainer.appendChild(stack);

@@ -15,6 +15,10 @@ const kPrefLetterboxingDimensions =
   "privacy.resistFingerprinting.letterboxing.dimensions";
 const kPrefLetterboxingTesting =
   "privacy.resistFingerprinting.letterboxing.testing";
+const kPrefLetterboxingVcenter =
+  "privacy.resistFingerprinting.letterboxing.vcenter";
+const kPrefLetterboxingGradient =
+  "privacy.resistFingerprinting.letterboxing.gradient";
 
 const kTopicDOMWindowOpened = "domwindowopened";
 const kTopicDOMWindowClosed = "domwindowclosed";
@@ -51,6 +55,9 @@ class _RFPHelper {
     // Add unconditional observers
     Services.prefs.addObserver(kPrefResistFingerprinting, this);
     Services.prefs.addObserver(kPrefLetterboxing, this);
+    Services.prefs.addObserver(kPrefLetterboxingVcenter, this);
+    Services.prefs.addObserver(kPrefLetterboxingGradient, this);
+
     XPCOMUtils.defineLazyPreferenceGetter(
       this,
       "_letterboxingDimensions",
@@ -82,6 +89,8 @@ class _RFPHelper {
 
     // Remove unconditional observers
     Services.prefs.removeObserver(kPrefResistFingerprinting, this);
+    Services.prefs.removeObserver(kPrefLetterboxingGradient, this);
+    Services.prefs.removeObserver(kPrefLetterboxingVcenter, this);
     Services.prefs.removeObserver(kPrefLetterboxing, this);
     // Remove the RFP observers, swallowing exceptions if they weren't present
     this._removeLanguagePrefObservers();
@@ -133,6 +142,8 @@ class _RFPHelper {
         this._handleSpoofEnglishChanged();
         break;
       case kPrefLetterboxing:
+      case kPrefLetterboxingVcenter:
+      case kPrefLetterboxingGradient:
         this._handleLetterboxingPrefChanged();
         break;
       default:
@@ -600,6 +611,14 @@ class _RFPHelper {
     let tabBrowser = aWindow.gBrowser;
 
     tabBrowser.tabpanels?.classList.add("letterboxing");
+    tabBrowser.tabpanels?.classList.toggle(
+      "letterboxing-vcenter",
+      Services.prefs.getBoolPref(kPrefLetterboxingVcenter, false)
+    );
+    tabBrowser.tabpanels?.classList.toggle(
+      "letterboxing-gradient",
+      Services.prefs.getBoolPref(kPrefLetterboxingGradient, false)
+    );
 
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
