@@ -14,12 +14,19 @@ const kPrefLetterboxingDimensions =
   "privacy.resistFingerprinting.letterboxing.dimensions";
 const kPrefLetterboxingTesting =
   "privacy.resistFingerprinting.letterboxing.testing";
+const kPrefLetterboxingVcenter =
+  "privacy.resistFingerprinting.letterboxing.vcenter";
 
 const kTopicDOMWindowOpened = "domwindowopened";
 const kTopicDOMWindowClosed = "domwindowclosed";
 
+const kPrefVerticalTabs = "sidebar.verticalTabs";
+
 const lazy = {};
 
+ChromeUtils.defineESModuleGetters(lazy, {
+  Color: "resource://gre/modules/Color.sys.mjs",
+});
 ChromeUtils.defineLazyGetter(lazy, "logConsole", () =>
   console.createInstance({
     prefix: "RFPHelper",
@@ -55,6 +62,9 @@ class _RFPHelper {
     // Add unconditional observers
     Services.prefs.addObserver(kPrefResistFingerprinting, this);
     Services.prefs.addObserver(kPrefLetterboxing, this);
+    Services.prefs.addObserver(kPrefLetterboxingVcenter, this);
+    Services.prefs.addObserver(kPrefVerticalTabs, this);
+
     XPCOMUtils.defineLazyPreferenceGetter(
       this,
       "_letterboxingDimensions",
@@ -86,7 +96,9 @@ class _RFPHelper {
 
     // Remove unconditional observers
     Services.prefs.removeObserver(kPrefResistFingerprinting, this);
+    Services.prefs.removeObserver(kPrefLetterboxingVcenter, this);
     Services.prefs.removeObserver(kPrefLetterboxing, this);
+    Services.prefs.removeObserver(kPrefVerticalTabs, this);
     // Remove the RFP observers, swallowing exceptions if they weren't present
     this._removeLanguagePrefObservers();
     // Added in _handleSpoofEnglishChanged.
@@ -124,6 +136,13 @@ class _RFPHelper {
         resizeObserver.observe(browser.parentElement);
         break;
       }
+      case "nativethemechange":
+        // NOTE: "nativethemechange" seems to always be sent after
+        // "windowlwthemeupdate". So all the lwtheme CSS properties should be
+        // set to the new theme's values already, so we don't need to wait for
+        // windowlwthemeupdate.
+        this._updateLetterboxingColors(aMessage.currentTarget, true);
+        break;
       default:
         break;
     }
@@ -139,7 +158,13 @@ class _RFPHelper {
         this._handleSpoofEnglishChanged();
         break;
       case kPrefLetterboxing:
+      case kPrefLetterboxingVcenter:
         this._handleLetterboxingPrefChanged();
+        break;
+      case kPrefVerticalTabs:
+        if (this.letterboxingEnabled) {
+          forEachWindow(win => this._updateLetterboxingColors(win));
+        }
         break;
       default:
         break;
@@ -347,7 +372,7 @@ class _RFPHelper {
     // If not already cached on the document object, traverse the CSSOM and
     // find the rule applying the default letterboxing styles to browsers
     // preemptively in order to beat race conditions on tab/window creation
-    return (document._letterboxingMarginsRule ||= (() => {
+    return (document._letterboxingDefaultRule ||= (() => {
       const LETTERBOX_CSS_SELECTOR = ".letterboxing";
       const LETTERBOX_CSS_URL =
         "chrome://global/content/resistfingerprinting/letterboxing.css";
@@ -554,26 +579,14 @@ class _RFPHelper {
 
     if (lastRoundedSize) {
       // Check whether the letterboxing margin is less than the border radius,
-      // and if so flatten the borders.
-      let borderRadius = parseInt(
-        win
-          .getComputedStyle(browserContainer)
-          .getPropertyValue("--letterboxing-border-radius")
+      // and if so do not show an outline.
+      const gapVertical = parentHeight - lastRoundedSize.height;
+      const gapHorizontal = parentWidth - lastRoundedSize.width;
+      browserParent.classList.toggle(
+        "letterboxing-show-outline",
+        gapVertical >= this._letterboxingBorderRadius ||
+          gapHorizontal >= this._letterboxingBorderRadius
       );
-      if (
-        borderRadius &&
-        parentWidth - lastRoundedSize.width < borderRadius &&
-        parentHeight - lastRoundedSize.height < borderRadius
-      ) {
-        borderRadius = 0;
-      } else {
-        borderRadius = "";
-      }
-      styleChanges.queueIfNeeded(browserParent, {
-        "--letterboxing-decorator-visibility":
-          borderRadius === 0 ? "hidden" : "",
-        "--letterboxing-border-radius": borderRadius,
-      });
     }
 
     // If the size of the content is already quantized, we do nothing.
@@ -606,12 +619,28 @@ class _RFPHelper {
 
   _resetContentSize(aBrowser) {
     aBrowser.parentElement.classList.add("exclude-letterboxing");
+    aBrowser.parentElement.classList.remove("letterboxing-show-outline");
   }
 
   _updateSizeForTabsInWindow(aWindow) {
     let tabBrowser = aWindow.gBrowser;
 
-    tabBrowser.tabpanels?.classList.add("letterboxing");
+    tabBrowser.tabbox.classList.add("letterboxing");
+    tabBrowser.tabbox.classList.toggle(
+      "letterboxing-vcenter",
+      Services.prefs.getBoolPref(kPrefLetterboxingVcenter, false)
+    );
+    if (this._letterboxingBorderRadius === undefined && tabBrowser.tabbox) {
+      // Cache the value since it is not expected to change in a session for any
+      // window.
+      this._letterboxingBorderRadius = Math.ceil(
+        parseFloat(
+          aWindow
+            .getComputedStyle(tabBrowser.tabbox)
+            .getPropertyValue("--letterboxing-border-radius")
+        )
+      );
+    }
 
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
@@ -620,7 +649,7 @@ class _RFPHelper {
     // We need to add this class late because otherwise new windows get
     // maximized.
     aWindow.setTimeout(() => {
-      tabBrowser.tabpanels?.classList.add("letterboxing-ready");
+      tabBrowser.tabbox.classList.add("letterboxing-ready");
     });
   }
 
@@ -640,6 +669,299 @@ class _RFPHelper {
     this._resizeObservers.set(aWindow, resizeObserver);
     // Rounding the content viewport.
     this._updateSizeForTabsInWindow(aWindow);
+
+    this._updateLetterboxingColors(aWindow, true);
+    aWindow.addEventListener("nativethemechange", this);
+  }
+
+  /**
+   * Convert a CSS property to its RGBA value.
+   *
+   * @param {Window} win - The window for the element.
+   * @param {CSSStyleDeclaration} style - The computed style for the element we
+   *   want to grab the color from.
+   * @param {string} property - The name of the property we want.
+   * @param {object} [options] - Optional details.
+   * @param {string} [options.fallbackProperty] - A fallback to use instead if
+   *   the property doesn't have a computed value.
+   * @param {string} [options.currentColorProperty] - The name of a property to
+   *   use as the currentColor.
+   *
+   * @returns {InspectorRGBATuple} - The RGBA color. The "r", "g", "b" fields
+   *   are relative to the 0-255 color range. The "a" field is in the 0-1 range.
+   */
+  _convertToRGBA(win, style, property, options) {
+    let cssColor = style.getPropertyValue(property);
+    if (!cssColor) {
+      if (options?.fallbackProperty) {
+        lazy.logConsole.debug(
+          "Using fallback property for RGBA.",
+          property,
+          options.fallbackProperty
+        );
+        return this._convertToRGBA(win, style, options.fallbackProperty);
+      }
+      lazy.logConsole.error(`Missing color "${property}"`);
+      return { r: 0, g: 0, b: 0, a: 0 };
+    }
+    const currentColorRegex =
+      /(^|[^a-zA-Z0-9_-])currentColor($|[^a-zA-Z0-9_-])/g;
+    if (currentColorRegex.test(cssColor)) {
+      let currentColor;
+      if (options?.currentColorProperty) {
+        const currRGBA = this._convertToRGBA(
+          win,
+          style,
+          options.currentColorProperty
+        );
+        currentColor = `rgba(${currRGBA.r}, ${currRGBA.g}, ${currRGBA.b}, ${currRGBA.a})`;
+      } else {
+        lazy.logConsole.warning(
+          "Missing a specification for the currentColor, using computed color."
+        );
+        // Use the current "color" value. NOTE: this may not be exactly what we
+        // want since it's current value may be effected by :hover, :active,
+        // :focus, etc. But we want this to be a stable colour for the theme.
+        currentColor = style.color;
+      }
+      cssColor = cssColor.replace(currentColorRegex, (_, pre, post) => {
+        return pre + currentColor + post;
+      });
+      lazy.logConsole.debug(
+        "Replaced currentColor.",
+        property,
+        currentColor,
+        cssColor
+      );
+    }
+    // Can drop the document argument after bugzilla bug 1973684 (142).
+    const colorRGBA = win.InspectorUtils.colorToRGBA(cssColor, win.document);
+    if (!colorRGBA) {
+      lazy.logConsole.error(
+        `Failed to convert "${property}" color (${cssColor}) to RGBA`
+      );
+      return { r: 0, g: 0, b: 0, a: 0 };
+    }
+    return colorRGBA;
+  }
+
+  /**
+   * Compose two colors with alpha values on top of each other.
+   *
+   * @param {InspectorRGBATuple} topRGBA - The color to place on the top.
+   * @param {InspectorRGBATuple} bottomRGBA - The color to place on the bottom.
+   *
+   * @returns {InspectorRGBATuple} - The composed color.
+   */
+  _composeRGBA(topRGBA, bottomRGBA) {
+    const topA = Math.max(0, Math.min(1, topRGBA.a));
+    const bottomA = Math.max(0, Math.min(1, bottomRGBA.a));
+    const a = topA + bottomA - topA * bottomA; // Should be 1 if either is 1.
+    if (a === 0) {
+      return { r: 0, g: 0, b: 0, a };
+    }
+    const ret = { a };
+    for (const field of ["r", "g", "b"]) {
+      ret[field] =
+        (topRGBA[field] * topA + bottomRGBA[field] * bottomA * (1 - topA)) / a;
+    }
+    return ret;
+  }
+
+  /**
+   * Calculate the urlbar's container opaque background color, removing any
+   * transparency.
+   *
+   * @param {Window} win - The window to calculate the color for.
+   * @param {CSSStyleDeclaration} style - The computed style for the #nav-bar
+   *   element.
+   * @param {boolean} verticalTabs - Whether vertical tabs are enabled.
+   *
+   * @returns {InspectorRGBATuple} - The calculated color, which will be opaque.
+   */
+  _calculateUrlbarContainerColor(win, style, verticalTabs) {
+    let colorRGBA;
+    if (!verticalTabs) {
+      lazy.logConsole.debug("Toolbar background used.");
+      colorRGBA = this._convertToRGBA(win, style, "--toolbar-background-color");
+      if (colorRGBA.a === 1) {
+        return colorRGBA;
+      }
+    } else {
+      // The urlbar only has the toolbox colour.
+      colorRGBA = { r: 0, g: 0, b: 0, a: 0 };
+    }
+    let toolboxHasBackgroundImage = false;
+    const isLwTheme = win.document.documentElement.hasAttribute("lwtheme");
+    if (isLwTheme) {
+      for (const prop of ["--lwt-header-image", "--lwt-additional-images"]) {
+        const headerImage = style.getPropertyValue(prop);
+        if (headerImage && headerImage !== "none") {
+          // The theme sets a background image behind the urlbar. No easy way to
+          // derive a single colour from this.
+          toolboxHasBackgroundImage = true;
+          lazy.logConsole.debug(
+            "Toolbox has background image.",
+            prop,
+            headerImage
+          );
+          break;
+        }
+      }
+    }
+    if (!toolboxHasBackgroundImage) {
+      lazy.logConsole.debug("Toolbox background used.");
+      colorRGBA = this._composeRGBA(
+        colorRGBA,
+        this._convertToRGBA(win, style, "--toolbox-background-color")
+      );
+      if (colorRGBA.a === 1) {
+        return colorRGBA;
+      }
+    }
+
+    // Determine whether the urlbar is dark.
+    // At this point, the urlbar background has some transparency, likely on top
+    // of an image.
+    // We use the theme's text colour to figure out whether the urlbar
+    // background is overall meant to be light or dark. Unlike the urlbar, we
+    // expect this colour to be (almost) opaque.
+    const textRGBA = this._convertToRGBA(
+      win,
+      style,
+      "--toolbar-field-text-color"
+    );
+    const textColor = new lazy.Color(textRGBA.r, textRGBA.g, textRGBA.b);
+    if (textColor.relativeLuminance >= 0.5) {
+      // Light text, so assume it has a dark background.
+      // Combine with a generic opaque dark colour. Copied from "frame" for the
+      // built-in dark theme.
+      lazy.logConsole.debug("Generic dark background used.");
+      const darkFrameRGBA = { r: 28, g: 27, b: 34, a: 1 };
+      return this._composeRGBA(colorRGBA, darkFrameRGBA);
+    }
+    // Combine with an opaque light colour. Copied from "frame" for the built-in
+    // light theme.
+    lazy.logConsole.debug("Generic light background used.");
+    const lightFrameRGBA = { r: 234, g: 234, b: 237, a: 1 };
+    return this._composeRGBA(colorRGBA, lightFrameRGBA);
+  }
+
+  /**
+   * Update the Letterboxing colors and related classes, or clear them if
+   * Letterboxing is not enabled.
+   *
+   * @param {Window} win - The window to update the colors for.
+   * @param {boolean} letterboxingEnabled - Whether Letterboxing is enabled.
+   */
+  _updateLetterboxingColors(win, letterboxingEnabled) {
+    let urlbarBackgroundRGBA;
+    let urlbarTextRGBA;
+    let contentSeparatorRGBA;
+    let urlbarBackgroundDark = false;
+    let lowBackgroundOutlineContrast = false;
+
+    if (letterboxingEnabled) {
+      // Want the effective colour of various elements without any alpha values
+      // so they can be used consistently.
+
+      const verticalTabs = Services.prefs.getBoolPref(kPrefVerticalTabs);
+      const chromeTextColorProperty = verticalTabs
+        ? "--toolbox-text-color"
+        : "--toolbar-text-color";
+
+      const navbarStyle = win.getComputedStyle(
+        win.document.getElementById("nav-bar")
+      );
+      const containerRGBA = this._calculateUrlbarContainerColor(
+        win,
+        navbarStyle,
+        verticalTabs
+      );
+      urlbarBackgroundRGBA = this._composeRGBA(
+        this._convertToRGBA(
+          win,
+          navbarStyle,
+          "--toolbar-field-background-color"
+        ),
+        containerRGBA
+      );
+      // NOTE: In the default theme (no "lwtheme" attribute) with
+      // browser.theme.native-theme set to false, --toolbar-field-color can be
+      // set to "inherit", which means it will have a blank computed value. We
+      // fallback to --toolbar-text-color or --toolbox-text-color in this case.
+      // Similarly, for windows OS, it can be set to "currentColor".
+      urlbarTextRGBA = this._composeRGBA(
+        this._convertToRGBA(win, navbarStyle, "--toolbar-field-text-color", {
+          fallbackProperty: chromeTextColorProperty,
+          currentColorProperty: chromeTextColorProperty,
+        }),
+        urlbarBackgroundRGBA
+      );
+      // Separator between the urlbar container #nav-bar and the tabbox.
+      // For the default theme, this can be set to --card-border-color, which
+      // can use "currentColor".
+      const tabboxStyle = win.getComputedStyle(win.gBrowser.tabbox);
+      contentSeparatorRGBA = this._composeRGBA(
+        this._convertToRGBA(
+          win,
+          tabboxStyle,
+          "--chrome-content-separator-color",
+          { currentColorProperty: chromeTextColorProperty }
+        ),
+        containerRGBA
+      );
+      const bgColor = new lazy.Color(
+        urlbarBackgroundRGBA.r,
+        urlbarBackgroundRGBA.g,
+        urlbarBackgroundRGBA.b
+      );
+      const outlineColor = new lazy.Color(
+        contentSeparatorRGBA.r,
+        contentSeparatorRGBA.g,
+        contentSeparatorRGBA.b
+      );
+      const contrastRatio = bgColor.contrastRatio(outlineColor);
+      lazy.logConsole.debug(
+        "Outline-background contrast ratio.",
+        contrastRatio
+      );
+      urlbarBackgroundDark = bgColor.relativeLuminance < 0.5;
+      // Very low contrast ratio. For reference the default light theme has
+      // a contrast ratio of ~1.1.
+      lowBackgroundOutlineContrast = contrastRatio < 1.05;
+    }
+    for (const { name, colorRGBA } of [
+      {
+        name: "--letterboxing-urlbar-text-color",
+        colorRGBA: urlbarTextRGBA,
+      },
+      {
+        name: "--letterboxing-urlbar-background-color",
+        colorRGBA: urlbarBackgroundRGBA,
+      },
+      {
+        name: "--letterboxing-content-separator-color",
+        colorRGBA: contentSeparatorRGBA,
+      },
+    ]) {
+      if (letterboxingEnabled) {
+        win.gBrowser.tabbox.style.setProperty(
+          name,
+          `rgb(${colorRGBA.r}, ${colorRGBA.g}, ${colorRGBA.b})`
+        );
+      } else {
+        win.gBrowser.tabbox.style.removeProperty(name);
+      }
+    }
+    win.gBrowser.tabbox.classList.toggle(
+      "letterboxing-urlbar-background-dark",
+      urlbarBackgroundDark
+    );
+    win.gBrowser.tabbox.classList.toggle(
+      "letterboxing-low-background-outline-contrast",
+      lowBackgroundOutlineContrast
+    );
   }
 
   _attachAllWindows() {
@@ -671,13 +993,16 @@ class _RFPHelper {
     aWindow.removeEventListener("TabOpen", this);
 
     // revert tabpanel's style to default
-    tabBrowser.tabpanels?.classList.remove("letterboxing");
+    tabBrowser.tabbox.classList.remove("letterboxing");
 
     // and restore default size on each browser element
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
     }
+
+    aWindow.removeEventListener("nativethemechange", this);
+    this._updateLetterboxingColors(aWindow, false);
   }
 
   _detachAllWindows() {

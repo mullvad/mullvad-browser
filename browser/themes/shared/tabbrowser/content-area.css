@@ -572,6 +572,11 @@ split-view-footer {
   width: 100%;
   height: 100%;
 
+  /* Override the <stack> `grid-area: 1 / 1` rule with an `auto` placement.
+   * Otherwise the .dialogStack start edges are placed relative to the
+   * center-aligned grid items, rather than the grid's padding area. */
+  grid-area: auto;
+
   /* Hide tab-modal dialogs when a window-modal one is up. */
   :root[window-modal-open] .browserStack > &,
   /* For some printing use cases we need to visually hide the dialog before
