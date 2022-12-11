@@ -102,12 +102,23 @@ body {
   Never modify the following selector without synchronizing
   LETTERBOX_CSS_SELECTOR in RFPHelper.jsm!
 **/
-.letterboxing .browserStack > browser:not(.exclude-letterboxing) {
-  margin: 0; /* to be dynamically set by RFHelper.jsm */
+.letterboxing .browserStack:not(.exclude-letterboxing) > browser {
+  /* width & height to be dynamically set by RFPHelper.jsm */
+  outline: 1px solid var(--chrome-content-separator-color);
 }
 
-browser.exclude-letterboxing {
-  margin: 0 !important;
+.exclude-letterboxing > browser {
+  outline: initial;
+}
+
+:root:not([inDOMFullscreen]) .letterboxing.letterboxing-ready .browserStack:not(.exclude-letterboxing) {
+  place-content: start center;
+}
+
+/* extend down the toolbar's colors when letterboxing is enabled */
+.letterboxing {
+  background-color: var(--toolbar-bgcolor);
+  background-image: var(--toolbar-bgimage);
 }
 
 #toolbar-menubar[autohide="true"] {
