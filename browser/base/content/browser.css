@@ -6,15 +6,116 @@
 
 /**
   Never modify the following selector without synchronizing
-  LETTERBOX_CSS_SELECTOR in RFPHelper.sys.mjs!
+  LETTERBOX_CSS_SELECTOR in RFPHelper.sys.mjs, where
+  --letterboxing-width & --letterboxing-height are actually set.
   And you will need to update the JS also if you move the rules to another file.
 **/
-.letterboxing .browserStack > browser:not(.exclude-letterboxing) {
-  margin: 0; /* to be dynamically set by RFHelper.sys.mjs */
+.letterboxing .browserContainer {
+  /*
+  From Firefox 115 on, .browserContainer layout is flex / column,
+  and without this trick the .browserStack's resize observer
+  doesn't get notified on horizontal shrinking.
+  See also tor-browser#42405.
+  */
+  overflow: hidden;
+  background: var(--letterboxing-bgcolor);
 }
 
-browser.exclude-letterboxing {
-  margin: 0 !important;
+.browserDecorator {
+  display: none;
+  pointer-events: none;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.letterboxing {
+  --letterboxing-border-radius: 8px;
+  --letterboxing-border-top-radius: 0;
+  --letterboxing-vertical-alignment: start;
+  --letterboxing-shadow-color: rgba(12, 12, 13, 0.10);
+  --letterboxing-bgcolor: var(--tabpanel-background-color);
+  --letterboxing-gradient-color1: var(--letterboxing-bgcolor);
+  --letterboxing-gradient-color2: color-mix(in srgb, var(--chrome-content-separator-color) 50%, var(--letterboxing-bgcolor));
+  --letterboxing-border-color: var(--letterboxing-bgcolor);
+  --letterboxing-decorator-visibility: visible;
+}
+
+.letterboxing.letterboxing-vcenter .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing) {
+  --letterboxing-border-top-radius: var(--letterboxing-border-radius);
+  --letterboxing-vertical-alignment: center;
+}
+
+.letterboxing.letterboxing-gradient .browserContainer {
+  background: linear-gradient(283deg, var(--letterboxing-gradient-color1) 0%, var(--letterboxing-gradient-color2) 100%), var(--letterboxing-bgcolor);
+}
+
+:root:not([inDOMFullscreen]) .letterboxing .browserContainer:not(.responsive-mode)
+  > .browserStack:not(.exclude-letterboxing)
+  > .browserDecorator {
+  display: initial;
+  visibility: var(--letterboxing-decorator-visibility);
+  border-radius: var(--letterboxing-border-radius);
+  border-top-left-radius: var(--letterboxing-border-top-radius);
+  border-top-right-radius: var(--letterboxing-border-top-radius);
+  box-shadow: var(--letterboxing-border-color) 0px 0px .1px inset, var(--letterboxing-border-color) 0 0 .1px;
+  border: .1px solid var(--letterboxing-border-color);
+  outline: .1px solid var(--letterboxing-bgcolor);
+  height: calc(var(--letterboxing-height) + 1px);
+  top: -1px;
+}
+
+.letterboxing-vcenter .browserDecorator {
+  height: auto !important;
+  top: 0 !important;
+}
+
+/*
+  Align status bar with content.
+  TODO: switch to nested CSS selectors for conciseness when available (Firefox >= 117)
+*/
+.letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing)
+  > #statuspanel:not([hidden]) {
+  position: relative;
+  place-self: end left;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  --letterboxing-status-left-radius: var(--letterboxing-border-radius);
+  --letterboxing-status-right-radius: 0;
+}
+.letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing)
+  > #statuspanel:not([mirror]):-moz-locale-dir(rtl),
+.letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing)
+  > #statuspanel[mirror]:-moz-locale-dir(ltr) {
+  left: 0;
+  right: 0;
+  --letterboxing-status-right-radius: var(--letterboxing-border-radius);
+  --letterboxing-status-left-radius: 0;
+  justify-self: right;
+}
+
+.letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing)
+#statuspanel-label {
+  border-radius: 0 0 var(--letterboxing-status-right-radius) var(--letterboxing-status-left-radius);
+  margin: 0;
+  border: 1px solid var(--letterboxing-border-color);
+  max-width: calc(var(--letterboxing-width) * .5);
+}
+
+.letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing) > browser {
+  box-shadow: 0px 4px 8px 0px var(--letterboxing-shadow-color);
+  border-radius: var(--letterboxing-border-radius);
+  border-top-left-radius: var(--letterboxing-border-top-radius);
+  border-top-right-radius: var(--letterboxing-border-top-radius);
+  width: var(--letterboxing-width) !important;
+  height: var(--letterboxing-height) !important;
+  background: var(--letterboxing-gradient-color2);
+}
+
+:root:not([inDOMFullscreen]) .letterboxing.letterboxing-ready .browserContainer:not(.responsive-mode)
+  > .browserStack:not(.exclude-letterboxing) {
+  place-content: var(--letterboxing-vertical-alignment) center;
 }
 
 panelmultiview {
