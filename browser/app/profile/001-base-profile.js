@@ -446,6 +446,10 @@ pref("security.remote_settings.intermediates.enabled", false);
 pref("dom.use_components_shim", false);
 // Enable letterboxing
 pref("privacy.resistFingerprinting.letterboxing", true);
+// tor-browser#41917: Center letterboxed area vertically
+pref("privacy.resistFingerprinting.letterboxing.vcenter", true);
+// tor-browser#41917: Letterboxing gradient background
+pref("privacy.resistFingerprinting.letterboxing.gradient", true);
 // tor-browser#43402: Avoid a resize from the skeleton to the newwin size.
 // Should be fixed in ESR-140 with Bug 1448423.
 pref("browser.startup.blankWindow", false);
