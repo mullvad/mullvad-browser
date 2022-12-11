@@ -82,7 +82,7 @@ async function test_dynamical_window_rounding(aWindow, aCheckFunc) {
   // We need to wait for the updating the margins for the newly opened tab, or
   // it will affect the following tests.
   let promiseForTheFirstRounding = TestUtils.topicObserved(
-    "test:letterboxing:update-margin-finish"
+    "test:letterboxing:update-size-finish"
   );
 
   info("Open a content tab for testing.");
@@ -108,7 +108,7 @@ async function test_dynamical_window_rounding(aWindow, aCheckFunc) {
     let caseString = "Case " + width + "x" + height + ": ";
     // Create a promise for waiting for the margin update.
     let promiseRounding = TestUtils.topicObserved(
-      "test:letterboxing:update-margin-finish"
+      "test:letterboxing:update-size-finish"
     );
 
     let { containerWidth, containerHeight } = getContainerSize(tab);
@@ -316,7 +316,7 @@ async function test_findbar(aWindow) {
   );
 
   let promiseRounding = TestUtils.topicObserved(
-    "test:letterboxing:update-margin-finish"
+    "test:letterboxing:update-size-finish"
   );
 
   let findBarOpenPromise = BrowserTestUtils.waitForEvent(
@@ -330,7 +330,7 @@ async function test_findbar(aWindow) {
   ok(true, "Margin updated when findbar opened");
 
   promiseRounding = TestUtils.topicObserved(
-    "test:letterboxing:update-margin-finish"
+    "test:letterboxing:update-size-finish"
   );
 
   let findBarClosePromise = BrowserTestUtils.waitForEvent(
