@@ -5146,12 +5146,19 @@ public class GeckoSession {
         return super.confirm();
       }
 
+      private static String normalizePath(String input) {
+          // For an unclear reason, Android media picker delivers file paths
+          // starting with double slash. Firefox performs path validation on
+          // all paths, and double slash is deemed invalid.
+          return input.startsWith("//") ? input.substring(1) : input;
+      }
+
       private static String getFile(final @NonNull Context context, final @NonNull Uri uri) {
         if (uri == null) {
           return null;
         }
         if ("file".equals(uri.getScheme())) {
-          return uri.getPath();
+          return normalizePath(uri.getPath());
         }
         final ContentResolver cr = context.getContentResolver();
         final Cursor cur =
@@ -5173,7 +5180,7 @@ public class GeckoSession {
             try {
               final String path = cur.getString(idx);
               if (path != null && !path.isEmpty()) {
-                return path;
+                return normalizePath(path);
               }
             } catch (final Exception e) {
             }
