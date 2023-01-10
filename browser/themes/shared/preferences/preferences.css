@@ -598,6 +598,13 @@ html|label[disabled] {
   margin-inline-start: 0;
 }
 
+@media (-moz-platform: windows) {
+  #windows-sso,
+  #windows-sso-caption {
+    display: none;
+  }
+}
+
 /**
  * Dialog
  */
