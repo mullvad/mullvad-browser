@@ -507,7 +507,7 @@
                  data-l10n-attrs="hidden"
                  flex="1"/>
 #ifdef XP_WIN
-    <hbox id="windows-sso" align="center">
+    <hbox id="windows-sso" align="center" hidden="true" data-hidden-from-search="true">
       <checkbox data-l10n-id="forms-windows-sso"
                 preference="network.http.windows-sso.enabled"
                 class="tail-with-learn-more"/>
@@ -518,6 +518,8 @@
       />
     </hbox>
     <description id="windows-sso-caption" class="indent tip-caption"
+           hidden="true"
+           data-hidden-from-search="true"
            data-l10n-id="forms-windows-sso-desc"/>
 #endif
   </vbox>
