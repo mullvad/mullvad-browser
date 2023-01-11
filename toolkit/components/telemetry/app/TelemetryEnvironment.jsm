@@ -973,7 +973,9 @@ function EnvironmentCache() {
   p.push(this._addonBuilder.init());
 
   this._currentEnvironment.profile = {};
-  p.push(this._updateProfile());
+  if (AppConstants.MOZ_TELEMETRY_REPORTING) {
+    p.push(this._updateProfile());
+  }
   if (AppConstants.MOZ_BUILD_APP == "browser") {
     p.push(this._loadAttributionAsync());
   }
