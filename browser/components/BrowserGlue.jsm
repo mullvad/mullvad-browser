@@ -1693,7 +1693,9 @@ BrowserGlue.prototype = {
     this._firstWindowTelemetry(aWindow);
     this._firstWindowLoaded();
 
-    this._collectStartupConditionsTelemetry();
+    if (AppConstants.MOZ_TELEMETRY_REPORTING) {
+      this._collectStartupConditionsTelemetry();
+    }
 
     // Set the default favicon size for UI views that use the page-icon protocol.
     PlacesUtils.favicons.setDefaultIconURIPreferredSize(
@@ -2881,13 +2883,21 @@ BrowserGlue.prototype = {
         }
       },
 
-      () => BrowserUsageTelemetry.reportProfileCount(),
+      () => {
+        if (AppConstants.MOZ_TELEMETRY_REPORTING) {
+          BrowserUsageTelemetry.reportProfileCount();
+        }
+      },
 
       () => OsEnvironment.reportAllowedAppSources(),
 
       () => Services.search.runBackgroundChecks(),
 
-      () => BrowserUsageTelemetry.reportInstallationTelemetry(),
+      () => {
+        if (AppConstants.MOZ_TELEMETRY_REPORTING) {
+          BrowserUsageTelemetry.reportInstallationTelemetry();
+        }
+      },
     ];
 
     for (let task of idleTasks) {
