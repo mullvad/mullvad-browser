@@ -2800,7 +2800,9 @@ static ReturnAbortOnError ProfileLockedDialog(nsIFile* aProfileDir,
   rv = xpcom.Initialize();
   NS_ENSURE_SUCCESS(rv, rv);
 
+#if defined(MOZ_TELEMETRY_REPORTING)
   if (aProfileDir) mozilla::Telemetry::WriteFailedProfileLock(aProfileDir);
+#endif
 
   rv = xpcom.SetWindowCreator(aNative);
   NS_ENSURE_SUCCESS(rv, NS_ERROR_FAILURE);
