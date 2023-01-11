@@ -5984,6 +5984,7 @@ var TabsProgressListener = {
   onStateChange(aBrowser, aWebProgress, aRequest, aStateFlags, aStatus) {
     // Collect telemetry data about tab load times.
     if (
+      AppConstants.MOZ_TELEMETRY_REPORTING &&
       aWebProgress.isTopLevel &&
       (!aRequest.originalURI || aRequest.originalURI.scheme != "about")
     ) {
