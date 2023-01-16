@@ -268,7 +268,7 @@ pref("network.http.referer.defaultPolicy.pbmode", 2);
 pref("network.http.referer.XOriginTrimmingPolicy", 2); // Bug 17228: Force trim referer to scheme+host+port in cross-origin requests
 pref("media.videocontrols.picture-in-picture.enabled", false); // Bug 40148: disable until audited in #40147
 // Bug 40463: Disable Windows SSO
-pref("network.http.windows-sso.enabled", false);
+pref("network.http.windows-sso.enabled", false, locked);
 // Bug 40383: Disable new PerformanceEventTiming
 pref("dom.enable_event_timing", false);
 // Disable API for measuring text width and height.
