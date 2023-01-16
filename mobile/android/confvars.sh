@@ -15,3 +15,9 @@ MOZ_OFFICIAL_BRANDING_DIRECTORY=mobile/android/branding/official
 MOZ_RAW=1
 
 MOZ_APP_ID={aa3c5121-dab2-40e2-81ca-7ea25febc110}
+
+# Disable telemetry at compile-time
+unset MOZ_TELEMETRY_REPORTING
+
+# Disable data reporting at compile-time
+unset MOZ_DATA_REPORTING
