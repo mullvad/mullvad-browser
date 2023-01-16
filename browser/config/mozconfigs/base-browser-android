@@ -24,14 +24,13 @@ ac_add_options --disable-debug
 ac_add_options --disable-rust-debug
 
 ac_add_options --disable-updater
+ac_add_options --disable-verify-mar
 ac_add_options --disable-crashreporter
 ac_add_options --disable-webrtc
 ac_add_options --disable-parental-controls
 
 ac_add_options --enable-proxy-bypass-protection
 ac_add_options --disable-system-policies
-
-ac_add_options --enable-base-browser
 
 # Disable telemetry
 ac_add_options MOZ_TELEMETRY_REPORTING=

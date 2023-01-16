@@ -1016,14 +1016,6 @@ def zlib_in_mozglue(system_zlib, js_shared, linker, os):
 set_config("ZLIB_IN_MOZGLUE", zlib_in_mozglue)
 set_define("ZLIB_IN_MOZGLUE", zlib_in_mozglue)
 
-option(
-    "--enable-base-browser",
-    help="Enable Base Browser"
-)
-
-set_config("BASE_BROWSER", True, when="--enable-base-browser")
-set_define("BASE_BROWSER", True, when="--enable-base-browser")
-
 
 option(
     "--with-relative-profile",
@@ -1042,6 +1034,37 @@ def relative_profile(value, target):
 
 
 set_define("RELATIVE_PROFILE_DIRECTORY", relative_profile)
+
+
+option(
+    "--with-base-browser-version",
+    nargs=1,
+    help="Set the Base Browser version, e.g., 7.0a1"
+)
+
+
+@depends("--with-base-browser-version")
+def base_browser_version(value):
+    if not value:
+        die(
+            "--with-base-browser-version is required for Base Browser and derived browsers."
+        )
+    return value[0]
+
+
+@depends("--with-base-browser-version")
+def base_browser_version_quoted(value):
+    if not value:
+        die(
+            "--with-base-browser-version is required for Base Browser and derived browsers."
+        )
+    if '"' in value or "\\" in value:
+        die("--with-base-browser-version cannot contain \" or \\.")
+    return '"{}"'.format(value[0])
+
+
+set_define("BASE_BROWSER_VERSION", base_browser_version)
+set_define("BASE_BROWSER_VERSION_QUOTED", base_browser_version_quoted)
 
 
 # Please do not add configure checks from here on.
