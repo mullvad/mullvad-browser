@@ -17,7 +17,8 @@ MOZ_BRANDING_DIRECTORY=browser/branding/unofficial
 MOZ_OFFICIAL_BRANDING_DIRECTORY=browser/branding/official
 MOZ_APP_ID={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 
-MOZ_PROFILE_MIGRATOR=1
+# tor-browser#41577: Do not enable profile migration
+# MOZ_PROFILE_MIGRATOR=1
 
 # Include the DevTools client, not just the server (which is the default)
 MOZ_DEVTOOLS=all
