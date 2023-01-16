@@ -14,7 +14,14 @@ export MOZILLA_OFFICIAL=1
 ac_add_options --enable-optimize
 ac_add_options --enable-rust-simd
 
+# Bug 13379: Sign our MAR files.
+ac_add_options --enable-verify-mar
+ac_add_options --enable-nss-mar
+
 ac_add_options --enable-bundled-fonts
+
+# See bug #41587
+ac_add_options --disable-updater
 
 ac_add_options --disable-tests
 ac_add_options --disable-debug
@@ -32,8 +39,6 @@ ac_add_options --disable-system-policies
 
 # See bug #41131
 ac_add_options --disable-backgroundtasks
-
-ac_add_options --enable-base-browser
 
 # Disable telemetry
 ac_add_options MOZ_TELEMETRY_REPORTING=

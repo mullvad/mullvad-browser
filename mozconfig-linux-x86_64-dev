@@ -11,3 +11,4 @@ ac_add_options --enable-default-toolkit=cairo-gtk3
 ac_add_options --disable-strip
 ac_add_options --disable-install-strip
 
+ac_add_options --with-base-browser-version=dev-build
