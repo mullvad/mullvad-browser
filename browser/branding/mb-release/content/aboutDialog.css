@@ -1,0 +1,17 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+:root {
+  --about-dialog-background-color: #0b2138;
+  --about-dialog-text-color: #fff;
+  --about-dialog-color-scheme: dark;
+  --about-dialog-background-color-bottom: rgba(0, 0, 0, 0.2);
+  --about-dialog-text-color-trademark: #999999;
+}
+
+#rightBox {
+  -moz-context-properties: fill, stroke;
+  fill: currentColor;
+  stroke: currentColor;
+}

@@ -135,6 +135,7 @@
   word-break: break-word;
   margin: 0;
   align-items: center;
+  justify-content: space-between;
 
   &:has(slot:has-slotted) {
     gap: var(--space-small);
