@@ -136,6 +136,18 @@ locales = [
 # repositories, we need to preserve this entry until esr115 and esr128 become
 # unsupported.
 [[paths]]
+    reference = "browser/branding/mb-alpha/locales/en-US/**"
+    l10n = "{l}browser/branding/mb-alpha/**"
+
+[[paths]]
+    reference = "browser/branding/mb-nightly/locales/en-US/**"
+    l10n = "{l}browser/branding/mb-nightly/**"
+
+[[paths]]
+    reference = "browser/branding/mb-release/locales/en-US/**"
+    l10n = "{l}browser/branding/mb-release/**"
+
+[[paths]]
     reference = "browser/extensions/formautofill/locales/en-US/**"
     l10n = "{l}browser/extensions/formautofill/**"
 
