@@ -1,0 +1,12 @@
+:root {
+  --branding-gradient-start: #086DB6;
+  --branding-gradient-middle: #0A286F;
+  --branding-gradient-end: #05101B;
+  /* Blue 20 */
+  --branding-focus-outline-color: #00ddff;
+  --branding-link-color: #00ddff;
+  /* Blue 10 */
+  --branding-link-color-hover: #80ebff;
+  /* Blue 05 */
+  --branding-link-color-active: #aaf2ff;
+}
