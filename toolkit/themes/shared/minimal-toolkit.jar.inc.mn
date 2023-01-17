@@ -45,3 +45,6 @@ toolkit.jar:
 # Text recognition widget
 
   skin/classic/global/media/textrecognition.css            (../../shared/media/textrecognition.css)
+
+# For testing purposes
+  skin/classic/global/icons/mullvadbrowser.png             (../../shared/icons/mullvadbrowser.png)

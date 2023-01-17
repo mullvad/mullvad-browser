@@ -456,7 +456,6 @@
      have their strings defined by appmenu-data-l10n-id. -->
                 <menuitem id="menu_openHelp"
                           oncommand="openHelpLink('firefox-help')"
-                          hidden="true"
                           data-l10n-id="menu-get-help"
                           appmenu-data-l10n-id="appmenu-get-help"
 #ifdef XP_MACOSX
