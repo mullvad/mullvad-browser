@@ -134,6 +134,12 @@ export default class MozSupportLink extends HTMLAnchorElement {
       return;
     }
     let supportPage = this.getAttribute("support-page") ?? "";
+    // Customize the link in about:preferences.
+    // See mullvad-browser#244 and tor-browser#41910.
+    if (supportPage === "preferences") {
+      this.href = "https://mullvad.net/en/help/";
+      return;
+    }
     let base = MozSupportLink.SUPPORT_URL + supportPage;
     this.href = this.hasAttribute("utm-content")
       ? formatUTMParams(this.getAttribute("utm-content"), base)
