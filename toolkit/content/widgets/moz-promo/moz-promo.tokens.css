@@ -23,7 +23,7 @@
     --promo-image-size-large: calc(2 * var(--size-image-xlarge));
     --promo-message-text-color: var(--text-color);
     --promo-message-text-color-vibrant: light-dark(var(--color-violet-80), var(--color-violet-0));
-    --promo-padding: var(--space-medium);
+    --promo-padding: var(--space-medium) var(--space-xlarge);
   }
 }
 

@@ -53,3 +53,6 @@ toolkit.jar:
 # used in about:certificate on desktop/Android
   skin/classic/global/icons/error.svg                       (../../shared/icons/error.svg)
   skin/classic/global/illustrations/error-malformed-url.svg (../../shared/illustrations/error-malformed-url.svg)
+
+# For testing purposes
+  skin/classic/global/icons/mullvadbrowser.png             (../../shared/icons/mullvadbrowser.png)

@@ -1,0 +1,12 @@
+:root {
+  --branding-gradient-start: #2261a5;
+  --branding-gradient-middle: #1b4d83;
+  --branding-gradient-end: #05101b;
+  /* Yellow 40 */
+  --branding-focus-outline-color: #ffbd4f;
+  --branding-link-color: #ffbd4f;
+  /* Yellow 30 */
+  --branding-link-color-hover: #ffd567;
+  /* Yellow 20 */
+  --branding-link-color-active: #ffea80;
+}

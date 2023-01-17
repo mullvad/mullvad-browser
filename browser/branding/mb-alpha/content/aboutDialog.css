@@ -1,0 +1,27 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+@import url("chrome://branding/content/mullvad-branding.css");
+
+:root {
+  --about-dialog-background-color: #0b2138;
+  --about-dialog-text-color: #fff;
+  --about-dialog-color-scheme: dark;
+  --about-dialog-background-color-bottom: rgba(0, 0, 0, 0.2);
+  --about-dialog-text-color-trademark: #999999;
+}
+
+#rightBox {
+  /* Increase the default width to fit the about-wordmark.svg width. */
+  max-width: 559px;
+  -moz-context-properties: fill, stroke;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+@media not ((prefers-contrast) or (forced-colors)) {
+  #rightBox {
+    stroke: var(--branding-wordmark-accent);
+  }
+}
