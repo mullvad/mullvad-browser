@@ -31,7 +31,7 @@ ifeq ($(OS_ARCH),WINNT)
 # (this dependency should really be just for firefox.exe, not other targets)
 # Note the manifest file exists in the tree, so we use the explicit filename
 # here.
-EXTRA_DEPS += $(srcdir)/firefox.exe.manifest
+EXTRA_DEPS += $(srcdir)/mullvadbrowser.exe.manifest
 endif
 
 PROGRAMS_DEST = $(DIST)/bin
@@ -104,5 +104,5 @@ ifdef MOZ_UPDATER
 	ln -s ../../../../Library/LaunchServices/org.mozilla.updater '$(dist_dest)/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater'
 endif
 endif
-	printf APPLMOZB > '$(dist_dest)/Contents/PkgInfo'
+	printf APPLMULB > '$(dist_dest)/Contents/PkgInfo'
 endif
