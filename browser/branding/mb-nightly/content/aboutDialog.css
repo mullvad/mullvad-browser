@@ -1,0 +1,28 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#aboutDialogContainer {
+  background-color: #0B2138;
+  color: #fff;
+  color-scheme: dark;
+}
+
+#rightBox {
+  margin-inline: 30px;
+  background-size: auto;
+  /* Increase the default width to fit the about-wordmark.svg width. */
+  width: 601px;
+}
+
+#bottomBox {
+  background-color: rgba(0,0,0,0.2);
+  padding: 15px 10px 15px;
+}
+
+#trademark {
+  font-size: xx-small;
+  text-align: center;
+  color: #999999;
+  margin-block: 10px;
+}
