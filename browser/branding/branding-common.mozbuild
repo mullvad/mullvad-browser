@@ -18,11 +18,8 @@ def FirefoxBranding():
     if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'windows':
         FINAL_TARGET_FILES['..'] += [
             'firefox.VisualElementsManifest.xml',
-            'private_browsing.VisualElementsManifest.xml',
         ]
         FINAL_TARGET_FILES.VisualElements += [
-            'PrivateBrowsing_150.png',
-            'PrivateBrowsing_70.png',
             'VisualElements_150.png',
             'VisualElements_70.png',
         ]
@@ -30,6 +27,7 @@ def FirefoxBranding():
         FINAL_TARGET_FILES.chrome.icons.default += [
             'default128.png',
             'default16.png',
+            'default256.png',
             'default32.png',
             'default48.png',
             'default64.png',
