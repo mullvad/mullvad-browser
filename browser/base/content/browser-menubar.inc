@@ -428,7 +428,6 @@
 <!-- Note: Items under here are cloned to the AppMenu Help submenu. The cloned items
      have their strings defined by appmenu-data-l10n-id. -->
                 <menuitem id="menu_openHelp"
-                          hidden="true"
                           data-l10n-id="menu-get-help"
                           appmenu-data-l10n-id="appmenu-get-help"
                           />

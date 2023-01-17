@@ -50,3 +50,6 @@ toolkit.jar:
 
 # used in about:logging on Android
   skin/classic/global/icons/open-in-new.svg                (../../shared/icons/open-in-new.svg)
+
+# For testing purposes
+  skin/classic/global/icons/mullvadbrowser.png             (../../shared/icons/mullvadbrowser.png)
