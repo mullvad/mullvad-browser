@@ -70,10 +70,10 @@ pref("browser.helperApps.deleteTempFileOnExit", true);
 pref("browser.download.enable_spam_prevention", true);
 
 // Misc privacy: Disk
-pref("signon.rememberSignons", false);
-pref("browser.formfill.enable", false);
+pref("signon.rememberSignons", false, locked);
+pref("browser.formfill.enable", false, locked);
 pref("signon.formlessCapture.enabled", false); // Added with tor-browser#41496
-pref("signon.autofillForms", false);
+pref("signon.autofillForms", false, locked);
 // Do not store extra data (form, scrollbar positions, cookies, POST data) for
 // the session restore functionality.
 pref("browser.sessionstore.privacy_level", 2);
@@ -311,7 +311,7 @@ pref("security.remote_settings.crlite_filters.enabled", false);
 pref("security.pki.crlite_mode", 0);
 
 // Disable website password breach alerts
-pref("signon.management.page.breach-alerts.enabled", false);
+pref("signon.management.page.breach-alerts.enabled", false, locked);
 
 // Disable remote "password recipes". They are a way to improve the UX of the
 // password manager by havinc specific heuristics for some sites.
@@ -352,7 +352,6 @@ pref("dom.disable_window_move_resize", true);
 // Set video VP9 to 0 for everyone (bug 22548)
 pref("media.benchmark.vp9.threshold", 0);
 pref("privacy.resistFingerprinting.block_mozAddonManager", true); // Bug 26114
-pref("dom.webaudio.enabled", false); // Bug 13017: Disable Web Audio API
 pref("dom.webmidi.enabled", false); //  Bug 41398: Disable Web MIDI API
 // tor-browser#42043: Stop reporting device IDs (and spoof their number without
 // RFP, RFP already reports 1 audioinput and 1 videoinput, but still has
@@ -482,7 +481,6 @@ pref("network.http.http2.enable-hpack-dump", false, locked);
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
 // (defense in depth measure)
 pref("network.gio.supported-protocols", "");
-pref("media.peerconnection.enabled", false); // Disable WebRTC interfaces
 // Mullvad Browser enables WebRTC by default, meaning that there the following prefs
 // are first-line defense, rather than "in depth" (mullvad-browser#40)
 // tor-browser#41667 - Defense in depth: use mDNS to avoid local IP leaks on Android too if user enables WebRTC
