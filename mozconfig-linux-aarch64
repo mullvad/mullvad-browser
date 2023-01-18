@@ -1,4 +1,4 @@
-. $topsrcdir/browser/config/mozconfigs/base-browser
+. $topsrcdir/browser/config/mozconfigs/mullvad-browser
 
 ac_add_options --target=aarch64-unknown-linux-gnu
 
