@@ -49,9 +49,9 @@ pref("browser.download.useDownloadDir", false);
 pref("browser.download.manager.addToRecentDocs", false);
 
 // Misc privacy: Disk
-pref("signon.rememberSignons", false);
-pref("browser.formfill.enable", false);
-pref("signon.autofillForms", false);
+pref("signon.rememberSignons", false, locked);
+pref("browser.formfill.enable", false, locked);
+pref("signon.autofillForms", false, locked);
 pref("browser.sessionstore.privacy_level", 2);
 // Use the in-memory media cache and increase its maximum size (#29120)
 pref("browser.privatebrowsing.forceMediaMemoryCache", true);
@@ -237,7 +237,7 @@ pref("security.remote_settings.crlite_filters.enabled", false);
 pref("security.pki.crlite_mode", 0);
 
 // Disable website password breach alerts
-pref("signon.management.page.breach-alerts.enabled", false);
+pref("signon.management.page.breach-alerts.enabled", false, locked);
 
 // Disable remote "password recipes"
 pref("signon.recipes.remoteRecipes.enabled", false);
@@ -264,7 +264,6 @@ pref("dom.disable_window_move_resize", true);
 pref("media.benchmark.vp9.threshold", 0);
 pref("dom.enable_resource_timing", false); // Bug 13024: To hell with this API
 pref("privacy.resistFingerprinting.block_mozAddonManager", true); // Bug 26114
-pref("dom.webaudio.enabled", false); // Bug 13017: Disable Web Audio API
 pref("dom.webmidi.enabled", false); //  Bug 41398: Disable Web MIDI API
 pref("dom.w3c_touch_events.enabled", 0); // Bug 10286: Always disable Touch API
 pref("dom.vr.enabled", false); // Bug 21607: Disable WebVR for now
@@ -368,7 +367,6 @@ pref("media.peerconnection.ice.relay_only", true);
 // Disables media devices but only if `media.peerconnection.enabled` is set to
 // `false` as well. (see bug 16328 for this defense-in-depth measure)
 pref("media.navigator.enabled", false);
-pref("media.peerconnection.enabled", false); // Disable WebRTC interfaces
 // GMPs (Gecko Media Plugins, https://wiki.mozilla.org/GeckoMediaPlugins)
 // We make sure they don't show up on the Add-on panel and confuse users.
 // And the external update/donwload server must not get pinged. We apply a
@@ -454,9 +452,6 @@ pref("extensions.abuseReport.enabled", false);
 pref("intl.multilingual.downloadEnabled", false);
 // Disk activity: Disable storage.sync (tor-browser#41424)
 pref("webextensions.storage.sync.enabled", false);
-
-// Toolbar layout
-pref("browser.uiCustomization.state", "{\"placements\":{\"widget-overflow-fixed-list\":[],\"PersonalToolbar\":[\"personal-bookmarks\"],\"nav-bar\":[\"back-button\",\"forward-button\",\"stop-reload-button\",\"urlbar-container\",\"security-level-button\",\"new-identity-button\",\"downloads-button\"],\"TabsToolbar\":[\"tabbrowser-tabs\",\"new-tab-button\",\"alltabs-button\"],\"toolbar-menubar\":[\"menubar-items\"],\"PanelUI-contents\":[\"home-button\",\"edit-controls\",\"zoom-controls\",\"new-window-button\",\"save-page-button\",\"print-button\",\"bookmarks-menu-button\",\"history-panelmenu\",\"find-button\",\"preferences-button\",\"add-ons-button\",\"developer-button\"],\"addon-bar\":[\"addonbar-closebutton\",\"status-bar\"]},\"seen\":[\"developer-button\"],\"dirtyAreaCache\":[\"PersonalToolbar\",\"nav-bar\",\"TabsToolbar\",\"toolbar-menubar\"],\"currentVersion\":14,\"newElementCount\":1}");
 
 // Enforce certificate pinning, see: https://bugs.torproject.org/16206
 pref("security.cert_pinning.enforcement_level", 2);

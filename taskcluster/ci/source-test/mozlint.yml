@@ -151,6 +151,7 @@ lintpref:
         files-changed:
             - 'modules/libpref/init/all.js'
             - 'modules/libpref/init/StaticPrefList.yaml'
+            - 'browser/app/profile/000-mullvad-browser.js'
             - 'browser/app/profile/001-base-profile.js'
             - 'browser/app/profile/firefox.js'
             - 'mobile/android/app/mobile.js'
