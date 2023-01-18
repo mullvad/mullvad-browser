@@ -1,4 +1,4 @@
-. $topsrcdir/browser/config/mozconfigs/base-browser
+. $topsrcdir/browser/config/mozconfigs/mullvad-browser
 
 # This mozconfig file is not used in official builds.
 # It is only intended to be used when doing incremental macOS builds
