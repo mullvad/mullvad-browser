@@ -1003,6 +1003,9 @@ set_define("BASE_BROWSER_VERSION", base_browser_version)
 set_define("BASE_BROWSER_VERSION_QUOTED", base_browser_version_quoted)
 
 
+set_define("MULLVAD_BROWSER", True)
+
+
 # Please do not add configure checks from here on.
 
 # Fallthrough to autoconf-based configure

@@ -254,6 +254,7 @@
 @RESPATH@/browser/defaults/permissions
 ; Remote Settings JSON dumps
 @RESPATH@/browser/defaults/settings
+@RESPATH@/browser/@PREF_DIR@/000-mullvad-browser.js
 @RESPATH@/browser/@PREF_DIR@/001-base-profile.js
 
 # channel-prefs.js has been removed on macOS.
