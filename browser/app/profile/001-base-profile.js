@@ -70,10 +70,10 @@ pref("browser.helperApps.deleteTempFileOnExit", true);
 pref("browser.download.enable_spam_prevention", true);
 
 // Misc privacy: Disk
-pref("signon.rememberSignons", false);
-pref("browser.formfill.enable", false);
+pref("signon.rememberSignons", false, locked);
+pref("browser.formfill.enable", false, locked);
 pref("signon.formlessCapture.enabled", false); // Added with tor-browser#41496
-pref("signon.autofillForms", false);
+pref("signon.autofillForms", false, locked);
 pref("extensions.formautofill.available", "");
 pref("extensions.formautofill.addresses.enabled", false);
 pref("extensions.formautofill.creditCards.enabled", false);
@@ -332,7 +332,7 @@ pref("security.remote_settings.crlite_filters.enabled", false);
 pref("security.pki.crlite_mode", 0);
 
 // Disable website password breach alerts
-pref("signon.management.page.breach-alerts.enabled", false);
+pref("signon.management.page.breach-alerts.enabled", false, locked);
 // tor-browser#42814: Opt out from Firefox relay by default.
 // Firefox would normally assign disabled when a user has been presented the
 // opportunity to use the service and opted out (see firefox.js).
@@ -506,7 +506,6 @@ pref("network.http.http2.enable-hpack-dump", false, locked);
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
 // (defense in depth measure)
 pref("network.gio.supported-protocols", "");
-pref("media.peerconnection.enabled", false); // Disable WebRTC interfaces
 // Mullvad Browser enables WebRTC by default, meaning that there the following prefs
 // are first-line defense, rather than "in depth" (mullvad-browser#40)
 // tor-browser#41667 - Defense in depth: use mDNS to avoid local IP leaks on Android too if user enables WebRTC
