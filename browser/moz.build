@@ -57,6 +57,7 @@ if CONFIG["MOZ_ARTIFACT_BUILDS"]:
 # These files are specified in this moz.build to pick up DIST_SUBDIR as set in
 # this directory, which is un-set in browser/app.
 JS_PREFERENCE_PP_FILES += [
+    "app/profile/000-mullvad-browser.js",
     "app/profile/001-base-profile.js",
     "app/profile/firefox.js",
 ]
