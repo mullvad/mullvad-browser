@@ -1,0 +1,10 @@
+. $topsrcdir/browser/config/mozconfigs/base-browser
+
+export MOZ_APP_BASENAME=MullvadBrowser
+mk_add_options MOZ_APP_DISPLAYNAME="Mullvad Browser"
+
+ac_add_options --with-user-appdir=Mullvad
+
+ac_add_options --with-relative-data-dir=../Data
+
+ac_add_options --with-distribution-id=net.mullvad

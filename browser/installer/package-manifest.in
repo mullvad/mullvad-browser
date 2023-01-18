@@ -269,6 +269,7 @@
 @RESPATH@/browser/defaults/settings/blocklists
 @RESPATH@/browser/defaults/settings/main
 @RESPATH@/browser/defaults/settings/security-state
+@RESPATH@/browser/@PREF_DIR@/000-mullvad-browser.js
 @RESPATH@/browser/@PREF_DIR@/001-base-profile.js
 
 ; Warning: changing the path to channel-prefs.js can cause bugs (Bug 756325)
