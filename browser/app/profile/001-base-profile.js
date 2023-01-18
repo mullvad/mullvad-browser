@@ -74,10 +74,10 @@ pref("browser.helperApps.deleteTempFileOnExit", true);
 pref("browser.download.enable_spam_prevention", true);
 
 // Misc privacy: Disk
-pref("signon.rememberSignons", false);
-pref("browser.formfill.enable", false);
+pref("signon.rememberSignons", false, locked);
+pref("browser.formfill.enable", false, locked);
 pref("signon.formlessCapture.enabled", false); // Added with tor-browser#41496
-pref("signon.autofillForms", false);
+pref("signon.autofillForms", false, locked);
 pref("extensions.formautofill.available", "");
 pref("extensions.formautofill.addresses.enabled", false);
 pref("extensions.formautofill.creditCards.enabled", false);
@@ -359,7 +359,7 @@ pref("security.remote_settings.crlite_filters.enabled", false);
 pref("security.pki.crlite_mode", 0);
 
 // Disable website password breach alerts
-pref("signon.management.page.breach-alerts.enabled", false);
+pref("signon.management.page.breach-alerts.enabled", false, locked);
 // tor-browser#42814: Opt out from Firefox relay by default.
 // Firefox would normally assign disabled when a user has been presented the
 // opportunity to use the service and opted out (see firefox.js).
@@ -515,7 +515,6 @@ pref("network.http.tailing.enabled", true, locked);
 // As of Firefox 118 (Bug 1843763), upstream does not add any protocol by
 // default, but setting it to blank seems a good idea (tor-browser#42054).
 pref("network.gio.supported-protocols", "");
-pref("media.peerconnection.enabled", false); // Disable WebRTC interfaces
 // Mullvad Browser enables WebRTC by default, meaning that there the following prefs
 // are first-line defense, rather than "in depth" (mullvad-browser#40)
 // tor-browser#41667 - Defense in depth: use mDNS to avoid local IP leaks on Android too if user enables WebRTC
@@ -527,9 +526,6 @@ pref("media.peerconnection.ice.default_address_only", true);
 pref("media.peerconnection.ice.no_host", true);
 pref("media.peerconnection.ice.proxy_only_if_behind_proxy", true);
 
-// Disables media devices but only if `media.peerconnection.enabled` is set to
-// `false` as well. (see bug 16328 for this defense-in-depth measure)
-pref("media.navigator.enabled", false);
 // GMPs (Gecko Media Plugins, https://wiki.mozilla.org/GeckoMediaPlugins)
 // We make sure they don't show up on the Add-on panel and confuse users.
 // And the external update/donwload server must not get pinged. We apply a
