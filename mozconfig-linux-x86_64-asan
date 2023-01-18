@@ -1,4 +1,4 @@
-. $topsrcdir/browser/config/mozconfigs/base-browser
+. $topsrcdir/browser/config/mozconfigs/mullvad-browser
 
 export CFLAGS="-fsanitize=address -Dxmalloc=myxmalloc"
 export CXXFLAGS="-fsanitize=address -Dxmalloc=myxmalloc"
