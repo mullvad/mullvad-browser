@@ -49,9 +49,9 @@ pref("browser.download.useDownloadDir", false);
 pref("browser.download.manager.addToRecentDocs", false);
 
 // Misc privacy: Disk
-pref("signon.rememberSignons", false);
-pref("browser.formfill.enable", false);
-pref("signon.autofillForms", false);
+pref("signon.rememberSignons", false, locked);
+pref("browser.formfill.enable", false, locked);
+pref("signon.autofillForms", false, locked);
 pref("browser.sessionstore.privacy_level", 2);
 // Use the in-memory media cache and increase its maximum size (#29120)
 pref("browser.privatebrowsing.forceMediaMemoryCache", true);
@@ -246,7 +246,7 @@ pref("security.remote_settings.crlite_filters.enabled", false);
 pref("security.pki.crlite_mode", 0);
 
 // Disable website password breach alerts
-pref("signon.management.page.breach-alerts.enabled", false);
+pref("signon.management.page.breach-alerts.enabled", false, locked);
 
 // Disable remote "password recipes"
 pref("signon.recipes.remoteRecipes.enabled", false);
@@ -273,7 +273,6 @@ pref("dom.disable_window_move_resize", true);
 pref("media.benchmark.vp9.threshold", 0);
 pref("dom.enable_resource_timing", false); // Bug 13024: To hell with this API
 pref("privacy.resistFingerprinting.block_mozAddonManager", true); // Bug 26114
-pref("dom.webaudio.enabled", false); // Bug 13017: Disable Web Audio API
 pref("dom.webmidi.enabled", false); //  Bug 41398: Disable Web MIDI API
 pref("dom.w3c_touch_events.enabled", 0); // Bug 10286: Always disable Touch API
 pref("dom.vr.enabled", false); // Bug 21607: Disable WebVR for now
@@ -370,7 +369,6 @@ pref("network.http.http2.enable-hpack-dump", false, locked);
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
 // (defense in depth measure)
 pref("network.gio.supported-protocols", "");
-pref("media.peerconnection.enabled", false); // Disable WebRTC interfaces
 // Mullvad browser enables WebRTC by default, therefore the following 2 prefs
 // are first-line defense, rather than "in depth" (mullvad-browser#40)
 // tor-browser#41667 - Defense in depth: use mDNS to avoid local IP leaks on Android too if user enables WebRTC
