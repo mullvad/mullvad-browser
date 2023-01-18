@@ -1,4 +1,4 @@
-. $topsrcdir/browser/config/mozconfigs/base-browser
+. $topsrcdir/browser/config/mozconfigs/mullvad-browser
 
 ac_add_options --target=x86_64-w64-mingw32
 ac_add_options --with-toolchain-prefix=x86_64-w64-mingw32-
@@ -8,7 +8,6 @@ ac_add_options --enable-strip
 # Bits is Background Intelligent Transfer Service
 ac_add_options --disable-bits-download
 ac_add_options --disable-maintenance-service
-ac_add_options --disable-default-browser-agent
 
 # See bug #13379
 ac_add_options --enable-nss-mar
