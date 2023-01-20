@@ -1578,6 +1578,12 @@ nsresult nsToolkitProfileService::SelectStartupProfile(
 
     rv = CreateDefaultProfile(getter_AddRefs(mCurrent));
     if (NS_SUCCEEDED(rv)) {
+      // tor-browser#41542: We do not need to support legacy versions.
+      // For now, we just use an ifdef, but we could write a patch to disable
+      // this behavior through a build-time flag, should Mozilla be interested
+      // in taking it.
+      // See also https://bugzilla.mozilla.org/show_bug.cgi?id=1770174
+#ifndef BASE_BROWSER
       // If there is only one profile and it isn't meant to be the profile that
       // older versions of Firefox use then we must create a default profile
       // for older versions of Firefox to avoid the existing profile being
@@ -1589,6 +1595,7 @@ nsresult nsToolkitProfileService::SelectStartupProfile(
                       getter_AddRefs(newProfile));
         SetNormalDefault(newProfile);
       }
+#endif
 
       rv = Flush();
       NS_ENSURE_SUCCESS(rv, rv);
