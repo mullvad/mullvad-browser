@@ -12,14 +12,12 @@ const { PromiseUtils } = ChromeUtils.import(
 );
 
 XPCOMUtils.defineLazyModuleGetters(this, {
-  AppConstants: "resource://gre/modules/AppConstants.jsm",
   AddonManager: "resource://gre/modules/AddonManager.jsm",
   IgnoreLists: "resource://gre/modules/IgnoreLists.jsm",
   OpenSearchEngine: "resource://gre/modules/OpenSearchEngine.jsm",
   Region: "resource://gre/modules/Region.jsm",
   RemoteSettings: "resource://services-settings/remote-settings.js",
   SearchEngine: "resource://gre/modules/SearchEngine.jsm",
-  SearchEngineSelector: "resource://gre/modules/SearchEngineSelector.jsm",
   SearchSettings: "resource://gre/modules/SearchSettings.jsm",
   SearchStaticData: "resource://gre/modules/SearchStaticData.jsm",
   SearchUtils: "resource://gre/modules/SearchUtils.jsm",
@@ -239,11 +237,6 @@ SearchService.prototype = {
     Services.obs.addObserver(this, Region.REGION_TOPIC);
 
     try {
-      // Create the search engine selector.
-      this._engineSelector = new SearchEngineSelector(
-        this._handleConfigurationUpdated.bind(this)
-      );
-
       // See if we have a settings file so we don't have to parse a bunch of XML.
       let settings = await this._settings.get();
 
@@ -1164,26 +1157,9 @@ SearchService.prototype = {
   },
 
   async _fetchEngineSelectorEngines() {
-    let searchEngineSelectorProperties = {
-      locale: Services.locale.appLocaleAsBCP47,
-      region: Region.home || "default",
-      channel: AppConstants.MOZ_APP_VERSION_DISPLAY.endsWith("esr")
-        ? "esr"
-        : AppConstants.MOZ_UPDATE_CHANNEL,
-      experiment: NimbusFeatures.search.getVariable("experiment") ?? "",
-      distroID: SearchUtils.distroID ?? "",
-    };
-
-    for (let [key, value] of Object.entries(searchEngineSelectorProperties)) {
-      this._settings.setAttribute(key, value);
-    }
-
-    let {
-      engines,
-      privateDefault,
-    } = await this._engineSelector.fetchEngineConfiguration(
-      searchEngineSelectorProperties
-    );
+    const engines = [
+      { webExtension: { id: "ddg@search.mozilla.org" }, orderHint: 100 },
+    ];
 
     for (let e of engines) {
       if (!e.webExtension) {
@@ -1192,7 +1168,7 @@ SearchService.prototype = {
       e.webExtension.locale = e.webExtension?.locale ?? SearchUtils.DEFAULT_TAG;
     }
 
-    return { engines, privateDefault };
+    return { engines, privateDefault: undefined };
   },
 
   _setDefaultAndOrdersFromSelector(engines, privateDefault) {
