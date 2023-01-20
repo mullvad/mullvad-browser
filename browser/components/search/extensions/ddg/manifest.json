@@ -19,7 +19,7 @@
       "name": "DuckDuckGo",
       "search_url": "https://duckduckgo.com/",
       "search_form": "https://duckduckgo.com/",
-      "search_url_get_params": "t=ffab&q={searchTerms}",
+      "search_url_get_params": "q={searchTerms}",
       "suggest_url": "https://ac.duckduckgo.com/ac/",
       "suggest_url_get_params": "q={searchTerms}&type=list"
     }
