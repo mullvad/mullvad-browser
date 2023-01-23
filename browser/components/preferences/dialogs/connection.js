@@ -484,12 +484,13 @@ var gConnectionsDialog = {
 
     let trrModeCurrent = Preferences.get("network.trr.mode").value;
     if (trrModeCheckbox.checked) {
+      // privacy-browser#19: Prefer TRR-only
       //Check if the user has set the value themself through about:config.
-      if (trrModeCurrent == Ci.nsIDNSService.MODE_TRRONLY) {
-        return Ci.nsIDNSService.MODE_TRRONLY;
+      if (trrModeCurrent == Ci.nsIDNSService.MODE_TRRFIRST) {
+        return trrModeCurrent;
       }
-      // we treat checked/enabled as mode 2
-      return Ci.nsIDNSService.MODE_TRRFIRST;
+      // we treat checked/enabled as mode TRR-only
+      return Ci.nsIDNSService.MODE_TRRONLY;
     }
 
     return Ci.nsIDNSService.MODE_TRROFF;
