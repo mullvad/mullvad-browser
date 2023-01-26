@@ -2556,11 +2556,23 @@ BrowserGlue.prototype = {
 
       {
         task: () => {
-          // Init the url query stripping list.
-          let urlQueryStrippingListService = Cc[
-            "@mozilla.org/query-stripping-list-service;1"
-          ].getService(Ci.nsIURLQueryStrippingListService);
-          urlQueryStrippingListService.init();
+          // tor-browser#40788: Do not initialize
+          // nsIURLQueryStrippingListService to prevent it from initializing
+          // its remote settings if it's disabled.
+          // See also https://bugzilla.mozilla.org/show_bug.cgi?id=1812594
+          let enabledPref = "privacy.query_stripping.enabled";
+          let enabledPBMPref = "privacy.query_stripping.enabled.pbmode";
+
+          if (
+            Services.prefs.getBoolPref(enabledPref, false) ||
+            Services.prefs.getBoolPref(enabledPBMPref, false)
+          ) {
+            // Init the url query stripping list.
+            let urlQueryStrippingListService = Cc[
+              "@mozilla.org/query-stripping-list-service;1"
+            ].getService(Ci.nsIURLQueryStrippingListService);
+            urlQueryStrippingListService.init();
+          }
         },
       },
 
