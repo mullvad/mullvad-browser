@@ -116,6 +116,7 @@ pref("datareporting.healthreport.uploadEnabled", false);
 pref("datareporting.policy.dataSubmissionEnabled", false);
 // Make sure Unified Telemetry is really disabled, see: #18738.
 pref("toolkit.telemetry.unified", false);
+// This needs to be locked, or nightly builds will automatically lock it to true
 pref("toolkit.telemetry.enabled", false, locked);
 pref("toolkit.telemetry.server", "data:,");
 pref("toolkit.telemetry.archive.enabled", false);
