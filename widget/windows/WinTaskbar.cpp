@@ -211,7 +211,21 @@ bool WinTaskbar::GenerateAppUserModelID(nsAString& aAppUserModelId,
                                         bool aPrivateBrowsing) {
   // If marked as such in prefs, use a hash of the profile path for the id
   // instead of the install path hash setup by the installer.
-  if (Preferences::GetBool("taskbar.grouping.useprofile", false)) {
+  bool useProfile = Preferences::GetBool("taskbar.grouping.useprofile", false);
+
+  {
+    // For portable mode, force the AUMID to be based on the profile directory
+    // instead of reading it from the registry.
+    bool isPortable = true;
+    // Do not even check if taskbar.grouping.useprofile is already true.
+    if (!useProfile &&
+        NS_SUCCEEDED(gDirServiceProvider->GetIsPortableMode(&isPortable)) &&
+        isPortable) {
+      useProfile = true;
+    }
+  }
+
+  if (useProfile) {
     nsCOMPtr<nsIFile> profileDir;
     NS_GetSpecialDirectory(NS_APP_USER_PROFILE_50_DIR,
                            getter_AddRefs(profileDir));
