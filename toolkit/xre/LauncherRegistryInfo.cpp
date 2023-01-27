@@ -17,6 +17,9 @@
 #include <string>
 #include <type_traits>
 
+// tor-browser#42163
+#include <filesystem>
+
 #define EXPAND_STRING_MACRO2(t) t
 #define EXPAND_STRING_MACRO(t) EXPAND_STRING_MACRO2(t)
 
@@ -586,6 +589,45 @@ LauncherRegistryInfo::GetBrowserStartTimestamp() {
 
 LauncherResult<std::wstring>
 LauncherRegistryInfo::BuildDefaultBlocklistFilename() {
+  // tor-browser#42163: Make the DLL blocklist obey portable mode
+  {
+    std::filesystem::path appDir;
+    {
+      mozilla::UniquePtr<wchar_t[]> appDirStr = GetFullBinaryPath();
+      if (!appDirStr) {
+        return LAUNCHER_ERROR_FROM_WIN32(ERROR_NOT_ENOUGH_MEMORY);
+      }
+      appDir = std::filesystem::path(appDirStr.get()).parent_path();
+    }
+    std::error_code ec;
+    const bool isPortable =
+        !std::filesystem::exists(appDir / L"system-install", ec);
+    if (ec) {
+      // exists is supposed not to set an error when a file does not exist
+      // (whereas other functions such as is_regular_file sets it).
+      // The standard is quite opaque about the meaning of the numeric codes.
+      // Moreover, we use libcxx on Windows, and it seems they created a sort of
+      // POSIX compatibility layer (e.g., for stat), see
+      // libcxx/src/filesystem/posix_compat.h.
+      // std::error_code has a message function, but all the various macro are
+      // specific to handle Windows errors, so we have to use the generic error.
+      // At least, at the moment the error is dropped eventually.
+      return LAUNCHER_ERROR_GENERIC();
+    }
+    if (isPortable) {
+      // RELATIVE_DATA_DIR must have forward slashes, but weakly_canonical
+      // already changes them to backslashes.
+      const std::filesystem::path blocklistPath =
+          std::filesystem::weakly_canonical(
+              appDir / L"" RELATIVE_DATA_DIR / L"blocklist", ec);
+      if (ec) {
+        return LAUNCHER_ERROR_GENERIC();
+      }
+      return blocklistPath.wstring();
+    }
+    // Normal installation, continue on Mozilla's path
+  }
+
   // These flags are chosen to avoid I/O, see bug 1363398.
   const DWORD flags =
       KF_FLAG_SIMPLE_IDLIST | KF_FLAG_DONT_VERIFY | KF_FLAG_NO_ALIAS;
@@ -618,6 +660,8 @@ LauncherRegistryInfo::BuildDefaultBlocklistFilename() {
 }
 
 LauncherResult<std::wstring> LauncherRegistryInfo::GetBlocklistFileName() {
+  // tor-browser#42163: Make the DLL blocklist obey portable mode
+#ifndef BASE_BROWSER_VERSION
   LauncherResult<Disposition> disposition = Open();
   if (disposition.isErr()) {
     return disposition.propagateErr();
@@ -633,19 +677,19 @@ LauncherResult<std::wstring> LauncherRegistryInfo::GetBlocklistFileName() {
     UniquePtr<wchar_t[]> buf = readResult.unwrap();
     return std::wstring(buf.get());
   }
-
+#endif
   LauncherResult<std::wstring> defaultBlocklistPath =
       BuildDefaultBlocklistFilename();
   if (defaultBlocklistPath.isErr()) {
     return defaultBlocklistPath.propagateErr();
   }
-
+#ifndef BASE_BROWSER_VERSION
   LauncherVoidResult writeResult = WriteRegistryValueString(
       mRegKey, ResolveBlocklistValueName(), defaultBlocklistPath.inspect());
   if (writeResult.isErr()) {
     return writeResult.propagateErr();
   }
-
+#endif
   return defaultBlocklistPath;
 }
 
