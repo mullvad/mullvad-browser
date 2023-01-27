@@ -109,6 +109,10 @@ nsIFile* gDataDirHome = nullptr;
 nsCOMPtr<nsIFile> gDataDirProfileLocal = nullptr;
 nsCOMPtr<nsIFile> gDataDirProfile = nullptr;
 
+#if defined(RELATIVE_DATA_DIR)
+mozilla::Maybe<nsCOMPtr<nsIFile>> gDataDirPortable;
+#endif
+
 // These are required to allow nsXREDirProvider to be usable in xpcshell tests.
 // where gAppData is null.
 #if defined(XP_MACOSX) || defined(XP_UNIX)
@@ -1198,10 +1202,96 @@ nsresult nsXREDirProvider::SetUserDataProfileDirectory(nsCOMPtr<nsIFile>& aFile,
   return NS_OK;
 }
 
+#if defined(RELATIVE_DATA_DIR)
+nsresult nsXREDirProvider::GetPortableDataDir(nsIFile** aFile,
+                                              bool& aIsPortable) {
+  if (gDataDirPortable) {
+    if (*gDataDirPortable) {
+      nsresult rv = (*gDataDirPortable)->Clone(aFile);
+      NS_ENSURE_SUCCESS(rv, rv);
+      aIsPortable = true;
+    } else {
+      aIsPortable = false;
+    }
+    return NS_OK;
+  }
+
+  nsCOMPtr<nsIFile> exeFile, exeDir;
+  bool persistent = false;
+  nsresult rv =
+      GetFile(XRE_EXECUTABLE_FILE, &persistent, getter_AddRefs(exeFile));
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = exeFile->Normalize();
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = exeFile->GetParent(getter_AddRefs(exeDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+
+#  if defined(XP_MACOSX)
+  nsAutoString exeDirPath;
+  rv = exeDir->GetPath(exeDirPath);
+  NS_ENSURE_SUCCESS(rv, rv);
+  // When the browser is installed in /Applications, we never run in portable
+  // mode.
+  if (exeDirPath.LowerCaseFindASCII("/applications/") == 0) {
+    aIsPortable = false;
+    return NS_OK;
+  }
+#  endif
+
+  nsCOMPtr<nsIFile> systemInstallFile;
+  rv = exeDir->Clone(getter_AddRefs(systemInstallFile));
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = systemInstallFile->AppendNative("system-install"_ns);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  bool exists = false;
+  rv = systemInstallFile->Exists(&exists);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (exists) {
+    aIsPortable = false;
+    gDataDirPortable.emplace(nullptr);
+    return NS_OK;
+  }
+
+  nsCOMPtr<nsIFile> localDir = exeDir;
+#  if defined(XP_MACOSX)
+  rv = exeDir->GetParent(getter_AddRefs(localDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+  exeDir = localDir;
+  rv = exeDir->GetParent(getter_AddRefs(localDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+#  endif
+  rv = localDir->SetRelativePath(localDir.get(),
+                                 nsLiteralCString(RELATIVE_DATA_DIR));
+  NS_ENSURE_SUCCESS(rv, rv);
+
+#  if defined(XP_MACOSX)
+  // On macOS we try to create the directory immediately to switch to
+  // system-install mode if needed (e.g., when running from the DMG).
+  rv = localDir->Exists(&exists);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (!exists) {
+    rv = localDir->Create(nsIFile::DIRECTORY_TYPE, 0700);
+    if (NS_FAILED(rv)) {
+      aIsPortable = false;
+      return NS_OK;
+    }
+  }
+#  endif
+
+  gDataDirPortable.emplace(localDir);
+  rv = (*gDataDirPortable)->Clone(aFile);
+  NS_ENSURE_SUCCESS(rv, rv);
+  aIsPortable = true;
+  return rv;
+}
+#endif
+
 nsresult nsXREDirProvider::GetUserDataDirectoryHome(nsIFile** aFile,
                                                     bool aLocal) {
   // Copied from nsAppFileLocationProvider (more or less)
   nsresult rv;
+  NS_ENSURE_ARG_POINTER(aFile);
   nsCOMPtr<nsIFile> localDir;
 
   if (aLocal && gDataDirHomeLocal) {
@@ -1210,6 +1300,24 @@ nsresult nsXREDirProvider::GetUserDataDirectoryHome(nsIFile** aFile,
   if (!aLocal && gDataDirHome) {
     return gDataDirHome->Clone(aFile);
   }
+
+#if defined(RELATIVE_DATA_DIR)
+  RefPtr<nsXREDirProvider> singleton = GetSingleton();
+  if (!singleton) {
+    return NS_ERROR_OUT_OF_MEMORY;
+  }
+  bool isPortable = false;
+  rv = singleton->GetPortableDataDir(getter_AddRefs(localDir), isPortable);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (isPortable) {
+    if (aLocal) {
+      rv = localDir->AppendNative("Caches"_ns);
+      NS_ENSURE_SUCCESS(rv, rv);
+    }
+    NS_IF_ADDREF(*aFile = localDir);
+    return rv;
+  }
+#endif
 
 #if defined(XP_MACOSX)
   FSRef fsRef;
@@ -1403,6 +1511,13 @@ nsresult nsXREDirProvider::AppendProfilePath(nsIFile* aFile, bool aLocal) {
   if (!gAppData) {
     return NS_OK;
   }
+
+#if defined(RELATIVE_DATA_DIR)
+  if (gDataDirPortable && *gDataDirPortable) {
+    // Do nothing in portable mode
+    return NS_OK;
+  }
+#endif
 
   nsAutoCString profile;
   nsAutoCString appName;
