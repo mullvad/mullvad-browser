@@ -49,3 +49,5 @@ fi
 
 # tor-browser#42337
 ac_add_options --enable-geckodriver
+
+ac_add_options --with-relative-data-dir=BaseBrowser/Data/Browser
