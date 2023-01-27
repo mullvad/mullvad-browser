@@ -20,4 +20,9 @@ interface nsIXREDirProvider : nsISupports
    * Gets the hash for the current installation directory.
    */
   AString getInstallHash();
+
+  /**
+   * Tells whether the browser has been started in portable mode.
+   */
+  readonly attribute boolean isPortableMode;
 };
