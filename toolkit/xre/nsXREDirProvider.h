@@ -155,6 +155,14 @@ class nsXREDirProvider final : public nsIDirectoryServiceProvider2,
  private:
   static nsresult SetUserDataProfileDirectory(nsCOMPtr<nsIFile>& aFile,
                                               bool aLocal);
+
+#if defined(RELATIVE_DATA_DIR)
+  /**
+   * Get the path to the portable data dir, if the application is running in
+   * portable mode.
+   */
+  nsresult GetPortableDataDir(nsIFile** aFile, bool& aIsPortable);
+#endif
 };
 
 #endif
