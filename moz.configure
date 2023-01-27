@@ -954,6 +954,25 @@ set_define("ZLIB_IN_MOZGLUE", zlib_in_mozglue)
 
 
 option(
+    "--with-relative-data-dir",
+    nargs=1,
+    help="Sets the data directories to be relative to the application directory",
+)
+
+
+@depends("--with-relative-data-dir", target)
+@imports("json")
+def relative_data_dir(value, target):
+    if value and target.os == "Android":
+        die("--with-relative-data-dir is not supported on Android")
+    if value:
+        return json.dumps(value[0])
+
+
+set_define("RELATIVE_DATA_DIR", relative_data_dir)
+
+
+option(
     "--with-base-browser-version",
     nargs=1,
     help="Set the Base Browser version, e.g., 7.0a1",
