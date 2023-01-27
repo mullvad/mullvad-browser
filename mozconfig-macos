@@ -4,3 +4,6 @@ ac_add_options --enable-strip
 
 # See bug #41131
 ac_add_options --disable-update-agent
+
+# For base-browser we do not enable portable mode on macOS.
+ac_add_options --without-relative-data-dir
