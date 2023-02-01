@@ -97,7 +97,7 @@ def source_repo_header(output):
         output.write("#define MOZ_SOURCE_STAMP %s\n" % changeset)
 
     if repo and buildconfig.substs.get("MOZ_INCLUDE_SOURCE_INFO"):
-        source = "%s/rev/%s" % (repo, changeset)
+        source = "%s/-/commit/%s" % (repo, changeset)
         output.write("#define MOZ_SOURCE_REPO %s\n" % repo)
         output.write("#define MOZ_SOURCE_URL %s\n" % source)
 
