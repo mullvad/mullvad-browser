@@ -8,12 +8,9 @@ import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
-  AboutHomeStartupCache: "resource:///modules/AboutHomeStartupCache.sys.mjs",
+  // newtab component is disabled. tor-browser#43886
   AWToolbarButton: "resource:///modules/aboutwelcome/AWToolbarUtils.sys.mjs",
   ASRouter: "resource:///modules/asrouter/ASRouter.sys.mjs",
-  ASRouterDefaultConfig:
-    "resource:///modules/asrouter/ASRouterDefaultConfig.sys.mjs",
-  ASRouterNewTabHook: "resource:///modules/asrouter/ASRouterNewTabHook.sys.mjs",
   AddonManager: "resource://gre/modules/AddonManager.sys.mjs",
   BackupService: "resource:///modules/backup/BackupService.sys.mjs",
   BrowserSearchTelemetry:
@@ -396,10 +393,7 @@ BrowserGlue.prototype = {
 
   // cleanup (called on application shutdown)
   _dispose: function BG__dispose() {
-    // AboutHomeStartupCache might write to the cache during
-    // quit-application-granted, so we defer uninitialization
-    // until here.
-    lazy.AboutHomeStartupCache.uninit();
+    // newtab component is disabled. tor-browser#43886
 
     if (this._lateTasksIdleObserver) {
       this._userIdleService.removeIdleObserver(
@@ -1231,13 +1225,6 @@ BrowserGlue.prototype = {
           ) {
             await lazy.AWToolbarButton.maybeAddSetupButton();
           }
-        },
-      },
-
-      {
-        name: "ASRouterNewTabHook.createInstance",
-        task: () => {
-          lazy.ASRouterNewTabHook.createInstance(lazy.ASRouterDefaultConfig());
         },
       },
 
