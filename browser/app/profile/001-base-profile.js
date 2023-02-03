@@ -4,6 +4,11 @@
 // Use the OS locale by default (tor-browser#17400)
 pref("intl.locale.requested", "");
 
+// Home page and new tab is blank rather than Firefox Home (Activity Stream).
+// tor-browser#31575 and tor-browser#30662
+pref("browser.startup.homepage", "about:blank");
+pref("browser.newtabpage.enabled", false);
+
 // Disable initial homepage notifications
 pref("browser.search.update", false);
 pref("startup.homepage_welcome_url", "");
@@ -12,12 +17,11 @@ pref("startup.homepage_welcome_url.additional", "");
 // Disable Firefox Welcome Dialog
 pref("browser.aboutwelcome.enabled", false);
 
-// Set a generic, default URL that will be opened in a tab after an update.
-// Typically, this will not be used; instead, the <update> element within
-// each update manifest should contain attributes similar to:
-//   actions="showURL"
-//   openURL="https://blog.torproject.org/tor-browser-55a2-released"
-pref("startup.homepage_override_url", "https://blog.torproject.org/category/applications");
+// Bug 41668: allow users to apply updates. This is set also in firefox.js for
+// all platforms, except for Windows. As explained on firefox.js, Firefox uses a
+// per-installation preference on Windows. However, we patch this behavior, and
+// we set this preference also for Windows.
+pref("app.update.auto", true);
 
 // Try to nag a bit more about updates: Pop up a restart dialog an hour after the initial dialog
 pref("app.update.promptWaitTime", 3600);
@@ -52,6 +56,12 @@ pref("browser.sessionstore.privacy_level", 2);
 // Use the in-memory media cache and increase its maximum size (#29120)
 pref("browser.privatebrowsing.forceMediaMemoryCache", true);
 pref("media.memory_cache_max_size", 16384);
+// Disable restore in case of crash (tor-browser#41503)
+// This should not be needed in PBM, but we added it anyway like other options.
+pref("browser.sessionstore.resume_from_crash", false);
+// Disable capturing thumbnails (tor-browser#41595)
+// Also not needed in PBM at the moment.
+pref("browser.pagethumbnails.capturing_disabled", true);
 
 // Enable HTTPS-Only mode (tor-browser#19850)
 pref("dom.security.https_only_mode", true);
@@ -151,7 +161,6 @@ pref("services.sync.engine.passwords", false);
 pref("services.sync.engine.prefs", false);
 pref("services.sync.engine.tabs", false);
 pref("extensions.getAddons.cache.enabled", false); // https://blog.mozilla.org/addons/how-to-opt-out-of-add-on-metadata-updates/
-pref("browser.newtabpage.enabled", false);
 pref("browser.search.region", "US"); // The next two prefs disable GeoIP search lookups (#16254)
 pref("browser.search.geoip.url", "");
 pref("browser.fixup.alternate.enabled", false); // Bug #16783: Prevent .onion fixups
@@ -350,10 +359,16 @@ pref("network.http.http2.enable-hpack-dump", false, locked);
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
 // (defense in depth measure)
 pref("network.gio.supported-protocols", "");
-pref("media.peerconnection.enabled", false); // Disable WebRTC interfaces
+// Mullvad browser enables WebRTC by default, therefore the following 2 prefs are
+// first-line defense, rather than "in depth" (privacy-browser#40)
+// tor-browser#41667 - Defense in depth: use mDNS to avoid local IP leaks on Android too if user enables WebRTC
+pref("media.peerconnection.ice.obfuscate_host_addresses", true);
+// tor-browser#41671 - Defense in depth: connect using TURN only, to avoid IP leaks if user enables WebRTC
+pref("media.peerconnection.ice.relay_only", true);
 // Disables media devices but only if `media.peerconnection.enabled` is set to
 // `false` as well. (see bug 16328 for this defense-in-depth measure)
 pref("media.navigator.enabled", false);
+pref("media.peerconnection.enabled", false); // Disable WebRTC interfaces
 // GMPs (Gecko Media Plugins, https://wiki.mozilla.org/GeckoMediaPlugins)
 // We make sure they don't show up on the Add-on panel and confuse users.
 // And the external update/donwload server must not get pinged. We apply a
@@ -403,6 +418,14 @@ pref("captivedetect.canonicalURL", "");
 // DOM Push features are disabled by default via other prefs).
 // See tor-browser#18801.
 pref("dom.push.serverURL", "");
+
+#ifdef XP_WIN
+// tor-browser#41683: Disable the network process on Windows
+// Mozilla already disables the network process for HTTP.
+// With this preference, we completely disable it, because we found that it
+// breaks stuff with mingw. See also tor-browser#41489.
+pref("network.process.enabled", false);
+#endif
 
 // Extension support
 pref("extensions.autoDisableScopes", 0);
@@ -464,8 +487,8 @@ pref("browser.urlbar.suggest.topsites", false);
 // is only reported via telemetry (which is disabled). See tor-browser#40048.
 pref("corroborator.enabled", false);
 
-// prefs to disable jump-list entries in the taskbar on Windows (see bug #12885)
 #ifdef XP_WIN
+// prefs to disable jump-list entries in the taskbar on Windows (see bug #12885)
 // this pref changes the app's set AUMID to be dependent on the profile path, rather than
 // attempting to read it from the registry; this is necessary so that the file generated
 // by the jumplist system can be properly deleted if it is disabled
@@ -474,6 +497,10 @@ pref("browser.taskbar.lists.enabled", false);
 pref("browser.taskbar.lists.frequent.enabled", false);
 pref("browser.taskbar.lists.tasks.enabled", false);
 pref("browser.taskbar.lists.recent.enabled", false);
+
+// Do not re-open the browser automatically after reboots when "Restart apps" is
+// enabled (tor-browser#41503)
+pref("toolkit.winRegisterApplicationRestart", false);
 #endif
 
 // If we are bundling fonts, whitelist those bundled fonts, and restrict system fonts to a selection.
