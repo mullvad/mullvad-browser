@@ -380,10 +380,14 @@ var gHomePane = {
 
     if (controllingExtension && controllingExtension.id) {
       newValue = controllingExtension.id;
+    } else if (isBlank) {
+      // For base-browser, we want to check isBlank first since the default page
+      // is also the blank page, but we only have a menu option for
+      // HOME_MODE_BLANK, rather than HOME_MODE_FIREFOX_HOME.
+      // See tor-browser#41609.
+      newValue = this.HOME_MODE_BLANK;
     } else if (isDefault) {
       newValue = this.HOME_MODE_FIREFOX_HOME;
-    } else if (isBlank) {
-      newValue = this.HOME_MODE_BLANK;
     } else {
       newValue = this.HOME_MODE_CUSTOM;
     }

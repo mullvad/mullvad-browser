@@ -18,7 +18,6 @@ const { AppConstants } = ChromeUtils.import(
 );
 
 XPCOMUtils.defineLazyModuleGetters(this, {
-  AboutNewTab: "resource:///modules/AboutNewTab.jsm",
   ActorManagerParent: "resource://gre/modules/ActorManagerParent.jsm",
   AddonManager: "resource://gre/modules/AddonManager.jsm",
   AppMenuNotifications: "resource://gre/modules/AppMenuNotifications.jsm",
@@ -75,7 +74,6 @@ XPCOMUtils.defineLazyModuleGetters(this, {
   RFPHelper: "resource://gre/modules/RFPHelper.jsm",
   SafeBrowsing: "resource://gre/modules/SafeBrowsing.jsm",
   Sanitizer: "resource:///modules/Sanitizer.jsm",
-  SaveToPocket: "chrome://pocket/content/SaveToPocket.jsm",
   ScreenshotsUtils: "resource:///modules/ScreenshotsUtils.jsm",
   SearchSERPTelemetry: "resource:///modules/SearchSERPTelemetry.jsm",
   SessionStartup: "resource:///modules/sessionstore/SessionStartup.jsm",
@@ -219,28 +217,6 @@ let JSWINDOWACTORS = {
     },
     matches: ["about:logins", "about:logins?*", "about:loginsimportreport"],
     allFrames: true,
-    remoteTypes: ["privilegedabout"],
-  },
-
-  AboutNewTab: {
-    parent: {
-      moduleURI: "resource:///actors/AboutNewTabParent.jsm",
-    },
-    child: {
-      moduleURI: "resource:///actors/AboutNewTabChild.jsm",
-      events: {
-        DOMContentLoaded: {},
-        pageshow: {},
-        visibilitychange: {},
-      },
-    },
-    // The wildcard on about:newtab is for the ?endpoint query parameter
-    // that is used for snippets debugging. The wildcard for about:home
-    // is similar, and also allows for falling back to loading the
-    // about:home document dynamically if an attempt is made to load
-    // about:home?jscache from the AboutHomeStartupCache as a top-level
-    // load.
-    matches: ["about:home*", "about:welcome", "about:newtab*"],
     remoteTypes: ["privilegedabout"],
   },
 
@@ -1251,8 +1227,6 @@ BrowserGlue.prototype = {
       Normandy.init();
     }
 
-    SaveToPocket.init();
-
     AboutHomeStartupCache.init();
 
     Services.obs.notifyObservers(null, "browser-ui-startup-complete");
@@ -1575,8 +1549,6 @@ BrowserGlue.prototype = {
 
   // the first browser window has finished initializing
   _onFirstWindowLoaded: function BG__onFirstWindowLoaded(aWindow) {
-    AboutNewTab.init();
-
     TabCrashHandler.init();
 
     ProcessHangMonitor.init();
@@ -5780,12 +5752,8 @@ var AboutHomeStartupCache = {
       return { pageInputStream: null, scriptInputStream: null };
     }
 
-    let state = AboutNewTab.activityStream.store.getState();
-    return new Promise(resolve => {
-      this._cacheDeferred = resolve;
-      this.log.trace("Parent is requesting cache streams.");
-      this._procManager.sendAsyncMessage(this.CACHE_REQUEST_MESSAGE, { state });
-    });
+    this.log.error("Activity Stream is disabled.");
+    return { pageInputStream: null, scriptInputStream: null };
   },
 
   /**
