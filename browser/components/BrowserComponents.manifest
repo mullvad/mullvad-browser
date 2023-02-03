@@ -15,9 +15,8 @@ category browser-before-ui-startup resource:///modules/BuiltInThemes.sys.mjs Bui
 #ifdef MOZ_NORMANDY
 category browser-before-ui-startup resource://normandy/Normandy.sys.mjs Normandy.init
 #endif
-category browser-before-ui-startup chrome://pocket/content/SaveToPocket.sys.mjs SaveToPocket.init
 category browser-before-ui-startup resource:///modules/ResetPBMPanel.sys.mjs ResetPBMPanel.init
-category browser-before-ui-startup resource:///modules/AboutHomeStartupCache.sys.mjs AboutHomeStartupCache.init
+# newtab component is disabled. tor-browser#43886
 category browser-before-ui-startup resource:///modules/AccountsGlue.sys.mjs AccountsGlue.init
 
 # Browser window lifecycle consumers
@@ -37,7 +36,6 @@ category browser-window-delayed-startup resource:///modules/taskbartabs/TaskbarT
 
 # App startup consumers
 
-category browser-first-window-ready resource:///modules/AboutNewTab.sys.mjs AboutNewTab.init
 category browser-first-window-ready resource:///modules/ContentCrashHandlers.sys.mjs TabCrashHandler.init
 category browser-first-window-ready resource:///modules/ProcessHangMonitor.sys.mjs ProcessHangMonitor.init
 category browser-first-window-ready resource://gre/modules/PageThumbs.sys.mjs PageThumbs.init
@@ -89,7 +87,6 @@ category browser-quit-application-granted resource://gre/modules/NewTabUtils.sys
 category browser-quit-application-granted resource://normandy/Normandy.sys.mjs Normandy.uninit
 #endif
 category browser-quit-application-granted resource://gre/modules/RFPHelper.sys.mjs RFPHelper.uninit
-category browser-quit-application-granted resource:///modules/asrouter/ASRouterNewTabHook.sys.mjs ASRouterNewTabHook.destroy
 category browser-quit-application-granted moz-src:///browser/components/search/SERPCategorization.sys.mjs SERPCategorization.uninit
 category browser-quit-application-granted moz-src:///browser/components/search/SearchSERPTelemetry.sys.mjs SearchSERPTelemetry.uninit
 #ifdef MOZ_UPDATER

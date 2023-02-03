@@ -154,6 +154,11 @@ export const AboutNewTab = {
    * onBrowserReady - Continues the initialization of Activity Stream after browser is ready.
    */
   async onBrowserReady() {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // Do not initialise ActivityStream, which we do not want and is not
+      // available. tor-browser#43886.
+      return;
+    }
     if (this.activityStream && this.activityStream.initialized) {
       return;
     }

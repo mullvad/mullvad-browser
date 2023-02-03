@@ -32,8 +32,7 @@ with Files("WebRTCChild.sys.mjs"):
     BUG_COMPONENT = ("Firefox", "Site Permissions")
 
 FINAL_TARGET_FILES.actors += [
-    "AboutNewTabChild.sys.mjs",
-    "AboutNewTabParent.sys.mjs",
+    # Remove newtab actors. tor-browser#43886.
     "AboutPocketChild.sys.mjs",
     "AboutPocketParent.sys.mjs",
     "AboutPrivateBrowsingChild.sys.mjs",

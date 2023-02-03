@@ -42,12 +42,11 @@ DIRS += [
     "genai",
     "messagepreview",
     "migration",
-    "newtab",
+    # Exclude newtab component. tor-browser#43886.
     "originattributes",
     "pagedata",
     "permissions",
     "places",
-    "pocket",
     "preferences",
     "privatebrowsing",
     "prompts",

@@ -4,7 +4,6 @@
 
 let lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
-  AboutNewTab: "resource:///modules/AboutNewTab.sys.mjs",
   AsyncShutdown: "resource://gre/modules/AsyncShutdown.sys.mjs",
   DeferredTask: "resource://gre/modules/DeferredTask.sys.mjs",
   E10SUtils: "resource://gre/modules/E10SUtils.sys.mjs",
@@ -404,12 +403,8 @@ export var AboutHomeStartupCache = {
       return { pageInputStream: null, scriptInputStream: null };
     }
 
-    let state = lazy.AboutNewTab.activityStream.store.getState();
-    return new Promise(resolve => {
-      this._cacheDeferred = resolve;
-      this.log.trace("Parent is requesting cache streams.");
-      this._procManager.sendAsyncMessage(this.CACHE_REQUEST_MESSAGE, { state });
-    });
+    this.log.error("Activity Stream is disabled.");
+    return { pageInputStream: null, scriptInputStream: null };
   },
 
   /**
