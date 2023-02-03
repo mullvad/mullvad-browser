@@ -41,7 +41,6 @@ DIRS += [
     "newtab",
     "originattributes",
     "places",
-    "pocket",
     "preferences",
     "privatebrowsing",
     "prompts",
@@ -63,7 +62,6 @@ DIRS += ["build"]
 if CONFIG["NIGHTLY_BUILD"]:
     DIRS += [
         "colorways",
-        "firefoxview",
     ]
 
 
