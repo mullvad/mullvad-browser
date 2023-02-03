@@ -76,7 +76,7 @@ static const RedirEntry kRedirMap[] = {
          nsIAboutModule::IS_SECURE_CHROME_UI},
     {"policies", "chrome://browser/content/policies/aboutPolicies.html",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::IS_SECURE_CHROME_UI},
-    {"privatebrowsing", "chrome://browser/content/aboutPrivateBrowsing.html",
+    {"privatebrowsing", "about:blank",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::URI_MUST_LOAD_IN_CHILD | nsIAboutModule::ALLOW_SCRIPT |
          nsIAboutModule::URI_CAN_LOAD_IN_PRIVILEGEDABOUT_PROCESS},
@@ -113,6 +113,7 @@ static const RedirEntry kRedirMap[] = {
      nsIAboutModule::URI_MUST_LOAD_IN_CHILD |
          nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::HIDE_FROM_ABOUTABOUT},
+#ifndef BASE_BROWSER_VERSION
     {"pocket-saved", "chrome://pocket/content/panels/saved.html",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::URI_MUST_LOAD_IN_CHILD | nsIAboutModule::ALLOW_SCRIPT |
@@ -133,6 +134,7 @@ static const RedirEntry kRedirMap[] = {
          nsIAboutModule::URI_MUST_LOAD_IN_CHILD | nsIAboutModule::ALLOW_SCRIPT |
          nsIAboutModule::URI_CAN_LOAD_IN_PRIVILEGEDABOUT_PROCESS |
          nsIAboutModule::HIDE_FROM_ABOUTABOUT},
+#endif
     {"settings", "chrome://browser/content/preferences/preferences.xhtml",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::IS_SECURE_CHROME_UI |
          nsIAboutModule::HIDE_FROM_ABOUTABOUT},
@@ -205,7 +207,8 @@ AboutRedirector::NewChannel(nsIURI* aURI, nsILoadInfo* aLoadInfo,
       // enabled about:newtab. Disabled about:newtab page uses fallback.
       if (path.EqualsLiteral("home") ||
           (StaticPrefs::browser_newtabpage_enabled() &&
-           path.EqualsLiteral("newtab"))) {
+           path.EqualsLiteral("newtab")) ||
+          path.EqualsLiteral("privatebrowsing")) {
         nsCOMPtr<nsIAboutNewTabService> aboutNewTabService =
             do_GetService("@mozilla.org/browser/aboutnewtab-service;1", &rv);
         NS_ENSURE_SUCCESS(rv, rv);
