@@ -10,8 +10,6 @@ const lazy = {};
 // Ignore unused lazy property for PluginManager.
 // eslint-disable-next-line mozilla/valid-lazy
 ChromeUtils.defineESModuleGetters(lazy, {
-  ASRouterNewTabHook:
-    "resource://activity-stream/lib/ASRouterNewTabHook.sys.mjs",
   ActorManagerParent: "resource://gre/modules/ActorManagerParent.sys.mjs",
   AddonManager: "resource://gre/modules/AddonManager.sys.mjs",
   AppMenuNotifications: "resource://gre/modules/AppMenuNotifications.sys.mjs",
@@ -60,7 +58,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
   RemoteSettings: "resource://services-settings/remote-settings.sys.mjs",
   SafeBrowsing: "resource://gre/modules/SafeBrowsing.sys.mjs",
   Sanitizer: "resource:///modules/Sanitizer.sys.mjs",
-  SaveToPocket: "chrome://pocket/content/SaveToPocket.sys.mjs",
   ScreenshotsUtils: "resource:///modules/ScreenshotsUtils.sys.mjs",
   SearchSERPTelemetry: "resource:///modules/SearchSERPTelemetry.sys.mjs",
   SessionStartup: "resource:///modules/sessionstore/SessionStartup.sys.mjs",
@@ -80,9 +77,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 XPCOMUtils.defineLazyModuleGetters(lazy, {
-  AboutNewTab: "resource:///modules/AboutNewTab.jsm",
-  ASRouterDefaultConfig:
-    "resource://activity-stream/lib/ASRouterDefaultConfig.jsm",
   ASRouter: "resource://activity-stream/lib/ASRouter.jsm",
   BrowserUsageTelemetry: "resource:///modules/BrowserUsageTelemetry.jsm",
   BrowserUIUtils: "resource:///modules/BrowserUIUtils.jsm",
@@ -409,31 +403,6 @@ let JSWINDOWACTORS = {
     matches: ["about:messagepreview", "about:messagepreview?*"],
   },
 
-  AboutNewTab: {
-    parent: {
-      esModuleURI: "resource:///actors/AboutNewTabParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource:///actors/AboutNewTabChild.sys.mjs",
-      events: {
-        DOMDocElementInserted: {},
-        DOMContentLoaded: {},
-        load: { capture: true },
-        unload: { capture: true },
-        pageshow: {},
-        visibilitychange: {},
-      },
-    },
-    // The wildcard on about:newtab is for the ?endpoint query parameter
-    // that is used for snippets debugging. The wildcard for about:home
-    // is similar, and also allows for falling back to loading the
-    // about:home document dynamically if an attempt is made to load
-    // about:home?jscache from the AboutHomeStartupCache as a top-level
-    // load.
-    matches: ["about:home*", "about:welcome", "about:newtab*"],
-    remoteTypes: ["privilegedabout"],
-  },
-
   AboutPlugins: {
     parent: {
       esModuleURI: "resource:///actors/AboutPluginsParent.sys.mjs",
@@ -447,26 +416,6 @@ let JSWINDOWACTORS = {
     },
 
     matches: ["about:plugins"],
-  },
-  AboutPocket: {
-    parent: {
-      esModuleURI: "resource:///actors/AboutPocketParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource:///actors/AboutPocketChild.sys.mjs",
-
-      events: {
-        DOMDocElementInserted: { capture: true },
-      },
-    },
-
-    remoteTypes: ["privilegedabout"],
-    matches: [
-      "about:pocket-saved*",
-      "about:pocket-signup*",
-      "about:pocket-home*",
-      "about:pocket-style-guide*",
-    ],
   },
 
   AboutPrivateBrowsing: {
@@ -901,27 +850,6 @@ let JSWINDOWACTORS = {
       },
     },
     matches: ["about:studies*"],
-  },
-
-  ASRouter: {
-    parent: {
-      esModuleURI: "resource:///actors/ASRouterParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource:///actors/ASRouterChild.sys.mjs",
-      events: {
-        // This is added so the actor instantiates immediately and makes
-        // methods available to the page js on load.
-        DOMDocElementInserted: {},
-      },
-    },
-    matches: [
-      "about:home*",
-      "about:newtab*",
-      "about:welcome*",
-      "about:privatebrowsing*",
-    ],
-    remoteTypes: ["privilegedabout"],
   },
 
   SwitchDocumentDirection: {
@@ -1462,8 +1390,6 @@ BrowserGlue.prototype = {
       lazy.Normandy.init();
     }
 
-    lazy.SaveToPocket.init();
-
     AboutHomeStartupCache.init();
 
     Services.obs.notifyObservers(null, "browser-ui-startup-complete");
@@ -1793,8 +1719,6 @@ BrowserGlue.prototype = {
 
   // the first browser window has finished initializing
   _onFirstWindowLoaded: function BG__onFirstWindowLoaded(aWindow) {
-    lazy.AboutNewTab.init();
-
     lazy.TabCrashHandler.init();
 
     lazy.ProcessHangMonitor.init();
@@ -2140,7 +2064,6 @@ BrowserGlue.prototype = {
         }
       },
       () => lazy.RFPHelper.uninit(),
-      () => lazy.ASRouterNewTabHook.destroy(),
       () => {
         if (AppConstants.MOZ_UPDATER) {
           lazy.UpdateListener.reset();
@@ -2934,13 +2857,6 @@ BrowserGlue.prototype = {
           ) {
             await lazy.PlacesUIUtils.maybeAddImportButton();
           }
-        },
-      },
-
-      {
-        name: "ASRouterNewTabHook.createInstance",
-        task: () => {
-          lazy.ASRouterNewTabHook.createInstance(lazy.ASRouterDefaultConfig());
         },
       },
 
@@ -6188,12 +6104,8 @@ export var AboutHomeStartupCache = {
       return { pageInputStream: null, scriptInputStream: null };
     }
 
-    let state = lazy.AboutNewTab.activityStream.store.getState();
-    return new Promise(resolve => {
-      this._cacheDeferred = resolve;
-      this.log.trace("Parent is requesting cache streams.");
-      this._procManager.sendAsyncMessage(this.CACHE_REQUEST_MESSAGE, { state });
-    });
+    this.log.error("Activity Stream is disabled.");
+    return { pageInputStream: null, scriptInputStream: null };
   },
 
   /**
