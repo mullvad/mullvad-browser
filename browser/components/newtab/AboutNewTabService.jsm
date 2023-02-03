@@ -420,20 +420,7 @@ class BaseAboutNewTabService {
    * the newtab page has no effect on the result of this function.
    */
   get defaultURL() {
-    // Generate the desired activity stream resource depending on state, e.g.,
-    // "resource://activity-stream/prerendered/activity-stream.html"
-    // "resource://activity-stream/prerendered/activity-stream-debug.html"
-    // "resource://activity-stream/prerendered/activity-stream-noscripts.html"
-    return [
-      "resource://activity-stream/prerendered/",
-      "activity-stream",
-      // Debug version loads dev scripts but noscripts separately loads scripts
-      this.activityStreamDebug && !this.privilegedAboutProcessEnabled
-        ? "-debug"
-        : "",
-      this.privilegedAboutProcessEnabled ? "-noscripts" : "",
-      ".html",
-    ].join("");
+    return "about:blank";
   }
 
   get welcomeURL() {
