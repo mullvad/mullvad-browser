@@ -11,9 +11,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
   AboutHomeStartupCache: "resource:///modules/AboutHomeStartupCache.sys.mjs",
   AWToolbarButton: "resource:///modules/aboutwelcome/AWToolbarUtils.sys.mjs",
   ASRouter: "resource:///modules/asrouter/ASRouter.sys.mjs",
-  ASRouterDefaultConfig:
-    "resource:///modules/asrouter/ASRouterDefaultConfig.sys.mjs",
-  ASRouterNewTabHook: "resource:///modules/asrouter/ASRouterNewTabHook.sys.mjs",
   AddonManager: "resource://gre/modules/AddonManager.sys.mjs",
   AsyncShutdown: "resource://gre/modules/AsyncShutdown.sys.mjs",
   BackupService: "resource:///modules/backup/BackupService.sys.mjs",
@@ -1398,13 +1395,6 @@ BrowserGlue.prototype = {
           ) {
             await lazy.AWToolbarButton.maybeAddSetupButton();
           }
-        },
-      },
-
-      {
-        name: "ASRouterNewTabHook.createInstance",
-        task: () => {
-          lazy.ASRouterNewTabHook.createInstance(lazy.ASRouterDefaultConfig());
         },
       },
 
