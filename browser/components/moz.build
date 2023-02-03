@@ -42,7 +42,6 @@ DIRS += [
     "originattributes",
     "pagedata",
     "places",
-    "pocket",
     "preferences",
     "privatebrowsing",
     "prompts",
