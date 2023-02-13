@@ -21,7 +21,7 @@ XPCOMUtils.defineLazyModuleGetters(this, {
 });
 
 const kPrefName = "browser.startup.homepage";
-const kDefaultHomePage = "about:blank";
+const kDefaultHomePage = "about:mullvad-browser";
 const kExtensionControllerPref =
   "browser.startup.homepage_override.extensionControlled";
 const kHomePageIgnoreListId = "homepage-urls";

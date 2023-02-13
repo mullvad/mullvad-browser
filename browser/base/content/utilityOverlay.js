@@ -77,6 +77,7 @@ function isBlankPageURL(aURL) {
     aURL == "about:blank" ||
     aURL == "about:home" ||
     aURL == "about:welcome" ||
+    aURL == "about:mullvad-browser" ||
     aURL == BROWSER_NEW_TAB_URL
   );
 }
