@@ -24,7 +24,7 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityStrings", () => {
   let bundle = null;
   try {
     bundle = Services.strings.createBundle(
-      "chrome://newidentity/locale/newIdentity.properties"
+      "chrome://browser/locale/newIdentity.properties"
     );
   } catch (e) {
     console.warn("Could not load the New Identity strings");
