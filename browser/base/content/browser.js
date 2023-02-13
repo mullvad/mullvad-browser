@@ -689,6 +689,7 @@ async function gLazyFindCommand(cmd, ...args) {
 }
 
 var gPageIcons = {
+  "about:mullvad-browser": "chrome://branding/content/icon32.png",
   "about:home": "chrome://branding/content/icon32.png",
   "about:newtab": "chrome://branding/content/icon32.png",
   "about:welcome": "chrome://branding/content/icon32.png",
@@ -696,6 +697,7 @@ var gPageIcons = {
 };
 
 var gInitialPages = [
+  "about:mullvad-browser",
   "about:blank",
   "about:home",
   "about:firefoxview",
