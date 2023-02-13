@@ -109,14 +109,6 @@ class nsXREDirProvider final : public nsIDirectoryServiceProvider2,
    */
   nsresult GetProfileDir(nsIFile** aResult);
 
-  /**
-   * Get the path to the base application directory.
-   *
-   * In almost all platforms it is the directory that contains the Firefox
-   * executable; on macOS we remove also Contents/MacOS from it.
-   */
-  nsresult GetAppRootDir(nsIFile** aFile);
-
  protected:
   nsresult GetFilesInternal(const char* aProperty,
                             nsISimpleEnumerator** aResult);
@@ -163,6 +155,14 @@ class nsXREDirProvider final : public nsIDirectoryServiceProvider2,
  private:
   static nsresult SetUserDataProfileDirectory(nsCOMPtr<nsIFile>& aFile,
                                               bool aLocal);
+
+#if defined(RELATIVE_DATA_DIR)
+  /**
+   * Get the path to the portable data dir, if the application is running in
+   * portable mode.
+   */
+  nsresult GetPortableDataDir(nsIFile** aFile, bool& aIsPortable);
+#endif
 };
 
 #endif

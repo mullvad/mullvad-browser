@@ -229,13 +229,108 @@ nsresult nsAppFileLocationProvider::CloneMozBinDirectory(nsIFile** aLocalFile) {
   return NS_OK;
 }
 
+#ifdef RELATIVE_DATA_DIR
+static nsresult SetupPortableMode(nsIFile** aDirectory, bool aLocal,
+                                  bool& aIsPortable) {
+  // This is almost the same as nsXREDirProvider::GetPortableDataDir.
+  // However, it seems that this is never called, at least during simple usage
+  // of the browser.
+
+  nsresult rv = NS_ERROR_UNEXPECTED;
+  nsCOMPtr<nsIProperties> directoryService(
+      do_GetService(NS_DIRECTORY_SERVICE_CONTRACTID, &rv));
+  NS_ENSURE_SUCCESS(rv, rv);
+  nsCOMPtr<nsIFile> exeFile, exeDir;
+  rv = directoryService->Get(XRE_EXECUTABLE_FILE, NS_GET_IID(nsIFile),
+                             getter_AddRefs(exeFile));
+  rv = exeFile->Normalize();
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = exeFile->GetParent(getter_AddRefs(exeDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+
+#  if defined(XP_MACOSX)
+  nsAutoString exeDirPath;
+  rv = exeDir->GetPath(exeDirPath);
+  NS_ENSURE_SUCCESS(rv, rv);
+  // When the browser is installed in /Applications, we never run in portable
+  // mode.
+  if (exeDirPath.Find("/Applications/", true /* ignore case */) == 0) {
+    aIsPortable = false;
+    return NS_OK;
+  }
+#  endif
+
+  nsCOMPtr<nsIFile> systemInstallFile;
+  rv = exeDir->Clone(getter_AddRefs(systemInstallFile));
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = systemInstallFile->AppendNative("system-install"_ns);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  bool exists = false;
+  rv = systemInstallFile->Exists(&exists);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (exists) {
+    aIsPortable = false;
+    return NS_OK;
+  }
+
+  nsCOMPtr<nsIFile> localDir = exeDir;
+#  if defined(XP_MACOSX)
+  rv = exeDir->GetParent(getter_AddRefs(localDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+  exeDir = localDir;
+  rv = exeDir->GetParent(getter_AddRefs(localDir));
+  NS_ENSURE_SUCCESS(rv, rv);
+#  endif
+
+  rv = localDir->SetRelativePath(localDir.get(),
+                                 nsLiteralCString(RELATIVE_DATA_DIR));
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (aLocal) {
+    rv = localDir->AppendNative("Caches"_ns);
+    NS_ENSURE_SUCCESS(rv, rv);
+  }
+
+  rv = localDir->Exists(&exists);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (!exists) {
+    rv = localDir->Create(nsIFile::DIRECTORY_TYPE, 0700);
+#  if defined(XP_MACOSX)
+    if (NS_FAILED(rv)) {
+      // On macOS, we forgive this failure to allow running from the DMG.
+      aIsPortable = false;
+      return NS_OK;
+    }
+#  else
+    NS_ENSURE_SUCCESS(rv, rv);
+#  endif
+  }
+
+  localDir.forget(aDirectory);
+  aIsPortable = true;
+  return rv;
+}
+#endif
+
 //----------------------------------------------------------------------------------------
 // GetProductDirectory - Gets the directory which contains the application data
 // folder
 //
-// UNIX   : ~/.mozilla/
-// WIN    : <Application Data folder on user's machine>\Mozilla
-// Mac    : :Documents:Mozilla:
+// If portable mode is enabled:
+//  - aLocal == false: $APP_ROOT/$RELATIVE_DATA_DIR
+//  - aLocal == true:  $APP_ROOT/$RELATIVE_DATA_DIR/Caches
+// where $APP_ROOT is:
+//  - the parent directory of the executable on Windows and Linux
+//  - the root of the app bundle on macOS
+//
+// Otherwise:
+//  - Windows:
+//    - aLocal == false: %APPDATA%/$MOZ_USER_DIR
+//    - aLocal == true: %LOCALAPPDATA%/$MOZ_USER_DIR
+//  - macOS:
+//    - aLocal == false: kDomainLibraryFolderType/$MOZ_USER_DIR
+//    - aLocal == true: kCachedDataFolderType/$MOZ_USER_DIR
+//  - Unix: ~/$MOZ_USER_DIR
 //----------------------------------------------------------------------------------------
 nsresult nsAppFileLocationProvider::GetProductDirectory(nsIFile** aLocalFile,
                                                         bool aLocal) {
@@ -247,39 +342,17 @@ nsresult nsAppFileLocationProvider::GetProductDirectory(nsIFile** aLocalFile,
   bool exists;
   nsCOMPtr<nsIFile> localDir;
 
-#if defined(RELATIVE_PROFILE_DIRECTORY)
-  nsCOMPtr<nsIProperties> directoryService(
-      do_GetService(NS_DIRECTORY_SERVICE_CONTRACTID, &rv));
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  bool persistent = false;
-  nsCOMPtr<nsIFile> file, appRootDir;
-  rv = directoryService->Get(XRE_EXECUTABLE_FILE, NS_GET_IID(nsIFile),
-                             getter_AddRefs(file));
-  NS_ENSURE_SUCCESS(rv, rv);
-  rv = file->Normalize();
-  NS_ENSURE_SUCCESS(rv, rv);
-  int levelsToRemove = 1;
-#if defined(XP_MACOSX)
-  levelsToRemove += 2;
+#if defined(RELATIVE_DATA_DIR)
+  bool isPortable = false;
+  rv = SetupPortableMode(aLocalFile, aLocal, isPortable);
+  // If portable mode is enabled, we absolutely want it (e.g., to be sure there
+  // will not be disk leaks), so a failure is to be propagated.
+  if (NS_FAILED(rv) || isPortable) {
+    return rv;
+  }
 #endif
-  while (levelsToRemove-- > 0) {
-    rv = file->GetParent(getter_AddRefs(appRootDir));
-    NS_ENSURE_SUCCESS(rv, rv);
-    file = appRootDir;
-  }
 
-  localDir = appRootDir;
-  nsAutoCString profileDir(RELATIVE_PROFILE_DIRECTORY);
-  rv = localDir->SetRelativePath(localDir.get(), profileDir);
-  NS_ENSURE_SUCCESS(rv, rv);
-
-  if (aLocal) {
-    rv = localDir->AppendNative("Caches"_ns);
-    NS_ENSURE_SUCCESS(rv, rv);
-  }
-
-#elif defined(MOZ_WIDGET_COCOA)
+#if defined(MOZ_WIDGET_COCOA)
   FSRef fsRef;
   OSType folderType =
       aLocal ? (OSType)kCachedDataFolderType : (OSType)kDomainLibraryFolderType;
@@ -318,6 +391,10 @@ nsresult nsAppFileLocationProvider::GetProductDirectory(nsIFile** aLocalFile,
 #  error dont_know_how_to_get_product_dir_on_your_platform
 #endif
 
+  rv = localDir->AppendRelativeNativePath(DEFAULT_PRODUCT_DIR);
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
   rv = localDir->Exists(&exists);
 
   if (NS_SUCCEEDED(rv) && !exists) {
@@ -336,6 +413,11 @@ nsresult nsAppFileLocationProvider::GetProductDirectory(nsIFile** aLocalFile,
 //----------------------------------------------------------------------------------------
 // GetDefaultUserProfileRoot - Gets the directory which contains each user
 // profile dir
+//
+// - Windows and macOS: $PRODUCT_DIRECTORY/Profiles
+// - Unix: $PRODUCT_DIRECTORY
+// See also GetProductDirectory for instructions on how $PRODUCT_DIRECTORY is
+// generated.
 //----------------------------------------------------------------------------------------
 nsresult nsAppFileLocationProvider::GetDefaultUserProfileRoot(
     nsIFile** aLocalFile, bool aLocal) {
@@ -350,6 +432,23 @@ nsresult nsAppFileLocationProvider::GetDefaultUserProfileRoot(
   if (NS_FAILED(rv)) {
     return rv;
   }
+
+#if defined(MOZ_WIDGET_COCOA) || defined(XP_WIN)
+  // These 3 platforms share this part of the path - do them as one
+  rv = localDir->AppendRelativeNativePath("Profiles"_ns);
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
+
+  bool exists;
+  rv = localDir->Exists(&exists);
+  if (NS_SUCCEEDED(rv) && !exists) {
+    rv = localDir->Create(nsIFile::DIRECTORY_TYPE, 0775);
+  }
+  if (NS_FAILED(rv)) {
+    return rv;
+  }
+#endif
 
   localDir.forget(aLocalFile);
 

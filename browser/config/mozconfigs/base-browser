@@ -47,4 +47,4 @@ if test -z "$WASI_SYSROOT"; then
     ac_add_options --without-wasm-sandboxed-libraries
 fi
 
-ac_add_options --with-relative-profile=BaseBrowser/Data/Browser
+ac_add_options --with-relative-data-dir=BaseBrowser/Data/Browser
