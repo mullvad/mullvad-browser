@@ -1,0 +1,6 @@
+JAR_MANIFESTS += ["jar.mn"]
+
+FINAL_TARGET_FILES.actors += [
+    "AboutMullvadBrowserChild.sys.mjs",
+    "AboutMullvadBrowserParent.sys.mjs",
+]
