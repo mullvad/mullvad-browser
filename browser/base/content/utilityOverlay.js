@@ -82,6 +82,7 @@ function isBlankPageURL(aURL) {
   return (
     aURL == "about:blank" ||
     aURL == "about:home" ||
+    aURL == "about:mullvad-browser" ||
     aURL == BROWSER_NEW_TAB_URL ||
     aURL == "chrome://browser/content/blanktab.html"
   );

@@ -1,0 +1,6 @@
+JAR_MANIFESTS += ["jar.mn"]
+
+MOZ_SRC_FILES += [
+    "AboutMullvadBrowserChild.sys.mjs",
+    "AboutMullvadBrowserParent.sys.mjs",
+]

@@ -172,6 +172,17 @@ export let NewTabPagePreloading = {
       this.browserCounts[countKey]--;
       browser.removeAttribute("preloadedState");
       browser.setAttribute("autocompletepopup", "PopupAutoComplete");
+      // Copied from tor-browser. See mullvad-browser#486.
+      // Let a preloaded about:mullvad-browser page know that it is no longer
+      // preloaded (about to be shown).
+      try {
+        browser.browsingContext?.currentWindowGlobal
+          ?.getActor("AboutMullvadBrowser")
+          .preloadedRemoved();
+      } catch {
+        // Not an about:mullvad-browser page with an AboutMullvadBrowserParent
+        // instance.
+      }
     }
 
     return browser;
