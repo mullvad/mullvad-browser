@@ -39,6 +39,7 @@ DIRS += [
     "firefoxview",
     "messagepreview",
     "migration",
+    "mullvad-browser",
     "newidentity",
     "newtab",
     "originattributes",

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src chrome:; font-src data:; object-src 'none'" />
+    <title data-l10n-id="about-mullvad-browser-page-title"></title>
+    <link rel="icon" type="image/png" href="chrome://branding/content/icon32.png"/>
+    <link rel="stylesheet" href="chrome://browser/content/mullvad-browser/aboutMullvadBrowser.css"/>
+    <link rel="localization" href="branding/brand.ftl"/>
+    <link rel="localization" href="browser/mullvad-browser/aboutMullvadBrowser.ftl"/>
+  </head>
+  <body>
+    <div id="header">
+      <div id="headingContainer">
+        <img srcset="chrome://branding/content/icon64.png 1x, chrome://branding/content/icon128.png 2x"
+             width="64"
+             height="64"
+             alt="" />
+        <!-- img element is a visual stand-in for the heading, but we include a
+           - h1 element as semantic structure for screen readers. -->
+        <img id="headingImg"
+             src="chrome://branding/content/firefox-wordmark.svg"
+             width="324"
+             height="26"
+             alt="" />
+        <h1 class="screen-reader-only"
+            data-l10n-id="about-mullvad-browser-heading">
+        </h1>
+      </div>
+      <p data-l10n-id="about-mullvad-browser-developed-by">
+        <a data-l10n-name="tor-project-link"
+           href="https://www.torproject.org">
+        </a>
+        <a data-l10n-name="mullvad-vpn-link"
+           href="https://mullvad.net">
+        </a>
+      </p>
+    </div>
+    <div id="footer">
+      <p data-l10n-id="about-mullvad-browser-use-vpn">
+        <a data-l10n-name="with-vpn-link"
+           href="https://mullvad.net">
+        </a>
+      </p>
+      <p data-l10n-id="about-mullvad-browser-learn-more">
+        <a data-l10n-name="learn-more-link"
+           href="https://mullvad.net/browser">
+        </a>
+      </p>
+    </div>
+  </body>
+</html>
