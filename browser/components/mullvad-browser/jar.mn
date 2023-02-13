@@ -1,0 +1,6 @@
+browser.jar:
+  content/browser/mullvad-browser/aboutMullvadBrowser.js      (content/aboutMullvadBrowser.js)
+  content/browser/mullvad-browser/aboutMullvadBrowser.xhtml   (content/aboutMullvadBrowser.xhtml)
+  content/browser/mullvad-browser/aboutMullvadBrowser.css     (content/aboutMullvadBrowser.css)
+  content/browser/mullvad-browser/mullvadBrowserFont.css      (content/mullvadBrowserFont.css)
+  content/browser/mullvad-browser/2728-sparkles.svg           (content/2728-sparkles.svg)
