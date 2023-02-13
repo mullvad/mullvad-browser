@@ -1,0 +1,116 @@
+@import url("chrome://branding/content/mullvad-branding.css");
+
+body {
+  margin: 0;
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: auto;
+  grid-template-rows: 1fr auto;
+  text-align: center;
+}
+
+.screen-reader-only {
+  position: absolute;
+  clip-path: inset(50%);
+}
+
+#header {
+  display: grid;
+  grid-template: "heading" auto "text" auto / auto;
+  justify-items: center;
+  align-content: center;
+  gap: var(--space-xxlarge);
+  padding-block: var(--space-xxlarge);
+}
+
+#header,
+#footer {
+  padding-inline: var(--space-large);
+}
+
+#header p {
+  margin: 0;
+}
+
+#heading-container {
+  grid-area: heading;
+  display: inline flex;
+  flex-direction: row;
+  white-space: nowrap;
+  align-items: center;
+  gap: var(--space-large);
+}
+
+#heading-logo {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+}
+
+#heading-wordmark {
+  flex: 0 0 auto;
+  height: 22.4px;
+  -moz-context-properties: fill, stroke;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+#mullvad-browser-update,
+#mullvad-browser-intro {
+  grid-area: text;
+}
+
+body:not(.has-update) #mullvad-browser-update {
+  display: none;
+}
+
+body:not(.no-update) #mullvad-browser-intro {
+  /* Invisible but still reserves space for when the page is initially loaded to
+   * prevent the Mullvad title from jumping. */
+  visibility: hidden;
+}
+
+#mullvad-browser-update-img {
+  height: var(--icon-size);
+  vertical-align: sub;
+  margin-inline-end: var(--space-xsmall);
+}
+
+#footer {
+  padding-block: var(--space-xxlarge);
+  border-block-start: var(--border-width) solid var(--border-color);
+  background-color: var(--background-color-box-info);
+}
+
+#footer p {
+  margin-block: var(--space-small);
+}
+
+@media not ((prefers-contrast) or (forced-colors)) {
+  :root {
+    /* Dark background. */
+    background: linear-gradient(to bottom, var(--branding-gradient-start) 0%, var(--branding-gradient-middle) 55%, var(--branding-gradient-end) 100%);
+    /* Same as --text-color when "prefers-color-scheme: dark" */
+    --text-color-dark: var(--color-gray-0);
+    color: var(--text-color-dark);
+
+    --link-color: var(--branding-link-color);
+    --link-color-hover: var(--branding-link-color-hover);
+    --link-color-active: var(--branding-link-color-active);
+
+    --focus-outline-color: var(--branding-focus-outline-color);
+    --focus-outline: var(--focus-outline-width) solid var(--focus-outline-color);
+  }
+
+  #heading-wordmark {
+    /* Have a dark background, so can use fixed colours.
+     * NOTE: For the stable release, there is no accent color. */
+    fill: white;
+    stroke: var(--branding-wordmark-accent, white);
+  }
+
+  #footer {
+    border-block-start-color: transparent;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+}

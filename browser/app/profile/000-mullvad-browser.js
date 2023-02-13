@@ -1,5 +1,7 @@
 // Preferences specific to Mullvad Browser
 
+pref("browser.startup.homepage", "about:mullvad-browser");
+
 // General browser support url. tor-browser#43864 and mullvad-browser#244.
 pref("browser.base-browser-support-url", "https://mullvad.net/en/help/");
 

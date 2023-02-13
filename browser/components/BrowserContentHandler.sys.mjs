@@ -828,6 +828,7 @@ nsBrowserContentHandler.prototype = {
     var overridePage = "";
     var additionalPage = "";
     var willRestoreSession = false;
+    let openAboutMullvadBrowser = false;
     try {
       // Read the old value of homepage_override.mstone before
       // needHomepageOverride updates it, so that we can later add it to the
@@ -1032,6 +1033,19 @@ nsBrowserContentHandler.prototype = {
               "%OLD_BASE_BROWSER_VERSION%",
               old_forkVersion
             );
+            if (AppConstants.BASE_BROWSER_UPDATE) {
+              // NOTE: We ignore any overridePage value, which can come from the
+              // openURL attribute within the updates.xml file.
+              // Mullvad Browser, copied from tor-browser: Instead of opening
+              // the post-update "override page" directly, we include a link in
+              // about:mullvad-browser.
+              prefb.setBoolPref(
+                "mullvadbrowser.post_update.shouldNotify",
+                true
+              );
+              openAboutMullvadBrowser = true;
+              overridePage = "about:mullvad-browser";
+            }
             break;
           }
           case OVERRIDE_NEW_BUILD_ID: {
@@ -1131,6 +1145,16 @@ nsBrowserContentHandler.prototype = {
     var startPage = this.getNewWindowArgs(skipStartPage && !willRestoreSession);
 
     if (startPage == "about:blank") {
+      startPage = "";
+    }
+
+    // If the user's homepage is about:mullvad-browser, we do not want to open
+    // it twice with the override.
+    if (
+      openAboutMullvadBrowser &&
+      startPage === "about:mullvad-browser" &&
+      overridePage?.split("|").includes("about:mullvad-browser")
+    ) {
       startPage = "";
     }
 
