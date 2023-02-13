@@ -403,6 +403,20 @@ let JSWINDOWACTORS = {
     matches: ["about:messagepreview", "about:messagepreview?*"],
   },
 
+  AboutMullvadBrowser: {
+    parent: {
+      esModuleURI: "resource:///actors/AboutMullvadBrowserParent.sys.mjs",
+    },
+    child: {
+      esModuleURI: "resource:///actors/AboutMullvadBrowserChild.sys.mjs",
+      events: {
+        DOMContentLoaded: {},
+      },
+    },
+
+    matches: ["about:mullvad-browser"],
+  },
+
   AboutPlugins: {
     parent: {
       esModuleURI: "resource:///actors/AboutPluginsParent.sys.mjs",
