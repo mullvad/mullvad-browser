@@ -1,0 +1,91 @@
+@import url("chrome://browser/content/mullvad-browser/mullvadBrowserFont.css");
+
+body {
+  margin: 0;
+  display: grid;
+  height: 100vh;
+  grid-template-columns: auto;
+  grid-template-rows: 1fr auto;
+  text-align: center;
+  color: #FBFBFE;
+  background: radial-gradient(117% 58% at 50% 48%, #205C9D 0%, #1B4D83 26%, #05101B 100%);
+  font-family: 'Open Sans', sans-serif;
+}
+
+a {
+  color: #FFBD4F;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #FFD567;
+  text-decoration: underline solid;
+}
+
+a:active {
+  color: #FFEA80;
+  text-decoration: none;
+}
+
+p {
+  margin-inline: 8px;
+  margin-block: 0.5em;
+}
+
+#headingImg {
+  -moz-context-properties: fill;
+  fill: currentColor;
+}
+
+.screen-reader-only {
+  position: absolute;
+  clip-path: inset(50%);
+}
+
+#header {
+  display: grid;
+  grid-template: "heading" auto "text" auto / auto;
+  justify-items: center;
+  align-content: center;
+  gap: 1.5em;
+}
+
+#headingContainer {
+  grid-area: heading;
+  display: inline flex;
+  flex-direction: row;
+  white-space: nowrap;
+  align-items: center;
+  gap: 16px;
+}
+
+#mullvad-browser-update,
+#mullvad-browser-intro {
+  grid-area: text;
+}
+
+body:not(.has-update) #mullvad-browser-update {
+  display: none;
+}
+
+body:not(.no-update) #mullvad-browser-intro {
+  /* Invisible but still reserves space for when the page is initially loaded to
+   * prevent the Mullvad title from jumping. */
+  visibility: hidden;
+}
+
+#mullvad-browser-update-img {
+  height: 1em;
+  vertical-align: sub;
+  margin-inline-end: 0.3em;
+}
+
+#mullvad-browser-update a {
+  /* Increase gap between the link and the rest of the text. */
+  margin-inline: 0.4em;
+}
+
+#footer {
+  padding-block: 40px;
+  background: rgba(0, 0, 0, 0.2);
+}
