@@ -55,7 +55,7 @@ XPCOMUtils.defineLazyGetter(this, "SecurityLevelStrings", () => {
   let bundle = null;
   try {
     bundle = Services.strings.createBundle(
-      "chrome://securitylevel/locale/securityLevel.properties"
+      "chrome://browser/locale/securityLevel.properties"
     );
   } catch (e) {
     console.warn("Could not load the Security Level strings");

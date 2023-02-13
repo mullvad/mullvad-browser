@@ -4,8 +4,3 @@ browser.jar:
     content/browser/securitylevel/securityLevelButton.css      (content/securityLevelButton.css)
     content/browser/securitylevel/securityLevelPreferences.css (content/securityLevelPreferences.css)
     content/browser/securitylevel/securityLevelIcon.svg        (content/securityLevelIcon.svg)
-
-securitylevel.jar:
-# See New Identity for further information on how this works
-% locale securitylevel en-US %locale/en-US/
-    locale/en-US/securityLevel.properties                      (locale/en-US/securityLevel.properties)
