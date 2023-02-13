@@ -1431,7 +1431,7 @@ var BookmarkingUI = {
     if (newTabURL == "about:blank") {
       newTabURL = "about:newtab";
     }
-    let newTabURLs = [newTabURL, "about:home"];
+    let newTabURLs = [newTabURL, "about:home", "about:mullvad-browser"];
     if (PrivateBrowsingUtils.isWindowPrivate(window)) {
       newTabURLs.push("about:privatebrowsing");
     }
