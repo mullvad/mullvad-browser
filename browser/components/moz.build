@@ -38,6 +38,7 @@ DIRS += [
     "extensions",
     "pagedata",
     "migration",
+    "mullvad-browser",
     "newidentity",
     "newtab",
     "originattributes",
