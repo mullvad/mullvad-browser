@@ -1,5 +1,7 @@
 // Preferences specific to Mullvad Browser
 
+pref("browser.startup.homepage", "about:mullvad-browser");
+
 // Do not show the bookmark panel for now, because it makes the initial browser
 // window (about:home) bigger, and regular pages will show letterbox margins as
 // a result.
