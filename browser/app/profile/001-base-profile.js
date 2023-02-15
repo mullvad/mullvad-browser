@@ -57,6 +57,12 @@ pref("media.memory_cache_max_size", 16384);
 pref("dom.security.https_only_mode", true);
 pref("dom.security.https_only_mode_pbm", true);
 
+// tor-browser#22320: Hide referer when comming from a .onion address
+// We enable this here (rather than in Tor Browser) in case users of other
+// base-browser derived browsers configure it to use a system Tor daemon
+// to visit onion services.
+pref("network.http.referer.hideOnionSource", true);
+
 // Require Safe Negotiation ( https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/27719 )
 // Blocks connections to servers that don't support RFC 5746 [2] as they're potentially vulnerable to a
 // MiTM attack [3]. A server without RFC 5746 can be safe from the attack if it disables renegotiations
