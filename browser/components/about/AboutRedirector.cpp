@@ -90,9 +90,11 @@ static const RedirEntry kRedirMap[] = {
     {"rights", "https://www.mozilla.org/about/legal/terms/firefox/",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::URI_MUST_LOAD_IN_CHILD},
+#ifndef BASE_BROWSER_VERSION
     {"robots", "chrome://browser/content/aboutRobots.xhtml",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::ALLOW_SCRIPT},
+#endif
     {"sessionrestore", "chrome://browser/content/aboutSessionRestore.xhtml",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::HIDE_FROM_ABOUTABOUT |
          nsIAboutModule::IS_SECURE_CHROME_UI},
