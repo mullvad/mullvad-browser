@@ -2173,7 +2173,11 @@ BrowserGlue.prototype = {
       () => lazy.PageDataService.uninit(),
       () => lazy.PageThumbs.uninit(),
       () => lazy.NewTabUtils.uninit(),
-      () => lazy.Normandy.uninit(),
+      () => {
+        if (AppConstants.MOZ_NORMANDY) {
+          lazy.Normandy.uninit();
+        }
+      },
       () => lazy.RFPHelper.uninit(),
       () => lazy.ASRouterNewTabHook.destroy(),
       () => {
