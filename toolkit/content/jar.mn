@@ -44,6 +44,9 @@ toolkit.jar:
    content/global/aboutTelemetry.xhtml
    content/global/aboutTelemetry.css
 #endif
+#ifdef MULLVAD_BROWSER
+   content/global/aboutTelemetry.xhtml          (aboutTelemetryMullvad.xhtml)
+#endif
    content/global/aboutUrlClassifier.js
    content/global/aboutUrlClassifier.xhtml
    content/global/aboutUrlClassifier.css
@@ -191,3 +194,5 @@ toolkit.jar:
    content/global/vendor/react-transition-group.js (vendor/react/react-transition-group.js)
    content/global/vendor/redux.js (vendor/react/redux.js)
    content/global/vendor/react-redux.js (vendor/react/react-redux.js)
+
+   content/global/aboutRights.xhtml           (aboutRightsMullvad.xhtml)
