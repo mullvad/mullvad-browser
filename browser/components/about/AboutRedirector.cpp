@@ -87,9 +87,11 @@ static const RedirEntry kRedirMap[] = {
     {"rights", "chrome://global/content/aboutRights.xhtml",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::IS_SECURE_CHROME_UI},
+#if 0
     {"robots", "chrome://browser/content/aboutRobots.xhtml",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::ALLOW_SCRIPT},
+#endif
     {"sessionrestore", "chrome://browser/content/aboutSessionRestore.xhtml",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::HIDE_FROM_ABOUTABOUT |
          nsIAboutModule::IS_SECURE_CHROME_UI},
