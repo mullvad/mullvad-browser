@@ -144,8 +144,9 @@ static const RedirEntry kRedirMap[] = {
          nsIAboutModule::IS_SECURE_CHROME_UI},
     {"logging", "chrome://global/content/aboutLogging/aboutLogging.html",
      nsIAboutModule::ALLOW_SCRIPT},
-    {"logo", "chrome://branding/content/about.png",
-     nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT},
+    // Do not allow web pages to link to about:logo, which varies between
+    // channels. See tor-browser#43308.
+    // Moreover, it exposes firefox-specific branding.
     {"memory", "chrome://global/content/aboutMemory.xhtml",
      nsIAboutModule::ALLOW_SCRIPT},
     {"certificate", "chrome://global/content/certviewer/certviewer.html",
@@ -154,8 +155,10 @@ static const RedirEntry kRedirMap[] = {
          nsIAboutModule::URI_MUST_LOAD_IN_CHILD |
          nsIAboutModule::URI_CAN_LOAD_IN_PRIVILEGEDABOUT_PROCESS |
          nsIAboutModule::IS_SECURE_CHROME_UI},
+#ifndef BASE_BROWSER_VERSION
     {"mozilla", "chrome://global/content/mozilla.html",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT},
+#endif
 #if !defined(ANDROID) && !defined(XP_WIN)
     {"webauthn", "chrome://global/content/aboutWebauthn.html",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::IS_SECURE_CHROME_UI},
@@ -213,15 +216,17 @@ static const RedirEntry kRedirMap[] = {
     {"windows-messages", "chrome://global/content/aboutWindowsMessages.html",
      nsIAboutModule::ALLOW_SCRIPT},
 #endif
-#ifndef MOZ_GLEAN_ANDROID
+#ifdef MOZ_TELEMETRY_REPORTING
+#  ifndef MOZ_GLEAN_ANDROID
     {"glean", "chrome://global/content/aboutGlean.html",
-#  if !defined(NIGHTLY_BUILD) && defined(MOZILLA_OFFICIAL)
+#    if !defined(NIGHTLY_BUILD) && defined(MOZILLA_OFFICIAL)
      nsIAboutModule::HIDE_FROM_ABOUTABOUT |
-#  endif
+#    endif
          nsIAboutModule::ALLOW_SCRIPT},
-#endif
+#  endif
     {"telemetry", "chrome://global/content/aboutTelemetry.xhtml",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::IS_SECURE_CHROME_UI},
+#endif
 #ifndef BASE_BROWSER_VERSION
     // Remove about:translations since translations are disabled.
     // See tor-browser#44045 and tor-browser#42872.
@@ -232,10 +237,16 @@ static const RedirEntry kRedirMap[] = {
          nsIAboutModule::URI_MUST_LOAD_IN_CHILD |
          nsIAboutModule::URI_CAN_LOAD_IN_PRIVILEGEDABOUT_PROCESS},
 #endif
+#ifndef BASE_BROWSER_VERSION
+    // We disable safe browsing and the data update mechanisms. So this page
+    // will be non-functional or at least unreliable.
     {"url-classifier", "chrome://global/content/aboutUrlClassifier.xhtml",
      nsIAboutModule::ALLOW_SCRIPT},
+#endif
+#ifdef MOZ_WEBRTC
     {"webrtc", "chrome://global/content/aboutwebrtc/aboutWebrtc.html",
      nsIAboutModule::ALLOW_SCRIPT},
+#endif
     {"crashparent", "about:blank", nsIAboutModule::HIDE_FROM_ABOUTABOUT},
     {"crashcontent", "about:blank",
      nsIAboutModule::HIDE_FROM_ABOUTABOUT |
