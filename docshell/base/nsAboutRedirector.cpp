@@ -112,8 +112,10 @@ static const RedirEntry kRedirMap[] = {
          nsIAboutModule::URI_MUST_LOAD_IN_CHILD |
          nsIAboutModule::URI_CAN_LOAD_IN_PRIVILEGEDABOUT_PROCESS |
          nsIAboutModule::IS_SECURE_CHROME_UI},
+#if 0
     {"mozilla", "chrome://global/content/mozilla.html",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT},
+#endif
     {"neterror", "chrome://global/content/netError.xhtml",
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::URI_CAN_LOAD_IN_CHILD | nsIAboutModule::ALLOW_SCRIPT |
