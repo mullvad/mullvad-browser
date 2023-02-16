@@ -6,11 +6,7 @@ toolkit.jar:
    content/global/autocomplete.css
    content/global/aboutAbout.js
    content/global/aboutAbout.html
-#ifdef MOZILLA_OFFICIAL
-   content/global/aboutRights.xhtml
-#else
-   content/global/aboutRights.xhtml           (aboutRights-unbranded.xhtml)
-#endif
+   content/global/aboutRights.xhtml             (aboutRightsMullvad.xhtml)
    content/global/aboutNetworking.js
    content/global/aboutNetworking.html
 #ifndef ANDROID
@@ -30,9 +26,13 @@ toolkit.jar:
    content/global/aboutGlean.html
    content/global/aboutGlean.css
 #endif
+#ifdef BASE_BROWSER_VERSION
+   content/global/aboutTelemetry.xhtml          (aboutTelemetryMullvad.xhtml)
+#else
    content/global/aboutTelemetry.js
    content/global/aboutTelemetry.xhtml
    content/global/aboutTelemetry.css
+#endif
    content/global/aboutUrlClassifier.js
    content/global/aboutUrlClassifier.xhtml
    content/global/aboutUrlClassifier.css
