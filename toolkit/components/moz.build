@@ -125,7 +125,9 @@ if CONFIG["MOZ_WIDGET_TOOLKIT"] != "android":
     ]
 
 if CONFIG["MOZ_BUILD_APP"] == "browser":
-    DIRS += ["normandy", "messaging-system"]
+    if CONFIG["MOZ_NORMANDY"]:
+        DIRS += ["normandy"]
+    DIRS += ["messaging-system"]
 
 DIRS += ["nimbus"]
 
