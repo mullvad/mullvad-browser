@@ -45,6 +45,9 @@ toolkit.jar:
    content/global/aboutTelemetry.xhtml
    content/global/aboutTelemetry.css
 #endif
+#ifdef MULLVAD_BROWSER
+   content/global/aboutTelemetry.xhtml          (aboutTelemetryMullvad.xhtml)
+#endif
    content/global/aboutUrlClassifier.js
    content/global/aboutUrlClassifier.xhtml
    content/global/aboutUrlClassifier.css
