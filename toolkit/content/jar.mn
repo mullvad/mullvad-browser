@@ -16,7 +16,9 @@ toolkit.jar:
    content/global/aboutProfiles.xhtml
 #endif
    content/global/aboutRights.js
-#ifdef MOZILLA_OFFICIAL
+#ifdef MULLVAD_BROWSER
+   content/global/aboutRights.xhtml           (aboutRightsMullvad.xhtml)
+#elifdef MOZILLA_OFFICIAL
    content/global/aboutRights.xhtml
 #else
    content/global/aboutRights.xhtml           (aboutRights-unbranded.xhtml)
@@ -44,6 +46,9 @@ toolkit.jar:
    content/global/aboutTelemetry.js
    content/global/aboutTelemetry.xhtml
    content/global/aboutTelemetry.css
+#endif
+#ifdef MULLVAD_BROWSER
+   content/global/aboutTelemetry.xhtml          (aboutTelemetryMullvad.xhtml)
 #endif
    content/global/aboutUrlClassifier.js
    content/global/aboutUrlClassifier.xhtml
