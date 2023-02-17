@@ -77,6 +77,9 @@ ID01:
         - networkProtocolError-title
         - nssBadCert-title
         - nssBadCert-sts-title
+        # Mullvad browser identifiers we created before we applied the linters.
+        - mullvad-about-readMore
+        - mullvad-about-telemetryLink
     files:
         # policies-descriptions.ftl: These IDs are generated programmatically
         # from policy names.
@@ -84,6 +87,7 @@ ID01:
         # The webext-perms-description-* IDs are generated programmatically
         # from permission names
         - toolkit/locales/en-US/toolkit/global/extensionPermissions.ftl
+        - browser/locales/en-US/browser/aboutDialogMullvad.ftl
 ID02:
     messages:
         # browser/components/ion/content/ion.ftl
