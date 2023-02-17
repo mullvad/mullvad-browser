@@ -84,6 +84,10 @@ ID01:
         - unknownProtocolFound-title
         - unknownSocketType-title
         - unsafeContentType-title
+
+        # Mullvad browser identifiers we created before we applied the linters.
+        - mullvad-about-readMore
+        - mullvad-about-telemetryLink
     files:
         # policies-descriptions.ftl
         # These IDs are generated programmatically from policy names.
