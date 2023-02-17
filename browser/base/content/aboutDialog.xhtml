@@ -14,7 +14,7 @@
         data-l10n-id="aboutDialog-title"
 #endif
         role="dialog"
-        aria-describedby="version distribution distributionId trademark"
+        aria-describedby="version distribution distributionId mullvadBrowserDesc trademark"
         >
 #ifdef XP_MACOSX
 #include macWindow.inc.xhtml
@@ -36,6 +36,7 @@
     <html:link rel="localization" href="branding/brand.ftl"/>
     <html:link rel="localization" href="browser/aboutDialog.ftl"/>
     <html:link rel="localization" href="toolkit/global/base-browser.ftl"/>
+    <html:link rel="localization" href="toolkit/global/mullvad-browser.ftl"/>
   </linkset>
 
   <html:div id="aboutDialogContainer">
@@ -109,8 +110,8 @@
                    - same line as the version because it may overflow.
                    - See tor-browerr#42720. -->
                 <label id="releasenotes" is="text-link" hidden="true" data-l10n-id="releaseNotes-link"/>
-                <label id="aboutDialogHelpLink" is="text-link" data-l10n-id="aboutdialog-help-user"/>
-                <label id="submit-feedback" is="text-link" data-l10n-id="aboutdialog-submit-feedback"/>
+                <label id="aboutDialogHelpLink" is="text-link" hidden="true" data-l10n-id="aboutdialog-help-user"/>
+                <label id="submit-feedback" is="text-link" hidden="true" data-l10n-id="aboutdialog-submit-feedback"/>
               </description>
             </vbox>
 #endif
@@ -138,14 +139,24 @@
             <label is="text-link" href="https://foundation.mozilla.org/?form=firefox-about" data-l10n-name="helpus-donateLink"/>
             <label is="text-link" href="https://www.mozilla.org/contribute/?utm_source=firefox-browser&#38;utm_medium=firefox-desktop&#38;utm_campaign=about-dialog" data-l10n-name="helpus-getInvolvedLink"/>
           </description>
+          <description class="text-blurb" id="mullvadBrowserDesc" data-l10n-id="mullvad-about-desc">
+            <label is="text-link" href="https://mullvad.net" data-l10n-name="mullvad-about-mullvadLink"/>
+            <label is="text-link" href="https://www.torproject.org" data-l10n-name="mullvad-about-torProjectLink"/>
+          </description>
+          <description class="text-blurb">
+            <label is="text-link" href="https://mullvad.net/browser" data-l10n-id="mullvad-about-readMore"/>
+          </description>
+          <description class="text-blurb" data-l10n-id="mullvad-about-feedback2" data-l10n-args='{"emailAddress":"support@mullvadvpn.net"}'/>
         </vbox>
       </vbox>
     </hbox>
     <vbox id="bottomBox">
       <hbox pack="center">
-        <label is="text-link" class="bottom-link" useoriginprincipal="true" href="about:license" data-l10n-id="bottomLinks-license"/>
+        <label is="text-link" class="bottom-link visible-bottom-link" useoriginprincipal="true" href="about:license" data-l10n-id="bottomLinks-license"/>
         <label is="text-link" class="bottom-link" href="https://www.mozilla.org/about/legal/terms/firefox/" data-l10n-id="bottom-links-terms"/>
         <label is="text-link" class="bottom-link" href="https://www.mozilla.org/privacy/firefox/?utm_source=firefox-browser&#38;utm_medium=firefox-desktop&#38;utm_campaign=about-dialog" data-l10n-id="bottom-links-privacy"/>
+        <label is="text-link" class="bottom-link visible-bottom-link" href="https://mullvad.net/en/help/privacy-policy/" data-l10n-id="mullvad-about-privacy-policy"/>
+        <label is="text-link" class="bottom-link visible-bottom-link" useoriginprincipal="true" href="about:telemetry" data-l10n-id="mullvad-about-telemetryLink"/>
       </hbox>
       <description id="trademark" data-l10n-id="trademarkInfo"></description>
     </vbox>
