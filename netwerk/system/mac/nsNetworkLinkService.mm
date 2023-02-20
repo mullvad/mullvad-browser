@@ -126,8 +126,12 @@ nsNetworkLinkService::GetLinkType(uint32_t* aLinkType) {
 
 NS_IMETHODIMP
 nsNetworkLinkService::GetNetworkID(nsACString& aNetworkID) {
+#ifdef BASE_BROWSER_VERSION
+  aNetworkID.Truncate();
+#else
   MutexAutoLock lock(mMutex);
   aNetworkID = mNetworkId;
+#endif
   return NS_OK;
 }
 
