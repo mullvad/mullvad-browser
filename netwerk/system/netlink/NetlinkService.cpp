@@ -1884,8 +1884,12 @@ void NetlinkService::CalculateNetworkID() {
 }
 
 void NetlinkService::GetNetworkID(nsACString& aNetworkID) {
+#ifdef BASE_BROWSER_VERSION
+  aNetworkID.Truncate();
+#else
   MutexAutoLock lock(mMutex);
   aNetworkID = mNetworkId;
+#endif
 }
 
 nsresult NetlinkService::GetDnsSuffixList(nsTArray<nsCString>& aDnsSuffixList) {
