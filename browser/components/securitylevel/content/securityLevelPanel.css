@@ -47,7 +47,7 @@ label#securityLevel-level {
 
 label#securityLevel-custom {
   border-radius: 4px;
-  background-color: var(--yellow-50);
+  background-color: var(--warning-color);
   color: black;
   font-size: 1em;
   height: 1.6em;
