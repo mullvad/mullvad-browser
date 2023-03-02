@@ -1583,7 +1583,7 @@ nsresult nsToolkitProfileService::SelectStartupProfile(
       // this behavior through a build-time flag, should Mozilla be interested
       // in taking it.
       // See also https://bugzilla.mozilla.org/show_bug.cgi?id=1770174
-#ifndef BASE_BROWSER
+#ifndef BASE_BROWSER_VERSION
       // If there is only one profile and it isn't meant to be the profile that
       // older versions of Firefox use then we must create a default profile
       // for older versions of Firefox to avoid the existing profile being
