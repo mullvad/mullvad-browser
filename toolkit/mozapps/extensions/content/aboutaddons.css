@@ -732,3 +732,14 @@ section:not(:empty) ~ #empty-addons-message {
     background-color: var(--color-accent-primary);
   }
 }
+
+/* Mullvad Browser discourages users from installing extensions */
+addon-page-header .main-search {
+  /* preserving the vertical space in order to keep the title aligned */
+  visibility: hidden;
+}
+
+[support-page="addons-help"],
+#empty-addons-message {
+  display: none;
+}
