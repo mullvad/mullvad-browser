@@ -45,3 +45,5 @@ toolkit.jar:
 # Text recognition widget
 
   skin/classic/global/media/textrecognition.css            (../../shared/media/textrecognition.css)
+
+  skin/classic/global/browser-colors.css                   (../../shared/browser-colors.css)
