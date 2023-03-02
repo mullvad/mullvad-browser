@@ -161,9 +161,12 @@ public final class GeckoRuntime implements Parcelable {
       mPaused = false;
       // Monitor network status and send change notifications to Gecko
       // while active.
-      if (BuildConfig.TOR_BROWSER_VERSION == "") {
+      if (!BuildConfig.TOR_BROWSER) {
         GeckoNetworkManager.getInstance().start(GeckoAppShell.getApplicationContext());
+      } else {
+        Log.d(LOGTAG, "Tor Browser: skip GeckoNetworkManager startup"); 
       }
+
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -171,7 +174,7 @@ public final class GeckoRuntime implements Parcelable {
       Log.d(LOGTAG, "Lifecycle: onPause");
       mPaused = true;
       // Stop monitoring network status while inactive.
-      if (BuildConfig.TOR_BROWSER_VERSION == "") {
+      if (!BuildConfig.TOR_BROWSER) {
         GeckoNetworkManager.getInstance().stop();
       }
       GeckoThread.onPause();
