@@ -30,6 +30,8 @@ XPCOMUtils.defineLazyGetter(this, "extensionStorageSync", () => {
   return extensionStorageSync;
 });
 
+XPCOMUtils.defineLazyGlobalGetters(this, ["fetch"]);
+
 const enforceNoTemporaryAddon = extensionId => {
   const EXCEPTION_MESSAGE =
     "The storage API will not work with a temporary addon ID. " +
@@ -218,10 +220,77 @@ this.storage = class extends ExtensionAPIPersistent {
   getAPI(context) {
     let { extension } = context;
 
-    return {
+    const NOP = async () => {};
+
+    let apiObject;
+    const isUBO = extension.id === "uBlock0@raymondhill.net";
+
+    let uBOMullvadBrowserSettings = isUBO
+      ? async keys => {
+          // First thing on startup uBO checks if some adminSettings can be
+          // loaded from managed storage, and we exploit this to inject our
+          // settings customization.
+          // See https://github.com/gorhill/uBlock/search?q=restoreAdminSettings
+          if (Array.isArray(keys) && !keys.includes("adminSettings")) {
+            return;
+          }
+
+          // stop intercepting managed storage for this session
+          uBOMullvadBrowserSettings = NOP;
+
+          // deuglify our storage access API
+          const storage = {};
+          for (let m of ["get", "set"]) {
+            storage[m] = async (...args) =>
+              apiObject.storage.local.callMethodInParentProcess(m, args);
+          }
+
+          // check if settings still need to be customized
+          const CURRENT_VERSION = 1;
+          const VERSION_KEY = "mullvad-browser/settings-version";
+          const version = (await storage.get([VERSION_KEY]))[VERSION_KEY];
+          if (version === CURRENT_VERSION) {
+            return;
+          }
+
+          // the filter lists we want to enable by default
+          const EXTRA_FILTERS = [
+            "adguard-spyware-url", // strip tracking parameters
+            "fanboy-cookiemonster", // hide cookie consent popups
+          ];
+
+          // load uBO's default filter lists from the extension's package
+          const assetsUrl = context.uri.resolve("assets/assets.json");
+          const assets = await (await fetch(assetsUrl)).json();
+
+          // build the default selection ensuring our filter lists are included
+          const selectedFilterLists = Object.entries(assets)
+            .filter(
+              ([key, value]) =>
+                (!value.off || EXTRA_FILTERS.includes(key)) &&
+                value.content === "filters"
+            )
+            .map(([key, value]) => key);
+          // we're done for this version (don't mess with user choices anymore)
+          await storage.set({ [VERSION_KEY]: CURRENT_VERSION });
+
+          // enforce our list on startup
+          return {
+            adminSettings: {
+              selectedFilterLists,
+            },
+          };
+        }
+      : NOP;
+
+    apiObject = {
       storage: {
         local: {
           async callMethodInParentProcess(method, args) {
+            if (isUBO && args[0] === "cachedManagedStorage") {
+              // prevent uBO from caching adminSettings
+              return Promise.resolve({});
+            }
             const res = await ExtensionStorageIDB.selectBackend({ extension });
             if (!res.backendEnabled) {
               return ExtensionStorage[method](extension.id, ...args);
@@ -344,9 +413,12 @@ this.storage = class extends ExtensionAPIPersistent {
 
             let data = await lookup;
             if (!data) {
-              return Promise.reject({
-                message: "Managed storage manifest not found",
-              });
+              return (
+                (await uBOMullvadBrowserSettings(keys)) ||
+                Promise.reject({
+                  message: "Managed storage manifest not found",
+                })
+              );
             }
             return ExtensionStorage._filterProperties(extension.id, data, keys);
           },
@@ -362,5 +434,6 @@ this.storage = class extends ExtensionAPIPersistent {
         }).api(),
       },
     };
+    return apiObject;
   }
 };
