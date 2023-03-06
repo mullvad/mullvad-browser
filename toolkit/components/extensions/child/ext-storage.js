@@ -137,6 +137,8 @@ this.storage = class extends ExtensionAPI {
       context
     );
 
+    const isUBO = extension.id === "uBlock0@raymondhill.net";
+
     // onChangedName is "storage.onChanged", "storage.sync.onChanged", etc.
     function makeOnChangedEventTarget(onChangedName) {
       return new EventManager({
@@ -277,6 +279,11 @@ this.storage = class extends ExtensionAPI {
 
             // Get the selected backend and cache it for the next API calls from this context.
             selectedBackend = await promiseStorageLocalBackend;
+          }
+
+          if (isUBO && args[0] === "cachedManagedStorage") {
+            // prevent uBO from caching adminSettings
+            return Promise.resolve({});
           }
 
           // Let the outer try to catch rejections returned by the backend methods.
