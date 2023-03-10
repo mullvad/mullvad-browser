@@ -53,6 +53,11 @@
 #if defined(__FreeBSD__) && !defined(__Userspace__)
 #include <netinet/sctp_lock_bsd.h>
 #endif
+
+#if defined(_WIN32) && !defined(_MSC_VER)
+#include <minmax.h>
+#endif
+
 /*
  * NOTES: On the outbound side of things I need to check the sack timer to
  * see if I should generate a sack into the chunk queue (if I have data to
