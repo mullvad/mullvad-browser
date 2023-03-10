@@ -49,6 +49,10 @@
 #include <netinet/sctp_kdtrace.h>
 #endif
 
+#if defined(_WIN32) && defined(__MINGW32__)
+#include <minmax.h>
+#endif
+
 #define SHIFT_MPTCP_MULTI_N 40
 #define SHIFT_MPTCP_MULTI_Z 16
 #define SHIFT_MPTCP_MULTI 8
