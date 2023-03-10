@@ -15,7 +15,7 @@
 
 #include "rtc_base/system/arch.h"
 
-#if defined(WEBRTC_POSIX)
+#if (defined(WEBRTC_POSIX) || defined(__MINGW32__))
 #define WebRtcIsac_lrint lrint
 #elif (defined(WEBRTC_ARCH_X86) && defined(WIN32))
 static __inline long int WebRtcIsac_lrint(double x_dbl) {
