@@ -27,8 +27,8 @@ NrIceStunAddr::NrIceStunAddr(const nr_local_addr* addr)
       fqdn_(addr->addr.fqdn),
       is_proxied_(addr->addr.is_proxied),
       tls_(addr->addr.tls),
-      interface_type_(static_cast<InterfaceType>(addr->interface.type)),
-      estimated_speed_(addr->interface.estimated_speed),
+      interface_type_(static_cast<InterfaceType>(addr->iface.type)),
+      estimated_speed_(addr->iface.estimated_speed),
       temporary_((addr->flags & NR_ADDR_FLAG_TEMPORARY) != 0) {}
 
 NrIceStunAddr::Protocol NrIceStunAddr::protocolFromNrTransportAddr(
@@ -101,8 +101,8 @@ void NrIceStunAddr::toNrLocalAddr(nr_local_addr& addr) const {
   // generate as_string
   nr_transport_addr_fmt_addr_string(&addr.addr);
 
-  addr.interface.type = static_cast<int>(interface_type_);
-  addr.interface.estimated_speed = estimated_speed_;
+  addr.iface.type = static_cast<int>(interface_type_);
+  addr.iface.estimated_speed = estimated_speed_;
 
   if (temporary_) {
     addr.flags |= NR_ADDR_FLAG_TEMPORARY;

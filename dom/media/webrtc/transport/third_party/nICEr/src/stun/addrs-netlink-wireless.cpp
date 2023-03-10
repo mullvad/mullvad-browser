@@ -57,8 +57,8 @@ void stun_convert_netlink_wireless(nr_local_addr* addr, int s) {
   (void)strlcpy(wrq.ifr_name, addr->addr.ifname, sizeof(wrq.ifr_name));
   e = ioctl(s, SIOCGIWRATE, &wrq);
   if (e == 0) {
-    addr->interface.type = NR_INTERFACE_TYPE_WIFI;
-    addr->interface.estimated_speed = wrq.u.bitrate.value / 1000;
+    addr->iface.type = NR_INTERFACE_TYPE_WIFI;
+    addr->iface.estimated_speed = wrq.u.bitrate.value / 1000;
   }
 }
 
