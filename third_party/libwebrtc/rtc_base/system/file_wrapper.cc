@@ -22,7 +22,7 @@
 #include "rtc_base/numerics/safe_conversions.h"
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #else
 #endif
 
