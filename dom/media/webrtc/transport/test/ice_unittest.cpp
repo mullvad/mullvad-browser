@@ -1861,8 +1861,8 @@ class WebRtcIcePrioritizerTest : public StunTest {
     std::string str_addr = "10.0.0." + num;
     std::string ifname = "eth" + num;
     nr_local_addr local_addr;
-    local_addr.interface.type = type;
-    local_addr.interface.estimated_speed = estimated_speed;
+    local_addr.iface.type = type;
+    local_addr.iface.estimated_speed = estimated_speed;
 
     int r = nr_str_port_to_transport_addr(str_addr.c_str(), 0, IPPROTO_UDP,
                                           &(local_addr.addr));
@@ -2795,8 +2795,8 @@ TEST_F(WebRtcIceConnectTest,
 
   // prepare a fake wifi interface
   nr_local_addr wifi_addr;
-  wifi_addr.interface.type = NR_INTERFACE_TYPE_WIFI;
-  wifi_addr.interface.estimated_speed = 1000;
+  wifi_addr.iface.type = NR_INTERFACE_TYPE_WIFI;
+  wifi_addr.iface.estimated_speed = 1000;
 
   int r = nr_str_port_to_transport_addr(FAKE_WIFI_ADDR, 0, IPPROTO_UDP,
                                         &(wifi_addr.addr));
