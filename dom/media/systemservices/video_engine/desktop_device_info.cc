@@ -66,7 +66,7 @@ void DesktopDisplayDevice::setUniqueIdName(const char* aDeviceUniqueIdUTF8) {
   SetStringMember(&mDeviceUniqueIdUTF8, aDeviceUniqueIdUTF8);
 }
 
-void DesktopDisplayDevice::setPid(const int aPid) { mPid = aPid; }
+void DesktopDisplayDevice::setPid(const pid_t aPid) { mPid = aPid; }
 
 ScreenId DesktopDisplayDevice::getScreenId() { return mScreenId; }
 
