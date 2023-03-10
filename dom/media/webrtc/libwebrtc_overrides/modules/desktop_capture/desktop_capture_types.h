@@ -5,11 +5,11 @@
 #ifndef DOM_MEDIA_WEBRTC_LIBWEBRTCOVERRIDES_MODULES_DESKTOP_CAPTURE_DESKTOP_CAPTURE_TYPES_H_
 #define DOM_MEDIA_WEBRTC_LIBWEBRTCOVERRIDES_MODULES_DESKTOP_CAPTURE_DESKTOP_CAPTURE_TYPES_H_
 
-// pid_t
-#if !defined(XP_WIN) || defined(__MINGW32__)
+#if defined(XP_WIN) && \
+    !defined(__MINGW32__)  // Moving this into the global namespace
+typedef int pid_t;         // matching what used to be in
+#elif defined(XP_WIN)      // video_capture_defines.h
 #  include <sys/types.h>
-#else
-typedef int pid_t;
 #endif
 
 #include "../../third_party/libwebrtc/modules/desktop_capture/desktop_capture_types.h"

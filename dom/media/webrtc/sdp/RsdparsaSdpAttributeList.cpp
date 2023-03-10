@@ -6,6 +6,7 @@
 
 #include <limits>
 #include <ostream>
+#include <string>
 
 #include "SdpAttribute.h"
 #include "mozilla/Assertions.h"
