@@ -4,6 +4,10 @@
 
 #include <errno.h>
 
+#if defined(SIP_OS_WINDOWS) && !defined(_MSC_VER)
+#include <minmax.h>
+#endif
+
 #include "sdp_os_defs.h"
 #include "sipcc_sdp.h"
 #include "sdp_private.h"
