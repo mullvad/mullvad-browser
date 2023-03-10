@@ -11,8 +11,18 @@
 #ifndef RTC_BASE_WIN_CREATE_DIRECT3D_DEVICE_H_
 #define RTC_BASE_WIN_CREATE_DIRECT3D_DEVICE_H_
 
-#include <windows.graphics.directX.direct3d11.h>
-#include <windows.graphics.directX.direct3d11.interop.h>
+#include <windows.graphics.directx.direct3d11.h>
+#ifndef __MINGW32__
+#  include <windows.graphics.directX.direct3d11.interop.h>
+#else
+#  include <dxgi.h>
+#  include <inspectable.h>
+extern "C" {
+// This function is only used in decltype(..)
+HRESULT __stdcall CreateDirect3D11DeviceFromDXGIDevice(
+    ::IDXGIDevice* dxgiDevice, ::IInspectable** graphicsDevice);
+}
+#endif
 #include <winerror.h>
 #include <wrl/client.h>
 

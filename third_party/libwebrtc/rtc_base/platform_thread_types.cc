@@ -95,6 +95,8 @@ void SetCurrentThreadName(const char* name) {
     set_thread_description_func(::GetCurrentThread(), wide_thread_name);
   }
 
+#if defined(_MSC_VER)
+  // SEH is only impelmented for the MSVC compiler
   // For details see:
   // https://docs.microsoft.com/en-us/visualstudio/debugger/how-to-set-a-thread-name-in-native-code
 #pragma pack(push, 8)
@@ -114,6 +116,7 @@ void SetCurrentThreadName(const char* name) {
   } __except (EXCEPTION_EXECUTE_HANDLER) {  // NOLINT
   }
 #pragma warning(pop)
+#endif // _MSC_VER
 #elif defined(WEBRTC_LINUX) || defined(WEBRTC_ANDROID)
   prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name));  // NOLINT
 #elif defined(WEBRTC_MAC) || defined(WEBRTC_IOS)
