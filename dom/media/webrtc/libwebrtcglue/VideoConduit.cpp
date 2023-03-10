@@ -106,8 +106,8 @@
 #endif
 
 // for ntohs
-#ifdef _MSC_VER
-#  include "Winsock2.h"
+#ifdef WIN32
+#  include "winsock2.h"
 #else
 #  include <netinet/in.h>
 #endif
