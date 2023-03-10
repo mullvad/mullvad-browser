@@ -11,7 +11,7 @@
 #ifndef RTC_BASE_SYNCHRONIZATION_RW_LOCK_WIN_H_
 #define RTC_BASE_SYNCHRONIZATION_RW_LOCK_WIN_H_
 
-#include <Windows.h>
+#include <windows.h>
 
 #include "rtc_base/synchronization/rw_lock_wrapper.h"
 
