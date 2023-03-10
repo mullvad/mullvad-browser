@@ -79,6 +79,11 @@ __FBSDID("$FreeBSD$");
 #if defined(__Userspace__) && defined(INET6)
 #include <netinet6/sctp6_var.h>
 #endif
+
+#if defined(_WIN32) && !defined(_MSC_VER)
+#include <minmax.h>
+#endif
+
 #if defined(__APPLE__) && !defined(__Userspace__)
 #if !(defined(APPLE_LEOPARD) || defined(APPLE_SNOWLEOPARD))
 #define SCTP_MAX_LINKHDR 16
