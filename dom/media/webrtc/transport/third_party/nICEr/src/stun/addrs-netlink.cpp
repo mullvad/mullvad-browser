@@ -143,7 +143,7 @@ stun_convert_netlink(nr_local_addr *addr, struct ifaddrmsg *address_msg, struct 
   int flags = get_siocgifflags(addr);
   if (flags & IFF_POINTOPOINT)
   {
-    addr->interface.type = NR_INTERFACE_TYPE_UNKNOWN | NR_INTERFACE_TYPE_VPN;
+    addr->iface.type = NR_INTERFACE_TYPE_UNKNOWN | NR_INTERFACE_TYPE_VPN;
     /* TODO (Bug 896913): find backend network type of this VPN */
   }
 
@@ -165,11 +165,11 @@ stun_convert_netlink(nr_local_addr *addr, struct ifaddrmsg *address_msg, struct 
   {
     /* For wireless network, we won't get ethtool, it's a wired
      * connection */
-    addr->interface.type = NR_INTERFACE_TYPE_WIRED;
+    addr->iface.type = NR_INTERFACE_TYPE_WIRED;
 #ifdef DONT_HAVE_ETHTOOL_SPEED_HI
-    addr->interface.estimated_speed = ecmd.speed;
+    addr->iface.estimated_speed = ecmd.speed;
 #else
-    addr->interface.estimated_speed = ((ecmd.speed_hi << 16) | ecmd.speed) * 1000;
+    addr->iface.estimated_speed = ((ecmd.speed_hi << 16) | ecmd.speed) * 1000;
 #endif
   }
 
@@ -178,8 +178,8 @@ stun_convert_netlink(nr_local_addr *addr, struct ifaddrmsg *address_msg, struct 
   close(s);
 
 #else
-  addr->interface.type = NR_INTERFACE_TYPE_UNKNOWN;
-  addr->interface.estimated_speed = 0;
+  addr->iface.type = NR_INTERFACE_TYPE_UNKNOWN;
+  addr->iface.estimated_speed = 0;
 #endif
   return 0;
 }
