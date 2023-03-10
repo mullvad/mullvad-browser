@@ -63,6 +63,10 @@ __FBSDID("$FreeBSD$");
 #include <sys/smp.h>
 #endif
 
+#if defined(_WIN32) && !defined(_MSC_VER)
+#include <minmax.h>
+#endif
+
 static void
 sctp_stop_all_cookie_timers(struct sctp_tcb *stcb)
 {
