@@ -12,7 +12,7 @@
 #define MODULES_VIDEO_CAPTURE_MAIN_SOURCE_WINDOWS_DEVICE_INFO_DS_H_
 
 #include <dshow.h>
-#include <Ks.h>
+#include <ks.h>
 #include <dbt.h>
 
 #include "modules/video_capture/device_info_impl.h"

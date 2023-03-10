@@ -13,6 +13,8 @@
 #include <DispatcherQueue.h>
 #include <windows.graphics.capture.interop.h>
 #include <windows.graphics.directX.direct3d11.interop.h>
+#include <windows.graphics.h>
+#include <wrl/client.h>
 #include <wrl/event.h>
 
 #include <algorithm>

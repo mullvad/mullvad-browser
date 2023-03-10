@@ -11,8 +11,9 @@
 #ifndef RTC_BASE_WIN_CREATE_DIRECT3D_DEVICE_H_
 #define RTC_BASE_WIN_CREATE_DIRECT3D_DEVICE_H_
 
-#include <windows.graphics.directX.direct3d11.h>
-#include <windows.graphics.directX.direct3d11.interop.h>
+#include <windows.graphics.directx.direct3d11.h>
+#include <windows.graphics.directx.direct3d11.interop.h>
+
 #include <winerror.h>
 #include <wrl/client.h>
 
