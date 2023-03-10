@@ -11,11 +11,13 @@
 #ifndef MODULES_DESKTOP_CAPTURE_DESKTOP_CAPTURE_TYPES_H_
 #define MODULES_DESKTOP_CAPTURE_DESKTOP_CAPTURE_TYPES_H_
 
+// pid_t
+#if !defined(XP_WIN) || defined(__MINGW32__)
+#include <sys/types.h>
+#else
+typedef int pid_t;
+#endif
 #include <stdint.h>
-
-#ifdef XP_WIN      // Moving this into the global namespace
-typedef int pid_t; // matching what used to be in
-#endif             // video_capture_defines.h
 
 namespace webrtc {
 
