@@ -46,7 +46,7 @@
 
 #include <string.h>
 #include <errno.h>
-#ifndef _MSC_VER
+#ifndef WIN32
 #include <strings.h>
 #include <syslog.h>
 #endif

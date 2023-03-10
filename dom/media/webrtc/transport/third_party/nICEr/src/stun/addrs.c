@@ -92,7 +92,7 @@ nr_stun_filter_addrs_for_ifname(nr_local_addr src[], const int src_begin, const 
 
     if (src[i].addr.ip_version == NR_IPV6) {
       if (nr_transport_addr_is_teredo(&src[i].addr)) {
-          src[i].interface.type |= NR_INTERFACE_TYPE_TEREDO;
+          src[i].iface.type |= NR_INTERFACE_TYPE_TEREDO;
           /* Prefer teredo over mac-based address. Probably will never see
            * both. */
           filter_mac_ipv6 = 1;

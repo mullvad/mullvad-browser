@@ -174,14 +174,14 @@ stun_getaddrs_filtered(nr_local_addr addrs[], int maxaddrs, int *count)
 
           strlcpy(addrs[n].addr.ifname, hex_hashed_ifname, sizeof(addrs[n].addr.ifname));
           if (tmpAddress->IfType == IF_TYPE_ETHERNET_CSMACD) {
-            addrs[n].interface.type = NR_INTERFACE_TYPE_WIRED;
+            addrs[n].iface.type = NR_INTERFACE_TYPE_WIRED;
           } else if (tmpAddress->IfType == IF_TYPE_IEEE80211) {
             /* Note: this only works for >= Win Vista */
-            addrs[n].interface.type = NR_INTERFACE_TYPE_WIFI;
+            addrs[n].iface.type = NR_INTERFACE_TYPE_WIFI;
           } else {
-            addrs[n].interface.type = NR_INTERFACE_TYPE_UNKNOWN;
+            addrs[n].iface.type = NR_INTERFACE_TYPE_UNKNOWN;
           }
-          addrs[n].interface.estimated_speed = tmpAddress->TransmitLinkSpeed / 1000;
+          addrs[n].iface.estimated_speed = tmpAddress->TransmitLinkSpeed / 1000;
           if (stun_win32_address_temp_v6(u)) {
             addrs[n].flags |= NR_ADDR_FLAG_TEMPORARY;
           }
