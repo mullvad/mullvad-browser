@@ -11,7 +11,7 @@
 #ifndef MODULES_AUDIO_CODING_CODECS_ISAC_MAIN_SOURCE_OS_SPECIFIC_INLINE_H_
 #define MODULES_AUDIO_CODING_CODECS_ISAC_MAIN_SOURCE_OS_SPECIFIC_INLINE_H_
 
-#if defined(WEBRTC_POSIX)
+#if (defined(WEBRTC_POSIX) || defined(__MINGW32__))
 #define WebRtcIsac_lrint lrint
 #elif (defined(WEBRTC_ARCH_X86) && defined(WIN32))
 static __inline long int WebRtcIsac_lrint(double x_dbl) {

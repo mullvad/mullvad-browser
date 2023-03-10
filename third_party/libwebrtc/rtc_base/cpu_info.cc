@@ -99,7 +99,7 @@ uint64_t xgetbv(uint32_t xcr) {
 }
 #endif  // WEBRTC_ENABLE_AVX2
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 // Intrinsic for "cpuid".
 #if defined(__pic__) && defined(__i386__)
 static inline void __cpuid(int cpu_info[4], int info_type) {
