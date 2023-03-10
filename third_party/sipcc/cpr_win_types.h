@@ -40,15 +40,22 @@ typedef uint8_t boolean;
  * NOTE: size_t should already be declared by both the MinGW and Microsoft
  * SDKs.
  */
-#ifndef _SSIZE_T_
+
+#if defined(_MSC_VER) && !defined(_SSIZE_T_)
 #define _SSIZE_T_
-typedef int ssize_t;
+#if !defined(_WIN64)
+typedef int32_t ssize_t;
+#else
+typedef int64_t ssize_t;
+#endif
 #endif
 
 /*
- * Define pid_t.
+ * Define pid_t for MSVC builds
  */
+#if defined(_WIN32) && defined (_MSC_VER)
 typedef int pid_t;
+#endif
 
 /*
  * Define min/max
