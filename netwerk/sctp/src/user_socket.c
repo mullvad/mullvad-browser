@@ -60,9 +60,12 @@
 #endif
 userland_mutex_t accept_mtx;
 userland_cond_t accept_cond;
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <time.h>
 #include <sys/timeb.h>
+#if !defined(_MSC_VER)
+#include <minmax.h>
+#endif
 #endif
 
 MALLOC_DEFINE(M_PCB, "sctp_pcb", "sctp pcb");
