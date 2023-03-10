@@ -624,11 +624,11 @@ with only_when(depends(c_compiler)(lambda c: c.type == "clang-cl")):
         add_linker_flag("-LARGEADDRESSAWARE")
         add_linker_flag("-SAFESEH")
 
+        # avoid conficts with std::min/max
+        set_define("NOMINMAX", True)
+
 
 set_define("WIN32_LEAN_AND_MEAN", True)
-
-# See http://support.microsoft.com/kb/143208 to use STL
-set_define("NOMINMAX", True)
 
 
 with only_when(target_is_windows & depends(c_compiler)(lambda c: c.type != "clang-cl")):
