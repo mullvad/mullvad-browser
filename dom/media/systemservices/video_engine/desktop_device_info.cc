@@ -25,7 +25,7 @@ namespace webrtc {
 void DesktopSource::setScreenId(ScreenId aId) { mScreenId = aId; }
 void DesktopSource::setName(nsCString&& aName) { mName = std::move(aName); }
 void DesktopSource::setUniqueId(nsCString&& aId) { mUniqueId = std::move(aId); }
-void DesktopSource::setPid(const int aPid) { mPid = aPid; }
+void DesktopSource::setPid(const pid_t aPid) { mPid = aPid; }
 
 ScreenId DesktopSource::getScreenId() const { return mScreenId; }
 const nsCString& DesktopSource::getName() const { return mName; }
