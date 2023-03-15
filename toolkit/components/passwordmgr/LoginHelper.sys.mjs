@@ -1261,26 +1261,7 @@ export const LoginHelper = {
     window,
     { filterString = "", entryPoint = "", loginGuid = null } = {}
   ) {
-    // Get currently active tab's origin
-    const openedFrom =
-      window.gBrowser?.selectedTab.linkedBrowser.currentURI.spec;
-
-    // If no loginGuid is set, get sanitized origin, this will return null for about:* uris
-    const preselectedLogin = loginGuid ?? this.getLoginOrigin(openedFrom);
-
-    const params = new URLSearchParams({
-      ...(filterString && { filter: filterString }),
-      ...(entryPoint && { entryPoint }),
-    });
-
-    const paramsPart = params.toString() ? `?${params}` : "";
-    const fragmentsPart = preselectedLogin
-      ? `#${window.encodeURIComponent(preselectedLogin)}`
-      : "";
-    const destination = `about:logins${paramsPart}${fragmentsPart}`;
-
-    // We assume that managementURL has a '?' already
-    window.openTrustedLinkIn(destination, "tab");
+    console.error("The password manager is disabled in Mullvad Browser.");
   },
 
   /**
