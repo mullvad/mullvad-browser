@@ -16,7 +16,6 @@ import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   OSKeyStore: "resource://gre/modules/OSKeyStore.sys.mjs",
-  BrowserWindowTracker: "resource:///modules/BrowserWindowTracker.sys.mjs",
 });
 
 XPCOMUtils.defineLazyServiceGetter(
@@ -1258,29 +1257,9 @@ export const LoginHelper = {
    */
   openPasswordManager(
     window,
-    { filterString = "", entryPoint = "", loginGuid = null } = {}
+    { _filterString = "", _entryPoint = "", _loginGuid = null } = {}
   ) {
-    // Get currently active tab's origin
-    const openedFrom =
-      window.gBrowser?.selectedTab.linkedBrowser.currentURI.spec;
-    // If no loginGuid is set, get sanitized origin, this will return null for about:* uris
-    const preselectedLogin = loginGuid ?? this.getLoginOrigin(openedFrom);
-
-    const params = new URLSearchParams({
-      ...(filterString && { filter: filterString }),
-      ...(entryPoint && { entryPoint }),
-    });
-
-    const paramsPart = params.toString() ? `?${params}` : "";
-
-    let browserWindow = lazy.BrowserWindowTracker.getTopWindow();
-    const browser = browserWindow.gBrowser ?? browserWindow.opener?.gBrowser;
-
-    const tab = browser.addTrustedTab(`about:logins${paramsPart}`, {
-      inBackground: false,
-    });
-
-    tab.setAttribute("preselect-login", preselectedLogin);
+    console.error("The password manager is disabled in Mullvad Browser.");
   },
 
   /**
