@@ -26,7 +26,6 @@ with Files("controlcenter/**"):
 
 DIRS += [
     "about",
-    "aboutlogins",
     "aboutwelcome",
     "aiwindow",
     "asrouter",
