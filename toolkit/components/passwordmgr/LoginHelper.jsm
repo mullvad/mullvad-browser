@@ -1235,15 +1235,7 @@ this.LoginHelper = {
    *                 The name of the entry point, used for telemetry
    */
   openPasswordManager(window, { filterString = "", entryPoint = "" } = {}) {
-    const params = new URLSearchParams({
-      ...(filterString && { filter: filterString }),
-      ...(entryPoint && { entryPoint }),
-    });
-    const separator = params.toString() ? "?" : "";
-    const destination = `about:logins${separator}${params}`;
-
-    // We assume that managementURL has a '?' already
-    window.openTrustedLinkIn(destination, "tab");
+    console.error("The password manager is disabled in Mullvad Browser.");
   },
 
   /**
