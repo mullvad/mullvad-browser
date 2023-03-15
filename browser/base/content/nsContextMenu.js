@@ -1051,7 +1051,7 @@ class nsContextMenu {
       if (!this.isLoginForm()) {
         return;
       }
-      showManage = true;
+      showManage = Services.prefs.getBoolPref("signon.rememberSignons", true);
 
       // Disable the fill option if the user hasn't unlocked with their primary password
       // or if the password field or target field are disabled.
