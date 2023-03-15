@@ -387,7 +387,7 @@ const CONFIG_PANES = Object.freeze({
     groupIds: ["passwords", "payments", "addresses"],
     module:
       "chrome://browser/content/preferences/config/passwords-autofill.mjs",
-    visible: () => srdSectionEnabled("passwordsAutofill"),
+    visible: () => false,
   },
   privacy: {
     l10nId: "pane-privacy-section",

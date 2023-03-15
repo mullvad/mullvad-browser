@@ -733,6 +733,9 @@ SettingGroupManager.registerGroups({
     inProgress: false,
     id: "passwordsGroup",
     subcategory: "logins",
+    // Hide all password controls. mullvad-browser#21.
+    hidden: true,
+    hiddenFromSearch: true,
     l10nId: "forms-passwords-header",
     headingLevel: 2,
     items: [
