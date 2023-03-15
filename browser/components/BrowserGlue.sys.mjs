@@ -1430,7 +1430,8 @@ BrowserGlue.prototype = {
     const BREACH_ALERTS_PREF = "signon.management.page.breach-alerts.enabled";
     const clearVulnerablePasswordsIfBreachAlertsDisabled = async function () {
       if (!Services.prefs.getBoolPref(BREACH_ALERTS_PREF)) {
-        await lazy.LoginBreaches.clearAllPotentiallyVulnerablePasswords();
+        // mullvad-browser#21: LoginBreaches is removed at compile time
+        // await lazy.LoginBreaches.clearAllPotentiallyVulnerablePasswords();
       }
     };
     clearVulnerablePasswordsIfBreachAlertsDisabled();

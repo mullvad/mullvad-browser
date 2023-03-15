@@ -84,38 +84,6 @@ let JSWINDOWACTORS = {
     enablePreference: "browser.contextual-password-manager.enabled",
   },
 
-  AboutLogins: {
-    parent: {
-      esModuleURI: "resource:///actors/AboutLoginsParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource:///actors/AboutLoginsChild.sys.mjs",
-      events: {
-        AboutLoginsCopyLoginDetail: { wantUntrusted: true },
-        AboutLoginsCreateLogin: { wantUntrusted: true },
-        AboutLoginsDeleteLogin: { wantUntrusted: true },
-        AboutLoginsDismissBreachAlert: { wantUntrusted: true },
-        AboutLoginsImportFromBrowser: { wantUntrusted: true },
-        AboutLoginsImportFromFile: { wantUntrusted: true },
-        AboutLoginsImportReportInit: { wantUntrusted: true },
-        AboutLoginsImportReportReady: { wantUntrusted: true },
-        AboutLoginsInit: { wantUntrusted: true },
-        AboutLoginsGetHelp: { wantUntrusted: true },
-        AboutLoginsOpenPreferences: { wantUntrusted: true },
-        AboutLoginsOpenSite: { wantUntrusted: true },
-        AboutLoginsRecordTelemetryEvent: { wantUntrusted: true },
-        AboutLoginsRemoveAllLogins: { wantUntrusted: true },
-        AboutLoginsSortChanged: { wantUntrusted: true },
-        AboutLoginsSyncEnable: { wantUntrusted: true },
-        AboutLoginsUpdateLogin: { wantUntrusted: true },
-        AboutLoginsExportPasswords: { wantUntrusted: true },
-      },
-    },
-    matches: ["about:logins", "about:logins?*", "about:loginsimportreport"],
-    allFrames: true,
-    remoteTypes: ["privilegedabout"],
-  },
-
   AboutMessagePreview: {
     parent: {
       esModuleURI: "resource:///actors/AboutMessagePreviewParent.sys.mjs",
