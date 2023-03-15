@@ -357,39 +357,6 @@ let JSPROCESSACTORS = {
  * available at https://firefox-source-docs.mozilla.org/dom/ipc/jsactors.html
  */
 let JSWINDOWACTORS = {
-  AboutLogins: {
-    parent: {
-      esModuleURI: "resource:///actors/AboutLoginsParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource:///actors/AboutLoginsChild.sys.mjs",
-      events: {
-        AboutLoginsCopyLoginDetail: { wantUntrusted: true },
-        AboutLoginsCreateLogin: { wantUntrusted: true },
-        AboutLoginsDeleteLogin: { wantUntrusted: true },
-        AboutLoginsDismissBreachAlert: { wantUntrusted: true },
-        AboutLoginsImportFromBrowser: { wantUntrusted: true },
-        AboutLoginsImportFromFile: { wantUntrusted: true },
-        AboutLoginsImportReportInit: { wantUntrusted: true },
-        AboutLoginsImportReportReady: { wantUntrusted: true },
-        AboutLoginsInit: { wantUntrusted: true },
-        AboutLoginsGetHelp: { wantUntrusted: true },
-        AboutLoginsOpenPreferences: { wantUntrusted: true },
-        AboutLoginsOpenSite: { wantUntrusted: true },
-        AboutLoginsRecordTelemetryEvent: { wantUntrusted: true },
-        AboutLoginsRemoveAllLogins: { wantUntrusted: true },
-        AboutLoginsSortChanged: { wantUntrusted: true },
-        AboutLoginsSyncEnable: { wantUntrusted: true },
-        AboutLoginsSyncOptions: { wantUntrusted: true },
-        AboutLoginsUpdateLogin: { wantUntrusted: true },
-        AboutLoginsExportPasswords: { wantUntrusted: true },
-      },
-    },
-    matches: ["about:logins", "about:logins?*", "about:loginsimportreport"],
-    allFrames: true,
-    remoteTypes: ["privilegedabout"],
-  },
-
   AboutMessagePreview: {
     parent: {
       esModuleURI: "resource:///actors/AboutMessagePreviewParent.sys.mjs",
@@ -3143,7 +3110,8 @@ BrowserGlue.prototype = {
     const BREACH_ALERTS_PREF = "signon.management.page.breach-alerts.enabled";
     const clearVulnerablePasswordsIfBreachAlertsDisabled = async function () {
       if (!Services.prefs.getBoolPref(BREACH_ALERTS_PREF)) {
-        await lazy.LoginBreaches.clearAllPotentiallyVulnerablePasswords();
+        // privacy-browser#21: LoginBreaches is removed at compile time
+        // await lazy.LoginBreaches.clearAllPotentiallyVulnerablePasswords();
       }
     };
     clearVulnerablePasswordsIfBreachAlertsDisabled();
