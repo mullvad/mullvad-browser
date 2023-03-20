@@ -404,6 +404,14 @@ pref("captivedetect.canonicalURL", "");
 // See tor-browser#18801.
 pref("dom.push.serverURL", "");
 
+#ifdef XP_WIN
+// tor-browser#41683: Disable the network process on Windows
+// Mozilla already disables the network process for HTTP.
+// With this preference, we completely disable it, because we found that it
+// breaks stuff with mingw. See also tor-browser#41489.
+pref("network.process.enabled", false);
+#endif
+
 // Extension support
 pref("extensions.autoDisableScopes", 0);
 pref("extensions.databaseSchema", 3);
