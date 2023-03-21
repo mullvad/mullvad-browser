@@ -2210,10 +2210,8 @@ static void DumpHelp() {
       "  --migration        Start with migration wizard.\n"
       "  --ProfileManager   Start with ProfileManager.\n"
 #ifdef MOZ_HAS_REMOTE
-      "  --no-remote        (default) Do not accept or send remote commands; "
-      "implies\n"
+      "  --no-remote        Do not accept or send remote commands; implies\n"
       "                     --new-instance.\n"
-      "  --allow-remote     Accept and send remote commands.\n"
       "  --new-instance     Open new instance, not a new window in running "
       "instance.\n"
 #endif
@@ -4388,25 +4386,16 @@ int XREMain::XRE_mainInit(bool* aExitFlag) {
                                      gSafeMode);
 
 #if defined(MOZ_HAS_REMOTE)
-  // We disable remoting by default, unless -osint is used.
-  bool allowRemote = (CheckArg("allow-remote") == ARG_FOUND);
-  bool isOsint = (CheckArg("osint", nullptr, CheckArgFlag::None) == ARG_FOUND);
-  if (!allowRemote && !isOsint) {
-    SaveToEnv("MOZ_NO_REMOTE=1");
-  }
   // Handle --no-remote and --new-instance command line arguments. Setup
   // the environment to better accommodate other components and various
   // restart scenarios.
   ar = CheckArg("no-remote");
-  if ((ar == ARG_FOUND) && allowRemote) {
-    PR_fprintf(PR_STDERR,
-               "Error: argument --no-remote is invalid when argument "
-               "--allow-remote is specified\n");
-    return 1;
-  }
-  if (EnvHasValue("MOZ_NO_REMOTE")) {
+  if (ar == ARG_FOUND || EnvHasValue("MOZ_NO_REMOTE")) {
     mDisableRemoteClient = true;
     mDisableRemoteServer = true;
+    if (!EnvHasValue("MOZ_NO_REMOTE")) {
+      SaveToEnv("MOZ_NO_REMOTE=1");
+    }
   }
 
   ar = CheckArg("new-instance");
