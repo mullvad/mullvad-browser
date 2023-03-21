@@ -43,7 +43,7 @@ XPCOMUtils.defineLazyGetter(lazy, "gWindowsAlertsService", () => {
 });
 
 const FORK_VERSION_PREF =
-  "browser.startup.homepage_override.basebrowser.version";
+  "browser.startup.homepage_override.mullvadbrowser.version";
 
 // One-time startup homepage override configurations
 const ONCE_DOMAINS = ["mozilla.org", "firefox.com"];
