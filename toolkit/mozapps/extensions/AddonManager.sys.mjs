@@ -39,7 +39,7 @@ const PREF_GLEAN_PING_ADDONS_UPDATED_IDLE_TIMEOUT_MS =
   "extensions.gleanPingAddons.updated.idleTimeout";
 const PREF_GLEAN_PING_ADDONS_UPDATED_TESTING =
   "extensions.gleanPingAddons.updated.testing";
-const PREF_EM_LAST_FORK_VERSION = "extensions.lastBaseBrowserVersion";
+const PREF_EM_LAST_FORK_VERSION = "extensions.lastMullvadBrowserVersion";
 
 const PREF_MIN_WEBEXT_PLATFORM_VERSION =
   "extensions.webExtensionsMinPlatformVersion";
