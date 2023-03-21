@@ -28,3 +28,11 @@ pref("privacy.spoof_english", 2);
 
 // mullvad-browser#222: Hide "List all tabs" when the tabs don't overflow
 pref("browser.tabs.tabmanager.enabled", false);
+
+// mullvad-browser#131: Review a few updater preferences
+pref("app.update.notifyDuringDownload", true);
+pref("app.update.url.manual", "https://mullvad.net/download/browser");
+pref("app.update.url.details", "https://mullvad.net/download/browser");
+pref("app.update.badgeWaitTime", 0);
+// point to our feedback url rather than Mozilla's
+pref("app.feedback.baseURL", "https://mullvad.net/help/tag/browser/");
