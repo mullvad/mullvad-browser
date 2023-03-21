@@ -43,7 +43,7 @@ ChromeUtils.defineLazyGetter(lazy, "gWindowsAlertsService", () => {
 });
 
 const FORK_VERSION_PREF =
-  "browser.startup.homepage_override.basebrowser.version";
+  "browser.startup.homepage_override.mullvadbrowser.version";
 
 // One-time startup homepage override configurations
 const ONCE_DOMAINS = ["mozilla.org", "firefox.com"];
@@ -720,6 +720,23 @@ nsBrowserContentHandler.prototype = {
       }
     }
 
+    // Retrieve the home page early so we can compare it against
+    // about:mullvad-browser to decide whether or not we need an override page
+    // (second tab) after an update was applied.
+    var startPage = "";
+    try {
+      var choice = prefb.getIntPref("browser.startup.page");
+      if (choice == 1 || choice == 3) {
+        startPage = lazy.HomePage.get();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (startPage == "about:blank") {
+      startPage = "";
+    }
+
     var override;
     var overridePage = "";
     var additionalPage = "";
@@ -859,6 +876,23 @@ nsBrowserContentHandler.prototype = {
               "%OLD_BASE_BROWSER_VERSION%",
               old_forkVersion
             );
+            if (overridePage && AppConstants.BASE_BROWSER_UPDATE) {
+              // Mullvad Browser, copied from tor-browser: Instead of opening
+              // the post-update "override page" directly, we include a link in
+              // about:mullvad-browser.
+              prefb.setCharPref("mullvadbrowser.post_update.url", overridePage);
+              prefb.setBoolPref(
+                "mullvadbrowser.post_update.shouldNotify",
+                true
+              );
+              // If the user's homepage is about:tor, we will inform them
+              // about the update on that page; otherwise, we arrange to
+              // open about:tor in a secondary tab.
+              overridePage =
+                startPage === "about:mullvad-browser"
+                  ? ""
+                  : "about:mullvad-browser";
+            }
             break;
           }
           case OVERRIDE_NEW_BUILD_ID:
@@ -931,20 +965,6 @@ nsBrowserContentHandler.prototype = {
       } else {
         overridePage = additionalPage;
       }
-    }
-
-    var startPage = "";
-    try {
-      var choice = prefb.getIntPref("browser.startup.page");
-      if (choice == 1 || choice == 3) {
-        startPage = lazy.HomePage.get();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    if (startPage == "about:blank") {
-      startPage = "";
     }
 
     let skipStartPage =
