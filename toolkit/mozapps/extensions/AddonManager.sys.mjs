@@ -36,7 +36,7 @@ const PREF_EM_STRICT_COMPATIBILITY = "extensions.strictCompatibility";
 const PREF_EM_CHECK_UPDATE_SECURITY = "extensions.checkUpdateSecurity";
 const PREF_SYS_ADDON_UPDATE_ENABLED = "extensions.systemAddon.update.enabled";
 const PREF_REMOTESETTINGS_DISABLED = "extensions.remoteSettings.disabled";
-const PREF_EM_LAST_FORK_VERSION = "extensions.lastBaseBrowserVersion";
+const PREF_EM_LAST_FORK_VERSION = "extensions.lastMullvadBrowserVersion";
 
 const PREF_MIN_WEBEXT_PLATFORM_VERSION =
   "extensions.webExtensionsMinPlatformVersion";
