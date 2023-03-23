@@ -287,6 +287,8 @@ Preferences.addSetting({
 Preferences.addSetting({
   id: "suggestionsInSearchFieldsCheckbox",
   deps: ["searchSuggestionsEnabledPref", "urlbarSuggestionsEnabledPref"],
+  // Hide search suggestions. mullvad-browser#34.
+  visible: () => false,
   get(_, deps) {
     let searchBarVisible =
       !!lazy.CustomizableUI.getPlacementOfWidget("search-container");
@@ -1154,53 +1156,6 @@ SettingGroupManager.registerGroups({
         controlAttrs: {
           type: "reorderable-list",
         },
-      },
-    ],
-  },
-  searchSuggestions: {
-    l10nId: "search-suggestions-header-2",
-    headingLevel: 2,
-    items: [
-      // Add a warning banner. tor-browser#44629.
-      {
-        id: "searchSuggestionsWarningBanner",
-        l10nId: "search-suggestions-warning-banner",
-        control: "moz-message-bar",
-        controlAttrs: {
-          role: "status",
-          type: "warning",
-        },
-      },
-      {
-        id: "suggestionsInSearchFieldsCheckbox",
-        l10nId: "search-show-suggestions-option",
-        items: [
-          {
-            id: "urlBarSuggestionCheckbox",
-            l10nId: "search-show-suggestions-url-bar-option",
-          },
-          {
-            id: "showSearchSuggestionsFirstCheckbox",
-            l10nId: "search-show-suggestions-above-history-option-2",
-          },
-          {
-            id: "showSearchSuggestionsPrivateWindowsCheckbox",
-            l10nId: "search-show-suggestions-private-windows-2",
-          },
-          {
-            id: "showTrendingSuggestionsCheckbox",
-            l10nId: "addressbar-locbar-showtrendingsuggestions-option-2",
-            supportPage: "google-trending-searches-on-awesomebar",
-          },
-          {
-            id: "urlBarSuggestionPermanentPBMessage",
-            l10nId: "search-suggestions-cant-show-2",
-            control: "moz-message-bar",
-            controlAttrs: {
-              role: "status",
-            },
-          },
-        ],
       },
     ],
   },
