@@ -568,14 +568,6 @@ SettingGroupManager.registerGroups({
             control: "moz-box-link",
             supportPage: "preferences",
           },
-          {
-            id: "supportShareIdeas",
-            l10nId: "support-share-ideas",
-            control: "moz-box-link",
-            controlAttrs: {
-              href: "https://connect.mozilla.org/",
-            },
-          },
         ],
       },
     ],
