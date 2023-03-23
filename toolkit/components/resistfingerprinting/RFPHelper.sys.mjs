@@ -4,6 +4,7 @@
  * You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
+import { AppConstants } from "resource://gre/modules/AppConstants.sys.mjs";
 import * as constants from "resource://gre/modules/RFPTargetConstants.sys.mjs";
 
 const kPrefResistFingerprinting = "privacy.resistFingerprinting";
@@ -33,6 +34,20 @@ ChromeUtils.defineLazyGetter(lazy, "logConsole", () =>
 
 function log(...args) {
   lazy.logConsole.log(...args);
+}
+
+function forEachWindow(callback) {
+  const windowList = Services.wm.getEnumerator("navigator:browser");
+  while (windowList.hasMoreElements()) {
+    const win = windowList.getNext();
+    if (win.gBrowser && !win.closed) {
+      try {
+        callback(win);
+      } catch (e) {
+        lazy.logConsole.error(e);
+      }
+    }
+  }
 }
 
 class _RFPHelper {
@@ -202,7 +217,11 @@ class _RFPHelper {
       (this.rfpEnabled = Services.prefs.getBoolPref(kPrefResistFingerprinting))
     ) {
       this._addRFPObservers();
+      Services.ww.registerNotification(this);
+      forEachWindow(win => this._attachWindow(win));
     } else {
+      forEachWindow(win => this._detachWindow(win));
+      Services.ww.unregisterNotification(this);
       this._removeRFPObservers();
     }
   }
@@ -334,12 +353,12 @@ class _RFPHelper {
   }
 
   _handleLetterboxingPrefChanged() {
-    if (Services.prefs.getBoolPref(kPrefLetterboxing, false)) {
-      Services.ww.registerNotification(this);
-      this._attachAllWindows();
-    } else {
-      this._detachAllWindows();
-      Services.ww.unregisterNotification(this);
+    this.letterboxingEnabled = Services.prefs.getBoolPref(
+      kPrefLetterboxing,
+      false
+    );
+    if (this.rfpEnabled) {
+      forEachWindow(win => this._updateSizeForTabsInWindow(win));
     }
   }
 
@@ -416,22 +435,23 @@ class _RFPHelper {
     }
   }
 
+  stepping(aDimension, aIsWidth) {
+    if (aDimension <= 500) {
+      return 50;
+    } else if (aDimension <= 1600) {
+      return aIsWidth ? 200 : 100;
+    }
+    return 200;
+  }
+
   /**
    * Given a width or height, rounds it with the proper stepping.
    */
   steppedSize(aDimension, aIsWidth = false) {
-    let stepping;
     if (aDimension <= 50) {
       return aDimension;
-    } else if (aDimension <= 500) {
-      stepping = 50;
-    } else if (aDimension <= 1600) {
-      stepping = aIsWidth ? 200 : 100;
-    } else {
-      stepping = 200;
     }
-
-    return aDimension - (aDimension % stepping);
+    return aDimension - (aDimension % this.stepping(aDimension, aIsWidth));
   }
 
   /**
@@ -457,6 +477,17 @@ class _RFPHelper {
         element.clientHeight,
       ])
     );
+
+    const isInitialSize =
+      win._rfpOriginalSize &&
+      win.outerWidth === win._rfpOriginalSize.width &&
+      win.outerHeight === win._rfpOriginalSize.height;
+
+    // We may need to shrink this window to rounded size if the browser container
+    // area is taller than the original, meaning extra chrome (like the optional
+    // "Only Show on New Tab" bookmarks toobar) was present and now gone.
+    const needToShrink =
+      isInitialSize && containerHeight > win._rfpOriginalSize.containerHeight;
 
     log(
       `${logPrefix} contentWidth=${contentWidth} contentHeight=${contentHeight} parentWidth=${parentWidth} parentHeight=${parentHeight} containerWidth=${containerWidth} containerHeight=${containerHeight}${
@@ -485,7 +516,10 @@ class _RFPHelper {
 
       log(`${logPrefix} roundDimensions(${aWidth}, ${aHeight})`);
 
-      let result;
+      if (!(isInitialSize || this.letterboxingEnabled)) {
+        // just round size to int
+        return r(aWidth, aHeight);
+      }
 
       // If the set is empty, we will round the content with the default
       // stepping size.
@@ -539,6 +573,17 @@ class _RFPHelper {
             } catch (e) {
               lazy.logConsole.error(e);
             }
+          }
+          if (needToShrink && win.shrinkToLetterbox()) {
+            win.addEventListener(
+              "resize",
+              () => {
+                // We need to record the "new" initial size in this listener
+                // because resized dimensions are not immediately available.
+                RFPHelper._recordWindowSize(win);
+              },
+              { once: true }
+            );
           }
         });
       },
@@ -638,10 +683,41 @@ class _RFPHelper {
     // we need to add this class late because otherwise new windows get maximized
     aWindow.setTimeout(() => {
       tabBrowser.tabpanels?.classList.add("letterboxing-ready");
+      if (!aWindow._rfpOriginalSize) {
+        this._recordWindowSize(aWindow);
+      }
     });
   }
 
+  _recordWindowSize(aWindow) {
+    aWindow.promiseDocumentFlushed(() => {
+      aWindow._rfpOriginalSize = {
+        width: aWindow.outerWidth,
+        height: aWindow.outerHeight,
+        containerHeight: aWindow.gBrowser.getBrowserContainer()?.clientHeight,
+      };
+      log("Recording original window size", aWindow._rfpOriginalSize);
+    });
+  }
+
+  // We will attach this method to each browser window. When called
+  // it will instantly resize the window to exactly fit the selected
+  // (possibly letterboxed) browser.
+  // Returns true if a window resize will occur, false otherwise.
+  shrinkToLetterbox() {
+    let { selectedBrowser } = this.gBrowser;
+    let stack = selectedBrowser.closest(".browserStack");
+    const outer = stack.getBoundingClientRect();
+    const inner = selectedBrowser.getBoundingClientRect();
+    if (inner.width !== outer.witdh || inner.height !== outer.height) {
+      this.resizeBy(inner.width - outer.width, inner.height - outer.height);
+      return true;
+    }
+    return false;
+  }
+
   _attachWindow(aWindow) {
+    this._fixRounding(aWindow);
     aWindow.gBrowser.addTabsProgressListener(this);
     aWindow.addEventListener("TabOpen", this);
     const resizeObserver = (aWindow._rfpResizeObserver =
@@ -658,20 +734,6 @@ class _RFPHelper {
     this._updateSizeForTabsInWindow(aWindow);
   }
 
-  _attachAllWindows() {
-    let windowList = Services.wm.getEnumerator("navigator:browser");
-
-    while (windowList.hasMoreElements()) {
-      let win = windowList.getNext();
-
-      if (win.closed || !win.gBrowser) {
-        continue;
-      }
-
-      this._attachWindow(win);
-    }
-  }
-
   _detachWindow(aWindow) {
     let tabBrowser = aWindow.gBrowser;
     tabBrowser.removeTabsProgressListener(this);
@@ -686,20 +748,6 @@ class _RFPHelper {
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
-    }
-  }
-
-  _detachAllWindows() {
-    let windowList = Services.wm.getEnumerator("navigator:browser");
-
-    while (windowList.hasMoreElements()) {
-      let win = windowList.getNext();
-
-      if (win.closed || !win.gBrowser) {
-        continue;
-      }
-
-      this._detachWindow(win);
     }
   }
 
@@ -721,6 +769,49 @@ class _RFPHelper {
       },
       { once: true }
     );
+  }
+
+  _fixRounding(aWindow) {
+    if (!this.rfpEnabled) {
+      return;
+    }
+
+    // tor-browser#43205: in case of subpixels, new windows might have a wrong
+    // size because of platform-specific bugs (e.g., Bug 1947439 on Windows).
+    const contentContainer = aWindow.document.getElementById("browser");
+    const rect = contentContainer.getBoundingClientRect();
+    const steppingWidth = this.stepping(rect.width, true);
+    const steppingHeight = this.stepping(rect.height, false);
+    const deltaWidth =
+      rect.width - steppingWidth * Math.round(rect.width / steppingWidth);
+    const deltaHeight =
+      rect.height - steppingHeight * Math.round(rect.height / steppingHeight);
+
+    // It seems that under X11, a window cannot have all the possible (integer)
+    // sizes (see the videos on tor-browser#43205 and Bug 1947439)...
+    // We observed this behavior with 1.25 scaling, but we could not find
+    // where it happens exactly, so this code might be wrong.
+    // On the same system, this problem does not happen with Wayland.
+    if (AppConstants.platform === "linux") {
+      let targetWidth = aWindow.outerWidth - deltaWidth;
+      let targetHeight = aWindow.outerHeight - deltaHeight;
+      const x11Size = s =>
+        Math.floor(
+          // This first rounding is done by Gecko, rather than X11.
+          Math.round(s * aWindow.devicePixelRatio) / aWindow.devicePixelRatio
+        );
+      const x11Width = x11Size(targetWidth);
+      const x11Height = x11Size(targetHeight);
+      if (x11Width < targetWidth) {
+        targetWidth = x11Width + 2;
+      }
+      if (x11Height < targetHeight) {
+        targetHeight = x11Height + 2;
+      }
+      aWindow.resizeTo(targetWidth, targetHeight);
+    } else {
+      aWindow.resizeBy(deltaWidth, deltaHeight);
+    }
   }
 
   getTargets() {
