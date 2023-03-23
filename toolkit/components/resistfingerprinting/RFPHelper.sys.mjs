@@ -21,16 +21,31 @@ const kPrefLetterboxingGradient =
 
 const kTopicDOMWindowOpened = "domwindowopened";
 
-var logConsole;
-function log(msg) {
-  if (!logConsole) {
-    logConsole = console.createInstance({
-      prefix: "RFPHelper.jsm",
-      maxLogLevelPref: "privacy.resistFingerprinting.jsmloglevel",
-    });
-  }
+const lazy = {};
 
-  logConsole.log(msg);
+XPCOMUtils.defineLazyGetter(lazy, "logConsole", () =>
+  console.createInstance({
+    prefix: "RFPHelper.jsm",
+    maxLogLevelPref: "privacy.resistFingerprinting.jsmloglevel",
+  })
+);
+
+function log(...args) {
+  lazy.logConsole.log(...args);
+}
+
+function forEachWindow(callback) {
+  const windowList = Services.wm.getEnumerator("navigator:browser");
+  while (windowList.hasMoreElements()) {
+    const win = windowList.getNext();
+    if (win.gBrowser && !win.closed) {
+      try {
+        callback(win);
+      } catch (e) {
+        lazy.logConsole.error(e);
+      }
+    }
+  }
 }
 
 class _RFPHelper {
@@ -170,7 +185,11 @@ class _RFPHelper {
       (this.rfpEnabled = Services.prefs.getBoolPref(kPrefResistFingerprinting))
     ) {
       this._addRFPObservers();
+      Services.ww.registerNotification(this);
+      forEachWindow(win => this._attachWindow(win));
     } else {
+      forEachWindow(win => this._detachWindow(win));
+      Services.ww.unregisterNotification(this);
       this._removeRFPObservers();
     }
   }
@@ -310,12 +329,12 @@ class _RFPHelper {
   }
 
   _handleLetterboxingPrefChanged() {
-    if (Services.prefs.getBoolPref(kPrefLetterboxing, false)) {
-      Services.ww.registerNotification(this);
-      this._attachAllWindows();
-    } else {
-      this._detachAllWindows();
-      Services.ww.unregisterNotification(this);
+    this.letterboxingEnabled = Services.prefs.getBoolPref(
+      kPrefLetterboxing,
+      false
+    );
+    if (this.rfpEnabled) {
+      forEachWindow(win => this._updateSizeForTabsInWindow(win));
     }
   }
 
@@ -415,11 +434,13 @@ class _RFPHelper {
     let logPrefix = `_roundContentSize[${Math.random()}]`;
     log(logPrefix);
     let win = aBrowser.ownerGlobal;
+
     let browserContainer = aBrowser
       .getTabBrowser()
       .getBrowserContainer(aBrowser);
     let browserParent = aBrowser.parentElement;
     browserParent.classList.remove("exclude-letterboxing");
+
     let [
       [contentWidth, contentHeight],
       [parentWidth, parentHeight],
@@ -432,6 +453,22 @@ class _RFPHelper {
       ])
     );
 
+    if (!win._rfpSizeOffset) {
+      const BASELINE_ROUNDING = 10;
+      const offset = s =>
+        s - Math.round(s / BASELINE_ROUNDING) * BASELINE_ROUNDING;
+
+      win._rfpSizeOffset = {
+        width: offset(parentWidth),
+        height: offset(parentHeight),
+      };
+      log(
+        `${logPrefix} Window size offsets %o (from %s, %s)`,
+        win._rfpSizeOffset,
+        parentWidth,
+        parentHeight
+      );
+    }
     log(
       `${logPrefix} contentWidth=${contentWidth} contentHeight=${contentHeight} parentWidth=${parentWidth} parentHeight=${parentHeight} containerWidth=${containerWidth} containerHeight=${containerHeight}${
         isNewTab ? " (new tab)." : "."
@@ -460,6 +497,15 @@ class _RFPHelper {
       log(`${logPrefix} roundDimensions(${aWidth}, ${aHeight})`);
 
       let result;
+
+      if (!this.letterboxingEnabled) {
+        const offset = win._rfpSizeOffset;
+        result = r(aWidth - offset.width, aHeight - offset.height);
+        log(
+          `${logPrefix} Letterboxing disabled, applying baseline rounding offsets: (${aWidth}, ${aHeight}) => ${result.width} x ${result.height})`
+        );
+        return result;
+      }
 
       // If the set is empty, we will round the content with the default
       // stepping size.
@@ -511,7 +557,7 @@ class _RFPHelper {
             try {
               change();
             } catch (e) {
-              logConsole.error(e);
+              lazy.logConsole.error(e);
             }
           }
         });
@@ -594,7 +640,6 @@ class _RFPHelper {
 
   _updateSizeForTabsInWindow(aWindow) {
     let tabBrowser = aWindow.gBrowser;
-
     tabBrowser.tabpanels?.classList.add("letterboxing");
     tabBrowser.tabpanels?.classList.toggle(
       "letterboxing-vcenter",
@@ -632,20 +677,6 @@ class _RFPHelper {
     this._updateSizeForTabsInWindow(aWindow);
   }
 
-  _attachAllWindows() {
-    let windowList = Services.wm.getEnumerator("navigator:browser");
-
-    while (windowList.hasMoreElements()) {
-      let win = windowList.getNext();
-
-      if (win.closed || !win.gBrowser) {
-        continue;
-      }
-
-      this._attachWindow(win);
-    }
-  }
-
   _detachWindow(aWindow) {
     let tabBrowser = aWindow.gBrowser;
     tabBrowser.removeTabsProgressListener(this);
@@ -660,20 +691,6 @@ class _RFPHelper {
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
-    }
-  }
-
-  _detachAllWindows() {
-    let windowList = Services.wm.getEnumerator("navigator:browser");
-
-    while (windowList.hasMoreElements()) {
-      let win = windowList.getNext();
-
-      if (win.closed || !win.gBrowser) {
-        continue;
-      }
-
-      this._detachWindow(win);
     }
   }
 
