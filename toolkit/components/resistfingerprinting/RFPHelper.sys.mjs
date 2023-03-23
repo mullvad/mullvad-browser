@@ -22,16 +22,31 @@ const kPrefLetterboxingGradient =
 
 const kTopicDOMWindowOpened = "domwindowopened";
 
-var logConsole;
-function log(msg) {
-  if (!logConsole) {
-    logConsole = console.createInstance({
-      prefix: "RFPHelper",
-      maxLogLevelPref: "privacy.resistFingerprinting.jsmloglevel",
-    });
-  }
+const lazy = {};
 
-  logConsole.log(msg);
+ChromeUtils.defineLazyGetter(lazy, "logConsole", () =>
+  console.createInstance({
+    prefix: "RFPHelper",
+    maxLogLevelPref: "privacy.resistFingerprinting.jsmloglevel",
+  })
+);
+
+function log(...args) {
+  lazy.logConsole.log(...args);
+}
+
+function forEachWindow(callback) {
+  const windowList = Services.wm.getEnumerator("navigator:browser");
+  while (windowList.hasMoreElements()) {
+    const win = windowList.getNext();
+    if (win.gBrowser && !win.closed) {
+      try {
+        callback(win);
+      } catch (e) {
+        lazy.logConsole.error(e);
+      }
+    }
+  }
 }
 
 class _RFPHelper {
@@ -201,7 +216,11 @@ class _RFPHelper {
       (this.rfpEnabled = Services.prefs.getBoolPref(kPrefResistFingerprinting))
     ) {
       this._addRFPObservers();
+      Services.ww.registerNotification(this);
+      forEachWindow(win => this._attachWindow(win));
     } else {
+      forEachWindow(win => this._detachWindow(win));
+      Services.ww.unregisterNotification(this);
       this._removeRFPObservers();
     }
   }
@@ -333,12 +352,12 @@ class _RFPHelper {
   }
 
   _handleLetterboxingPrefChanged() {
-    if (Services.prefs.getBoolPref(kPrefLetterboxing, false)) {
-      Services.ww.registerNotification(this);
-      this._attachAllWindows();
-    } else {
-      this._detachAllWindows();
-      Services.ww.unregisterNotification(this);
+    this.letterboxingEnabled = Services.prefs.getBoolPref(
+      kPrefLetterboxing,
+      false
+    );
+    if (this.rfpEnabled) {
+      forEachWindow(win => this._updateSizeForTabsInWindow(win));
     }
   }
 
@@ -457,6 +476,17 @@ class _RFPHelper {
       ])
     );
 
+    const isInitialSize =
+      win._rfpOriginalSize &&
+      win.outerWidth === win._rfpOriginalSize.width &&
+      win.outerHeight === win._rfpOriginalSize.height;
+
+    // We may need to shrink this window to rounded size if the browser container
+    // area is taller than the original, meaning extra chrome (like the optional
+    // "Only Show on New Tab" bookmarks toobar) was present and now gone.
+    const needToShrink =
+      isInitialSize && containerHeight > win._rfpOriginalSize.containerHeight;
+
     log(
       `${logPrefix} contentWidth=${contentWidth} contentHeight=${contentHeight} parentWidth=${parentWidth} parentHeight=${parentHeight} containerWidth=${containerWidth} containerHeight=${containerHeight}${
         isNewTab ? " (new tab)." : "."
@@ -484,7 +514,10 @@ class _RFPHelper {
 
       log(`${logPrefix} roundDimensions(${aWidth}, ${aHeight})`);
 
-      let result;
+      if (!(isInitialSize || this.letterboxingEnabled)) {
+        // just round size to int
+        return r(aWidth, aHeight);
+      }
 
       // If the set is empty, we will round the content with the default
       // stepping size.
@@ -536,8 +569,19 @@ class _RFPHelper {
             try {
               change();
             } catch (e) {
-              logConsole.error(e);
+              lazy.logConsole.error(e);
             }
+          }
+          if (needToShrink && win.shrinkToLetterbox()) {
+            win.addEventListener(
+              "resize",
+              () => {
+                // We need to record the "new" initial size in this listener
+                // because resized dimensions are not immediately available.
+                RFPHelper._recordWindowSize(win);
+              },
+              { once: true }
+            );
           }
         });
       },
@@ -637,7 +681,37 @@ class _RFPHelper {
     // we need to add this class late because otherwise new windows get maximized
     aWindow.setTimeout(() => {
       tabBrowser.tabpanels?.classList.add("letterboxing-ready");
+      if (!aWindow._rfpOriginalSize) {
+        this._recordWindowSize(aWindow);
+      }
     });
+  }
+
+  _recordWindowSize(aWindow) {
+    aWindow.promiseDocumentFlushed(() => {
+      aWindow._rfpOriginalSize = {
+        width: aWindow.outerWidth,
+        height: aWindow.outerHeight,
+        containerHeight: aWindow.gBrowser.getBrowserContainer()?.clientHeight,
+      };
+      log("Recording original window size", aWindow._rfpOriginalSize);
+    });
+  }
+
+  // We will attach this method to each browser window. When called
+  // it will instantly resize the window to exactly fit the selected
+  // (possibly letterboxed) browser.
+  // Returns true if a window resize will occur, false otherwise.
+  shrinkToLetterbox() {
+    let { selectedBrowser } = this.gBrowser;
+    let stack = selectedBrowser.closest(".browserStack");
+    const outer = stack.getBoundingClientRect();
+    const inner = selectedBrowser.getBoundingClientRect();
+    if (inner.width !== outer.witdh || inner.height !== outer.height) {
+      this.resizeBy(inner.width - outer.width, inner.height - outer.height);
+      return true;
+    }
+    return false;
   }
 
   _attachWindow(aWindow) {
@@ -657,20 +731,6 @@ class _RFPHelper {
     this._updateSizeForTabsInWindow(aWindow);
   }
 
-  _attachAllWindows() {
-    let windowList = Services.wm.getEnumerator("navigator:browser");
-
-    while (windowList.hasMoreElements()) {
-      let win = windowList.getNext();
-
-      if (win.closed || !win.gBrowser) {
-        continue;
-      }
-
-      this._attachWindow(win);
-    }
-  }
-
   _detachWindow(aWindow) {
     let tabBrowser = aWindow.gBrowser;
     tabBrowser.removeTabsProgressListener(this);
@@ -685,20 +745,6 @@ class _RFPHelper {
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
-    }
-  }
-
-  _detachAllWindows() {
-    let windowList = Services.wm.getEnumerator("navigator:browser");
-
-    while (windowList.hasMoreElements()) {
-      let win = windowList.getNext();
-
-      if (win.closed || !win.gBrowser) {
-        continue;
-      }
-
-      this._detachWindow(win);
     }
   }
 
