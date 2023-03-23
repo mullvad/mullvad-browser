@@ -50,7 +50,7 @@
       </vbox>
     </groupbox>
 
-    <groupbox id="searchSuggestionsGroup" data-category="paneSearch" hidden="true">
+    <groupbox id="searchSuggestionsGroup" data-category="paneSearch" hidden="true" data-hidden-from-search="true">
       <label><html:h2 data-l10n-id="search-suggestions-header" /></label>
       <description id="searchSuggestionsDesc"
                    data-l10n-id="search-suggestions-desc" />
@@ -117,7 +117,7 @@
                   />
         </hbox>
       </hbox>
-      <hbox id="addEnginesBox" pack="start">
+      <hbox id="addEnginesBox" pack="start" hidden="true">
         <label id="addEngines" data-l10n-id="search-find-more-link" is="text-link"></label>
       </hbox>
     </groupbox>
