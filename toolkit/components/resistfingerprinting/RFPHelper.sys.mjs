@@ -10,6 +10,9 @@ const kPrefResistFingerprinting = "privacy.resistFingerprinting";
 const kPrefSpoofEnglish = "privacy.spoof_english";
 const kTopicHttpOnModifyRequest = "http-on-modify-request";
 
+// The original (rounded) size of each window, recorded when it was ready.
+const originalWindowSizes = new WeakMap();
+
 const kPrefLetterboxing = "privacy.resistFingerprinting.letterboxing";
 const kPrefLetterboxingDimensions =
   "privacy.resistFingerprinting.letterboxing.dimensions";
@@ -26,6 +29,8 @@ const kTopicDOMWindowOpened = "domwindowopened";
 const kTopicDOMWindowClosed = "domwindowclosed";
 
 const kPrefVerticalTabs = "sidebar.verticalTabs";
+
+const kPrefResizeWarnings = "privacy.resistFingerprinting.resizeWarnings";
 
 const lazy = {};
 
@@ -55,6 +60,84 @@ function forEachWindow(callback) {
       }
     }
   }
+}
+
+async function windowResizeHandler(aEvent) {
+  if (RFPHelper.letterboxingEnabled || !RFPHelper.rfpEnabled) {
+    return;
+  }
+  if (Services.prefs.getIntPref(kPrefResizeWarnings) <= 0) {
+    return;
+  }
+
+  const window = aEvent.currentTarget;
+
+  // Wait for end of execution queue to ensure we have correct windowState.
+  await new Promise(resolve => window.setTimeout(resolve, 0));
+  switch (window.windowState) {
+    case window.STATE_MAXIMIZED:
+    case window.STATE_FULLSCREEN:
+      break;
+    default:
+      return;
+  }
+
+  // Do not add another notification if one is already showing.
+  const kNotificationName = "rfp-window-resize-notification";
+  let box = window.gNotificationBox;
+  if (box.getNotificationWithValue(kNotificationName)) {
+    return;
+  }
+
+  // Rate-limit showing our notification if needed.
+  if (Date.now() - (windowResizeHandler.timestamp || 0) < 1000) {
+    return;
+  }
+  windowResizeHandler.timestamp = Date.now();
+
+  const decreaseWarningsCount = () => {
+    const currentCount = Services.prefs.getIntPref(kPrefResizeWarnings);
+    if (currentCount > 0) {
+      Services.prefs.setIntPref(kPrefResizeWarnings, currentCount - 1);
+    }
+  };
+
+  const [label, accessKey] = await window.document.l10n.formatValues([
+    { id: "basebrowser-rfp-restore-window-size-button-label" },
+    { id: "basebrowser-rfp-restore-window-size-button-ak" },
+  ]);
+
+  const buttons = [
+    {
+      label,
+      accessKey,
+      popup: null,
+      callback() {
+        // reset notification timer to work-around resize race conditions
+        windowResizeHandler.timestamp = Date.now();
+        // restore the original (rounded) size we had stored on window startup
+        let originalSize = originalWindowSizes.get(window);
+        window.setTimeout(() => {
+          window.resizeTo(originalSize.width, originalSize.height);
+        }, 0);
+      },
+    },
+  ];
+
+  box.appendNotification(
+    kNotificationName,
+    {
+      label: { "l10n-id": "basebrowser-rfp-maximize-warning-message" },
+      priority: box.PRIORITY_WARNING_LOW,
+      eventCallback(event) {
+        if (event === "dismissed") {
+          // user manually dismissed the notification
+          decreaseWarningsCount();
+        }
+      },
+    },
+    buttons
+  );
 }
 
 class _RFPHelper {
@@ -486,16 +569,17 @@ class _RFPHelper {
       ])
     );
 
+    const originalSize = originalWindowSizes.get(win);
     const isInitialSize =
-      win._rfpOriginalSize &&
-      win.outerWidth === win._rfpOriginalSize.width &&
-      win.outerHeight === win._rfpOriginalSize.height;
+      originalSize &&
+      win.outerWidth === originalSize.width &&
+      win.outerHeight === originalSize.height;
 
     // We may need to shrink this window to rounded size if the browser container
     // area is taller than the original, meaning extra chrome (like the optional
     // "Only Show on New Tab" bookmarks toobar) was present and now gone.
     const needToShrink =
-      isInitialSize && containerHeight > win._rfpOriginalSize.containerHeight;
+      isInitialSize && containerHeight > originalSize.containerHeight;
 
     log(
       `${logPrefix} contentWidth=${contentWidth} contentHeight=${contentHeight} parentWidth=${parentWidth} parentHeight=${parentHeight} containerWidth=${containerWidth} containerHeight=${containerHeight}${
@@ -698,7 +782,7 @@ class _RFPHelper {
     // maximized.
     aWindow.setTimeout(() => {
       tabBrowser.tabbox.classList.add("letterboxing-ready");
-      if (!aWindow._rfpOriginalSize) {
+      if (!originalWindowSizes.has(aWindow)) {
         this._recordWindowSize(aWindow);
       }
     });
@@ -706,12 +790,13 @@ class _RFPHelper {
 
   _recordWindowSize(aWindow) {
     aWindow.promiseDocumentFlushed(() => {
-      aWindow._rfpOriginalSize = {
+      const size = {
         width: aWindow.outerWidth,
         height: aWindow.outerHeight,
         containerHeight: aWindow.gBrowser.getBrowserContainer()?.clientHeight,
       };
-      log("Recording original window size", aWindow._rfpOriginalSize);
+      originalWindowSizes.set(aWindow, size);
+      log("Recording original window size", size);
     });
   }
 
@@ -733,6 +818,7 @@ class _RFPHelper {
 
   _attachWindow(aWindow) {
     this._fixRounding(aWindow);
+    aWindow.addEventListener("sizemodechange", windowResizeHandler);
     aWindow.gBrowser.addTabsProgressListener(this);
     aWindow.addEventListener("TabOpen", this);
     let resizeObserver = new aWindow.ResizeObserver(entries => {
@@ -1065,6 +1151,7 @@ class _RFPHelper {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
     }
+    aWindow.removeEventListener("sizemodechange", windowResizeHandler);
 
     aWindow.removeEventListener("nativethemechange", this);
     this._updateLetterboxingColors(aWindow, false);
