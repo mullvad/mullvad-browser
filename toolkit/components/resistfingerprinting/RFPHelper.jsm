@@ -22,6 +22,8 @@ const kPrefLetterboxingTesting =
   "privacy.resistFingerprinting.letterboxing.testing";
 const kTopicDOMWindowOpened = "domwindowopened";
 
+const kPrefResizeWarnings = "privacy.resistFingerprinting.resizeWarnings";
+
 XPCOMUtils.defineLazyGetter(this, "logConsole", () =>
   console.createInstance({
     prefix: "RFPHelper.jsm",
@@ -45,6 +47,85 @@ function forEachWindow(callback) {
       }
     }
   }
+}
+
+
+async function windowResizeHandler(aEvent) {
+  if (RFPHelper.letterboxingEnabled) {
+    return;
+  }
+  if (Services.prefs.getIntPref(kPrefResizeWarnings, 3) <= 0) {
+    return;
+  }
+
+  const window = aEvent.currentTarget;
+
+  // Wait for end of execution queue to ensure we have correct windowState.
+  await new Promise(resolve => window.setTimeout(resolve, 0));
+  switch (window.windowState) {
+    case window.STATE_MAXIMIZED:
+    case window.STATE_FULLSCREEN:
+      break;
+    default:
+      return;
+  }
+
+  // Do not add another notification if one is already showing.
+  const kNotificationName = "rfp-window-resize-notification";
+  let box = window.gNotificationBox;
+  if (box.getNotificationWithValue(kNotificationName)) {
+    return;
+  }
+
+  // Rate-limit showing our notification if needed.
+  if (Date.now() - (windowResizeHandler.timestamp || 0) < 1000) {
+    return;
+  }
+  windowResizeHandler.timestamp = Date.now();
+
+  const decreaseWarningsCount = () => {
+    const currentCount = Services.prefs.getIntPref(kPrefResizeWarnings);
+    if (currentCount > 0) {
+      Services.prefs.setIntPref(kPrefResizeWarnings, currentCount - 1);
+    }
+  };
+
+  const [label, accessKey] = await window.document.l10n.formatValues([
+    { id: "basebrowser-rfp-restore-window-size-button-label" },
+    { id: "basebrowser-rfp-restore-window-size-button-ak" },
+  ]);
+
+  const buttons = [
+    {
+      label,
+      accessKey,
+      popup: null,
+      callback() {
+        // reset notification timer to work-around resize race conditions
+        windowResizeHandler.timestamp = Date.now();
+        // restore the original (rounded) size we had stored on window startup
+        let { _rfpOriginalSize } = window;
+        window.setTimeout(() => {
+          window.resizeTo(_rfpOriginalSize.width, _rfpOriginalSize.height);
+        }, 0);
+      },
+    },
+  ];
+
+  box.appendNotification(
+    kNotificationName,
+    {
+      label: { "l10n-id": "basebrowser-rfp-maximize-warning-message" },
+      priority: box.PRIORITY_WARNING_LOW,
+      eventCallback(event) {
+        if (event === "dismissed") {
+          // user manually dismissed the notification
+          decreaseWarningsCount();
+        }
+      },
+    },
+    buttons
+  );
 }
 
 class _RFPHelper {
@@ -436,7 +517,12 @@ class _RFPHelper {
       ])
     );
 
-    if (!win._rfpSizeOffset) {
+    if (
+      !win._rfpSizeOffset ||
+      (win._rfpOriginalSize &&
+        win.outerWidth === win._rfpOriginalSize.width &&
+        win.outerHeight === win._rfpOriginalSize.height)
+    ) {
       const BASELINE_ROUNDING = 10;
       const offset = s =>
         s - Math.round(s / BASELINE_ROUNDING) * BASELINE_ROUNDING;
@@ -606,10 +692,18 @@ class _RFPHelper {
     // we need to add this class late because otherwise new windows get maximized
     aWindow.setTimeout(() => {
       tabBrowser.tabpanels?.classList.add("letterboxing-ready");
+      if (!aWindow._rfpOriginalSize) {
+        aWindow._rfpOriginalSize = {
+          width: aWindow.outerWidth,
+          height: aWindow.outerHeight,
+        };
+        log("Recording original window size", aWindow._rfpOriginalSize);
+      }
     });
   }
 
   _attachWindow(aWindow) {
+    aWindow.addEventListener("sizemodechange", windowResizeHandler);
     aWindow.gBrowser.addTabsProgressListener(this);
     aWindow.addEventListener("TabOpen", this);
     const resizeObserver = (aWindow._rfpResizeObserver = new aWindow.ResizeObserver(
@@ -644,6 +738,7 @@ class _RFPHelper {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
     }
+    aWindow.removeEventListener("sizemodechange", windowResizeHandler);
   }
 
   _handleDOMWindowOpened(win) {
