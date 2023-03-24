@@ -286,6 +286,8 @@ pref("security.remote_settings.intermediates.enabled", false);
 pref("dom.use_components_shim", false);
 // Enable letterboxing
 pref("privacy.resistFingerprinting.letterboxing", true);
+// tor-browser#41695: how many warnings we show if user closes them without restoring the window size
+pref("privacy.resistFingerprinting.resizeWarnings", 3);
 // Enforce Network Information API as disabled
 pref("dom.netinfo.enabled", false);
 pref("network.http.referer.defaultPolicy", 2); // Bug 32948: Make referer behavior consistent regardless of private browing mode status
