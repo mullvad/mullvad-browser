@@ -8,3 +8,7 @@ language-notification-label-system = { -brand-short-name } has set your display 
 # $language is the language Tor Browser is displayed in (already translated).
 language-notification-label = { -brand-short-name } has set your display language to { $language }.
 language-notification-button = Change Language…
+
+basebrowser-rfp-maximize-warning-message = Maximizing the browser window can allow websites to determine your monitor size, which can be used to track you. We recommend that you leave browser windows in their original default size.
+basebrowser-rfp-restore-window-size-button-label = Restore
+basebrowser-rfp-restore-window-size-button-ak = R
