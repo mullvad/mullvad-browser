@@ -23,6 +23,8 @@ const kPrefLetterboxingDidForceSize =
 
 const kTopicDOMWindowOpened = "domwindowopened";
 
+const kPrefResizeWarnings = "privacy.resistFingerprinting.resizeWarnings";
+
 const lazy = {};
 
 XPCOMUtils.defineLazyGetter(lazy, "logConsole", () =>
@@ -48,6 +50,84 @@ function forEachWindow(callback) {
       }
     }
   }
+}
+
+async function windowResizeHandler(aEvent) {
+  if (RFPHelper.letterboxingEnabled || !RFPHelper.rfpEnabled) {
+    return;
+  }
+  if (Services.prefs.getIntPref(kPrefResizeWarnings) <= 0) {
+    return;
+  }
+
+  const window = aEvent.currentTarget;
+
+  // Wait for end of execution queue to ensure we have correct windowState.
+  await new Promise(resolve => window.setTimeout(resolve, 0));
+  switch (window.windowState) {
+    case window.STATE_MAXIMIZED:
+    case window.STATE_FULLSCREEN:
+      break;
+    default:
+      return;
+  }
+
+  // Do not add another notification if one is already showing.
+  const kNotificationName = "rfp-window-resize-notification";
+  let box = window.gNotificationBox;
+  if (box.getNotificationWithValue(kNotificationName)) {
+    return;
+  }
+
+  // Rate-limit showing our notification if needed.
+  if (Date.now() - (windowResizeHandler.timestamp || 0) < 1000) {
+    return;
+  }
+  windowResizeHandler.timestamp = Date.now();
+
+  const decreaseWarningsCount = () => {
+    const currentCount = Services.prefs.getIntPref(kPrefResizeWarnings);
+    if (currentCount > 0) {
+      Services.prefs.setIntPref(kPrefResizeWarnings, currentCount - 1);
+    }
+  };
+
+  const [label, accessKey] = await window.document.l10n.formatValues([
+    { id: "basebrowser-rfp-restore-window-size-button-label" },
+    { id: "basebrowser-rfp-restore-window-size-button-ak" },
+  ]);
+
+  const buttons = [
+    {
+      label,
+      accessKey,
+      popup: null,
+      callback() {
+        // reset notification timer to work-around resize race conditions
+        windowResizeHandler.timestamp = Date.now();
+        // restore the original (rounded) size we had stored on window startup
+        let { _rfpOriginalSize } = window;
+        window.setTimeout(() => {
+          window.resizeTo(_rfpOriginalSize.width, _rfpOriginalSize.height);
+        }, 0);
+      },
+    },
+  ];
+
+  box.appendNotification(
+    kNotificationName,
+    {
+      label: { "l10n-id": "basebrowser-rfp-maximize-warning-message" },
+      priority: box.PRIORITY_WARNING_LOW,
+      eventCallback(event) {
+        if (event === "dismissed") {
+          // user manually dismissed the notification
+          decreaseWarningsCount();
+        }
+      },
+    },
+    buttons
+  );
 }
 
 class _RFPHelper {
@@ -701,6 +781,7 @@ class _RFPHelper {
   }
 
   _attachWindow(aWindow) {
+    aWindow.addEventListener("sizemodechange", windowResizeHandler);
     aWindow.gBrowser.addTabsProgressListener(this);
     aWindow.addEventListener("TabOpen", this);
     const resizeObserver = (aWindow._rfpResizeObserver =
@@ -732,6 +813,7 @@ class _RFPHelper {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
     }
+    aWindow.removeEventListener("sizemodechange", windowResizeHandler);
   }
 
   _handleDOMWindowOpened(win) {
