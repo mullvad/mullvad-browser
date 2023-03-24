@@ -380,6 +380,8 @@ pref("privacy.resistFingerprinting.letterboxing", true);
 pref("privacy.resistFingerprinting.letterboxing.vcenter", true);
 // tor-browser#41917 letterboxing gradient background
 pref("privacy.resistFingerprinting.letterboxing.gradient", true);
+// tor-browser#41695: how many warnings we show if user closes them without restoring the window size
+pref("privacy.resistFingerprinting.resizeWarnings", 3);
 // tor-browser#33282: new windows start at 1400x900 when there's enough screen space, otherwise down by 200x100 blocks
 pref("privacy.window.maxInnerWidth", 1400);
 pref("privacy.window.maxInnerHeight", 900);
