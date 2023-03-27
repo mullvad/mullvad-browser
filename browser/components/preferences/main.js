@@ -1742,7 +1742,9 @@ var gMainPane = {
       let defaultBrowserBox = document.getElementById("defaultBrowserBox");
       let isInFlatpak = gGIOService?.isRunningUnderFlatpak;
       // Flatpak does not support setting nor detection of default browser
-      if (!shellSvc || isInFlatpak) {
+      // privacy-browser#87: Let's keep the default browser box only on macOS
+      // for now.
+      if (!shellSvc || isInFlatpak || Services.appinfo.OS !== "Darwin") {
         defaultBrowserBox.hidden = true;
         return;
       }
