@@ -1335,7 +1335,9 @@ var gMainPane = {
     if (AppConstants.HAVE_SHELL_SERVICE) {
       let shellSvc = getShellService();
       let defaultBrowserBox = document.getElementById("defaultBrowserBox");
-      if (!shellSvc) {
+      // privacy-browser#87: Let's keep the default browser box only on macOS
+      // for now.
+      if (!shellSvc || Services.appinfo.OS !== "Darwin") {
         defaultBrowserBox.hidden = true;
         return;
       }
