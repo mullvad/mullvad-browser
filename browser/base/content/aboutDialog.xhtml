@@ -121,10 +121,12 @@
                 <label id="version" class="update"/>
                 <label id="releasenotes" is="text-link" hidden="true" data-l10n-id="releaseNotes-link"/>
               </hbox>
+#ifndef MULLVAD_BROWSER
               <description class="text-blurb">
                 <label is="text-link" onclick="openHelpLink('firefox-help')" data-l10n-id="aboutdialog-help-user"/>
                 <label id="submit-feedback" is="text-link" onclick="openFeedbackPage()" data-l10n-id="aboutdialog-submit-feedback"/>
               </description>
+#endif
             </vbox>
 #endif
           </hbox>
