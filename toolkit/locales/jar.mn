@@ -9,6 +9,7 @@
   toolkit                                          (%toolkit/**/*.ftl)
   locales-preview/aboutRestricted.ftl              (../locales-preview/aboutRestricted.ftl)
   locales-preview/smartWindow-aboutAddons.ftl         (../locales-preview/smartWindow-aboutAddons.ftl)
+  locales-preview/base-browser-no-translate.ftl    (../locales-preview/base-browser-no-translate.ftl)
 #ifdef MOZ_LAYOUT_DEBUGGER
   layoutdebug/layoutdebug.ftl                      (../../layout/tools/layout-debug/ui/content/layoutdebug.ftl)
 #endif

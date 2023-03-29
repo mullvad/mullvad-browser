@@ -195,6 +195,8 @@ CO01:
         - add-engine-name-placeholder
         # browser/appmenu.ftl
         - appmenu-other-protection-header2
+        # toolkit/locales/en-US/toolkit/global/base-browser.ftl
+        - basebrowser-about-dialog-version
     files:
         - browser/locales/en-US/browser/profile/default-bookmarks.ftl
         - toolkit/locales/en-US/toolkit/about/aboutMozilla.ftl
