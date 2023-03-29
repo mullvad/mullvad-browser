@@ -167,6 +167,15 @@ let noscriptSettings = safetyLevel => ({
     enforced: true,
     autoAllowTop: false,
   },
+  sync: {
+    TabGuardMode: "off", // we want to turn it off in PB until tor-browser#41112
+  },
+  // host-specific metadata
+  settingsHost: {
+    // help NoScript cooperate by versioning these settings
+    id: "mullvad",
+    version: 1,
+  },
   isTorBrowser: true,
   tabId: -1,
 });
