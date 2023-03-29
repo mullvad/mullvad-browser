@@ -200,6 +200,8 @@ CO01:
         - cert-error-mitm-connection
         # browser/search.ftl
         - add-engine-name-placeholder
+        # toolkit/locales/en-US/toolkit/global/base-browser.ftl
+        - basebrowser-about-dialog-version
     files:
         - browser/locales/en-US/browser/profile/default-bookmarks.ftl
         - toolkit/locales/en-US/toolkit/about/aboutMozilla.ftl
