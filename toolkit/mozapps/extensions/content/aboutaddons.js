@@ -4885,6 +4885,29 @@ async function initialize() {
       );
     }
   }
+
+  // At the moment we need to do this, because Weblate still does not support
+  // attributes in Fluent.
+  const [recommended, verified] = await document.l10n.formatValues([
+    { id: "basebrowser-addon-badge-recommended" },
+    { id: "basebrowser-addon-badge-verified" },
+  ]);
+
+  importTemplate("card");
+  _templates.card.content
+    .querySelector(".addon-badge-recommended")
+    .setAttribute("title", recommended);
+  _templates.card.content
+    .querySelector(".addon-badge-verified")
+    .setAttribute("title", verified);
+
+  // We also update any template copy that has already been created.
+  for (const badge of document.querySelectorAll(".addon-badge-recommended")) {
+    badge.setAttribute("title", recommended);
+  }
+  for (const badge of document.querySelectorAll(".addon-badge-verified")) {
+    badge.setAttribute("title", verified);
+  }
 }
 
 window.promiseInitialized = new Promise(resolve => {
