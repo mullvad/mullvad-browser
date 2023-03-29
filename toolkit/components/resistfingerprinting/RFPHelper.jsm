@@ -515,7 +515,6 @@ class _RFPHelper {
     // Calculating the margins around the browser element in order to round the
     // content viewport. We will use a 200x100 stepping if the dimension set
     // is not given.
-    // Margin and outline colors are set in browser.css (.letterboxing  * selectors).
 
     const buildMarginStyleString = (aWidth, aHeight) => {
       const marginDims = calcMargins(aWidth, aHeight);
@@ -578,10 +577,9 @@ class _RFPHelper {
     }
 
     log(`${logPrefix} setting margins to ${marginStyleString}`);
-    // Here we set the browser's margin to round its content size.
-    // A "border" visual is created by using a CSS outline, which does't
-    // affect layout, while the background appearance is borrowed from the
-    // toolbar and set in the .letterboxing ancestor (see browser.css).
+    // One cannot (easily) control the color of a margin unfortunately.
+    // An initial attempt to use a border instead of a margin resulted
+    // in offset event dispatching; so for now we use a colorless margin.
     marginChanges.perform();
   }
 
