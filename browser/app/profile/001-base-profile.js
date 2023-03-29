@@ -443,6 +443,9 @@ pref("browser.discovery.enabled", false);
 pref("extensions.webextensions.restrictedDomains", "");
 // Don't give Mozilla-recommended third-party extensions special privileges.
 pref("extensions.postDownloadThirdPartyPrompt", false);
+// tor-browser#41701: Reporting an extension does not work
+// disable extension reporting since the request goes to Mozilla and is rejected anyway (HTTP 400)
+pref("extensions.abuseReport.enabled", false);
 // We are already providing the languages we support in multi-lingual packages.
 // Therefore, do not allow download of additional language packs. They are not a
 // privacy/security threat, we are disabling them for UX reasons. See bug 41377.
