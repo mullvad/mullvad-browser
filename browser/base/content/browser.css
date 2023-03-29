@@ -104,18 +104,10 @@ body {
 **/
 .letterboxing .browserStack > browser:not(.exclude-letterboxing) {
   margin: 0; /* to be dynamically set by RFHelper.jsm */
-  outline: 1px solid var(--chrome-content-separator-color);
 }
 
 browser.exclude-letterboxing {
   margin: 0 !important;
-  outline: initial;
-}
-
-/* extend down the toolbar's colors when letterboxing is enabled */
-.letterboxing {
-  background-color: var(--toolbar-bgcolor);
-  background-image: var(--toolbar-bgimage);
 }
 
 #toolbar-menubar[autohide="true"] {
