@@ -56,6 +56,23 @@ export default class MozSupportLink extends HTMLAnchorElement {
       !this.getAttribute("data-l10n-name") &&
       !this.childElementCount
     ) {
+      const fixupL10nId = this.getAttribute("data-basebrowser-l10n-fixup");
+      if (fixupL10nId) {
+        document.l10n.formatValue(fixupL10nId).then(title => {
+          this.setAttribute("title", title);
+          // NOTE: Mozilla adds identical aria-label and title attributes. This is
+          // generally bad practice because this link has no text content, so the
+          // title alone will already act as the accessible name.
+          // Normally setting both aria-label and title will lead to the title being
+          // used as the accessible description, but since they are identical
+          // the LocalAccessible::Description method will make an exception and keep
+          // the description empty.
+          // Since this component is outside of our fork's control, we follow the
+          // same practice just in case Mozilla ever adds some text content.
+          this.setAttribute("aria-label", title);
+        });
+        return;
+      }
       document.l10n.setAttributes(this, "moz-support-link-text");
     }
     document.l10n.translateFragment(this);
