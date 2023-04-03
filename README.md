@@ -14,6 +14,12 @@ You can visit [our download page](https://mullvad.net/download/browser) to get t
 - Windows 10 or later (64 bit only)
 - macOS 11 or later
 
+### Verifying the download
+
+Mullvad Browser is signed by the Tor Browser Developers.
+
+To verify your download, [follow our guide](https://mullvad.net/en/help/verifying-mullvad-browser-signature/).
+
 ## I have some feedback / I encountered a bug
 
 Please open an issue in this repository or send an email to [support@mullvad.net](mailto:support@mullvad.net).
