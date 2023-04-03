@@ -8,10 +8,6 @@ The Mullvad Browser is a privacy-focused web browser developed in a collaboratio
 
 You can visit [our download page](https://mullvad.net/download/browser) to get the latest stable release.
 
-## Build instructions
-
-coming soon.
-
 ### Available platforms
 
 - Linux (64 bit only)
@@ -31,6 +27,10 @@ Here's the corresponding version / branches:
 - Mullvad Browser 12.0.4 / `mullvad-browser-102.9.0esr-12.0-2`
 
 The browser code is also available from the Tor Project Gitlab.
+
+## Build instructions
+
+Follow the instructions from the Tor Browser [building guide](https://gitlab.torproject.org/tpo/applications/team/-/wikis/Development-Information/Tor-Browser/Building).
 
 ## License
 
