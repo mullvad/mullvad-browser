@@ -26,7 +26,7 @@ Here's the corresponding version / branches:
 
 - Mullvad Browser 12.0.4 / `mullvad-browser-102.9.0esr-12.0-2`
 
-The browser code is also available from the Tor Project Gitlab.
+The browser code is also available directly in the [Tor Project Gitlab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
 
 ## Build instructions
 
