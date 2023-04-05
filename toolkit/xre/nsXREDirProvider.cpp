@@ -1211,15 +1211,15 @@ nsresult nsXREDirProvider::GetUpdateRootDir(nsIFile** aResult,
   NS_ENSURE_SUCCESS(rv, rv);
 
 #if defined(BASE_BROWSER_UPDATE)
-  nsCOMPtr<nsIFile> dataDir;
   // For Base Browser and derivatives, we store update history, etc. within the
   // UpdateInfo directory under the user data directory.
 #  if defined(ANDROID)
 #    error "The Base Browser updater is not supported on Android."
-#  else
-  rv = GetUserDataDirectoryHome(getter_AddRefs(dataDir), false);
+#  elif defined(XP_MACOSX)
+  rv = GetUserDataDirectory(getter_AddRefs(updRoot), false);
   NS_ENSURE_SUCCESS(rv, rv);
-  rv = dataDir->GetParent(getter_AddRefs(updRoot));
+#  else
+  rv = GetUserDataDirectoryHome(getter_AddRefs(updRoot), false);
   NS_ENSURE_SUCCESS(rv, rv);
 #  endif
   rv = updRoot->AppendNative("UpdateInfo"_ns);
