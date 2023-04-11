@@ -54,7 +54,7 @@ async function windowResizeHandler(aEvent) {
   if (RFPHelper.letterboxingEnabled) {
     return;
   }
-  if (Services.prefs.getIntPref(kPrefResizeWarnings, 3) <= 0) {
+  if (Services.prefs.getIntPref(kPrefResizeWarnings) <= 0) {
     return;
   }
 
