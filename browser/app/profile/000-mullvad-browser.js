@@ -8,10 +8,10 @@ pref("browser.startup.homepage", "about:mullvad-browser");
 pref("browser.toolbars.bookmarks.visibility", "never");
 
 // privacy-browser#19: Enable Mullvad's DOH
-pref("network.trr.uri", "https://doh.mullvad.net/dns-query");
-pref("network.trr.default_provider_uri", "https://doh.mullvad.net/dns-query");
+pref("network.trr.uri", "https://dns.mullvad.net/dns-query");
+pref("network.trr.default_provider_uri", "https://dns.mullvad.net/dns-query");
 pref("network.trr.mode", 3);
-pref("doh-rollout.provider-list", "[{\"UIName\":\"Mullvad\",\"autoDefault\":true,\"canonicalName\":\"\",\"id\":\"mullvad\",\"last_modified\":0,\"schema\":0,\"uri\":\"https://doh.mullvad.net/dns-query\"},{\"UIName\":\"Mullvad (Ad-blocking)\",\"autoDefault\":false,\"canonicalName\":\"\",\"id\":\"mullvad\",\"last_modified\":0,\"schema\":0,\"uri\":\"https://adblock.doh.mullvad.net/dns-query\"}]");
+pref("doh-rollout.provider-list", "[{\"UIName\":\"Mullvad\",\"autoDefault\":true,\"canonicalName\":\"\",\"id\":\"mullvad\",\"last_modified\":0,\"schema\":0,\"uri\":\"https://dns.mullvad.net/dns-query\"},{\"UIName\":\"Mullvad (Ad-blocking)\",\"autoDefault\":false,\"canonicalName\":\"\",\"id\":\"mullvad\",\"last_modified\":0,\"schema\":0,\"uri\":\"https://adblock.dns.mullvad.net/dns-query\"}]");
 // privacy-browser#122: Audit DoH heuristics
 pref("doh-rollout.disable-heuristics", true);
 
