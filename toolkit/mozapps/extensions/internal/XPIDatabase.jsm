@@ -936,7 +936,11 @@ class AddonInternal {
     }
 
     // Bug 41598: prevent NoScript from being uninstalled/disabled
-    if (this.id === "{73a6fe31-595d-460b-a920-fcc0f8843232}") {
+    if (
+      this.id === "{73a6fe31-595d-460b-a920-fcc0f8843232}" ||
+      // mullvad-browser#163: prevent uBlock Origin from being uninstalled/disabled
+      this.id === "uBlock0@raymondhill.net"
+    ) {
       permissions &= ~(
         lazy.AddonManager.PERM_CAN_UNINSTALL |
         lazy.AddonManager.PERM_CAN_DISABLE |
