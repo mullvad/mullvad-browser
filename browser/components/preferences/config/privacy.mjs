@@ -2735,10 +2735,11 @@ Preferences.addSetting(
 
 Preferences.addSetting({
   id: "cookieExceptions",
-  disabled: () =>
+  deps: ["privateBrowsingAutoStart"],
+  disabled: ({ privateBrowsingAutoStart }) =>
     Services.prefs.prefIsLocked(
       "pref.privacy.disable_button.cookie_exceptions"
-    ),
+    ) || privateBrowsingAutoStart.value,
   onUserClick() {
     gSubDialog.open(
       "chrome://browser/content/preferences/dialogs/permissions.xhtml",
