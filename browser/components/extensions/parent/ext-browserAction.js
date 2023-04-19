@@ -176,6 +176,10 @@ this.browserAction = class extends ExtensionAPIPersistent {
   }
 
   build() {
+    // The extension ID for NoScript (WebExtension)
+    const isNoScript =
+      this.extension.id === "{73a6fe31-595d-460b-a920-fcc0f8843232}";
+
     let { extension } = this;
     let widgetId = makeWidgetId(extension.id);
     let widget = CustomizableUI.createWidget({
@@ -186,7 +190,11 @@ this.browserAction = class extends ExtensionAPIPersistent {
       removable: true,
       label: this.action.getProperty(null, "title"),
       tooltiptext: this.action.getProperty(null, "title"),
-      defaultArea: browserAreas[this.action.getDefaultArea()],
+      // Do not want to add the NoScript extension to the toolbar by default.
+      // tor-browser#41736
+      defaultArea: isNoScript
+        ? null
+        : browserAreas[this.action.getDefaultArea()],
       showInPrivateBrowsing: extension.privateBrowsingAllowed,
       disallowSubView: true,
 
