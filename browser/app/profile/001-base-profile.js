@@ -497,6 +497,10 @@ pref("browser.urlbar.suggest.topsites", false);
 // is only reported via telemetry (which is disabled). See tor-browser#40048.
 pref("corroborator.enabled", false);
 
+// tor-browser#41417: do not allow live reload until we switch to Fluent and
+// stop using .textContent.
+pref("intl.multilingual.liveReload", false);
+
 #ifdef XP_WIN
 // prefs to disable jump-list entries in the taskbar on Windows (see bug #12885)
 // this pref changes the app's set AUMID to be dependent on the profile path, rather than
