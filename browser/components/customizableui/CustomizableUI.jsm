@@ -66,6 +66,11 @@ const kSubviewEvents = ["ViewShowing", "ViewHiding"];
 var kVersion = 17;
 
 /**
+ * The current version for base browser.
+ */
+var kVersionBaseBrowser = 1;
+
+/**
  * Buttons removed from built-ins by version they were removed. kVersion must be
  * bumped any time a new id is added to this. Use the button id as key, and
  * version the button is removed in as the value.  e.g. "pocket-button": 5
@@ -218,6 +223,7 @@ var CustomizableUIInternal = {
     this._updateForNewVersion();
     this._updateForNewProtonVersion();
     this._markObsoleteBuiltinButtonsSeen();
+    this._updateForBaseBrowser();
 
     this.registerArea(
       CustomizableUI.AREA_FIXED_OVERFLOW_PANEL,
@@ -236,10 +242,15 @@ var CustomizableUIInternal = {
       Services.policies.isAllowed("removeHomeButtonByDefault")
         ? null
         : "home-button",
-      "spring",
+      // Don't want springs either side of the urlbar. tor-browser#41736
       "urlbar-container",
-      "spring",
-      "save-to-pocket-button",
+      // save-to-pocket-button is entirely disabled. See tor-browser#18886 and
+      // tor-browser#31602.
+      // Base-browser additions tor-browser#41736. If you want to add to, remove
+      // from, or rearrange this list, then bump the kVersionBaseBrowser and
+      // update existing saved states in _updateForBaseBrowser.
+      "security-level-button",
+      "new-identity-button",
       "downloads-button",
       AppConstants.MOZ_DEV_EDITION ? "developer-button" : null,
       "fxa-toolbar-menu-button",
@@ -255,6 +266,10 @@ var CustomizableUIInternal = {
       },
       true
     );
+    // navbarPlacements does not match the initial default XHTML layout.
+    // Therefore we always need to rebuild the navbar area when
+    // registerToolbarNode is called. tor-browser#41736
+    gDirtyAreaCache.add(CustomizableUI.AREA_NAVBAR);
 
     if (AppConstants.MENUBAR_CAN_AUTOHIDE) {
       this.registerArea(
@@ -684,6 +699,104 @@ var CustomizableUIInternal = {
         gSeenWidgets.add(id);
         gDirty = true;
       }
+    }
+  },
+
+  _updateForBaseBrowser() {
+    if (!gSavedState) {
+      // Use the defaults.
+      return;
+    }
+
+    const currentVersion = gSavedState.currentVersionBaseBrowser;
+
+    if (currentVersion < 1) {
+      // NOTE: In base-browser/tor-browser version 12.5a5, and earlier, the
+      // toolbar was configured by setting the full JSON string for the default
+      // "browser.uiCustomization.state" preference value. The disadvantage is
+      // that we could not update this value in a way that existing users (who
+      // would have non-default preference values) would also get the desired
+      // change (e.g. for adding or removing a button).
+      //
+      // With tor-browser#41736 we want to switch to changing the toolbar
+      // dynamically like firefox. Therefore, this first version transfer simply
+      // gets the toolbar into the same state we wanted before, away from the
+      // default firefox state.
+      //
+      // If an existing user state aligned with the previous default
+      // "browser.uiCustomization.state" then this shouldn't visibly change
+      // anything.
+      // If a user explicitly customized the toolbar to go back to the firefox
+      // default, then this may undo those changes.
+      const navbarPlacements =
+        gSavedState.placements[CustomizableUI.AREA_NAVBAR];
+      if (navbarPlacements) {
+        const getBeforeAfterUrlbar = () => {
+          // NOTE: The urlbar is non-removable from the navbar, so should have
+          // an index.
+          const index = navbarPlacements.indexOf("urlbar-container");
+          let after = index + 1;
+          if (
+            after < navbarPlacements.length &&
+            navbarPlacements[after] === "search-container"
+          ) {
+            // Skip past the search-container.
+            after++;
+          }
+          return { before: index - 1, after };
+        };
+
+        // Remove the urlbar springs either side of the urlbar.
+        const { before, after } = getBeforeAfterUrlbar();
+        if (
+          after < navbarPlacements.length &&
+          this.matchingSpecials(navbarPlacements[after], "spring")
+        ) {
+          // Remove the spring after.
+          navbarPlacements.splice(after, 1);
+          // NOTE: The `before` index does not change.
+        }
+        if (
+          before >= 0 &&
+          this.matchingSpecials(navbarPlacements[before], "spring")
+        ) {
+          // Remove the spring before.
+          navbarPlacements.splice(before, 1);
+        }
+
+        // Make sure the security-level-button and new-identity-button appears
+        // in the toolbar.
+        for (const id of ["new-identity-button", "security-level-button"]) {
+          let alreadyAdded = false;
+          for (const placements of Object.values(gSavedState.placements)) {
+            if (placements.includes(id)) {
+              alreadyAdded = true;
+              break;
+            }
+          }
+          if (alreadyAdded) {
+            continue;
+          }
+
+          // Add to the nav-bar, after the urlbar-container.
+          // NOTE: We have already removed the spring after the urlbar.
+          navbarPlacements.splice(getBeforeAfterUrlbar().after, 0, id);
+        }
+      }
+
+      // Remove save-to-pocket-button. See tor-browser#18886 and
+      // tor-browser#31602.
+      for (const placements of Object.values(gSavedState.placements)) {
+        let buttonIndex = placements.indexOf("save-to-pocket-button");
+        if (buttonIndex != -1) {
+          placements.splice(buttonIndex, 1);
+        }
+      }
+
+      // Remove unused fields that used to be part of
+      // "browser.uiCustomization.state".
+      delete gSavedState.placements["PanelUI-contents"];
+      delete gSavedState.placements["addon-bar"];
     }
   },
 
@@ -2501,6 +2614,10 @@ var CustomizableUIInternal = {
       gSavedState.currentVersion = 0;
     }
 
+    if (!("currentVersionBaseBrowser" in gSavedState)) {
+      gSavedState.currentVersionBaseBrowser = 0;
+    }
+
     gSeenWidgets = new Set(gSavedState.seen || []);
     gDirtyAreaCache = new Set(gSavedState.dirtyAreaCache || []);
     gNewElementCount = gSavedState.newElementCount || 0;
@@ -2579,6 +2696,7 @@ var CustomizableUIInternal = {
       seen: gSeenWidgets,
       dirtyAreaCache: gDirtyAreaCache,
       currentVersion: kVersion,
+      currentVersionBaseBrowser: kVersionBaseBrowser,
       newElementCount: gNewElementCount,
     };
 
