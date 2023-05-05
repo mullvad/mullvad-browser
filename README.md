@@ -30,7 +30,8 @@ The Source Code can be obtained from separate branches. This `main` branch only 
 
 Here's the corresponding version / branches:
 
-- Mullvad Browser 12.0.4 / `mullvad-browser-102.9.0esr-12.0-2`
+- Mullvad Browser 12.0.4 / [mullvad-browser-102.9.0esr-12.0-2](https://github.com/mullvad/mullvad-browser/tree/mullvad-browser-102.9.0esr-12.0-2)
+- Mullvad Browser 12.0.5 / [mullvad-browser-102.10.0esr-12.0-2](https://github.com/mullvad/mullvad-browser/tree/mullvad-browser-102.10.0esr-12.0-2)
 
 The browser code is also available directly in the [Tor Project Gitlab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
 
