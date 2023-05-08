@@ -14,6 +14,11 @@ const kPrefLetterboxingDimensions =
   "privacy.resistFingerprinting.letterboxing.dimensions";
 const kPrefLetterboxingTesting =
   "privacy.resistFingerprinting.letterboxing.testing";
+const kPrefLetterboxingVcenter =
+  "privacy.resistFingerprinting.letterboxing.vcenter";
+const kPrefLetterboxingGradient =
+  "privacy.resistFingerprinting.letterboxing.gradient";
+
 const kTopicDOMWindowOpened = "domwindowopened";
 
 const kPrefResizeWarnings = "privacy.resistFingerprinting.resizeWarnings";
@@ -140,6 +145,9 @@ class _RFPHelper {
     // Add unconditional observers
     Services.prefs.addObserver(kPrefResistFingerprinting, this);
     Services.prefs.addObserver(kPrefLetterboxing, this);
+    Services.prefs.addObserver(kPrefLetterboxingVcenter, this);
+    Services.prefs.addObserver(kPrefLetterboxingGradient, this);
+
     XPCOMUtils.defineLazyPreferenceGetter(
       this,
       "_letterboxingDimensions",
@@ -171,6 +179,8 @@ class _RFPHelper {
 
     // Remove unconditional observers
     Services.prefs.removeObserver(kPrefResistFingerprinting, this);
+    Services.prefs.removeObserver(kPrefLetterboxingGradient, this);
+    Services.prefs.removeObserver(kPrefLetterboxingVcenter, this);
     Services.prefs.removeObserver(kPrefLetterboxing, this);
     // Remove the RFP observers, swallowing exceptions if they weren't present
     this._removeRFPObservers();
@@ -218,6 +228,8 @@ class _RFPHelper {
         this._handleSpoofEnglishChanged();
         break;
       case kPrefLetterboxing:
+      case kPrefLetterboxingVcenter:
+      case kPrefLetterboxingGradient:
         this._handleLetterboxingPrefChanged();
         break;
       default:
@@ -429,8 +441,7 @@ class _RFPHelper {
     });
   }
 
-  getLetterboxingDefaultRule(aBrowser) {
-    let document = aBrowser.ownerDocument;
+  getLetterboxingDefaultRule(document) {
     return (document._letterBoxingSizingRule ||= (() => {
       // If not already cached on the document object, traverse the CSSOM and
       // find the rule applying the default letterboxing styles to browsers
@@ -555,11 +566,16 @@ class _RFPHelper {
       return;
     }
 
+    let lastRoundedSize;
+
     const roundDimensions = (aWidth, aHeight) => {
-      const r = (aWidth, aHeight) => ({
-        width: `var(--rdm-width, ${aWidth}px)`,
-        height: `var(--rdm-height, ${aHeight}px)`,
-      });
+      const r = (width, height) => {
+        lastRoundedSize = {width, height};
+        return {
+          width: `var(--rdm-width, ${width}px)`,
+          height: `var(--rdm-height, ${height}px)`,
+        }
+      };
 
       let result;
 
@@ -642,7 +658,7 @@ class _RFPHelper {
     const roundedDefault = roundDimensions(containerWidth, containerHeight);
 
     styleChanges.queueIfNeeded(
-      this.getLetterboxingDefaultRule(aBrowser),
+      this.getLetterboxingDefaultRule(aBrowser.ownerDocument),
       roundedDefault
     );
 
@@ -654,6 +670,21 @@ class _RFPHelper {
           roundDimensions(parentWidth, parentHeight)
         : { width: "", height: "" }; // otherwise we can keep the default (rounded) size
     styleChanges.queueIfNeeded(aBrowser, roundedInline);
+
+    if (lastRoundedSize) {
+      // check wether the letterboxing margin is less than the border radius, and if so flatten the borders
+      let borderRadius = parseInt(win.getComputedStyle(browserContainer).getPropertyValue("--letterboxing-border-radius"));
+      if (borderRadius &&
+        (parentWidth - lastRoundedSize.width < borderRadius &&
+          parentHeight - lastRoundedSize.height < borderRadius)) {
+        borderRadius = 0;
+      } else {
+        borderRadius = "";
+      }
+      styleChanges.queueIfNeeded(browserParent, {
+        '--letterboxing-border-radius': borderRadius
+      });
+    }
 
     // If the size of the content is already quantized, we do nothing.
     if (!styleChanges.length) {
@@ -690,6 +721,10 @@ class _RFPHelper {
   _updateSizeForTabsInWindow(aWindow) {
     let tabBrowser = aWindow.gBrowser;
     tabBrowser.tabpanels?.classList.add("letterboxing");
+    tabBrowser.tabpanels?.classList.toggle("letterboxing-vcenter",
+      Services.prefs.getBoolPref(kPrefLetterboxingVcenter, false));
+    tabBrowser.tabpanels?.classList.toggle("letterboxing-gradient",
+      Services.prefs.getBoolPref(kPrefLetterboxingGradient, false));
 
     for (let tab of tabBrowser.tabs) {
       let browser = tab.linkedBrowser;
