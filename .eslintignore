@@ -174,9 +174,6 @@ js/src/fuzz-tests/
 # Template file
 mobile/android/docs/geckoview/assets/js/search-data.json
 
-# uses `#include`
-mobile/android/app/000-tor-browser-android.js
-
 # Uses `#filter substitution`
 mobile/android/app/mobile.js
 mobile/android/app/geckoview-prefs.js
