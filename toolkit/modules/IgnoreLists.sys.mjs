@@ -9,8 +9,6 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "resource://services-settings/RemoteSettingsClient.sys.mjs",
 });
 
-Cu.importGlobalProperties(["fetch"]);
-
 class IgnoreListsManager {
   _ignoreListSettings = null;
 
