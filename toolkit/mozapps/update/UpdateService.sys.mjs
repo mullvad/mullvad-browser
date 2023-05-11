@@ -1650,9 +1650,8 @@ function handleUpdateFailure(update) {
     Services.prefs.setIntPref(PREF_APP_UPDATE_CANCELATIONS, cancelations);
     if (AppConstants.platform == "macosx" && AppConstants.BASE_BROWSER_UPDATE) {
       cleanupActiveUpdates();
-      update.statusText = lazy.gUpdateBundle.GetStringFromName(
-        "elevationFailure"
-      );
+      update.statusText =
+        lazy.gUpdateBundle.GetStringFromName("elevationFailure");
     } else if (AppConstants.platform == "macosx") {
       let osxCancelations = Services.prefs.getIntPref(
         PREF_APP_UPDATE_CANCELATIONS_OSX,
@@ -2277,6 +2276,7 @@ UpdatePatch.prototype = {
  * @throws if the update contains no patches
  * @constructor
  */
+// eslint-disable-next-line complexity
 function Update(update) {
   this._patches = [];
   this._properties = {};
