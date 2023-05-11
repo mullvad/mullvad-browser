@@ -127,6 +127,15 @@ body {
   -moz-window-dragging: drag;
 }
 
+.letterboxing .browserContainer {
+  /*
+  From Firefox 115 on, .browserContainer layout is flex / column,
+  and without this trick the .browserStack's resize observer
+  doesn't get notified on horizontal shrinking.
+  */
+  overflow-x: hidden;
+}
+
 /**
   Never modify the following selector without synchronizing
   LETTERBOX_CSS_SELECTOR in RFPHelper.jsm!
