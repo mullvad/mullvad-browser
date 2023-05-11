@@ -383,7 +383,7 @@ var SecurityLevelPreferences = {
   /**
    * A list of radio options and their containers.
    *
-   * @type {Array<Object>}
+   * @type {Array<object>}
    */
   _radioOptions: null,
 

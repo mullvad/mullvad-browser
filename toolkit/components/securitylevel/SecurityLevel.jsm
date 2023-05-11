@@ -3,29 +3,24 @@
 var EXPORTED_SYMBOLS = ["SecurityLevel"];
 
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
-const BrowserTopics = Object.freeze({
-  ProfileAfterChange: "profile-after-change",
-});
-
 const { XPCOMUtils } = ChromeUtils.import(
   "resource://gre/modules/XPCOMUtils.jsm"
 );
+const { ConsoleAPI } = ChromeUtils.import("resource://gre/modules/Console.jsm");
 
-XPCOMUtils.defineLazyModuleGetters(this, {
+const lazy = {};
+
+XPCOMUtils.defineLazyModuleGetters(lazy, {
   ExtensionParent: "resource://gre/modules/ExtensionParent.jsm",
 });
 
-// Logger adapted from CustomizableUI.jsm
-XPCOMUtils.defineLazyGetter(this, "logger", () => {
-  const { ConsoleAPI } = ChromeUtils.import(
-    "resource://gre/modules/Console.jsm"
-  );
-  let consoleOptions = {
-    maxLogLevel: "info",
-    prefix: "SecurityLevel",
-  };
-  return new ConsoleAPI(consoleOptions);
+const logger = new ConsoleAPI({
+  maxLogLevel: "info",
+  prefix: "SecurityLevel",
+});
+
+const BrowserTopics = Object.freeze({
+  ProfileAfterChange: "profile-after-change",
 });
 
 // The Security Settings prefs in question.
@@ -34,7 +29,7 @@ const kCustomPref = "browser.security_level.security_custom";
 
 // __getPrefValue(prefName)__
 // Returns the current value of a preference, regardless of its type.
-var getPrefValue = function(prefName) {
+var getPrefValue = function (prefName) {
   switch (Services.prefs.getPrefType(prefName)) {
     case Services.prefs.PREF_BOOL:
       return Services.prefs.getBoolPref(prefName);
@@ -51,7 +46,7 @@ var getPrefValue = function(prefName) {
 // Applies prefHandler whenever the value of the pref changes.
 // If init is true, applies prefHandler to the current value.
 // Returns a zero-arg function that unbinds the pref.
-var bindPref = function(prefName, prefHandler, init = false) {
+var bindPref = function (prefName, prefHandler, init = false) {
   let update = () => {
       prefHandler(getPrefValue(prefName));
     },
@@ -79,7 +74,7 @@ var bindPrefAndInit = (prefName, prefHandler) =>
   bindPref(prefName, prefHandler, true);
 
 async function waitForExtensionMessage(extensionId, checker = () => {}) {
-  const { torWaitForExtensionMessage } = ExtensionParent;
+  const { torWaitForExtensionMessage } = lazy.ExtensionParent;
   if (torWaitForExtensionMessage) {
     return torWaitForExtensionMessage(extensionId, checker);
   }
@@ -87,7 +82,7 @@ async function waitForExtensionMessage(extensionId, checker = () => {}) {
 }
 
 async function sendExtensionMessage(extensionId, message) {
-  const { torSendExtensionMessage } = ExtensionParent;
+  const { torSendExtensionMessage } = lazy.ExtensionParent;
   if (torSendExtensionMessage) {
     return torSendExtensionMessage(extensionId, message);
   }
@@ -289,7 +284,7 @@ const kSecuritySettings = {
 // __write_setting_to_prefs(settingIndex)__.
 // Take a given setting index and write the appropriate pref values
 // to the pref database.
-var write_setting_to_prefs = function(settingIndex) {
+var write_setting_to_prefs = function (settingIndex) {
   Object.keys(kSecuritySettings).forEach(prefName =>
     Services.prefs.setBoolPref(
       prefName,
@@ -301,7 +296,7 @@ var write_setting_to_prefs = function(settingIndex) {
 // __read_setting_from_prefs()__.
 // Read the current pref values, and decide if any of our
 // security settings matches. Otherwise return null.
-var read_setting_from_prefs = function(prefNames) {
+var read_setting_from_prefs = function (prefNames) {
   prefNames = prefNames || Object.keys(kSecuritySettings);
   for (let settingIndex of [1, 2, 3, 4]) {
     let possibleSetting = true;
@@ -328,7 +323,7 @@ var read_setting_from_prefs = function(prefNames) {
 // Whenever a pref bound to the security slider changes, onSettingChanged
 // is called with the new security setting value (1,2,3,4 or null).
 // Returns a zero-arg function that ends this binding.
-var watch_security_prefs = function(onSettingChanged) {
+var watch_security_prefs = function (onSettingChanged) {
   let prefNames = Object.keys(kSecuritySettings);
   let unbindFuncs = [];
   for (let prefName of prefNames) {
@@ -350,7 +345,7 @@ var initializedSecPrefs = false;
 // Defines the behavior of "browser.security_level.security_custom",
 // "browser.security_level.security_slider", and the security-sensitive
 // prefs declared in kSecuritySettings.
-var initializeSecurityPrefs = function() {
+var initializeSecurityPrefs = function () {
   // Only run once.
   if (initializedSecPrefs) {
     return;
@@ -359,14 +354,14 @@ var initializeSecurityPrefs = function() {
   initializedSecPrefs = true;
   // When security_custom is set to false, apply security_slider setting
   // to the security-sensitive prefs.
-  bindPrefAndInit(kCustomPref, function(custom) {
+  bindPrefAndInit(kCustomPref, function (custom) {
     if (custom === false) {
       write_setting_to_prefs(Services.prefs.getIntPref(kSliderPref));
     }
   });
   // If security_slider is given a new value, then security_custom should
   // be set to false.
-  bindPref(kSliderPref, function(prefIndex) {
+  bindPref(kSliderPref, function (prefIndex) {
     Services.prefs.setBoolPref(kCustomPref, false);
     write_setting_to_prefs(prefIndex);
   });
@@ -400,7 +395,7 @@ function migratePreferences() {
   // For 12.0, check for extensions.torbutton.noscript_inited, which was set
   // as a user preference for sure, if someone used security level in previous
   // versions.
-  if(!Services.prefs.prefHasUserValue(kPrefCheck)) {
+  if (!Services.prefs.prefHasUserValue(kPrefCheck)) {
     return;
   }
   const migrate = (oldName, newName, getter, setter) => {
@@ -415,7 +410,7 @@ function migratePreferences() {
     security_custom: "security_level.security_custom",
     noscript_persist: "security_level.noscript_persist",
     noscript_inited: "security_level.noscript_inited",
-  }
+  };
   for (const [oldName, newName] of Object.entries(prefs)) {
     migrate(
       oldName,
