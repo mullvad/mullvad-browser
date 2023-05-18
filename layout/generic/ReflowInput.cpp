@@ -2723,13 +2723,12 @@ void ReflowInput::CalculateBlockSideMargins() {
 // This is necessary because without this compensation, normal line height might
 // look too tight.
 constexpr float kNormalLineHeightFactor = 1.2f;
-static nscoord GetNormalLineHeight(nsFontMetrics* aFontMetrics) {
+static nscoord GetNormalLineHeight(nsFontMetrics* aFontMetrics, bool aRFP) {
   MOZ_ASSERT(aFontMetrics, "no font metrics");
   nscoord externalLeading = aFontMetrics->ExternalLeading();
   nscoord internalLeading = aFontMetrics->InternalLeading();
   nscoord emHeight = aFontMetrics->EmHeight();
-  if ((!internalLeading && !externalLeading) ||
-      nsContentUtils::ShouldResistFingerprinting()) {
+  if ((!internalLeading && !externalLeading) || aRFP) {
     return NSToCoordRound(emHeight * kNormalLineHeightFactor);
   }
   return emHeight + internalLeading + externalLeading;
@@ -2739,7 +2738,7 @@ static inline nscoord ComputeLineHeight(const StyleLineHeight& aLh,
                                         const nsStyleFont& aRelativeToFont,
                                         nsPresContext* aPresContext,
                                         bool aIsVertical, nscoord aBlockBSize,
-                                        float aFontSizeInflation) {
+                                        float aFontSizeInflation, bool aRFP) {
   if (aLh.IsLength()) {
     nscoord result = aLh.AsLength().ToAppUnits();
     if (aFontSizeInflation != 1.0f) {
@@ -2769,7 +2768,7 @@ static inline nscoord ComputeLineHeight(const StyleLineHeight& aLh,
     RefPtr<nsFontMetrics> fm = nsLayoutUtils::GetMetricsFor(
         aPresContext, aIsVertical, &aRelativeToFont, size,
         /* aUseUserFontSet = */ true);
-    return GetNormalLineHeight(fm);
+    return GetNormalLineHeight(fm, aRFP);
   }
   // If we don't have a pres context, use a 1.2em fallback.
   size.ScaleBy(kNormalLineHeightFactor);
@@ -2819,9 +2818,12 @@ nscoord ReflowInput::CalcLineHeight(
     const StyleLineHeight& aLh, const nsStyleFont& aRelativeToFont,
     nsPresContext* aPresContext, bool aIsVertical, const nsIContent* aContent,
     nscoord aBlockBSize, float aFontSizeInflation) {
+  const bool rfp =
+      aContent ? aContent->OwnerDoc()->ShouldResistFingerprinting()
+               : nsContentUtils::ShouldResistFingerprinting("nullptr aContent");
   nscoord lineHeight =
       ComputeLineHeight(aLh, aRelativeToFont, aPresContext, aIsVertical,
-                        aBlockBSize, aFontSizeInflation);
+                        aBlockBSize, aFontSizeInflation, rfp);
 
   NS_ASSERTION(lineHeight >= 0, "ComputeLineHeight screwed up");
 
@@ -2832,7 +2834,7 @@ nscoord ReflowInput::CalcLineHeight(
     if (!aLh.IsNormal()) {
       nscoord normal = ComputeLineHeight(
           StyleLineHeight::Normal(), aRelativeToFont, aPresContext, aIsVertical,
-          aBlockBSize, aFontSizeInflation);
+          aBlockBSize, aFontSizeInflation, rfp);
       if (lineHeight < normal) {
         lineHeight = normal;
       }
