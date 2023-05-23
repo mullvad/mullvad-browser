@@ -12,3 +12,7 @@ ac_add_options --disable-default-browser-agent
 
 # See bug #41131
 ac_add_options --disable-update-agent
+
+# Bug 1782837: Not supported because Mozilla (and therefore also us) build
+# libc++ with LIBCXX_ENABLE_FILESYSTEM disabled.
+ac_add_options --disable-notification-server
