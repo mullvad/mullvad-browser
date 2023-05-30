@@ -140,7 +140,7 @@ document.addEventListener(
           if (gContextMenu.onCanvas) {
             gContextMenu.copyCanvasImage();
           } else {
-            goDoCommand("cmd_copyImage");
+            goDoCommand("cmd_copyImageContents");
           }
           break;
         case "context-copyaudiourl":
