@@ -501,7 +501,7 @@ nsresult nsCopySupport::ImageCopy(nsIImageLoadingContent* aImageElement,
       trans->SetReferrerInfo(referrerInfo);
     }
 
-#ifdef XP_WIN
+#if defined(XP_WIN) && !defined(BASE_BROWSER_VERSION)
     rv = AppendImagePromise(trans, imgRequest, aImageElement);
     NS_ENSURE_SUCCESS(rv, rv);
 #endif

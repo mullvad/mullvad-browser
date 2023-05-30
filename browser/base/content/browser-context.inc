@@ -219,7 +219,7 @@
 #ifdef CONTEXT_COPY_IMAGE_CONTENTS
       <menuitem id="context-copyimage-contents"
                 data-l10n-id="main-context-menu-image-copy"
-                oncommand="goDoCommand('cmd_copyImage');"/>
+                oncommand="goDoCommand('cmd_copyImageContents');"/>
 #endif
       <menuitem id="context-copyimage"
                 data-l10n-id="main-context-menu-image-copy-link"
