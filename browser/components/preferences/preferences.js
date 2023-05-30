@@ -267,7 +267,7 @@ function init_all() {
 
   gotoPref().then(() => {
     let helpButton = document.getElementById("helpButton");
-    const helpUrl = "https://mullvad.net/en/help/"
+    const helpUrl = "https://mullvad.net/en/help/";
     helpButton.setAttribute("href", helpUrl);
 
     document.getElementById("addonsButton").addEventListener("click", e => {

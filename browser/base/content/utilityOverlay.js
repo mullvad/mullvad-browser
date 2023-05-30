@@ -592,10 +592,9 @@ function makeURLAbsolute(aBase, aUrl) {
 function getHelpLinkURL(aHelpTopic) {
   if (aHelpTopic === "firefox-help") {
     return "https://mullvad.net/en/help";
-  } else {
-    var url = Services.urlFormatter.formatURLPref("app.support.baseURL");
-    return url + aHelpTopic;
   }
+  var url = Services.urlFormatter.formatURLPref("app.support.baseURL");
+  return url + aHelpTopic;
 }
 
 // aCalledFromModal is optional
