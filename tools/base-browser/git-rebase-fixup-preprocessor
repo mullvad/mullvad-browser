@@ -1,0 +1,93 @@
+#!/usr/bin/python
+"""
+Pre-process a git todo file before passing it on to an editor.
+"""
+
+import sys
+import os
+import subprocess
+import re
+
+EDITOR_ENV_NAME = "GIT_REBASE_FIXUP_PREPROCESSOR_USER_EDITOR"
+
+try:
+    editor = os.environ[EDITOR_ENV_NAME]
+except KeyError:
+    print(f"Missing {EDITOR_ENV_NAME} in environment", file=sys.stderr)
+    exit(1)
+
+if len(sys.argv) < 2:
+    print("Missing filename argument", file=sys.stderr)
+    exit(1)
+
+filename = sys.argv[1]
+
+
+class TodoLine:
+    """
+    Represents a line in the git todo file.
+    """
+
+    _PICK_REGEX = re.compile(r"^pick [a-f0-9]+ (?P<fixups>(fixup! )*)(?P<title>.*)")
+
+    def __init__(self, line):
+        """
+        Create a new line with the given text content.
+        """
+        self._line = line
+        self._make_fixup = False
+
+        match = self._PICK_REGEX.match(line)
+        if match:
+            self._is_pick = True
+            self._num_fixups = len(match.group("fixups")) / len("fixup! ")
+            self._title = match.group("title")
+        else:
+            self._is_pick = False
+            self._num_fixups = False
+            self._title = None
+
+    def add_to_list_try_fixup(self, existing_lines):
+        """
+        Add the TodoLine to the given list of other TodoLine, trying to fix up
+        one of the existing lines.
+        """
+        if not self._num_fixups:  # Not a fixup line.
+            existing_lines.append(self)
+            return
+
+        # Search from the end of the list upwards.
+        for index in reversed(range(len(existing_lines))):
+            other = existing_lines[index]
+            if (
+                other._is_pick
+                and self._num_fixups == other._num_fixups + 1
+                and other._title == self._title
+            ):
+                self._make_fixup = True
+                existing_lines.insert(index + 1, self)
+                return
+
+        # No line found to fixup.
+        existing_lines.append(self)
+
+    def get_text(self):
+        """
+        Get the text for the line to save.
+        """
+        line = self._line
+        if self._make_fixup:
+            line = line.replace("pick", "fixup", 1)
+        return line
+
+
+todo_lines = []
+with open(filename, "r", encoding="utf8") as todo_file:
+    for line in todo_file:
+        TodoLine(line).add_to_list_try_fixup(todo_lines)
+
+with open(filename, "w", encoding="utf8") as todo_file:
+    for line in todo_lines:
+        todo_file.write(line.get_text())
+
+exit(subprocess.run([editor, *sys.argv[1:]], check=False).returncode)

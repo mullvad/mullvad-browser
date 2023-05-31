@@ -1,0 +1,817 @@
+#!/usr/bin/env python3
+# PYTHON_ARGCOMPLETE_OK
+"""
+Useful tools for working on tor-browser repository.
+"""
+
+import argparse
+import atexit
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import termios
+import urllib.request
+
+import argcomplete
+
+GIT_PATH = "/usr/bin/git"
+UPSTREAM_URLS = {
+    "tor-browser": [
+        "https://gitlab.torproject.org/tpo/applications/tor-browser.git",
+        "git@gitlab.torproject.org:tpo/applications/tor-browser.git",
+    ],
+    "mullvad-browser": [
+        "https://gitlab.torproject.org/tpo/applications/mullvad-browser.git",
+        "git@gitlab.torproject.org:tpo/applications/mullvad-browser.git",
+    ],
+}
+FIXUP_PREPROCESSOR_EDITOR = "git-rebase-fixup-preprocessor"
+USER_EDITOR_ENV_NAME = "GIT_REBASE_FIXUP_PREPROCESSOR_USER_EDITOR"
+
+
+class TbDevException(Exception):
+    pass
+
+
+def git_run(args, check=True, env=None):
+    """
+    Run a git command with output sent to stdout.
+    """
+    if env is not None:
+        tmp_env = dict(os.environ)
+        for key, value in env.items():
+            tmp_env[key] = value
+        env = tmp_env
+    try:
+        subprocess.run([GIT_PATH, *args], check=check, env=env)
+    except subprocess.CalledProcessError as err:
+        raise TbDevException(str(err)) from err
+
+
+def git_get(args):
+    """
+    Run a git command with each non-empty line returned in a list.
+    """
+    try:
+        git_process = subprocess.run(
+            [GIT_PATH, *args], text=True, stdout=subprocess.PIPE, check=True
+        )
+    except subprocess.CalledProcessError as err:
+        raise TbDevException(str(err)) from err
+    return [line for line in git_process.stdout.split("\n") if line]
+
+
+local_root = None
+
+
+def get_local_root():
+    """
+    Get the path for the tor-browser root directory.
+    """
+    global local_root
+    if local_root is None:
+        try:
+            # Make sure we have a matching remote in this git repository.
+            if get_upstream_details()["is-browser-repo"]:
+                local_root = git_get(["rev-parse", "--show-toplevel"])[0]
+            else:
+                local_root = ""
+        except TbDevException:
+            local_root = ""
+    return local_root
+
+
+def determine_upstream_details():
+    """
+    Determine details about the upstream.
+    """
+    remote_urls = {
+        remote: git_get(["remote", "get-url", remote])[0]
+        for remote in git_get(["remote"])
+    }
+
+    matches = {
+        remote: repo
+        for repo, url_list in UPSTREAM_URLS.items()
+        for url in url_list
+        for remote, fetch_url in remote_urls.items()
+        if fetch_url == url
+    }
+
+    is_browser_repo = len(matches) > 0
+    details = {"is-browser-repo": is_browser_repo}
+
+    origin_remote_repo = matches.get("origin", None)
+    upstream_remote_repo = matches.get("upstream", None)
+
+    if origin_remote_repo is not None:
+        if upstream_remote_repo is None:
+            details["remote"] = "origin"
+            details["repo-name"] = origin_remote_repo
+        # Else, both "upstream" and "origin" point to a remote repo. Not clear
+        # which should be used.
+    elif upstream_remote_repo is not None:
+        details["remote"] = "upstream"
+        details["repo-name"] = upstream_remote_repo
+    elif len(matches) == 1:
+        remote = next(iter(matches.keys()))
+        details["remote"] = remote
+        details["repo-name"] = matches[remote]
+    # Else, the upstream is ambiguous.
+
+    return details
+
+
+cached_upstream_details = None
+
+
+def get_upstream_details():
+    """
+    Get details about the upstream repository.
+    """
+    global cached_upstream_details
+    if cached_upstream_details is None:
+        cached_upstream_details = determine_upstream_details()
+    return cached_upstream_details
+
+
+class Reference:
+    """Represents a git reference to a commit."""
+
+    def __init__(self, name, commit):
+        self.name = name
+        self.commit = commit
+
+
+def get_refs(ref_type, name_start):
+    """
+    Get a list of references that match the given 'ref_type' ("tag" or "remote"
+    or "head") that starts with the given 'name_start'.
+    """
+    if ref_type == "tag":
+        # Instead of returning tag hash, return the commit hash it points to.
+        fstring = "%(*objectname)"
+        ref_start = "refs/tags/"
+    elif ref_type == "remote":
+        fstring = "%(objectname)"
+        ref_start = "refs/remotes/"
+    elif ref_type == "head":
+        fstring = "%(objectname)"
+        ref_start = "refs/heads/"
+    else:
+        raise TypeError(f"Unknown type {ref_type}")
+
+    fstring = f"{fstring},%(refname)"
+    pattern = f"{ref_start}{name_start}**"
+
+    def line_to_ref(line):
+        [commit, ref_name] = line.split(",", 1)
+        return Reference(ref_name.replace(ref_start, "", 1), commit)
+
+    return [
+        line_to_ref(line)
+        for line in git_get(["for-each-ref", f"--format={fstring}", pattern])
+    ]
+
+
+def get_nearest_ref(ref_type, name_start, search_from):
+    """
+    Search backwards from the 'search_from' commit to find the first commit
+    that matches the given 'ref_type' that starts with the given 'name_start'.
+    """
+    ref_list = get_refs(ref_type, name_start)
+
+    for commit in git_get(["rev-list", "-1000", search_from]):
+        for ref in ref_list:
+            if commit == ref.commit:
+                return ref
+
+    raise TbDevException(f"No {name_start} commit found in the last 1000 commits")
+
+
+def get_firefox_ref(search_from):
+    """
+    Search backwards from the 'search_from' commit to find the commit that comes
+    from firefox.
+    """
+    return get_nearest_ref("tag", "FIREFOX_", search_from)
+
+
+def get_upstream_tracking_branch(search_from):
+    return git_get(["rev-parse", "--abbrev-ref", f"{search_from}@{{upstream}}"])[0]
+
+
+def get_upstream_basis_commit(search_from):
+    """
+    Get the first common ancestor of search_from that is also in its upstream
+    branch.
+    """
+    upstream_branch = get_upstream_tracking_branch(search_from)
+    commit = git_get(["merge-base", search_from, upstream_branch])[0]
+    # Verify that the upstream commit shares the same firefox basis. Otherwise,
+    # this would indicate that the upstream is on an early or later FIREFOX
+    # base.
+    upstream_firefox = get_firefox_ref(upstream_branch).commit
+    search_firefox = get_firefox_ref(search_from).commit
+    if upstream_firefox != search_firefox:
+        raise TbDevException(
+            f"Upstream of {search_from} has a different FIREFOX base. "
+            "You might want to set the upstream tracking branch to a new value."
+        )
+    return commit
+
+
+def get_changed_files(from_commit, staged=False):
+    """
+    Get a list of filenames relative to the current working directory that have
+    been changed since 'from_commit' (non-inclusive).
+    """
+    args = ["diff"]
+    if staged:
+        args.append("--staged")
+    args.append("--name-only")
+    args.append(from_commit)
+    return [
+        os.path.relpath(os.path.join(get_local_root(), filename))
+        for filename in git_get(args)
+    ]
+
+
+def file_contains(filename, regex):
+    """
+    Return whether the file is a utf-8 text file containing the regular
+    expression given by 'regex'.
+    """
+    with open(filename, "r", encoding="utf-8") as file:
+        try:
+            for line in file:
+                if regex.search(line):
+                    return True
+        except UnicodeDecodeError:
+            # Not a text file
+            pass
+    return False
+
+
+def get_gitlab_default():
+    """
+    Get the name of the default branch on gitlab.
+    """
+    repo_name = get_upstream_details().get("repo-name", None)
+    if repo_name is None:
+        raise TbDevException("Cannot determine the repository name")
+    query = f"""
+      query {{
+        project(fullPath: "tpo/applications/{repo_name}") {{
+          repository {{ rootRef }}
+        }}
+      }}
+    """
+    request_data = {"query": re.sub(r"\s+", "", query)}
+    gitlab_request = urllib.request.Request(
+        "https://gitlab.torproject.org/api/graphql",
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "",
+        },
+        data=json.dumps(request_data).encode("ascii"),
+    )
+
+    with urllib.request.urlopen(gitlab_request, timeout=20) as response:
+        return json.load(response)["data"]["project"]["repository"]["rootRef"]
+
+
+def within_browser_root():
+    """
+    Whether we are with the tor browser root.
+    """
+    root = get_local_root()
+    if not root:
+        return False
+    return os.path.commonpath([os.getcwd(), root]) == root
+
+
+# * -------------------- *
+# | Methods for commands |
+# * -------------------- *
+
+
+def show_firefox_commit(_args):
+    """
+    Print the tag name and commit for the last firefox commit below the current
+    HEAD.
+    """
+    ref = get_firefox_ref("HEAD")
+    print(ref.name)
+    print(ref.commit)
+
+
+def show_upstream_basis_commit(_args):
+    """
+    Print the last upstream commit for the current HEAD.
+    """
+    print(get_upstream_basis_commit("HEAD"))
+
+
+def show_log(args):
+    """
+    Show the git log between the current HEAD and the last firefox commit.
+    """
+    commit = get_firefox_ref("HEAD").commit
+    git_run(["log", f"{commit}..HEAD", *args.gitargs], check=False)
+
+
+def show_files_containing(args):
+    """
+    List all the files that that have been modified for tor browser, that also
+    contain a regular expression.
+    """
+    try:
+        regex = re.compile(args.regex)
+    except re.error as err:
+        raise TbDevException(f"{args.regex} is not a valid python regex") from err
+
+    file_list = get_changed_files(get_firefox_ref("HEAD").commit)
+
+    for filename in file_list:
+        if not os.path.isfile(filename):
+            # deleted ofile
+            continue
+        if file_contains(filename, regex):
+            print(filename)
+
+
+def show_changed_files(_args):
+    """
+    List all the files that have been modified relative to upstream.
+    """
+    for filename in get_changed_files(get_upstream_basis_commit("HEAD")):
+        print(filename)
+
+
+def lint_changed_files(args):
+    """
+    Lint all the files that have been modified relative to upstream.
+    """
+    os.chdir(get_local_root())
+    file_list = [
+        f
+        for f in get_changed_files(get_upstream_basis_commit("HEAD"))
+        if os.path.isfile(f)  # Not deleted
+    ]
+    # We add --warnings since clang only reports whitespace issues as warnings.
+    subprocess.run(
+        ["./mach", "lint", "--warnings", "soft", *args.lintargs, *file_list],
+        check=False,
+    )
+
+
+def prompt_user(prompt, convert):
+    """
+    Ask the user for some input until the given converter returns without
+    throwing a ValueError.
+    """
+    while True:
+        # Flush out stdin.
+        termios.tcflush(sys.stdin, termios.TCIFLUSH)
+        print(prompt, end="")
+        sys.stdout.flush()
+        try:
+            return convert(sys.stdin.readline().strip())
+        except ValueError:
+            # Continue to prompt.
+            pass
+
+
+def binary_reply_default_no(value):
+    """Process a 'y' or 'n' reply, defaulting to 'n' if empty."""
+    if value == "":
+        return False
+    if value.lower() == "y":
+        return True
+    if value.lower() == "n":
+        return False
+    raise ValueError()
+
+
+def get_fixup_for_file(filename, firefox_commit):
+    """Find the commit the given file should fix up."""
+
+    def parse_log_line(line):
+        [commit, short_ref, title] = line.split(",", 2)
+        return {"commit": commit, "short-ref": short_ref, "title": title}
+
+    options = [
+        parse_log_line(line)
+        for line in git_get(
+            [
+                "log",
+                "--pretty=format:%H,%h,%s",
+                f"{firefox_commit}..HEAD",
+                "--",
+                filename,
+            ]
+        )
+    ]
+    if not options:
+        print(f"No commit found for {filename}")
+        return None
+
+    def valid_index(val):
+        if val == "d":
+            return val
+
+        is_patch = val.startswith("p")
+        if is_patch:
+            val = val[1:]
+
+        # May raise a ValueError.
+        as_index = int(val)
+        if as_index < 0 or as_index > len(options):
+            raise ValueError()
+
+        if as_index == 0:
+            if is_patch:
+                raise ValueError()
+            return None
+
+        return (is_patch, options[as_index - 1]["commit"])
+
+    while True:
+        print(f"For {filename}:\n")
+        print("  \x1b[1m0\x1b[0m: None")
+        for index, opt in enumerate(options):
+            print(
+                f"  \x1b[1m{index + 1}\x1b[0m: "
+                + f"\x1b[1;38;5;212m{opt['short-ref']}\x1b[0m "
+                + opt["title"]
+            )
+        print("")
+        response = prompt_user(
+            "Choose an <index> to fixup, or '0' to skip this file, "
+            "or 'd' to view the pending diff, "
+            "or 'p<index>' to view the patch for the index: ",
+            valid_index,
+        )
+        if response is None:
+            # Skip this file.
+            return None
+
+        if response == "d":
+            git_run(["diff", "--", filename])
+            continue
+
+        view_patch, commit = response
+        if view_patch:
+            git_run(["log", "-p", "-1", commit, "--", filename])
+            continue
+
+        return commit
+
+
+def auto_fixup(_args):
+    """
+    Automatically find and fix up commits using the current unstaged changes.
+    """
+    # Only want to search as far back as the firefox commit.
+    firefox_commit = get_firefox_ref("HEAD").commit
+
+    staged_files = get_changed_files("HEAD", staged=True)
+    if staged_files:
+        raise TbDevException(f"Have already staged files: {staged_files}")
+
+    fixups = {}
+    for filename in get_changed_files("HEAD"):
+        commit = get_fixup_for_file(filename, firefox_commit)
+        if commit is None:
+            continue
+        if commit not in fixups:
+            fixups[commit] = [filename]
+        else:
+            fixups[commit].append(filename)
+        print("")
+
+    for commit, files in fixups.items():
+        print("")
+        git_run(["add", *files])
+        git_run(["commit", f"--fixup={commit}"])
+        print("")
+
+        if prompt_user(
+            "Edit fixup commit message? (y/\x1b[4mn\x1b[0m)", binary_reply_default_no
+        ):
+            git_run(["commit", "--amend"])
+
+
+def clean_fixups(_args):
+    """
+    Perform an interactive rebase that automatically applies fixups, similar to
+    --autosquash but also works on fixups of fixups.
+    """
+    user_editor = git_get(["var", "GIT_SEQUENCE_EDITOR"])[0]
+    sub_editor = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), FIXUP_PREPROCESSOR_EDITOR
+    )
+
+    git_run(
+        ["rebase", "--interactive"],
+        check=False,
+        env={"GIT_SEQUENCE_EDITOR": sub_editor, USER_EDITOR_ENV_NAME: user_editor},
+    )
+
+
+def show_default(_args):
+    """
+    Print the default branch name from gitlab.
+    """
+    default_branch = get_gitlab_default()
+    upstream = get_upstream_details().get("remote", None)
+    if upstream is None:
+        raise TbDevException("Cannot determine the upstream remote")
+    print(f"{upstream}/{default_branch}")
+
+
+def branch_from_default(args):
+    """
+    Fetch the default gitlab branch from upstream and create a new local branch.
+    """
+    default_branch = get_gitlab_default()
+    upstream = get_upstream_details().get("remote", None)
+    if upstream is None:
+        raise TbDevException("Cannot determine the upstream remote")
+
+    git_run(["fetch", upstream, default_branch])
+    git_run(
+        [
+            "switch",
+            "--create",
+            args.branchname,
+            "--track",
+            f"{upstream}/{default_branch}",
+        ]
+    )
+
+
+def move_to_default(args):
+    """
+    Fetch the default gitlab branch from upstream and move the specified
+    branch's commits on top. A new branch will be created tracking the default
+    branch, and the old branch will be renamed with a suffix for the old
+    tracking branch. This method will switch to the new branch, but will avoid
+    switching to the old branch to prevent triggering a CLOBBER build.
+    """
+    branch_name = args.branch
+    if branch_name is None:
+        # Use current branch as default.
+        try:
+            branch_name = git_get(["branch", "--show-current"])[0]
+        except IndexError:
+            raise TbDevException("No current branch")
+
+    current_upstream_branch = get_upstream_tracking_branch(branch_name)
+    default_branch = get_gitlab_default()
+    upstream = get_upstream_details().get("remote", None)
+    if upstream is None:
+        raise TbDevException("Cannot determine the upstream remote")
+
+    git_run(["fetch", upstream, default_branch])
+
+    new_upstream_branch = f"{upstream}/{default_branch}"
+    if current_upstream_branch == new_upstream_branch:
+        print(
+            f"{branch_name} is already set to track the default branch {new_upstream_branch}."
+        )
+        return
+
+    # We want to avoid checking out the old branch because this can cause
+    # mozilla ./mach to do a CLOBBER build.
+    # Instead we create a new branch with the same name and cherry pick.
+    current_basis = get_upstream_basis_commit(branch_name)
+    old_branch_name = branch_name + "-" + get_firefox_ref(branch_name).name
+
+    print(f"Moving old branch {branch_name} to {old_branch_name}")
+    git_run(["branch", "-m", branch_name, old_branch_name])
+
+    try:
+        git_run(["switch", "--create", branch_name, "--track", new_upstream_branch])
+    except subprocess.CalledProcessError as err:
+        print(f"Moving {old_branch_name} back to {branch_name}")
+        git_run(["branch", "-m", old_branch_name, branch_name])
+        raise err
+
+    # Set check to False since cherry-pick might fail due to a merge conflict.
+    git_run(["cherry-pick", f"{current_basis}..{old_branch_name}"], check=False)
+
+
+def show_range_diff(args):
+    """
+    Show the range diff between two branches, from their firefox bases.
+    """
+    firefox_commit_1 = get_firefox_ref(args.branch1).commit
+    firefox_commit_2 = get_firefox_ref(args.branch2).commit
+    git_run(
+        [
+            "range-diff",
+            f"{firefox_commit_1}..{args.branch1}",
+            f"{firefox_commit_2}..{args.branch2}",
+        ],
+        check=False,
+    )
+
+
+def show_diff_diff(args):
+    """
+    Show the diff between the diffs of two branches, relative to their firefox
+    bases.
+    """
+    config_res = git_get(["config", "--get", "diff.tool"])
+    if not config_res:
+        raise TbDevException("No diff.tool configured for git")
+    diff_tool = config_res[0]
+
+    # Filter out parts of the diff we expect to be different.
+    index_regex = re.compile(r"index [0-9a-f]{12}\.\.[0-9a-f]{12}")
+    lines_regex = re.compile(r"@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@(?P<rest>.*)")
+
+    def save_diff(branch):
+        firefox_commit = get_firefox_ref(branch).commit
+        file_desc, file_name = tempfile.mkstemp(
+            text=True, prefix=f'{branch.split("/")[-1]}-'
+        )
+        # Register deleting the file at exit.
+        atexit.register(os.remove, file_name)
+
+        diff_process = subprocess.Popen(
+            [GIT_PATH, "diff", f"{firefox_commit}..{branch}"],
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+
+        with os.fdopen(file_desc, "w") as file:
+            for line in diff_process.stdout:
+                if index_regex.match(line):
+                    # Fake data that will match.
+                    file.write("index ????????????..????????????\n")
+                    continue
+                lines_match = lines_regex.match(line)
+                if lines_match:
+                    # Fake data that will match.
+                    file.write("@@ ?,? ?,? @@" + lines_match.group("rest"))
+                    continue
+                file.write(line)
+
+        status = diff_process.poll()
+        if status != 0:
+            raise TbDevException(f"git diff exited with status {status}")
+
+        return file_name
+
+    file_1 = save_diff(args.branch1)
+    file_2 = save_diff(args.branch2)
+    subprocess.run([diff_tool, file_1, file_2], check=False)
+
+
+# * -------------------- *
+# | Command line parsing |
+# * -------------------- *
+
+
+def branch_complete(prefix, parsed_args, **kwargs):
+    """
+    Complete the argument with a branch name.
+    """
+    if not within_browser_root():
+        return []
+    try:
+        branches = [ref.name for ref in get_refs("head", "")]
+        branches.extend([ref.name for ref in get_refs("remote", "")])
+        branches.append("HEAD")
+    except Exception:
+        return []
+    return [br for br in branches if br.startswith(prefix)]
+
+
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(required=True)
+
+for name, details in {
+    "show-upstream-basis-commit": {
+        "func": show_upstream_basis_commit,
+    },
+    "changed-files": {
+        "func": show_changed_files,
+    },
+    "lint-changed-files": {
+        "func": lint_changed_files,
+        "args": {
+            "lintargs": {
+                "help": "argument to pass to ./mach lint",
+                "metavar": "-- lint-arg",
+                "nargs": "*",
+            },
+        },
+    },
+    "auto-fixup": {
+        "func": auto_fixup,
+    },
+    "clean-fixups": {
+        "func": clean_fixups,
+    },
+    "show-default": {
+        "func": show_default,
+    },
+    "branch-from-default": {
+        "func": branch_from_default,
+        "args": {
+            "branchname": {
+                "help": "the name for the new local branch",
+                "metavar": "<branch-name>",
+            },
+        },
+    },
+    "move-to-default": {
+        "func": move_to_default,
+        "args": {
+            "branch": {
+                "help": "the branch to move, else uses the current branch",
+                "metavar": "<branch>",
+                "nargs": "?",
+                "completer": branch_complete,
+            },
+        },
+    },
+    "show-firefox-commit": {
+        "func": show_firefox_commit,
+    },
+    "log": {
+        "func": show_log,
+        "args": {
+            "gitargs": {
+                "help": "argument to pass to git log",
+                "metavar": "-- git-log-arg",
+                "nargs": "*",
+            },
+        },
+    },
+    "branch-range-diff": {
+        "func": show_range_diff,
+        "args": {
+            "branch1": {
+                "help": "the first branch to compare",
+                "metavar": "<branch-1>",
+                "completer": branch_complete,
+            },
+            "branch2": {
+                "help": "the second branch to compare",
+                "metavar": "<branch-2>",
+                "completer": branch_complete,
+            },
+        },
+    },
+    "branch-diff-diff": {
+        "func": show_diff_diff,
+        "args": {
+            "branch1": {
+                "help": "the first branch to compare",
+                "metavar": "<branch-1>",
+                "completer": branch_complete,
+            },
+            "branch2": {
+                "help": "the second branch to compare",
+                "metavar": "<branch-2>",
+                "completer": branch_complete,
+            },
+        },
+    },
+    "files-containing": {
+        "func": show_files_containing,
+        "args": {
+            "regex": {"help": "the regex that the files must contain"},
+        },
+    },
+}.items():
+    help_message = re.sub(r"\s+", " ", details["func"].__doc__).strip()
+    sub = subparsers.add_parser(name, help=help_message)
+    sub.set_defaults(func=details["func"])
+    for arg, keywords in details.get("args", {}).items():
+        completer = None
+        if "completer" in keywords:
+            completer = keywords["completer"]
+            del keywords["completer"]
+        sub_arg = sub.add_argument(arg, **keywords)
+        if completer is not None:
+            sub_arg.completer = completer
+
+argcomplete.autocomplete(parser)
+
+try:
+    if not within_browser_root():
+        raise TbDevException("Must be within a browser directory")
+    parsed_args = parser.parse_args()
+
+    parsed_args.func(parsed_args)
+except TbDevException as err:
+    print(f"\x1b[1m{err}\x1b[0m", file=sys.stderr)
