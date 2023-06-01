@@ -14,6 +14,8 @@ export MOZILLA_OFFICIAL=1
 ac_add_options --enable-optimize
 ac_add_options --enable-rust-simd
 
+ac_add_options --disable-unverified-updates
+
 ac_add_options --enable-bundled-fonts
 
 # See bug #41587
