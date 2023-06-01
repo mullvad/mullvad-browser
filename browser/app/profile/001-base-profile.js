@@ -490,7 +490,7 @@ pref("gfx.offscreencanvas.domain-enabled", false);
 pref("gfx.offscreencanvas.domain-allowlist", "");
 
 // Disable share menus on Mac and Windows tor-browser#41117
-pref("browser.share_menu.allow", false, locked);
+pref("browser.menu.share_url.allow", false, locked);
 
 // Disable special URL bar behaviors
 pref("browser.urlbar.suggest.topsites", false);
