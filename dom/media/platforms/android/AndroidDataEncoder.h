@@ -56,7 +56,7 @@ class AndroidDataEncoder final : public MediaDataEncoder {
 
    private:
     Mutex mMutex;
-    AndroidDataEncoder* mEncoder MOZ_GUARDED_BY(mMutex);
+    AndroidDataEncoder* mEncoder GUARDED_BY(mMutex);
   };
   friend class CallbacksSupport;
 
