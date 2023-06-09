@@ -14,6 +14,12 @@ ChromeUtils.defineESModuleGetters(lazy, {
   SearchUtils: "resource://gre/modules/SearchUtils.sys.mjs",
 });
 
+ChromeUtils.defineModuleGetter(
+  lazy,
+  "SecurityLevelPrefs",
+  "resource://gre/modules/SecurityLevel.jsm"
+);
+
 const BinaryInputStream = Components.Constructor(
   "@mozilla.org/binaryinputstream;1",
   "nsIBinaryInputStream",
@@ -26,12 +32,6 @@ XPCOMUtils.defineLazyGetter(lazy, "logConsole", () => {
     maxLogLevel: lazy.SearchUtils.loggingEnabled ? "Debug" : "Warn",
   });
 });
-
-XPCOMUtils.defineLazyScriptGetter(
-  this,
-  "SecurityLevelPrefs",
-  "chrome://browser/content/securitylevel/securityLevel.js"
-);
 
 const USER_DEFINED = "searchTerms";
 
@@ -444,8 +444,8 @@ export class EngineURL {
       engine &&
       (engine._extensionID === "ddg@search.mozilla.org" ||
         engine._extensionID === "ddg-onion@search.mozilla.org") &&
-      this.type === SearchUtils.URL_TYPE.SEARCH &&
-      SecurityLevelPrefs?.securityLevel === "safest"
+      this.type === lazy.SearchUtils.URL_TYPE.SEARCH &&
+      lazy.SecurityLevelPrefs?.securityLevel === "safest"
     ) {
       urlTemplate += "html";
     }

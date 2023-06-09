@@ -1,18 +1,17 @@
 "use strict";
 
-var EXPORTED_SYMBOLS = ["SecurityLevel"];
+var EXPORTED_SYMBOLS = ["SecurityLevel", "SecurityLevelPrefs"];
 
 const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-const { XPCOMUtils } = ChromeUtils.import(
-  "resource://gre/modules/XPCOMUtils.jsm"
-);
 const { ConsoleAPI } = ChromeUtils.import("resource://gre/modules/Console.jsm");
 
 const lazy = {};
 
-XPCOMUtils.defineLazyModuleGetters(lazy, {
-  ExtensionParent: "resource://gre/modules/ExtensionParent.jsm",
-});
+ChromeUtils.defineModuleGetter(
+  lazy,
+  "ExtensionParent",
+  "resource://gre/modules/ExtensionParent.jsm"
+);
 
 const logger = new ConsoleAPI({
   maxLogLevel: "info",
@@ -443,3 +442,42 @@ class SecurityLevel {
     }
   }
 }
+
+/*
+  Security Level Prefs
+
+  Getters and Setters for relevant torbutton prefs
+*/
+const SecurityLevelPrefs = {
+  SecurityLevels: Object.freeze({
+    safest: 1,
+    safer: 2,
+    standard: 4,
+  }),
+  security_slider_pref: "browser.security_level.security_slider",
+  security_custom_pref: "browser.security_level.security_custom",
+
+  get securityLevel() {
+    // Set the default return value to 0, which won't match anything in
+    // SecurityLevels.
+    const val = Services.prefs.getIntPref(this.security_slider_pref, 0);
+    return Object.entries(this.SecurityLevels).find(
+      entry => entry[1] === val
+    )?.[0];
+  },
+
+  set securityLevel(level) {
+    const val = this.SecurityLevels[level];
+    if (val !== undefined) {
+      Services.prefs.setIntPref(this.security_slider_pref, val);
+    }
+  },
+
+  get securityCustom() {
+    return Services.prefs.getBoolPref(this.security_custom_pref);
+  },
+
+  set securityCustom(val) {
+    Services.prefs.setBoolPref(this.security_custom_pref, val);
+  },
+}; /* Security Level Prefs */

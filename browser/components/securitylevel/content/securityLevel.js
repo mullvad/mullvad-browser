@@ -2,6 +2,12 @@
 
 /* global AppConstants, Services, openPreferences, XPCOMUtils */
 
+ChromeUtils.defineModuleGetter(
+  this,
+  "SecurityLevelPrefs",
+  "resource://gre/modules/SecurityLevel.jsm"
+);
+
 XPCOMUtils.defineLazyGetter(this, "SecurityLevelStrings", () => {
   let strings = {
     // Generic terms
@@ -60,45 +66,6 @@ XPCOMUtils.defineLazyGetter(this, "SecurityLevelStrings", () => {
   }
   return strings;
 });
-
-/*
-  Security Level Prefs
-
-  Getters and Setters for relevant torbutton prefs
-*/
-var SecurityLevelPrefs = {
-  SecurityLevels: Object.freeze({
-    safest: 1,
-    safer: 2,
-    standard: 4,
-  }),
-  security_slider_pref: "browser.security_level.security_slider",
-  security_custom_pref: "browser.security_level.security_custom",
-
-  get securityLevel() {
-    // Set the default return value to 0, which won't match anything in
-    // SecurityLevels.
-    const val = Services.prefs.getIntPref(this.security_slider_pref, 0);
-    return Object.entries(this.SecurityLevels).find(
-      entry => entry[1] === val
-    )?.[0];
-  },
-
-  set securityLevel(level) {
-    const val = this.SecurityLevels[level];
-    if (val !== undefined) {
-      Services.prefs.setIntPref(this.security_slider_pref, val);
-    }
-  },
-
-  get securityCustom() {
-    return Services.prefs.getBoolPref(this.security_custom_pref);
-  },
-
-  set securityCustom(val) {
-    Services.prefs.setBoolPref(this.security_custom_pref, val);
-  },
-}; /* Security Level Prefs */
 
 /*
   Security Level Button Code
