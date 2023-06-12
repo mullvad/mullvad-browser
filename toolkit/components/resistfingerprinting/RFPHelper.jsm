@@ -51,7 +51,7 @@ function forEachWindow(callback) {
 
 
 async function windowResizeHandler(aEvent) {
-  if (RFPHelper.letterboxingEnabled) {
+  if (RFPHelper.letterboxingEnabled || !RFPHelper.rfpEnabled) {
     return;
   }
   if (Services.prefs.getIntPref(kPrefResizeWarnings) <= 0) {
@@ -250,7 +250,9 @@ class _RFPHelper {
   }
 
   _handleResistFingerprintingChanged() {
-    if (Services.prefs.getBoolPref(kPrefResistFingerprinting)) {
+    if (
+      (this.rfpEnabled = Services.prefs.getBoolPref(kPrefResistFingerprinting))
+    ) {
       this._addRFPObservers();
       Services.ww.registerNotification(this);
       forEachWindow(win => this._attachWindow(win));
@@ -397,7 +399,9 @@ class _RFPHelper {
       kPrefLetterboxing,
       false
     );
-    forEachWindow(win => this._updateSizeForTabsInWindow(win));
+    if (this.rfpEnabled) {
+      forEachWindow(win => this._updateSizeForTabsInWindow(win));
+    }
   }
 
   // The function to parse the dimension set from the pref value. The pref value
