@@ -150,7 +150,9 @@ class _RFPHelper {
   }
 
   _handleResistFingerprintingChanged() {
-    if (Services.prefs.getBoolPref(kPrefResistFingerprinting)) {
+    if (
+      (this.rfpEnabled = Services.prefs.getBoolPref(kPrefResistFingerprinting))
+    ) {
       this._addRFPObservers();
     } else {
       this._removeRFPObservers();
