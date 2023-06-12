@@ -2738,7 +2738,7 @@ static inline nscoord ComputeLineHeight(const StyleLineHeight& aLh,
                                         const nsStyleFont& aRelativeToFont,
                                         nsPresContext* aPresContext,
                                         bool aIsVertical, nscoord aBlockBSize,
-                                        float aFontSizeInflation, bool aRFP) {
+                                        float aFontSizeInflation) {
   if (aLh.IsLength()) {
     nscoord result = aLh.AsLength().ToAppUnits();
     if (aFontSizeInflation != 1.0f) {
@@ -2768,7 +2768,9 @@ static inline nscoord ComputeLineHeight(const StyleLineHeight& aLh,
     RefPtr<nsFontMetrics> fm = nsLayoutUtils::GetMetricsFor(
         aPresContext, aIsVertical, &aRelativeToFont, size,
         /* aUseUserFontSet = */ true);
-    return GetNormalLineHeight(fm, aRFP);
+    return GetNormalLineHeight(
+        fm, aPresContext->Document()->ShouldResistFingerprinting(
+                RFPTarget::Unknown));
   }
   // If we don't have a pres context, use a 1.2em fallback.
   size.ScaleBy(kNormalLineHeightFactor);
@@ -2818,12 +2820,9 @@ nscoord ReflowInput::CalcLineHeight(
     const StyleLineHeight& aLh, const nsStyleFont& aRelativeToFont,
     nsPresContext* aPresContext, bool aIsVertical, const nsIContent* aContent,
     nscoord aBlockBSize, float aFontSizeInflation) {
-  const bool rfp =
-      aContent ? aContent->OwnerDoc()->ShouldResistFingerprinting()
-               : nsContentUtils::ShouldResistFingerprinting("nullptr aContent");
   nscoord lineHeight =
       ComputeLineHeight(aLh, aRelativeToFont, aPresContext, aIsVertical,
-                        aBlockBSize, aFontSizeInflation, rfp);
+                        aBlockBSize, aFontSizeInflation);
 
   NS_ASSERTION(lineHeight >= 0, "ComputeLineHeight screwed up");
 
@@ -2834,7 +2833,7 @@ nscoord ReflowInput::CalcLineHeight(
     if (!aLh.IsNormal()) {
       nscoord normal = ComputeLineHeight(
           StyleLineHeight::Normal(), aRelativeToFont, aPresContext, aIsVertical,
-          aBlockBSize, aFontSizeInflation, rfp);
+          aBlockBSize, aFontSizeInflation);
       if (lineHeight < normal) {
         lineHeight = normal;
       }
