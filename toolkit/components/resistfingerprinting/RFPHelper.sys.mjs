@@ -314,7 +314,9 @@ class _RFPHelper {
       kPrefLetterboxing,
       false
     );
-    forEachWindow(win => this._updateSizeForTabsInWindow(win));
+    if (this.rfpEnabled) {
+      forEachWindow(win => this._updateSizeForTabsInWindow(win));
+    }
   }
 
   // The function to parse the dimension set from the pref value. The pref value
