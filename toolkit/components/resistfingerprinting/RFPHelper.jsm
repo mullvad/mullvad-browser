@@ -51,7 +51,7 @@ function forEachWindow(callback) {
 
 
 async function windowResizeHandler(aEvent) {
-  if (RFPHelper.letterboxingEnabled) {
+  if (RFPHelper.letterboxingEnabled || !RFPHelper.rfpEnabled) {
     return;
   }
   if (Services.prefs.getIntPref(kPrefResizeWarnings) <= 0) {
