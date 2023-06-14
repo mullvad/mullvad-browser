@@ -5,14 +5,14 @@
 ### Issues
 
 #### Resolves
-- tor-browser#xxxxx
 - mullvad-browser#xxxxx
+- tor-browser#xxxxx
 - tor-browser-build#xxxxx
 
 #### Related
 
-- tor-browser#xxxxx
 - mullvad-browser#xxxxx
+- tor-browser#xxxxx
 - tor-browser-build#xxxxx
 
 ### Merging
@@ -21,15 +21,14 @@
 
 #### Target Branches
 
-- [ ] **`tor-browser`** - `!fixups` to `tor-browser`-specific commits, new features, security backports
-- [ ] **`base-browser`** *and* **`mullvad-browser`** - `!fixups` to `base-browser`-specific commits, new features to be shared with `mullvad-browser`, and security backports
-  - ⚠️ **IMPORTANT**: Please list the `base-browser`-specific commits which need to be cherry-picked to the `base-browser` and `mullvad-browser` branches here
+- [ ] **`mullvad-browser`** - `!fixups` to `mullvad-browser`-specific commits, new features, security backports
+- [ ] **`base-browser`** *and* **`tor-browser`** - `!fixups` to `base-browser`-specific commits or new features to be shared with `tor-browser`
+  - ⚠️ **IMPORTANT**: Please list the `base-browser`-specific commits which need to be cherry-picked to the `base-browser` and `tor-browser` branches here
 
 #### Target Channels
 
 - [ ] **Alpha**: esr128-14.5
 - [ ] **Stable**: esr128-14.0
-- [ ] **Legacy**: esr115-13.5
 
 ### Backporting
 
@@ -41,7 +40,6 @@
 
 #### (Optional) Justification
 - [ ] **Emergency security update**: patchset fixes CVEs, 0-days, etc
-- [ ] **Censorship event**: patchset enables censorship circumvention
 - [ ] **Critical bug-fix**: patchset fixes a bug in core-functionality
 - [ ] **Consistency**: patchset which would make development easier if it were in both the alpha and release branches; developer tools, build system changes, etc
 - [ ] **Sponsor required**: patchset required for sponsor
