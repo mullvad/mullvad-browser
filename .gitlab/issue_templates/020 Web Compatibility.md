@@ -38,16 +38,13 @@ Please provide the following information:
   - [ ] Alpha
   - [ ] Nightly
 - Distribution method:
-  - [ ] Installer/archive from torproject.org
-  - [ ] tor-browser-launcher
+  - [ ] Installer/archive from mullvad.net
   - [ ] homebrew
   - [ ] other (please specify):
 - Operating System:
   - [ ] Windows
   - [ ] macOS
   - [ ] Linux
-  - [ ] Android
-  - [ ] Tails
   - [ ] Other (please specify):
 - Operating System Version:
 
@@ -78,11 +75,10 @@ Archived packages for past versions can be found here:
 <!--
 Sometimes bugs are fixed in the Alpha (development) channel but not in the Stable channel.
 ⚠️ However, the Alpha release channel is the development version and as such may be contain
-critical bugs not present in the Stable release channel. Do not test in Alpha if you are an
-at risk user unless you really, actually, truly know what you are doing!
+critical bugs not present in the Stable release channel.
 
 The latest Alpha can be found here:
-- https://www.torproject.org/download/alpha/
+- https://github.com/mullvad/mullvad-browser/releases?q=prerelease%3Atrue
 -->
 
 ### Does this bug occur in Firefox ESR (Desktop only)?
@@ -108,5 +104,5 @@ If the issue has been fixed in Firefox, do you know the Bugzilla issue number as
 
 ---
 
-/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::WebCompatibility"
