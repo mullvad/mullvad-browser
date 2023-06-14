@@ -1,5 +1,3 @@
-# ⤵️ Rebase Rapid
-
 **NOTE**: All examples in this template reference the rebase from Firefox 129.0a1 to 130.0a1, see the tor-browser `Rebase Browser - Rapid.md` template for further info
 
 <details>
@@ -84,10 +82,4 @@
     ```
   - [ ] Push tag to `upstream`
 
-<!-- Do not edit beneath this line <3 -->
-
----
-
-/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Rebase"
-/label ~"Apps::Priority::High"

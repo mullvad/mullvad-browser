@@ -1,5 +1,3 @@
-# ⤵️ Rebase Alpha
-
 **NOTE:** All examples in this template reference the rebase from 102.7.0esr to 102.8.0esr
 
 <details>
@@ -52,7 +50,7 @@
 - [ ] Push new `mullvad-browser` branch to `upstream`
 - [ ] Push `base-browser` tag to `upstream`
 
-### **Rebase mullvad-browser**
+### **Rebase tor-browser**
 
 - [ ] Checkout a new local branch for the `mullvad-browser` rebase
   - **Example**: `git branch mullvad-browser-rebase upstream/mullvad-browser-102.8.0esr-12.5-1`
@@ -87,10 +85,4 @@
     ```
   - [ ] Push tag to `upstream`
 
-<!-- Do not edit beneath this line <3 -->
-
----
-
-/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Rebase"
-/label ~"Apps::Priority::Blocker"
