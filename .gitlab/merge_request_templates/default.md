@@ -3,8 +3,8 @@
 <!-- Bookkeeping information for release management -->
 
 ### Related Issues
-- tor-browser#xxxxx
 - mullvad-browser#xxxxx
+- tor-browser#xxxxx
 - tor-browser-build#xxxxx
 
 ### Backporting
@@ -24,35 +24,13 @@
 - [ ] **Other**: please explain
 
 ### Merging
-- [ ] Merge to `tor-browser` - `!fixups` to `tor-browser`-specific commits, new features, security backports
-- [ ] Merge to `base-browser` - `!fixups` to `base-browser`-specific commits, new features to be shared with `mullvad-browser`, and security backports
-  - **NOTE**: if your changeset includes patches to both `base-browser` and `tor-browser` please clearly label in the change description which commits should be cherry-picked to `base-browser` after merging
+- [ ] Merge to `mullvad-browser` - `!fixups` to `tor-browser`-specific commits, new features, security backports
+- [ ] Merge to `base-browser` -`!fixups` to `base-browser`-specific commits, new features to be shared with `mullvad-browser`, and security backports
+  - **NOTE**: if your changeset includes patches to both `base-browser` and `mullvad-browser` please clearly label in the change description which commits should be cherry-picked to `base-browser` after merging
 
 ### Issue Tracking
 - [ ] Link resolved issues with appropriate [Release Prep issue](https://gitlab.torproject.org/groups/tpo/applications/-/issues/?sort=updated_desc&state=opened&label_name%5B%5D=Release%20Prep&first_page_size=20) for changelog generation
 
-### Review
+## Change Description
 
-#### Request Reviewer
-
-- [ ] Request review from an applications developer depending on modified system:
-  - **NOTE**: if the MR modifies multiple areas, please `/cc` all the relevant reviewers (since gitlab only allows 1 reviewer)
-  - **accessibility** : henry
-  - **android** : dan
-  - **build system** : boklm
-  - **extensions** : ma1
-  - **firefox internals (XUL/JS/XPCOM)** : ma1
-  - **fonts** : pierov
-  - **frontend (implementation)** : henry
-  - **frontend (review)** : donuts, richard
-  - **localization** : henry, pierov
-  - **nightly builds** : boklm
-  - **rebases/release-prep** : dan_b, ma1, pierov, richard
-  - **security** : ma1
-  - **signing** : boklm, richard
-  - **updater** : pierov
-  - **misc/other** : pierov, richard
-
-#### Change Description
-
-<!-- Whatever context the reviewer needs to effectively review the patchset; if the patch includes UX updates be sure to include screenshots/video of how any new behaviour -->
+<!-- Whatever context the reviewer needs to effectively review the patchset -->
