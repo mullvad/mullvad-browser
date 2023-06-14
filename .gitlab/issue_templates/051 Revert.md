@@ -25,7 +25,7 @@ When should this patchset be reverted?
 
 ### Merge Request(s)
 <!-- merge-request associated with the original patchset -->
-- tor-browser!xxxx
+- mullvad-browser!xyz
 
 ### Target Channels
 <!-- Which channel has the commits we need to revert? -->
@@ -41,5 +41,5 @@ When should this patchset be reverted?
 
 ---
 
-/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Chore"

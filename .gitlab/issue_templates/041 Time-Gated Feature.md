@@ -41,10 +41,9 @@ When should this feature be enabled and disabled?
 <!-- Do not edit beneath this line <3 -->
 ### Revert Issue
 <!-- Add link to the associated issue to revert this change -->
-- tor-browser#xxxxx
 - mullvad-browser#yyy
 
 ---
 
-/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Feature"
