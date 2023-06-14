@@ -24,9 +24,9 @@
 - [ ] **Other**: please explain
 
 ### Merging
-- [ ] Merge to `tor-browser` - `!fixups` to `tor-browser`-specific commits, new features, security backports
-- [ ] Merge to `base-browser` - `!fixups` to `base-browser`-specific commits, new features to be shared with `mullvad-browser`, and security backports
-  - **NOTE**: if your changeset includes patches to both `base-browser` and `tor-browser` please clearly label in the change description which commits should be cherry-picked to `base-browser` after merging
+- [ ] Merge to `mullvad-browser` - `!fixups` to `tor-browser`-specific commits, new features, security backports
+- [ ] Merge to `base-browser` -`!fixups` to `base-browser`-specific commits, new features to be shared with `mullvad-browser`, and security backports
+  - **NOTE**: if your changeset includes patches to both `base-browser` and `mullvad-browser` please clearly label in the change description which commits should be cherry-picked to `base-browser` after merging
 
 ### Issue Tracking
 - [ ] Link resolved issues with appropriate [Release Prep issue](https://gitlab.torproject.org/groups/tpo/applications/-/issues/?sort=updated_desc&state=opened&label_name%5B%5D=Release%20Prep&first_page_size=20) for changelog generation
