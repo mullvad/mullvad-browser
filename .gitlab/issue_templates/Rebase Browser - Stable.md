@@ -1,4 +1,3 @@
-# ⤵️ Rebase Stable
 **NOTE:** All examples in this template reference the rebase from 102.7.0esr to 102.8.0esr
 
 <details>
@@ -87,10 +86,4 @@
     ```
   - [ ] Push tag to `upstream`
 
-<!-- Do not edit beneath this line <3 -->
-
----
-
-/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Rebase"
-/label ~"Apps::Priority::Blocker"
