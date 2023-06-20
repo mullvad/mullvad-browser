@@ -503,6 +503,10 @@ pref("corroborator.enabled", false);
 // stop using .textContent.
 pref("intl.multilingual.liveReload", false);
 
+// tor-browser#41729: if it is false, web content is not accessible to screen
+// readers, at least on Windows.
+pref("accessibility.cache.enabled", true);
+
 #ifdef XP_WIN
 // prefs to disable jump-list entries in the taskbar on Windows (see bug #12885)
 // this pref changes the app's set AUMID to be dependent on the profile path, rather than
