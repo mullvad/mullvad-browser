@@ -48,9 +48,6 @@ pref("security.nocertdb", true);
 pref("browser.download.useDownloadDir", false);
 pref("browser.download.manager.addToRecentDocs", false);
 
-// Prevent download stuffing / DOS (tor-browser#41764)
-pref("browser.download.enable_spam_prevention", true);
-
 // Misc privacy: Disk
 pref("signon.rememberSignons", false);
 pref("browser.formfill.enable", false);
