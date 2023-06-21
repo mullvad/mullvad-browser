@@ -1234,7 +1234,7 @@ var DownloadObserver = {
         ) {
           DownloadIntegration._initializeDownloadSpamProtection();
         }
-        DownloadIntegration.downloadSpamProtection.update(aData);
+        DownloadIntegration.downloadSpamProtection.update(aData, aSubject);
         break;
     }
   },
