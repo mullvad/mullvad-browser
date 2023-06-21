@@ -1975,7 +1975,7 @@ bool nsExternalAppHandler::IsDownloadSpam(nsIChannel* aChannel) {
       nsAutoCString cStringURI;
       loadInfo->TriggeringPrincipal()->GetPrePath(cStringURI);
       observerService->NotifyObservers(
-          nullptr, "blocked-automatic-download",
+          principal, "blocked-automatic-download",
           NS_ConvertASCIItoUTF16(cStringURI.get()).get());
       // FIXME: In order to escape memory leaks, currently we cancel blocked
       // downloads. This is temporary solution, because download data should be
@@ -1989,7 +1989,7 @@ bool nsExternalAppHandler::IsDownloadSpam(nsIChannel* aChannel) {
   if (!loadInfo->GetHasValidUserGestureActivation()) {
     permissionManager->AddFromPrincipal(
         principal, type, nsIPermissionManager::PROMPT_ACTION,
-        nsIPermissionManager::EXPIRE_NEVER, 0 /* expire time */);
+        nsIPermissionManager::EXPIRE_SESSION, 0 /* expire time */);
   }
 
   return false;
