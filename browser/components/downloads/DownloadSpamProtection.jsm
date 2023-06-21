@@ -18,6 +18,8 @@ var { XPCOMUtils } = ChromeUtils.import(
   "resource://gre/modules/XPCOMUtils.jsm"
 );
 
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
 XPCOMUtils.defineLazyModuleGetters(this, {
   BrowserWindowTracker: "resource:///modules/BrowserWindowTracker.jsm",
   Downloads: "resource://gre/modules/Downloads.jsm",
@@ -45,17 +47,18 @@ class DownloadSpamProtection {
     return this.list;
   }
 
-  update(url) {
+  update(url, principal) {
     if (this._blockedURLToDownloadSpam.has(url)) {
       let downloadSpam = this._blockedURLToDownloadSpam.get(url);
       this.spamList.remove(downloadSpam);
+      downloadSpam.principal = principal;
       downloadSpam.blockedDownloadsCount += 1;
       this.spamList.add(downloadSpam);
       this._indicator.onDownloadStateChanged(downloadSpam);
       return;
     }
 
-    let downloadSpam = new DownloadSpam(url);
+    let downloadSpam = new DownloadSpam(url, principal, this);
     this.spamList.add(downloadSpam);
     this._blockedURLToDownloadSpam.set(url, downloadSpam);
     let hasActiveDownloads = DownloadsCommon.summarizeDownloads(
@@ -85,8 +88,10 @@ class DownloadSpamProtection {
  * @extends Download
  */
 class DownloadSpam extends Download {
-  constructor(url) {
+  constructor(url, principal, protectionController) {
     super();
+    this.protectionController = protectionController;
+    this.principal = principal.QueryInterface(Ci.nsIPrincipal);
     this.hasBlockedData = true;
     this.stopped = true;
     this.error = new DownloadError({
@@ -96,5 +101,17 @@ class DownloadSpam extends Download {
     this.target = { path: "" };
     this.source = { url };
     this.blockedDownloadsCount = 1;
+  }
+  allow() {
+    const pm = Services.perms;
+    pm.addFromPrincipal(
+      this.principal,
+      "automatic-download",
+      pm.ALLOW_ACTION,
+      pm.EXPIRE_SESSION
+    );
+    this.hasBlockedData = this.hasPartialData = false;
+    this.protectionController.clearDownloadSpam(this.source.url);
+    this._notifyChange();
   }
 }
