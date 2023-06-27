@@ -26,15 +26,8 @@ Please open an issue in this repository or send an email to [support@mullvad.net
 
 ## Source Code
 
-The Source Code can be obtained from separate branches. This `main` branch only contains this Readme.
-
-Here's the corresponding version / branches:
-
-- Mullvad Browser 12.0.4 / [mullvad-browser-102.9.0esr-12.0-2](https://github.com/mullvad/mullvad-browser/tree/mullvad-browser-102.9.0esr-12.0-2)
-- Mullvad Browser 12.0.5 / [mullvad-browser-102.10.0esr-12.0-2](https://github.com/mullvad/mullvad-browser/tree/mullvad-browser-102.10.0esr-12.0-2)
-- Mullvad Browser 12.0.6 / [mullvad-browser-102.11.0esr-12.0-1](https://github.com/mullvad/mullvad-browser/tree/mullvad-browser-102.11.0esr-12.0-1)
-
-The browser code is also available directly in the [Tor Project Gitlab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
+The Source Code can be obtained by going to specific branches and/or tags. This `main` branch only contains this Readme.
+It is also available directly in the [Tor Project Gitlab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
 
 ## Build instructions
 
