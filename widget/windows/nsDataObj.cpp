@@ -520,11 +520,13 @@ nsDataObj::nsDataObj(nsIURI* uri)
   m_enumFE = new CEnumFormatEtc();
   m_enumFE->AddRef();
 
+#if !defined(BASE_BROWSER_VERSION)
   if (uri) {
     // A URI was obtained, so pass this through to the DataObject
     // so it can create a SourceURL for CF_HTML flavour
     uri->GetSpec(mSourceURL);
   }
+#endif
 }
 //-----------------------------------------------------
 // destruction
@@ -1978,6 +1980,7 @@ nsresult nsDataObj ::BuildPlatformHTML(const char* inOurHTML,
   *outPlatformHTML = nullptr;
   nsDependentCString inHTMLString(inOurHTML);
 
+#if !defined(BASE_BROWSER_VERSION)
   // Do we already have mSourceURL from a drag?
   if (mSourceURL.IsEmpty()) {
     nsAutoString url;
@@ -1985,6 +1988,7 @@ nsresult nsDataObj ::BuildPlatformHTML(const char* inOurHTML,
 
     AppendUTF16toUTF8(url, mSourceURL);
   }
+#endif
 
   constexpr auto kStartHTMLPrefix = "Version:0.9\r\nStartHTML:"_ns;
   constexpr auto kEndHTMLPrefix = "\r\nEndHTML:"_ns;
