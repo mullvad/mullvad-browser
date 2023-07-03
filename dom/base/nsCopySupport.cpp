@@ -300,9 +300,13 @@ static nsresult CreateTransferable(
     }
   }
 
+#if !defined(BASE_BROWSER_VERSION)
   // Append the source of the item being dragged.
   return nsCopySupport::AppendSourceURL(
       *aTransferable, nsCopySupport::GetDocumentSourceURL(aDocument));
+#else
+  return NS_OK;
+#endif
 }
 
 nsString nsCopySupport::GetDocumentSourceURL(
