@@ -1892,13 +1892,11 @@ bool nsExternalAppHandler::IsDownloadSpam(nsIChannel* aChannel) {
     if (capability == nsIPermissionManager::PROMPT_ACTION) {
       nsCOMPtr<nsIObserverService> observerService =
           mozilla::services::GetObserverService();
-      RefPtr<BrowsingContext> browsingContext;
-      loadInfo->GetBrowsingContext(getter_AddRefs(browsingContext));
 
       nsAutoCString cStringURI;
       loadInfo->TriggeringPrincipal()->GetPrePath(cStringURI);
       observerService->NotifyObservers(
-          browsingContext, "blocked-automatic-download",
+          loadInfo, "blocked-automatic-download",
           NS_ConvertASCIItoUTF16(cStringURI.get()).get());
       // FIXME: In order to escape memory leaks, currently we cancel blocked
       // downloads. This is temporary solution, because download data should be
