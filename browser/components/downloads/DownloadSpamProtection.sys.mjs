@@ -89,8 +89,9 @@ class WindowSpamProtection {
    * Add a blocked download to the spamList or increment the count of an
    * existing blocked download, then notify listeners about this.
    * @param {String} url
+   * @param {DownloadSpamEnabler} enabler
    */
-  addDownloadSpam(url) {
+  addDownloadSpam(url, enabler) {
     this._blocking = true;
     // Start listening on registered downloads views, if any exist.
     this._maybeAddViews();
@@ -104,7 +105,7 @@ class WindowSpamProtection {
     }
     // Otherwise, create a new DownloadSpam object for the URL, add it to the
     // spamList, and open the downloads panel.
-    let downloadSpam = new DownloadSpam(url);
+    let downloadSpam = new DownloadSpam(url, enabler);
     this.spamList.add(downloadSpam);
     this._downloadSpamForUrl.set(url, downloadSpam);
     this._notifyDownloadSpamAdded(downloadSpam);
@@ -189,6 +190,39 @@ class WindowSpamProtection {
 }
 
 /**
+ * Helper to grant a certain principal permission for automatic downloads
+ * and to clear its download spam messages from the UI
+ */
+class DownloadSpamEnabler {
+  /**
+   * Constructs a DownloadSpamEnabler object
+   * @param {nsIPrincipal} principal
+   * @param {DownloadSpamProtection} downloadSpamProtection
+   */
+  constructor(principal, downloadSpamProtection) {
+    this.principal = principal;
+    this.downloadSpamProtection = downloadSpamProtection;
+  }
+  /**
+   * Allows a DownloadSpam item
+   * @param {DownloadSpam} downloadSpam
+   */
+  allow(downloadSpam) {
+    const pm = Services.perms;
+    pm.addFromPrincipal(
+      this.principal,
+      "automatic-download",
+      pm.ALLOW_ACTION,
+      pm.EXPIRE_SESSION
+    );
+    downloadSpam.hasBlockedData = downloadSpam.hasPartialData = false;
+    const { url } = downloadSpam.source;
+    for (let window of lazy.BrowserWindowTracker.orderedWindows) {
+      this.downloadSpamProtection.removeDownloadSpamForWindow(url, window);
+    }
+  }
+}
+/**
  * Responsible for detecting events related to downloads spam and notifying the
  * relevant window's WindowSpamProtection object. This is a singleton object,
  * constructed by DownloadIntegration.sys.mjs when the first download is blocked.
@@ -205,9 +239,11 @@ export class DownloadSpamProtection {
    * download was blocked. This is invoked when a download is blocked by
    * nsExternalAppHandler::IsDownloadSpam
    * @param {String} url
-   * @param {Window} window
+   * @param {nsILoadInfo} loadInfo
    */
-  update(url, window) {
+  update(url, loadInfo) {
+    loadInfo = loadInfo.QueryInterface(Ci.nsILoadInfo);
+    const window = loadInfo.browsingContext.topChromeWindow;
     if (window == null) {
       lazy.DownloadsCommon.log(
         "Download spam blocked in a non-chrome window. URL: ",
@@ -221,7 +257,10 @@ export class DownloadSpamProtection {
     let wsp =
       this._forWindowMap.get(window) ?? new WindowSpamProtection(window);
     this._forWindowMap.set(window, wsp);
-    wsp.addDownloadSpam(url);
+    wsp.addDownloadSpam(
+      url,
+      new DownloadSpamEnabler(loadInfo.triggeringPrincipal, this)
+    );
   }
 
   /**
@@ -280,8 +319,9 @@ export class DownloadSpamProtection {
  * @extends Download
  */
 class DownloadSpam extends Download {
-  constructor(url) {
+  constructor(url, downloadSpamEnabler) {
     super();
+    this._downloadSpamEnabler = downloadSpamEnabler;
     this.hasBlockedData = true;
     this.stopped = true;
     this.error = new DownloadError({
@@ -291,5 +331,14 @@ class DownloadSpam extends Download {
     this.target = { path: "" };
     this.source = { url };
     this.blockedDownloadsCount = 1;
+  }
+
+  /**
+   * Allows the principal which triggered this download to perform automatic downloads
+   * and clears the UI from messages reporting this download spam
+   */
+  allow() {
+    this._downloadSpamEnabler.allow(this);
+    this._notifyChange();
   }
 }
