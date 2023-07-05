@@ -1532,8 +1532,9 @@ class AddonOptions extends HTMLElement {
           el.disabled = false;
           el.hidden = false;
           document.l10n.setAttributes(el, "remove-addon-button");
-        } else if (addon.isBuiltin) {
-          // Likely the built-in themes, can't be removed, that's fine.
+        } else if (true || addon.isBuiltin) {
+          // Just hide the uninstall button for any "special" add-on
+          // which can't be removed (tor-browser#41834)
           el.hidden = true;
         } else {
           // Likely sideloaded, mention that it can't be removed with a link.
