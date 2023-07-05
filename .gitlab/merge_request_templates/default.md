@@ -17,15 +17,14 @@
 
 #### (Optional) Justification
 - [ ] **Emergency security update**: patchset fixes CVEs, 0-days, etc
-- [ ] **Censorship event**: patchset enables censorship circumvention
 - [ ] **Critical bug-fix**: patchset fixes a bug in core-functionality
 - [ ] **Consistency**: patchset which would make development easier if it were in both the alpha and release branches; developer tools, build system changes, etc
 - [ ] **Sponsor required**: patchset required for sponsor
 - [ ] **Other**: please explain
 
 ### Merging
-- [ ] Merge to `mullvad-browser` - `!fixups` to `tor-browser`-specific commits, new features, security backports
-- [ ] Merge to `base-browser` -`!fixups` to `base-browser`-specific commits, new features to be shared with `mullvad-browser`, and security backports
+- [ ] Merge to `mullvad-browser` - `!fixups` to `mullvad-browser`-specific commits, new features, security backports
+- [ ] Merge to `base-browser` -`!fixups` to `base-browser`-specific commits, new features to be shared with `tor-browser`
   - **NOTE**: if your changeset includes patches to both `base-browser` and `mullvad-browser` please clearly label in the change description which commits should be cherry-picked to `base-browser` after merging
 
 ### Issue Tracking
