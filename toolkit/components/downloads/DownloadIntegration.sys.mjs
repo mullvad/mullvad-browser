@@ -1158,7 +1158,7 @@ var DownloadObserver = {
           DownloadIntegration._initializeDownloadSpamProtection();
           DownloadIntegration.downloadSpamProtection.update(
             aData,
-            aSubject.topChromeWindow
+            aSubject
           );
         }
         break;
