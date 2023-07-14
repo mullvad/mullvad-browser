@@ -38,9 +38,6 @@ if test -n "$LOCAL_DEV_BUILD"; then
     # You must use the "default" bogus channel for dev builds
     ac_add_options --enable-update-channel=default
     ac_add_options --with-base-browser-version=dev-build
-else
-    # We only use beta GeckoView for now, for official builds
-    ac_add_options --enable-update-channel=beta
 fi
 
 if test -z "$WASI_SYSROOT"; then
