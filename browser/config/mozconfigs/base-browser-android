@@ -8,6 +8,7 @@ ac_add_options --enable-application=mobile/android
 
 CC="clang"
 CXX="clang++"
+ac_add_options --enable-linker=lld
 ac_add_options --with-java-bin-path=$JAVA_HOME/bin
 ac_add_options --with-android-sdk=$ANDROID_HOME
 ac_add_options --with-android-ndk=$ANDROID_NDK_HOME
