@@ -1,0 +1,27 @@
+{
+  "name": "MetaGer (en)",
+  "manifest_version": 2,
+  "version": "1.0",
+  "applications": {
+    "gecko": {
+      "id": "metager@search.mozilla.org"
+    }
+  },
+  "hidden": true,
+  "icons": {
+    "16": "favicon.ico",
+    "32": "favicon.ico",
+    "96": "favicon.ico",
+    "128": "favicon.ico"
+  },
+  "web_accessible_resources": [
+    "favicon.ico"
+  ],
+  "chrome_settings_overrides": {
+    "search_provider": {
+      "name": "MetaGer",
+      "keyword": ["@metager", "@mg"],
+      "search_url": "https://metager.org/meta/meta.ger3?eingabe={searchTerms}"
+    }
+  }
+}

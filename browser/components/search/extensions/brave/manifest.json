@@ -1,0 +1,31 @@
+{
+  "name": "Brave Search",
+  "manifest_version": 2,
+  "version": "1.0",
+  "applications": {
+    "gecko": {
+      "id": "brave@search.mozilla.org"
+    }
+  },
+  "hidden": true,
+  "icons": {
+    "16": "favicon.svg",
+    "32": "favicon.svg",
+    "96": "favicon.svg",
+    "128": "favicon.svg"
+  },
+  "web_accessible_resources": [
+    "favicon.svg"
+  ],
+  "chrome_settings_overrides": {
+    "search_provider": {
+      "name": "Brave Search",
+      "keyword": ["@brave", "@bv"],
+      "search_form": "https://search.brave.com/search",
+      "search_url": "https://search.brave.com/search",
+      "search_url_get_params": "q={searchTerms}",
+      "suggest_url": "https://search.brave.com/api/suggest",
+      "suggest_url_get_params": "q={searchTerms}"
+    }
+  }
+}
