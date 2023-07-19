@@ -1,0 +1,23 @@
+{
+  "ddg": [
+    { "url": "chrome://global/content/search/duckduckgo.ico", "iconSize": 16 }
+  ],
+  "ddg-html": [
+    { "url": "chrome://global/content/search/duckduckgo.ico", "iconSize": 16 }
+  ],
+  "mullvad-leta": [
+    { "url": "chrome://global/content/search/mullvad-leta.svg", "iconSize": 16 }
+  ],
+  "mojeek": [
+    { "url": "chrome://global/content/search/mojeek.ico", "iconSize": 16 }
+  ],
+  "brave": [
+    { "url": "chrome://global/content/search/brave.svg", "iconSize": 16 }
+  ],
+  "startpage": [
+    { "url": "chrome://global/content/search/startpage.png", "iconSize": 16 }
+  ],
+  "metager": [
+    { "url": "chrome://global/content/search/metager.ico", "iconSize": 16 }
+  ]
+}
