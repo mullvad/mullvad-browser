@@ -501,15 +501,6 @@ export class SearchService {
   // Test-only function to reset just the engine selector so that it can
   // load a different configuration.
   resetEngineSelector() {
-    if (lazy.SearchUtils.newSearchConfigEnabled) {
-      this.#engineSelector = new lazy.SearchEngineSelector(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    } else {
-      this.#engineSelector = new lazy.SearchEngineSelectorOld(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    }
   }
 
   resetToAppDefaultEngine() {
@@ -1331,16 +1322,6 @@ export class SearchService {
     // We need to catch the region being updated during initialization so we
     // start listening straight away.
     Services.obs.addObserver(this, lazy.Region.REGION_TOPIC);
-
-    if (lazy.SearchUtils.newSearchConfigEnabled) {
-      this.#engineSelector = new lazy.SearchEngineSelector(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    } else {
-      this.#engineSelector = new lazy.SearchEngineSelectorOld(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    }
   }
 
   /**
@@ -2597,23 +2578,18 @@ export class SearchService {
   // This is prefixed with _ rather than # because it is
   // called in test_remove_engine_notification_box.js
   async _fetchEngineSelectorEngines() {
-    let searchEngineSelectorProperties = {
-      locale: Services.locale.appLocaleAsBCP47,
-      region: lazy.Region.home || "unknown",
-      channel: lazy.SearchUtils.MODIFIED_APP_CHANNEL,
-      experiment:
-        lazy.NimbusFeatures.searchConfiguration.getVariable("experiment") ?? "",
-      distroID: lazy.SearchUtils.distroID ?? "",
-    };
-
-    for (let [key, value] of Object.entries(searchEngineSelectorProperties)) {
-      this._settings.setMetaDataAttribute(key, value);
-    }
-
-    let { engines, privateDefault } =
-      await this.#engineSelector.fetchEngineConfiguration(
-        searchEngineSelectorProperties
-      );
+    const engines = [
+      { webExtension: { id: "ddg@search.mozilla.org" }, orderHint: 100 },
+      { webExtension: { id: "ddg-html@search.mozilla.org" }, orderHint: 90 },
+      {
+        webExtension: { id: "mullvad-leta@search.mozilla.org" },
+        orderHint: 80,
+      },
+      { webExtension: { id: "mojeek@search.mozilla.org" }, orderHint: 70 },
+      { webExtension: { id: "brave@search.mozilla.org" }, orderHint: 60 },
+      { webExtension: { id: "startpage@search.mozilla.org" }, orderHint: 50 },
+      { webExtension: { id: "metager@search.mozilla.org" }, orderHint: 40 },
+    ];
 
     for (let e of engines) {
       if (!e.webExtension) {
@@ -2621,32 +2597,9 @@ export class SearchService {
       }
       e.webExtension.locale =
         e.webExtension?.locale ?? lazy.SearchUtils.DEFAULT_TAG;
-
-      // TODO Bug 1875912 - Remove the webextension.id and webextension.locale when
-      // we're ready to remove old search-config and use search-config-v2 for all
-      // clients. The id in appProvidedSearchEngine should be changed to
-      // engine.identifier.
-      if (lazy.SearchUtils.newSearchConfigEnabled) {
-        let identifierComponents = NON_SPLIT_ENGINE_IDS.includes(e.identifier)
-          ? [e.identifier]
-          : e.identifier.split("-");
-
-        if (e.identifier == "amazon-se") {
-          identifierComponents[1] = "sweden";
-        }
-
-        if (e.identifier == "amazon-es") {
-          identifierComponents[1] = "spain";
-        }
-
-        let locale = identifierComponents.slice(1).join("-") || "default";
-
-        e.webExtension.id = identifierComponents[0] + "@search.mozilla.org";
-        e.webExtension.locale = locale;
-      }
     }
 
-    return { engines, privateDefault };
+    return { engines, privateDefault: undefined };
   }
 
   #setDefaultAndOrdersFromSelector(engines, privateDefault) {
