@@ -1,0 +1,26 @@
+{
+  "name": "Mullvad Leta",
+  "manifest_version": 2,
+  "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "mullvad-leta@search.mozilla.org"
+    }
+  },
+  "hidden": true,
+  "icons": {
+    "16": "favicon.svg",
+    "32": "favicon.svg",
+    "96": "favicon.svg",
+    "128": "favicon.svg"
+  },
+  "web_accessible_resources": ["favicon.svg"],
+  "chrome_settings_overrides": {
+    "search_provider": {
+      "keyword": ["@leta", "@mullvad", "@ml"],
+      "name": "Mullvad Leta",
+      "search_url": "https://leta.mullvad.net/",
+      "search_url_get_params": "q={searchTerms}"
+    }
+  }
+}
