@@ -19,6 +19,24 @@
   },
   {
     "base": {
+      "aliases": ["ddg-html", "duckduckgohtml", "ddgh"],
+      "classification": "general",
+      "name": "DuckDuckGo (HTML)",
+      "urls": {
+        "search": {
+          "base": "https://html.duckduckgo.com/html/",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "98d8c84b-7455-431d-98b9-890e7bcc0041",
+    "identifier": "ddg-html",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
       "aliases": ["ddgnoai"],
       "classification": "general",
       "name": "DuckDuckGo (no AI)",
@@ -32,6 +50,42 @@
     },
     "id": "91687f02-56dd-4fef-ba26-bf139dff3166",
     "identifier": "ddg-noai",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
+      "aliases": ["mojeek", "mj"],
+      "classification": "general",
+      "name": "Mojeek",
+      "urls": {
+        "search": {
+          "base": "https://www.mojeek.com/search",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "10df12ac-2b39-4aa9-8845-d5b35d5bb70c",
+    "identifier": "mojeek",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
+      "aliases": ["brave", "bv"],
+      "classification": "general",
+      "name": "Brave Search",
+      "urls": {
+        "search": {
+          "base": "https://search.brave.com/search",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "f479314b-030b-49a8-a2fe-7e1c5d1d9071",
+    "identifier": "brave",
     "recordType": "engine",
     "variants": [{ "environment": { "allRegionsAndLocales": true } }]
   },
@@ -56,14 +110,14 @@
   {
     "recordType": "defaultEngines",
     "globalDefault": "ddg",
-    "globalDefaultPrivate": "ddg"
+    "globalDefaultPrivate": "dgg"
   },
   {
     "recordType": "engineOrders",
     "orders": [
       {
         "environment": { "allRegionsAndLocales": true },
-        "order": ["ddg", "ddg-noai", "startpage"]
+        "order": ["ddg", "ddg-html", "ddg-noai", "mojeek", "brave", "startpage"]
       }
     ]
   }

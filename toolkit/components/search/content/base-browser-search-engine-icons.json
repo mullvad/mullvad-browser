@@ -2,8 +2,17 @@
   "ddg": [
     { "url": "chrome://global/content/search/duckduckgo.ico", "imageSize": 32 }
   ],
+  "ddg-html": [
+    { "url": "chrome://global/content/search/duckduckgo.ico", "imageSize": 32 }
+  ],
   "ddg-noai": [
     { "url": "chrome://global/content/search/duckduckgo.ico", "imageSize": 32 }
+  ],
+  "mojeek": [
+    { "url": "chrome://global/content/search/mojeek.ico", "imageSize": 32 }
+  ],
+  "brave": [
+    { "url": "chrome://global/content/search/brave.svg", "imageSize": 16 }
   ],
   "startpage": [
     {
