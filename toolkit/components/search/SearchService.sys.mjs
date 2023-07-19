@@ -22,7 +22,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
   Region: "resource://gre/modules/Region.sys.mjs",
   RemoteSettings: "resource://services-settings/remote-settings.sys.mjs",
   SearchEngine: "resource://gre/modules/SearchEngine.sys.mjs",
+  // eslint-disable-next-line mozilla/valid-lazy
   SearchEngineSelector: "resource://gre/modules/SearchEngineSelector.sys.mjs",
+  // eslint-disable-next-line mozilla/valid-lazy
   SearchEngineSelectorOld:
     "resource://gre/modules/SearchEngineSelectorOld.sys.mjs",
   SearchSettings: "resource://gre/modules/SearchSettings.sys.mjs",
@@ -81,6 +83,7 @@ export const NON_SPLIT_ENGINE_IDS = [
   "engine-purpose",
   "engine-fr",
   "fixup_search",
+  "ddg-html",
 ];
 
 const TOPIC_LOCALES_CHANGE = "intl:app-locales-changed";
@@ -500,17 +503,7 @@ export class SearchService {
 
   // Test-only function to reset just the engine selector so that it can
   // load a different configuration.
-  resetEngineSelector() {
-    if (lazy.SearchUtils.newSearchConfigEnabled) {
-      this.#engineSelector = new lazy.SearchEngineSelector(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    } else {
-      this.#engineSelector = new lazy.SearchEngineSelectorOld(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    }
-  }
+  resetEngineSelector() {}
 
   resetToAppDefaultEngine() {
     let appDefaultEngine = this.appDefaultEngine;
@@ -1331,16 +1324,6 @@ export class SearchService {
     // We need to catch the region being updated during initialization so we
     // start listening straight away.
     Services.obs.addObserver(this, lazy.Region.REGION_TOPIC);
-
-    if (lazy.SearchUtils.newSearchConfigEnabled) {
-      this.#engineSelector = new lazy.SearchEngineSelector(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    } else {
-      this.#engineSelector = new lazy.SearchEngineSelectorOld(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    }
   }
 
   /**
@@ -1560,6 +1543,7 @@ export class SearchService {
    * Handles the search configuration being - adds a wait on the user
    * being idle, before the search engine update gets handled.
    */
+  // eslint-disable-next-line no-unused-private-class-members
   #handleConfigurationUpdated() {
     if (this.#queuedIdle) {
       return;
@@ -2598,23 +2582,113 @@ export class SearchService {
   // This is prefixed with _ rather than # because it is
   // called in test_remove_engine_notification_box.js
   async _fetchEngineSelectorEngines() {
-    let searchEngineSelectorProperties = {
-      locale: Services.locale.appLocaleAsBCP47,
-      region: lazy.Region.home || "unknown",
-      channel: lazy.SearchUtils.MODIFIED_APP_CHANNEL,
-      experiment:
-        lazy.NimbusFeatures.searchConfiguration.getVariable("experiment") ?? "",
-      distroID: lazy.SearchUtils.distroID ?? "",
-    };
-
-    for (let [key, value] of Object.entries(searchEngineSelectorProperties)) {
-      this._settings.setMetaDataAttribute(key, value);
-    }
-
-    let { engines, privateDefault } =
-      await this.#engineSelector.fetchEngineConfiguration(
-        searchEngineSelectorProperties
-      );
+    const engines = [
+      {
+        aliases: ["duckduckgo", "ddg"],
+        name: "DuckDuckGo",
+        urls: {
+          search: {
+            base: "https://duckduckgo.com/",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "04e99a38-13ee-47d8-8aa4-64482b3dea99",
+        identifier: "ddg",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["ddg-html", "duckduckgohtml", "ddgh"],
+        name: "DuckDuckGo (HTML)",
+        urls: {
+          search: {
+            base: "https://html.duckduckgo.com/html/",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "98d8c84b-7455-431d-98b9-890e7bcc0041",
+        identifier: "ddg-html",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["mullvad-leta", "leta", "mullvad", "ml"],
+        name: "Mullvad Leta",
+        urls: {
+          search: {
+            base: "https://leta.mullvad.net/",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "ee88d691-6d7a-4adb-9fec-5a205565505a",
+        identifier: "mullvad-leta",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["mojeek", "mj"],
+        name: "Mojeek",
+        urls: {
+          search: {
+            base: "https://www.mojeek.com/search",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "10df12ac-2b39-4aa9-8845-d5b35d5bb70c",
+        identifier: "mojeek",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["brave", "bv"],
+        name: "Brave Search",
+        urls: {
+          search: {
+            base: "https://search.brave.com/search",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "f479314b-030b-49a8-a2fe-7e1c5d1d9071",
+        identifier: "brave",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["startpage", "sp"],
+        name: "Startpage",
+        urls: {
+          search: {
+            base: "https://www.startpage.com/sp/search",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "049f86fd-28fe-4389-910f-aac28f07d745",
+        identifier: "startpage",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["metager", "mg"],
+        name: "MetaGer",
+        urls: {
+          search: {
+            base: "https://metager.org/meta/meta.ger3",
+            params: [],
+            searchTermParamName: "eingabe",
+          },
+        },
+        id: "a9d07d93-469c-4bf4-8dd1-fa137f1cc85f",
+        identifier: "metager",
+        recordType: "engine",
+        variants: [],
+      },
+    ];
 
     for (let e of engines) {
       if (!e.webExtension) {
@@ -2647,7 +2721,7 @@ export class SearchService {
       }
     }
 
-    return { engines, privateDefault };
+    return { engines, privateDefault: undefined };
   }
 
   #setDefaultAndOrdersFromSelector(engines, privateDefault) {
