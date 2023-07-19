@@ -16,7 +16,10 @@ const { SearchService } = ChromeUtils.importESModule(
 
 const expectedURLs = {
   ddg: "https://duckduckgo.com/?q=test",
+  "ddg-html": "https://html.duckduckgo.com/html/?q=test",
   "ddg-noai": "https://noai.duckduckgo.com/?q=test",
+  mojeek: "https://www.mojeek.com/search?q=test",
+  brave: "https://search.brave.com/search?q=test",
   startpage: "https://www.startpage.com/sp/search?q=test",
 };
 const defaultEngine = "ddg";
