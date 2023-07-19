@@ -1,0 +1,9 @@
+[
+  ["ddg", "chrome://global/content/search/duckduckgo.ico"],
+  ["ddg-html", "chrome://global/content/search/duckduckgo.ico"],
+  ["mullvad-leta", "chrome://global/content/search/mullvad-leta.svg"],
+  ["mojeek", "chrome://global/content/search/mojeek.ico"],
+  ["brave", "chrome://global/content/search/brave.svg"],
+  ["startpage", "chrome://global/content/search/startpage.png"],
+  ["metager", "chrome://global/content/search/metager.ico"]
+]
