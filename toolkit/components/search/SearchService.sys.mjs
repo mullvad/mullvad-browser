@@ -22,7 +22,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
   Region: "resource://gre/modules/Region.sys.mjs",
   RemoteSettings: "resource://services-settings/remote-settings.sys.mjs",
   SearchEngine: "resource://gre/modules/SearchEngine.sys.mjs",
+  // eslint-disable-next-line mozilla/valid-lazy
   SearchEngineSelector: "resource://gre/modules/SearchEngineSelector.sys.mjs",
+  // eslint-disable-next-line mozilla/valid-lazy
   SearchEngineSelectorOld:
     "resource://gre/modules/SearchEngineSelectorOld.sys.mjs",
   SearchSettings: "resource://gre/modules/SearchSettings.sys.mjs",
@@ -81,6 +83,7 @@ export const NON_SPLIT_ENGINE_IDS = [
   "engine-purpose",
   "engine-fr",
   "fixup_search",
+  "ddg-html",
 ];
 
 const TOPIC_LOCALES_CHANGE = "intl:app-locales-changed";
@@ -500,17 +503,7 @@ export class SearchService {
 
   // Test-only function to reset just the engine selector so that it can
   // load a different configuration.
-  resetEngineSelector() {
-    if (lazy.SearchUtils.newSearchConfigEnabled) {
-      this.#engineSelector = new lazy.SearchEngineSelector(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    } else {
-      this.#engineSelector = new lazy.SearchEngineSelectorOld(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    }
-  }
+  resetEngineSelector() {}
 
   resetToAppDefaultEngine() {
     let appDefaultEngine = this.appDefaultEngine;
@@ -1331,16 +1324,6 @@ export class SearchService {
     // We need to catch the region being updated during initialization so we
     // start listening straight away.
     Services.obs.addObserver(this, lazy.Region.REGION_TOPIC);
-
-    if (lazy.SearchUtils.newSearchConfigEnabled) {
-      this.#engineSelector = new lazy.SearchEngineSelector(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    } else {
-      this.#engineSelector = new lazy.SearchEngineSelectorOld(
-        this.#handleConfigurationUpdated.bind(this)
-      );
-    }
   }
 
   /**
@@ -1560,6 +1543,7 @@ export class SearchService {
    * Handles the search configuration being - adds a wait on the user
    * being idle, before the search engine update gets handled.
    */
+  // eslint-disable-next-line no-unused-private-class-members
   #handleConfigurationUpdated() {
     if (this.#queuedIdle) {
       return;
@@ -2598,23 +2582,11 @@ export class SearchService {
   // This is prefixed with _ rather than # because it is
   // called in test_remove_engine_notification_box.js
   async _fetchEngineSelectorEngines() {
-    let searchEngineSelectorProperties = {
-      locale: Services.locale.appLocaleAsBCP47,
-      region: lazy.Region.home || "unknown",
-      channel: lazy.SearchUtils.MODIFIED_APP_CHANNEL,
-      experiment:
-        lazy.NimbusFeatures.searchConfiguration.getVariable("experiment") ?? "",
-      distroID: lazy.SearchUtils.distroID ?? "",
-    };
-
-    for (let [key, value] of Object.entries(searchEngineSelectorProperties)) {
-      this._settings.setMetaDataAttribute(key, value);
-    }
-
-    let { engines, privateDefault } =
-      await this.#engineSelector.fetchEngineConfiguration(
-        searchEngineSelectorProperties
-      );
+    const engines = await (
+      await fetch(
+        "chrome://global/content/search/mullvadBrowserSearchEngines.json"
+      )
+    ).json();
 
     for (let e of engines) {
       if (!e.webExtension) {
@@ -2647,7 +2619,7 @@ export class SearchService {
       }
     }
 
-    return { engines, privateDefault };
+    return { engines, privateDefault: undefined };
   }
 
   #setDefaultAndOrdersFromSelector(engines, privateDefault) {
