@@ -1,11 +1,11 @@
 {
-  "name": "DuckDuckGo",
-  "description": "Search DuckDuckGo",
+  "name": "DuckDuckGo HTML",
+  "description": "Search DuckDuckGo HTML",
   "manifest_version": 2,
   "version": "1.4",
   "browser_specific_settings": {
     "gecko": {
-      "id": "ddg@search.mozilla.org"
+      "id": "ddg-html@search.mozilla.org"
     }
   },
   "hidden": true,
@@ -15,12 +15,12 @@
   "web_accessible_resources": ["favicon.ico"],
   "chrome_settings_overrides": {
     "search_provider": {
-      "keyword": ["@duckduckgo", "@ddg"],
-      "name": "DuckDuckGo",
-      "search_url": "https://duckduckgo.com/",
-      "search_form": "https://duckduckgo.com/",
+      "keyword": ["@duckduckgohtml", "@ddgh"],
+      "name": "DuckDuckGo HTML",
+      "search_url": "https://html.duckduckgo.com/html/",
+      "search_form": "https://html.duckduckgo.com/html/",
       "search_url_get_params": "q={searchTerms}",
-      "suggest_url": "https://ac.duckduckgo.com/ac/",
+      "suggest_url": "https://duckduckgo.com/ac/",
       "suggest_url_get_params": "q={searchTerms}&type=list"
     }
   }
