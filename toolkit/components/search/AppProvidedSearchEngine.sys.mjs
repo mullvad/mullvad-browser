@@ -84,6 +84,8 @@ class IconHandler {
       await this.#getIconList();
     }
 
+    return this.#iconList.get(engineIdentifier);
+    // eslint-disable-next-line no-unreachable
     let iconRecords = this.#iconList.filter(r =>
       this._identifierMatches(engineIdentifier, r.engineIdentifiers)
     );
@@ -210,12 +212,18 @@ class IconHandler {
    */
   async #getIconList() {
     try {
-      this.#iconList = await this.#iconCollection.get();
+      this.#iconList = new Map(
+        await (
+          await fetch(
+            "chrome://global/content/search/mullvadBrowserSearchEngineIcons.json"
+          )
+        ).json()
+      );
     } catch (ex) {
       console.error(ex);
-      this.#iconList = [];
+      this.#iconList = null;
     }
-    if (!this.#iconList.length) {
+    if (!this.#iconList) {
       console.error("Failed to obtain search engine icon list records");
     }
   }
