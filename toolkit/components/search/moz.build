@@ -43,5 +43,7 @@ TESTING_JS_MODULES += [
     "tests/SearchTestUtils.sys.mjs",
 ]
 
+JAR_MANIFESTS += ["jar.mn"]
+
 with Files("**"):
     BUG_COMPONENT = ("Firefox", "Search")
