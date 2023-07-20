@@ -11,10 +11,6 @@ if test -n "$LOCAL_DEV_BUILD"; then
     ac_add_options --enable-update-channel=default
     ac_add_options --without-wasm-sandboxed-libraries
     ac_add_options --with-base-browser-version=dev-build
-else
-    # We want to have a similar fat .aar versioning as Mozilla and make it clear
-    # we are on the beta channel for GeckoView
-    ac_add_options --enable-update-channel=beta
 fi
 
 ac_add_options --with-tor-browser-version=dev-build
