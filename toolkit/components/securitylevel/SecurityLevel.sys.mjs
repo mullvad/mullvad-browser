@@ -152,6 +152,18 @@ let noscriptSettings = safetyLevel => ({
     enforced: true,
     autoAllowTop: false,
   },
+  sync: {
+    // Apply cross-tab identity leak protection to PBM windows
+    TabGuardMode: "incognito",
+    // Prompt only on problematic POST requests
+    TabGuardPrompt: "post",
+  },
+  // host-specific metadata
+  settingsHost: {
+    // help NoScript cooperate by versioning these settings
+    id: "mullvad",
+    version: 2,
+  },
   isTorBrowser: true,
   tabId: -1,
 });
