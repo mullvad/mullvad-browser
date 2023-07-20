@@ -162,13 +162,16 @@ let noscriptSettings = safetyLevel => ({
     autoAllowTop: false,
   },
   sync: {
-    TabGuardMode: "off", // we want to turn it off in PB until tor-browser#41112
+    // Apply cross-tab identity leak protection to PBM windows
+    TabGuardMode: "incognito",
+    // Prompt only on problematic POST requests
+    TabGuardPrompt: "post",
   },
   // host-specific metadata
   settingsHost: {
     // help NoScript cooperate by versioning these settings
     id: "mullvad",
-    version: 1,
+    version: 2,
   },
   isTorBrowser: true,
   tabId: -1,
