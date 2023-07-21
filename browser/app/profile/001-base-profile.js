@@ -519,6 +519,10 @@ pref("browser.taskbar.lists.frequent.enabled", false);
 pref("browser.taskbar.lists.tasks.enabled", false);
 pref("browser.taskbar.lists.recent.enabled", false);
 
+// tor-browser#41806: Prevent the browser from adding a new Private Browsing
+// start menu item automatically
+pref("browser.privacySegmentation.createdShortcut", true);
+
 // Do not re-open the browser automatically after reboots when "Restart apps" is
 // enabled (tor-browser#41503)
 pref("toolkit.winRegisterApplicationRestart", false);
