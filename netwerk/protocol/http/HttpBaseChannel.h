@@ -619,6 +619,7 @@ class HttpBaseChannel : public nsHashPropertyBag,
 
   friend class PrivateBrowsingChannel<HttpBaseChannel>;
   friend class InterceptFailedOnStop;
+  friend class HttpChannelParent;
 
  protected:
   // this section is for main-thread-only object
