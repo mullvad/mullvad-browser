@@ -18,10 +18,6 @@ pref("doh-rollout.disable-heuristics", true);
 // privacy-browser#37: Customization for the about dialog
 pref("app.releaseNotesURL.aboutDialog", "about:blank");
 
-// privacy-browser#70: Temporarily disable the language notification
-// TODO: Remove when we enable other languages
-pref("intl.language_notification.shown", true);
-
 // privacy-browser#94: Disable legacy global microphone/webcam indicator
 // Disable the legacy Firefox Quantum-styled global webcam/microphone indicator in favor of each
 // platform's native indicator
