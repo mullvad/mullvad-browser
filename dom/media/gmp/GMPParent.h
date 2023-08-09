@@ -20,6 +20,7 @@
 #include "nsString.h"
 #include "nsTArray.h"
 #include "nsIFile.h"
+#include "mozilla/Atomics.h"
 #include "mozilla/MozPromise.h"
 
 namespace mozilla::gmp {
@@ -42,12 +43,7 @@ class GMPCapability {
                        const nsCString& aAPI, const nsCString& aTag);
 };
 
-enum GMPState {
-  GMPStateNotLoaded,
-  GMPStateLoaded,
-  GMPStateUnloading,
-  GMPStateClosing
-};
+enum class GMPState : uint32_t { NotLoaded, Loaded, Unloading, Closing };
 
 class GMPContentParent;
 
@@ -194,7 +190,7 @@ class GMPParent final
                              uint32_t& aArchSet);
 #endif
 
-  GMPState mState;
+  Atomic<GMPState> mState;
   nsCOMPtr<nsIFile> mDirectory;  // plugin directory on disk
   nsString mName;  // base name of plugin on disk, UTF-16 because used for paths
   nsCString mDisplayName;  // name of plugin displayed to users
