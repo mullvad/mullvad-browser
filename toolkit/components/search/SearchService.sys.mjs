@@ -2269,7 +2269,6 @@ export class SearchService {
     const engines = [
       { webExtension: { id: "ddg@search.mozilla.org" }, orderHint: 100 },
       { webExtension: { id: "ddg-html@search.mozilla.org" }, orderHint: 90 },
-      { webExtension: { id: "mullvad-leta@search.mozilla.org" }, orderHint: 80 },
       { webExtension: { id: "mojeek@search.mozilla.org" }, orderHint: 70 },
       { webExtension: { id: "brave@search.mozilla.org" }, orderHint: 60 },
       { webExtension: { id: "startpage@search.mozilla.org" }, orderHint: 50 },
