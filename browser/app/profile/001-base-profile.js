@@ -314,6 +314,9 @@ pref("javascript.options.large_arraybuffers", false);
 // Bug 40057: Ensure system colors are not used for CSS4 colors
 pref("browser.display.use_system_colors", false);
 
+// tor-browser#41943: lock and revisit after it gets flipped to true in stable Firefox
+pref("javascript.options.spectre.disable_for_isolated_content", false, locked);
+
 // Third party stuff
 pref("privacy.firstparty.isolate", true); // Always enforce first party isolation
 // tor-browser#40123 and #40308: Disable for now until audit
