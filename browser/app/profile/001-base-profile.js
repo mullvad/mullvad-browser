@@ -118,6 +118,7 @@ pref("browser.search.suggest.enabled", false);
 pref("browser.urlbar.suggest.searches", false);
 pref("browser.urlbar.suggest.quicksuggest.nonsponsored", false);
 pref("browser.urlbar.suggest.quicksuggest.sponsored", false);
+pref("browser.urlbar.groupLabels.enabled", false);
 pref("browser.safebrowsing.malware.enabled", false);
 pref("browser.safebrowsing.phishing.enabled", false);
 pref("browser.safebrowsing.downloads.enabled", false);
