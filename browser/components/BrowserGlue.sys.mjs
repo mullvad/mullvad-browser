@@ -1362,6 +1362,9 @@ BrowserGlue.prototype = {
     // handle any UI migration
     this._migrateUI();
 
+    // Base Browser-specific version of _migrateUI.
+    this._migrateUIBB();
+
     // Clear possibly auto enabled enterprise_roots prefs (see bug 40166)
     if (
       !Services.prefs.getBoolPref(
@@ -4440,6 +4443,25 @@ BrowserGlue.prototype = {
 
     // Update the migration version.
     Services.prefs.setIntPref("browser.migration.version", UI_VERSION);
+  },
+
+  _migrateUIBB() {
+    // Version 1: 13.0a3. Reset layout.css.prefers-color-scheme.content-override
+    //            for tor-browser#41739.
+    const MIGRATION_VERSION = 1;
+    const MIGRATION_PREF = "basebrowser.migration.version";
+    // We do not care whether this is a new or old profile, since in version 1
+    // we just quickly clear a user preference, which should not do anything to
+    // new profiles.
+    // Shall we ever raise the version number and have a watershed, we can add
+    // a check easily (any version > 0 will be an old profile).
+    const currentVersion = Services.prefs.getIntPref(MIGRATION_PREF, 0);
+    if (currentVersion < 1) {
+      Services.prefs.clearUserPref(
+        "layout.css.prefers-color-scheme.content-override"
+      );
+    }
+    Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
   },
 
   async _showUpgradeDialog() {
