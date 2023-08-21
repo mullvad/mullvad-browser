@@ -142,6 +142,7 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
       this.clearStorage();
       this.clearPreferencesAndPermissions();
       await this.clearData();
+      await this.reloadAddons();
       this.clearConnections();
       this.clearPrivateSession();
     }
@@ -409,6 +410,15 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
     clearPrivateSession() {
       logger.info("Ending any remaining private browsing sessions.");
       Services.obs.notifyObservers(null, "last-pb-context-exited");
+    }
+
+    async reloadAddons() {
+      logger.info("Reloading add-ons to clear their temporary state.");
+      // Reload all active extensions except search engines, which would throw.
+      const addons = (
+        await AddonManager.getAddonsByTypes(["extension"])
+      ).filter(a => a.isActive && !a.id.endsWith("@search.mozilla.org"));
+      await Promise.all(addons.map(a => a.reload()));
     }
 
     // Broadcast as a hook to clear other data
