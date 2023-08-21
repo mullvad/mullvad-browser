@@ -1,7 +1,5 @@
 "use strict";
 
-var EXPORTED_SYMBOLS = ["NewIdentityButton"];
-
 /* globals CustomizableUI Services gFindBarInitialized gFindBar
    OpenBrowserWindow PrivateBrowsingUtils XPCOMUtils
  */
