@@ -87,6 +87,9 @@ pref("browser.sessionstore.resume_from_crash", false);
 // Also not needed in PBM at the moment.
 pref("browser.pagethumbnails.capturing_disabled", true);
 
+// Empty clipboard content from private windows on exit (tor-browser#42154)
+pref("browser.privatebrowsing.preserveClipboard", false);
+
 // Enable HTTPS-Only mode (tor-browser#19850)
 pref("dom.security.https_only_mode", true);
 // The previous pref automatically sets this to true (see StaticPrefList.yaml),
