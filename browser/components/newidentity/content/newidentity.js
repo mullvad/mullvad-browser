@@ -158,7 +158,6 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
     }
 
     closeTabs() {
-      logger.info("Closing tabs");
       if (
         !Services.prefs.getBoolPref("browser.new_identity.close_newnym", true)
       ) {
