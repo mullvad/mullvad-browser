@@ -379,12 +379,17 @@ pref("network.http.http2.enable-hpack-dump", false, locked);
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
 // (defense in depth measure)
 pref("network.gio.supported-protocols", "");
-// Mullvad browser enables WebRTC by default, therefore the following 2 prefs
+// Mullvad Browser enables WebRTC by default, meaning that there the following prefs
 // are first-line defense, rather than "in depth" (mullvad-browser#40)
 // tor-browser#41667 - Defense in depth: use mDNS to avoid local IP leaks on Android too if user enables WebRTC
 pref("media.peerconnection.ice.obfuscate_host_addresses", true);
 // tor-browser#41671 - Defense in depth: connect using TURN only, to avoid IP leaks if user enables WebRTC
 pref("media.peerconnection.ice.relay_only", true);
+// tor-browser#42029 - Defense-in-depth: disable non-proxied UDP WebRTC
+pref("media.peerconnection.ice.default_address_only", true);
+pref("media.peerconnection.ice.no_host", true);
+pref("media.peerconnection.ice.proxy_only_if_behind_proxy", true);
+
 // Disables media devices but only if `media.peerconnection.enabled` is set to
 // `false` as well. (see bug 16328 for this defense-in-depth measure)
 pref("media.navigator.enabled", false);
