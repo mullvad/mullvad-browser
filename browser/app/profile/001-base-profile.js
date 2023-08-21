@@ -163,6 +163,9 @@ pref("browser.backup.restore.enabled", false);
 // the OS when in PBM (defense-in-depth).
 pref("media.privatebrowsing.metadata.enabled", false);
 
+// tor-browser#42154: empty clipboard content from private windows on exit
+pref("browser.privatebrowsing.preserveClipboard", false);
+
 // tor-browser#42611: Do not include the URL of the image, when copying it.
 // Also, do not save clipboard in history/cloud.
 pref("clipboard.imageAsFile.enabled", false);

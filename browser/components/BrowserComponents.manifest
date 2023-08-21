@@ -119,6 +119,7 @@ category browser-first-window-ready resource://gre/modules/SandboxUtils.sys.mjs 
 category browser-window-delayed-startup resource://gre/modules/SandboxUtils.sys.mjs SandboxUtils.maybeWarnAboutDisabledContentSandbox
 category browser-first-window-ready resource://gre/modules/SandboxUtils.sys.mjs SandboxUtils.observeContentSandboxPref
 #endif
+category browser-first-window-ready moz-src:///browser/modules/ClipboardPrivacy.sys.mjs ClipboardPrivacy.init
 
 category browser-idle-startup moz-src:///browser/components/places/PlacesUIUtils.sys.mjs PlacesUIUtils.unblockToolbars
 category browser-idle-startup resource:///modules/BuiltInThemes.sys.mjs BuiltInThemes.ensureBuiltInThemes
