@@ -96,6 +96,9 @@ pref("browser.pagethumbnails.capturing_disabled", true);
 // pref("privacy.exposeContentTitleInWindow", false);
 // pref("privacy.exposeContentTitleInWindow.pbm", false);
 
+// Empty clipboard content from private windows on exit (tor-browser#42154)
+pref("browser.privatebrowsing.preserveClipboard", false);
+
 // tor-browser#42611: Do not include the URL of the image, when copying it.
 // Also, do not save clipboard in history/cloud.
 pref("clipboard.imageAsFile.enabled", false);
