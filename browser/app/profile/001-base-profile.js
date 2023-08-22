@@ -17,6 +17,9 @@ pref("startup.homepage_welcome_url.additional", "");
 // Disable Firefox Welcome Dialog
 pref("browser.aboutwelcome.enabled", false);
 
+// Disable the Firefox View tab (tor-browser#41876)
+pref("browser.tabs.firefox-view", false);
+
 // Bug 41668: allow users to apply updates. This is set also in firefox.js for
 // all platforms, except for Windows. As explained on firefox.js, Firefox uses a
 // per-installation preference on Windows. However, we patch this behavior, and
