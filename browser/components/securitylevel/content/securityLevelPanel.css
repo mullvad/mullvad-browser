@@ -1,12 +1,10 @@
 /* Security Level CSS */
 
 #securityLevel-background {
-  /* xul:vbox with display: block will be correctly measured in size by the
-   * parent xul:panel, with line-wrapping taken into account, and allocated the
-   * required space. */
-  display: block;
   min-height: 10em;
   padding-inline: 16px;
+  padding-block: 1em 0;
+  gap: 1em;
   background-repeat: no-repeat;
   background-position-y: top 0.4em;
   /* Icon center should be in-line with end padding.
@@ -35,6 +33,10 @@
 
 #securityLevel-background[level="safest"] {
   background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
+}
+
+#securityLevel-background p {
+  margin: 0;
 }
 
 /* Override margin in panelUI-shared.css */
