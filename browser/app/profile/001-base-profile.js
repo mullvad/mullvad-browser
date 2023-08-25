@@ -282,6 +282,11 @@ pref("dom.enable_resource_timing", false); // Bug 13024: To hell with this API
 pref("privacy.resistFingerprinting.block_mozAddonManager", true); // Bug 26114
 pref("dom.webaudio.enabled", false); // Bug 13017: Disable Web Audio API
 pref("dom.webmidi.enabled", false); //  Bug 41398: Disable Web MIDI API
+// tor-browser#42043: Stop reporting device IDs (and spoof their number without
+// RFP, RFP already reports 1 audioinput and 1 videoinput, but still has
+// randomized IDs when this pref is true).
+// Defense-in-depth (already the default value) from Firefox 119 or 120.
+pref("media.devices.enumerate.legacy.enabled", false);
 pref("dom.w3c_touch_events.enabled", 0); // Bug 10286: Always disable Touch API
 pref("dom.vr.enabled", false); // Bug 21607: Disable WebVR for now
 pref("security.webauth.webauthn", false); // Bug 26614: Disable Web Authentication API for now
