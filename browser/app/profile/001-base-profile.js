@@ -20,6 +20,9 @@ pref("browser.aboutwelcome.enabled", false);
 // Disable the Firefox View tab (tor-browser#41876)
 pref("browser.tabs.firefox-view", false);
 
+// Disable 'Switching to a new device" help menu item (tor-browser#41774)
+pref("browser.device-migration.help-menu.hidden", true);
+
 // Bug 41668: allow users to apply updates. This is set also in firefox.js for
 // all platforms, except for Windows. As explained on firefox.js, Firefox uses a
 // per-installation preference on Windows. However, we patch this behavior, and
