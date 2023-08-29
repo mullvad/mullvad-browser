@@ -50,8 +50,7 @@ pref("permissions.memory_only", true);
 pref("network.cookie.lifetimePolicy", 2);
 pref("security.nocertdb", true);
 
-// Disk Activity Disable auto-downloaing to ~/Downloads and other download
-// tweaks to minimize disk leaks (tor-browser#42050)
+// Disk activity: download tweaks to minimize disk leaks (tor-browser#42050)
 pref("browser.download.useDownloadDir", false);
 pref("browser.download.always_ask_before_handling_new_types", true);
 pref("browser.download.manager.addToRecentDocs", false);
