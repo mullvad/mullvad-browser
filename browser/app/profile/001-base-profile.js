@@ -266,7 +266,12 @@ pref("dom.serviceWorkers.enabled", false);
 pref("dom.push.enabled", false);
 
 // Fingerprinting
+// tor-browser#41797: For release builds, lock RFP
+#if MOZ_UPDATE_CHANNEL == release
+pref("privacy.resistFingerprinting", true, locked);
+#else
 pref("privacy.resistFingerprinting", true);
+#endif
 // tor-browser#18603: failIfMajorPerformanceCaveat is an optional attribute that
 // can be used when creating a WebGL context if the browser detects that the
 // performance would be low. That could be used to fingerpting users with a not
