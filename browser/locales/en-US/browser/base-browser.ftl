@@ -23,3 +23,10 @@ basebrowser-rfp-restore-window-size-button-ak = R
 
 basebrowser-addon-badge-recommended = Mozilla only recommends extensions that meet their standards for security and performance
 basebrowser-addon-badge-verified = Mozilla has reviewed this extension to meet their standards for security and performance
+
+## About dialog
+
+# "Mozilla Firefox" should be treated like a brand and it should be neither translated nor transliterated.
+# $version (String) - The current browser version. E.g. "12.5.3".
+# $firefoxVersion (String) - The version number of Firefox the current browser is based on. E.g. "102.15.0esr".
+basebrowser-about-dialog-version = { $version } (based on Mozilla Firefox { $firefoxVersion })
