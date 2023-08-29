@@ -537,6 +537,9 @@ pref("privacy.query_stripping.enabled", true);
 pref("privacy.query_stripping.enabled.pbmode", true);
 pref("privacy.query_stripping.strip_on_share.enabled", true);
 
+// Disable platform text recogniition functionality (tor-browser#42057)
+pref("dom.text-recognition.enabled", false);
+
 #ifdef XP_WIN
 // prefs to disable jump-list entries in the taskbar on Windows (see bug #12885)
 // this pref changes the app's set AUMID to be dependent on the profile path, rather than
