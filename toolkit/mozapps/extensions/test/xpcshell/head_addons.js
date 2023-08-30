@@ -344,6 +344,7 @@ function isNightlyChannel() {
 
   return (
     channel != "aurora" &&
+    channel != "alpha" &&
     channel != "beta" &&
     channel != "release" &&
     channel != "esr"
