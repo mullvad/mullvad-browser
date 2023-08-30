@@ -593,14 +593,8 @@ var gMainPane = {
     // Initialize the Firefox Updates section.
     let version = AppConstants.BASE_BROWSER_VERSION;
 
-    // Include the build ID if this is an "a#" (nightly) build
-    if (/a\d+$/.test(version)) {
-      let buildID = Services.appinfo.appBuildID;
-      let year = buildID.slice(0, 4);
-      let month = buildID.slice(4, 6);
-      let day = buildID.slice(6, 8);
-      version += ` (${year}-${month}-${day})`;
-    }
+    // Base Browser and derivatives: do not include the build ID in our alphas,
+    // since they are not actually related to the build date.
 
     // Append "(32-bit)" or "(64-bit)" build architecture to the version number:
     let bundle = Services.strings.createBundle(
