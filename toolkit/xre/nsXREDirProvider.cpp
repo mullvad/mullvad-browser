@@ -1287,6 +1287,20 @@ nsresult nsXREDirProvider::GetPortableDataDir(nsIFile** aFile,
 }
 #endif
 
+NS_IMETHODIMP nsXREDirProvider::GetIsPortableMode(bool* aIsPortableMode) {
+#ifdef RELATIVE_DATA_DIR
+  if (gDataDirPortable) {
+    *aIsPortableMode = *gDataDirPortable;
+  } else {
+    nsCOMPtr<nsIFile> dir;
+    GetPortableDataDir(getter_AddRefs(dir), *aIsPortableMode);
+  }
+#else
+  *aIsPortableMode = false;
+#endif
+  return NS_OK;
+}
+
 nsresult nsXREDirProvider::GetUserDataDirectoryHome(nsIFile** aFile,
                                                     bool aLocal) {
   // Copied from nsAppFileLocationProvider (more or less)
