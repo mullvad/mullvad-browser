@@ -328,7 +328,6 @@ pref("dom.textMetrics.emHeight.enabled", false);
 pref("dom.textMetrics.fontBoundingBox.enabled", false);
 // tor-browser#40424
 pref("pdfjs.enableScripting", false);
-pref("javascript.options.large_arraybuffers", false);
 // Bug 40057: Ensure system colors are not used for CSS4 colors
 pref("browser.display.use_system_colors", false);
 
