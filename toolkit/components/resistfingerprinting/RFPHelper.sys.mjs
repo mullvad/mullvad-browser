@@ -63,6 +63,9 @@ class _RFPHelper {
     // Add RFP and Letterboxing observers if prefs are enabled
     this._handleResistFingerprintingChanged();
     this._handleLetterboxingPrefChanged();
+
+    // Synchronize language preferences if accidentally messed up (tor-browser#42084)
+    this._handleSpoofEnglishChanged();
   }
 
   uninit() {
@@ -115,6 +118,7 @@ class _RFPHelper {
         this._handleResistFingerprintingChanged();
         break;
       case kPrefSpoofEnglish:
+      case "intl.accept_languages":
         this._handleSpoofEnglishChanged();
         break;
       case kPrefLetterboxing:
@@ -161,6 +165,7 @@ class _RFPHelper {
   }
 
   _handleSpoofEnglishChanged() {
+    Services.prefs.removeObserver("intl.accept_languages", this);
     switch (Services.prefs.getIntPref(kPrefSpoofEnglish)) {
       case 0: // will prompt
       // This should only happen when turning privacy.resistFingerprinting off.
@@ -179,6 +184,8 @@ class _RFPHelper {
       case 2: // spoof
         Services.prefs.setCharPref("intl.accept_languages", "en-US, en");
         Services.prefs.setBoolPref("javascript.use_us_english_locale", true);
+        // Ensure spoofing works if preferences are set out of order
+        Services.prefs.addObserver("intl.accept_languages", this);
         break;
       default:
         break;
