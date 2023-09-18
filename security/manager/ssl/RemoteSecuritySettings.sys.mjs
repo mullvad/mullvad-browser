@@ -529,6 +529,10 @@ class CRLiteFilters {
   }
 
   async cleanAttachmentCache() {
+    if (!this.client) {
+      return;
+    }
+
     // Bug 1795710 - misuse of Remote Settings `downloadToDisk` caused us to
     // keep filters and stashes on disk indefinitely. We're no longer caching
     // these downloads, so if there are any filters still in the cache they can
