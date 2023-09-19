@@ -49,6 +49,7 @@ pref("browser.cache.disk.enable", false);
 pref("permissions.memory_only", true);
 pref("network.cookie.lifetimePolicy", 2);
 pref("security.nocertdb", true);
+pref("media.aboutwebrtc.hist.enabled", false);
 
 // Disk Activity
 
