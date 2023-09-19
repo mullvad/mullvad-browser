@@ -39,7 +39,6 @@ DIRS += [
     "downloads",
     "enterprisepolicies",
     "extensions",
-    "firefoxview",
     # Exclude "genai" component. tor-browser#44045.
     "messagepreview",
     "migration",
