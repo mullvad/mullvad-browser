@@ -2693,8 +2693,11 @@ tab-group {
   }
 }
 
-:root:not([privatebrowsingmode]) :is(toolbarbutton, toolbarpaletteitem),
-:root[privatebrowsingmode] :is(toolbarbutton:not(#firefox-view-button), toolbarpaletteitem:not(#wrapper-firefox-view-button)) {
+/* about:firefoxview is disabled in Base Browser. See tor-browser#42037.
+ * Therefore we always hide #firefox-view-button, regardless of private
+ * browsing. Here we only want to draw the border if there is a non-hidden
+ * toolbar item before the tabs. */
+:root :is(toolbarbutton:not(#firefox-view-button), toolbarpaletteitem:not(#wrapper-firefox-view-button)) {
   ~ #tabbrowser-tabs[orient="horizontal"]::before {
     display: flex;
     content: "";
@@ -2704,7 +2707,10 @@ tab-group {
   }
 }
 
-:root[privatebrowsingmode] :is(#firefox-view-button, #menu_openFirefoxView) {
+/* about:firefoxview is disabled in Base Browser. Always hide the toolbar button
+ * and menu item regardless of private browsing. See tor-browser#42037. */
+#firefox-view-button,
+#menu_openFirefoxView {
   display: none;
 }
 
