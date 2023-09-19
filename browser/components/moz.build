@@ -40,7 +40,6 @@ DIRS += [
     "downloads",
     "enterprisepolicies",
     "extensions",
-    "firefoxview",
     "genai",
     "messagepreview",
     "migration",
