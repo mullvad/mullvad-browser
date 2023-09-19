@@ -1731,8 +1731,13 @@ tab-group {
   color-scheme: var(--tab-selected-color-scheme);
 }
 
-:root:not([privatebrowsingmode]) :is(toolbarbutton, toolbarpaletteitem) ~ #tabbrowser-tabs,
-:root[privatebrowsingmode] :is(
+/* about:firefoxview is disabled in Base Browser. See tor-browser#42037.
+ * Therefore we always hide #firefox-view-button, regardless of private
+ * browsing. Here we only want to draw the border if there is a non-hidden
+ * toolbar item before the tabs.
+ * NOTE: Expect merge conflict from bugzilla bug 1917595 and bug 1917599. In
+ * these cases we want to keep our selector as-is. */
+:root :is(
   toolbarbutton:not(#firefox-view-button),
   toolbarpaletteitem:not(#wrapper-firefox-view-button)
 ) ~ #tabbrowser-tabs {
@@ -1741,7 +1746,11 @@ tab-group {
   margin-inline-start: 2px;
 }
 
-:root[privatebrowsingmode] :is(#firefox-view-button, #menu_openFirefoxView) {
+/* about:firefoxview is disabled in Base Browser. Always hide the toolbar button
+ * and menu item regardless of private browsing. See tor-browser#42037.
+ * NOTE: Expect merge conflict from bugzilla bug 1903812 and bug 1917599. In
+ * these cases we want to keep our selector as-is. */
+#firefox-view-button, #menu_openFirefoxView {
   display: none;
 }
 
