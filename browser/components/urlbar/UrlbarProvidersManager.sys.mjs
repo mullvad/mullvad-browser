@@ -46,8 +46,9 @@ var localProviderModules = {
     "resource:///modules/UrlbarProviderHistoryUrlHeuristic.sys.mjs",
   UrlbarProviderInputHistory:
     "resource:///modules/UrlbarProviderInputHistory.sys.mjs",
-  UrlbarProviderInterventions:
-    "resource:///modules/UrlbarProviderInterventions.sys.mjs",
+  // disable as part of tor-browser#41327
+  // UrlbarProviderInterventions:
+  //   "resource:///modules/UrlbarProviderInterventions.sys.mjs",
   UrlbarProviderOmnibox: "resource:///modules/UrlbarProviderOmnibox.sys.mjs",
   UrlbarProviderPlaces: "resource:///modules/UrlbarProviderPlaces.sys.mjs",
   UrlbarProviderPrivateSearch:
