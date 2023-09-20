@@ -110,12 +110,7 @@ var localProviderModules = [
       "moz-src:///browser/components/urlbar/UrlbarProviderInputHistory.sys.mjs",
     supportedSAPs: ["smartbar", "urlbar"],
   },
-  {
-    name: "UrlbarProviderInterventions",
-    module:
-      "moz-src:///browser/components/urlbar/UrlbarProviderInterventions.sys.mjs",
-    supportedSAPs: ["urlbar"],
-  },
+  // disable UrlbarProviderInterventions as part of tor-browser#41327
   {
     name: "UrlbarProviderOmnibox",
     module:
