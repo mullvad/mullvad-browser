@@ -1466,17 +1466,21 @@ export var UrlbarUtils = {
         return "tab";
       case UrlbarUtils.RESULT_TYPE.TIP:
         if (result.providerName === "UrlbarProviderInterventions") {
+          // disable as part of tor-browser#41327
           switch (result.payload.type) {
             case lazy.UrlbarProviderInterventions.TIP_TYPE.CLEAR:
-              return "intervention_clear";
+            // return "intervention_clear";
+            // fall-through
             case lazy.UrlbarProviderInterventions.TIP_TYPE.REFRESH:
-              return "intervention_refresh";
+            // return "intervention_refresh";
+            // fall-through
             case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_ASK:
             case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_CHECKING:
             case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_REFRESH:
             case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_RESTART:
             case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_WEB:
-              return "intervention_update";
+            // return "intervention_update";
+            // fall-through
             default:
               return "intervention_unknown";
           }
