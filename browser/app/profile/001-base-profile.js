@@ -534,6 +534,11 @@ pref("browser.menu.share_url.allow", false, locked);
 // Disable special URL bar behaviors
 pref("browser.urlbar.suggest.topsites", false);
 
+// tor-browser#41884: Do not start a search when clicking on the new tab button
+// with the middle mouse button (to prevent searching for anything you might
+// have selected or already in your clipboard).
+pref("browser.tabs.searchclipboardfor.middleclick", false);
+
 // Skip checking omni.ja and other files for corruption since the result
 // is only reported via telemetry (which is disabled). See tor-browser#40048.
 pref("corroborator.enabled", false);
