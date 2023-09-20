@@ -21,8 +21,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
   SearchSuggestionController:
     "resource://gre/modules/SearchSuggestionController.sys.mjs",
   UrlbarPrefs: "resource:///modules/UrlbarPrefs.sys.mjs",
-  UrlbarProviderInterventions:
-    "resource:///modules/UrlbarProviderInterventions.sys.mjs",
+  // disable as part of tor-browser#41327
+  // UrlbarProviderInterventions:
+  //   "resource:///modules/UrlbarProviderInterventions.sys.mjs",
   UrlbarProvidersManager: "resource:///modules/UrlbarProvidersManager.sys.mjs",
   UrlbarProviderSearchTips:
     "resource:///modules/UrlbarProviderSearchTips.sys.mjs",
@@ -1387,20 +1388,22 @@ export var UrlbarUtils = {
         return "tab";
       case UrlbarUtils.RESULT_TYPE.TIP:
         if (result.providerName === "UrlbarProviderInterventions") {
-          switch (result.payload.type) {
-            case lazy.UrlbarProviderInterventions.TIP_TYPE.CLEAR:
-              return "intervention_clear";
-            case lazy.UrlbarProviderInterventions.TIP_TYPE.REFRESH:
-              return "intervention_refresh";
-            case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_ASK:
-            case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_CHECKING:
-            case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_REFRESH:
-            case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_RESTART:
-            case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_WEB:
-              return "intervention_update";
-            default:
-              return "intervention_unknown";
-          }
+          return "intervention_unknown";
+        // disable as part of tor-browser#41327
+        //   switch (result.payload.type) {
+        //     case lazy.UrlbarProviderInterventions.TIP_TYPE.CLEAR:
+        //       return "intervention_clear";
+        //     case lazy.UrlbarProviderInterventions.TIP_TYPE.REFRESH:
+        //       return "intervention_refresh";
+        //     case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_ASK:
+        //     case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_CHECKING:
+        //     case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_REFRESH:
+        //     case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_RESTART:
+        //     case lazy.UrlbarProviderInterventions.TIP_TYPE.UPDATE_WEB:
+        //       return "intervention_update";
+        //     default:
+        //       return "intervention_unknown";
+        //   }
         }
 
         switch (result.payload.type) {
