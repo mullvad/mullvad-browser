@@ -32,7 +32,8 @@ EXTRA_JS_MODULES += [
     "UrlbarProviderHeuristicFallback.sys.mjs",
     "UrlbarProviderHistoryUrlHeuristic.sys.mjs",
     "UrlbarProviderInputHistory.sys.mjs",
-    "UrlbarProviderInterventions.sys.mjs",
+    # disable as part of tor-browser#41327
+    # "UrlbarProviderInterventions.sys.mjs",
     "UrlbarProviderOmnibox.sys.mjs",
     "UrlbarProviderOpenTabs.sys.mjs",
     "UrlbarProviderPlaces.sys.mjs",
