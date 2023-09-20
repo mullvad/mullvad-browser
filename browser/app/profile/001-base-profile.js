@@ -203,6 +203,12 @@ pref("browser.newtabpage.activity-stream.default.sites", "");
 pref("browser.newtabpage.activity-stream.feeds.telemetry", false);
 pref("browser.newtabpage.activity-stream.telemetry", false);
 
+// tor-browser#41945 - disable automatic cookie banners dismissal until
+// we're sure it does not causes fingerprinting risks or other issues.
+pref("cookiebanners.service.mode", 0);
+pref("cookiebanners.service.mode.privateBrowsing", 0);
+pref("cookiebanners.ui.desktop.enabled", false);
+
 // tor-browser#40788: disable AS's calls to home.
 // Notice that null is between quotes because it is a JSON string.
 // Keep checked firefox.js to see if new entries are added.
