@@ -16,11 +16,8 @@ JS_PREFERENCE_FILES += [
 if CONFIG['MOZ_WIDGET_TOOLKIT'] == 'windows':
     FINAL_TARGET_FILES['..'] += [
         'mullvadbrowser.VisualElementsManifest.xml',
-        'private_browsing.VisualElementsManifest.xml',
     ]
     FINAL_TARGET_FILES.VisualElements += [
-        'PrivateBrowsing_150.png',
-        'PrivateBrowsing_70.png',
         'VisualElements_150.png',
         'VisualElements_70.png',
     ]
