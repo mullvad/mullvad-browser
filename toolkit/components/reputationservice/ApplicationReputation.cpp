@@ -181,6 +181,8 @@ const char* const ApplicationReputationService::kBinaryFileExtensions[] = {
     ".applescript",
     //".application", exec // MS ClickOnce
     //".appref-ms", exec // MS ClickOnce
+    //".appx", exec
+    //".appxbundle", exec
     //".arc",
     //".arj",
     ".as",  // Mac archive
@@ -331,6 +333,8 @@ const char* const ApplicationReputationService::kBinaryFileExtensions[] = {
     //".msh2xml", exec // Windows shell
     //".mshxml", exec // Windows
     //".msi", exec  // Windows installer
+    //".msix", exec // Windows installer
+    //".msixbundle", exec // Windows installer
     //".msp", exec  // Windows installer
     //".mst", exec  // Windows installer
     ".ndif",            // Mac disk image

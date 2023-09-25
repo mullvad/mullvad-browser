@@ -40,6 +40,8 @@ const char* const sExecutableExts[] = {
   ".app",         // executable application
   ".application", // from bug 348763
   ".appref-ms",   // ClickOnce link
+  ".appx",
+  ".appxbundle",
   ".asp",
   ".atloc",       // Appletalk Location
   ".bas",
@@ -91,6 +93,8 @@ const char* const sExecutableExts[] = {
   ".msh2xml",     // Microsoft Shell
   ".mshxml",      // Microsoft Shell
   ".msi",
+  ".msix",
+  ".msixbundle",
   ".msp",
   ".mst",
   ".ops",         // Office Profile Settings
