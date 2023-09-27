@@ -40,6 +40,8 @@ pref("app.update.promptWaitTime", 3600);
 pref("app.update.staging.enabled", false);
 #endif
 
+pref("browser.startup.homepage_override.buildID", "20100101");
+
 // Disable the "Refresh" prompt that is displayed for stale profiles.
 pref("browser.disableResetPrompt", true);
 
@@ -47,7 +49,6 @@ pref("browser.disableResetPrompt", true);
 pref("browser.privatebrowsing.autostart", true);
 pref("browser.cache.disk.enable", false);
 pref("permissions.memory_only", true);
-pref("network.cookie.lifetimePolicy", 2);
 pref("security.nocertdb", true);
 pref("media.aboutwebrtc.hist.enabled", false);
 
@@ -66,7 +67,10 @@ pref("browser.download.enable_spam_prevention", true);
 // Misc privacy: Disk
 pref("signon.rememberSignons", false, locked);
 pref("browser.formfill.enable", false, locked);
+pref("signon.formlessCapture.enabled", false); // Added with tor-browser#41496
 pref("signon.autofillForms", false, locked);
+// Do not store extra data (form, scrollbar positions, cookies, POST data) for
+// the session restore functionality.
 pref("browser.sessionstore.privacy_level", 2);
 // Use the in-memory media cache and increase its maximum size (#29120)
 pref("browser.privatebrowsing.forceMediaMemoryCache", true);
@@ -80,6 +84,8 @@ pref("browser.pagethumbnails.capturing_disabled", true);
 
 // Enable HTTPS-Only mode (tor-browser#19850)
 pref("dom.security.https_only_mode", true);
+// The previous pref automatically sets this to true (see StaticPrefList.yaml),
+// but set it anyway only as a defense-in-depth.
 pref("dom.security.https_only_mode_pbm", true);
 
 // tor-browser#22320: Hide referer when comming from a .onion address
@@ -118,7 +124,8 @@ pref("security.tls.version.enable-deprecated", false, locked);
 // Misc privacy: Remote
 pref("browser.send_pings", false);
 // Space separated list of URLs that are allowed to send objects (instead of
-// only strings) through webchannels.
+// only strings) through webchannels. The default for Firefox is some Mozilla
+// domains.
 pref("webchannel.allowObject.urlWhitelist", "");
 pref("geo.enabled", false);
 pref("geo.provider.network.url", "");
@@ -127,6 +134,7 @@ pref("geo.provider.use_corelocation", false);
 pref("geo.provider.use_gpsd", false);
 pref("geo.provider.use_geoclue", false);
 pref("browser.search.suggest.enabled", false);
+pref("browser.search.suggest.enabled.private", false);
 pref("browser.urlbar.suggest.searches", false);
 pref("browser.urlbar.suggest.quicksuggest.nonsponsored", false);
 pref("browser.urlbar.suggest.quicksuggest.sponsored", false);
@@ -143,7 +151,6 @@ pref("browser.safebrowsing.provider.google4.updateURL", "");
 pref("browser.safebrowsing.provider.google4.gethashURL", "");
 pref("browser.safebrowsing.provider.mozilla.updateURL", "");
 pref("browser.safebrowsing.provider.mozilla.gethashURL", "");
-pref("extensions.ui.lastCategory", "addons://list/extension");
 pref("datareporting.healthreport.uploadEnabled", false);
 pref("datareporting.policy.dataSubmissionEnabled", false);
 // Make sure Unified Telemetry is really disabled, see: #18738.
@@ -152,6 +159,9 @@ pref("toolkit.telemetry.unified", false);
 pref("toolkit.telemetry.enabled", false, locked);
 pref("toolkit.telemetry.server", "data:,");
 pref("toolkit.telemetry.archive.enabled", false);
+pref("toolkit.telemetry.newProfilePing.enabled", false); // Added in tor-browser#41496
+pref("toolkit.telemetry.shutdownPingSender.enabled", false); // Added in tor-browser#41496
+pref("toolkit.telemetry.firstShutdownPing.enabled", false); // Added in tor-browser#41496
 pref("toolkit.telemetry.updatePing.enabled", false); // Make sure updater telemetry is disabled; see #25909.
 pref("toolkit.telemetry.bhrPing.enabled", false);
 pref("toolkit.telemetry.coverage.opt-out", true);
@@ -160,6 +170,11 @@ pref("toolkit.coverage.endpoint.base", "");
 pref("browser.ping-centre.telemetry", false);
 pref("browser.tabs.crashReporting.sendReport", false);
 pref("browser.crashReports.unsubmittedCheck.autoSubmit2", false);
+// Added in tor-browser#41496 even though false by default
+pref("browser.crashReports.unsubmittedCheck.enabled", false);
+// Added in tor-browser#41496 even though it shuld be already always disabled
+// since we disable MOZ_CRASHREPORTER.
+pref("breakpad.reportURL", "data:");
 #ifdef XP_WIN
 // Defense-in-depth: ensure that the Windows default browser agent will
 // not ping Mozilla if it is somehow present (we omit it at build time).
@@ -177,10 +192,8 @@ pref("services.sync.engine.passwords", false);
 pref("services.sync.engine.prefs", false);
 pref("services.sync.engine.tabs", false);
 pref("extensions.getAddons.cache.enabled", false); // https://blog.mozilla.org/addons/how-to-opt-out-of-add-on-metadata-updates/
-pref("browser.search.region", "US"); // The next two prefs disable GeoIP search lookups (#16254)
-pref("browser.search.geoip.url", "");
 pref("browser.fixup.alternate.enabled", false); // Bug #16783: Prevent .onion fixups
-pref("privacy.donottrackheader.enabled", false); // (privacy-browser#17)
+pref("privacy.donottrackheader.enabled", false); // (mullvad-browser#17)
 // Make sure there is no Tracking Protection active in Tor Browser, see: #17898.
 pref("privacy.trackingprotection.enabled", false);
 pref("privacy.trackingprotection.pbmode.enabled", false);
@@ -200,14 +213,9 @@ pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
 pref("browser.newtabpage.activity-stream.showSponsored", false);
 pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false);
 pref("browser.newtabpage.activity-stream.default.sites", "");
+// Activity Stream telemetry
 pref("browser.newtabpage.activity-stream.feeds.telemetry", false);
 pref("browser.newtabpage.activity-stream.telemetry", false);
-
-// tor-browser#41945 - disable automatic cookie banners dismissal until
-// we're sure it does not causes fingerprinting risks or other issues.
-pref("cookiebanners.service.mode", 0);
-pref("cookiebanners.service.mode.privateBrowsing", 0);
-pref("cookiebanners.ui.desktop.enabled", false);
 
 // tor-browser#40788: disable AS's calls to home.
 // Notice that null is between quotes because it is a JSON string.
@@ -221,6 +229,12 @@ pref("browser.newtabpage.activity-stream.asrouter.providers.messaging-experiment
 // Disable fetching asrouter.ftl and related console errors (tor-browser#40763).
 pref("browser.newtabpage.activity-stream.asrouter.useRemoteL10n", false);
 
+// tor-browser#41945 - disable automatic cookie banners dismissal until
+// we're sure it does not causes fingerprinting risks or other issues.
+pref("cookiebanners.service.mode", 0);
+pref("cookiebanners.service.mode.privateBrowsing", 0);
+pref("cookiebanners.ui.desktop.enabled", false);
+
 // Disable moreFromMozilla pane in the preferences/settings (tor-browser#41292).
 pref("browser.preferences.moreFromMozilla", false);
 
@@ -228,14 +242,16 @@ pref("browser.preferences.moreFromMozilla", false);
 pref("extensions.screenshots.disabled", true);
 pref("extensions.webcompat-reporter.enabled", false);
 
+pref("browser.search.region", "US"); // Disable GeoIP search lookups (#16254)
 // Disable use of WiFi location information
 pref("browser.region.network.scan", false);
 pref("browser.region.network.url", "");
 pref("browser.region.local-geocoding", false);
-// Bug 40083: Make sure Region.jsm fetching is disabled
+// Bug 40083: Make sure Region.sys.mjs fetching is disabled
 pref("browser.region.update.enabled", false);
 
-// Don't load Mozilla domains in a separate tab process
+// Don't load Mozilla domains in a separate privileged tab process
+pref("browser.tabs.remote.separatePrivilegedMozillaWebContentProcess", false);
 pref("browser.tabs.remote.separatedMozillaDomains", "");
 
 // Avoid DNS lookups on search terms
@@ -270,12 +286,23 @@ pref("security.pki.crlite_mode", 0);
 // Disable website password breach alerts
 pref("signon.management.page.breach-alerts.enabled", false, locked);
 
-// Disable remote "password recipes"
+// Disable remote "password recipes". They are a way to improve the UX of the
+// password manager by havinc specific heuristics for some sites.
+// It needs remote settings and in general we disable the password manager.
+// More information about this feature at
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1119454
 pref("signon.recipes.remoteRecipes.enabled", false);
 
-// Disable ServiceWorkers and push notifications by default
+// Disable ServiceWorkers by default. They do not work in PBM in any case.
+// See https://bugzilla.mozilla.org/show_bug.cgi?id=1320796
 pref("dom.serviceWorkers.enabled", false);
+// Push notifications use an online Mozilla service and a persistent ID stored
+// in dom.push.userAgentID, so disable them by default.
+// See also https://support.mozilla.org/kb/push-notifications-firefox
 pref("dom.push.enabled", false);
+// As a defense in depth measure, also set the push server URL to empty.
+// See tor-browser#18801.
+pref("dom.push.serverURL", "");
 
 // Fingerprinting
 // tor-browser#41797: For release builds, lock RFP
@@ -292,7 +319,6 @@ pref("privacy.resistFingerprinting", true);
 pref("webgl.disable-fail-if-major-performance-caveat", true);
 // tor-browser#16404: disable until we investigate it further (#22333)
 pref("webgl.enable-webgl2", false);
-pref("browser.startup.homepage_override.buildID", "20100101");
 pref("browser.link.open_newwindow.restriction", 0); // Bug 9881: Open popups in new tabs (to avoid fullscreen popups)
 // Prevent scripts from moving and resizing open windows
 pref("dom.disable_window_move_resize", true);
@@ -306,7 +332,9 @@ pref("dom.webmidi.enabled", false); //  Bug 41398: Disable Web MIDI API
 // randomized IDs when this pref is true).
 // Defense-in-depth (already the default value) from Firefox 119 or 120.
 pref("media.devices.enumerate.legacy.enabled", false);
-pref("dom.w3c_touch_events.enabled", 0); // Bug 10286: Always disable Touch API
+// Bug 10286: Always disable Touch API.
+// We might need to deepen this topic, see tor-browser#42069.
+pref("dom.w3c_touch_events.enabled", 0);
 pref("dom.vr.enabled", false); // Bug 21607: Disable WebVR for now
 pref("security.webauth.webauthn", false); // Bug 26614: Disable Web Authentication API for now
 // Disable SAB, no matter if the sites are cross-origin isolated.
@@ -349,6 +377,7 @@ pref("javascript.options.spectre.disable_for_isolated_content", false, locked);
 pref("privacy.firstparty.isolate", true); // Always enforce first party isolation
 // tor-browser#40123 and #40308: Disable for now until audit
 pref("privacy.partition.network_state", false);
+// Only accept cookies from the originating site (block third party cookies)
 pref("network.cookie.cookieBehavior", 1);
 pref("network.cookie.cookieBehavior.pbmode", 1);
 pref("network.predictor.enabled", false); // Temporarily disabled. See https://bugs.torproject.org/16633
@@ -364,7 +393,9 @@ pref("privacy.purge_trackers.enabled", false);
 // Do not allow cross-origin sub-resources to open HTTP authentication
 // credentials dialogs. Hardens against potential credentials phishing.
 pref("network.auth.subresource-http-auth-allow", 1);
-// Disable sending additional analytics to web servers
+// Disable sending additional analytics to web servers.
+// This disables navigator.sendBeacon, even though this is discouraged by the
+// standard: https://w3c.github.io/beacon/#privacy-and-security
 pref("beacon.enabled", false);
 
 pref("network.dns.disablePrefetch", true);
@@ -378,13 +409,19 @@ pref("network.protocol-handler.warn-external.mailto", true);
 pref("network.protocol-handler.warn-external.news", true);
 pref("network.protocol-handler.warn-external.nntp", true);
 pref("network.protocol-handler.warn-external.snews", true);
+#ifdef XP_WIN
+  pref("network.protocol-handler.external.ms-windows-store", false);
+  pref("network.protocol-handler.warn-external.ms-windows-store", true);
+#endif
 pref("network.proxy.allow_bypass", false, locked); // #40682
 // Lock to 'true', which is already the firefox default, to prevent users
 // from making themselves fingerprintable by disabling. This pref
 // alters content load order in a page. See tor-browser#24686
 pref("network.http.tailing.enabled", true, locked);
 
-// Make sure the varoius http2 settings, buffer sizes, timings, etc are locked to firefox defaults to minimize network performance fingerprinting. See https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/27128
+// Make sure the varoius http2 settings, buffer sizes, timings, etc are locked
+// to firefox defaults to minimize network performance fingerprinting.
+// See https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/27128
 pref("network.http.http2.enabled", true, locked);
 pref("network.http.http2.enabled.deps", true, locked);
 pref("network.http.http2.enforce-tls-profile", true, locked);
@@ -394,13 +431,13 @@ pref("network.http.http2.coalesce-hostnames", true, locked);
 pref("network.http.http2.persistent-settings", false, locked);
 pref("network.http.http2.ping-threshold", 58, locked);
 pref("network.http.http2.ping-timeout", 8, locked);
-pref("network.http.http2.send-buffer-size", 131072, locked);
+pref("network.http.http2.send-buffer-size", 0, locked);
 pref("network.http.http2.allow-push", true, locked);
 pref("network.http.http2.push-allowance", 131072, locked);
 pref("network.http.http2.pull-allowance", 12582912, locked);
 pref("network.http.http2.default-concurrent", 100, locked);
 pref("network.http.http2.default-hpack-buffer", 65536, locked);
-pref("network.http.http2.websockets", false, locked);
+pref("network.http.http2.websockets", true, locked);
 pref("network.http.http2.enable-hpack-dump", false, locked);
 
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
@@ -465,10 +502,6 @@ pref("network.manage-offline-status", false);
 pref("network.captive-portal-service.enabled", false);
 pref("network.connectivity-service.enabled", false);
 pref("captivedetect.canonicalURL", "");
-// As a "defense in depth" measure, configure an empty push server URL (the
-// DOM Push features are disabled by default via other prefs).
-// See tor-browser#18801.
-pref("dom.push.serverURL", "");
 
 #ifdef XP_WIN
 // tor-browser#41683: Disable the network process on Windows
@@ -480,9 +513,7 @@ pref("network.process.enabled", false);
 
 // Extension support
 pref("extensions.autoDisableScopes", 0);
-pref("extensions.databaseSchema", 3);
 pref("extensions.enabledScopes", 5); // AddonManager.SCOPE_PROFILE=1 | AddonManager.SCOPE_APPLICATION=4
-pref("extensions.pendingOperations", false);
 // We don't know what extensions Mozilla is advertising to our users and we
 // don't want to have some random Google Analytics script running either on the
 // about:addons page, see bug 22073, 22900 and 31601.
@@ -496,8 +527,8 @@ pref("browser.discovery.enabled", false);
 pref("extensions.webextensions.restrictedDomains", "");
 // Don't give Mozilla-recommended third-party extensions special privileges.
 pref("extensions.postDownloadThirdPartyPrompt", false);
-// tor-browser#41701: Reporting an extension does not work
-// disable extension reporting since the request goes to Mozilla and is rejected anyway (HTTP 400)
+// tor-browser#41701: Reporting an extension does not work. The request goes to
+// Mozilla and is always rejected anyway (HTTP 400).
 pref("extensions.abuseReport.enabled", false);
 // We are already providing the languages we support in multi-lingual packages.
 // Therefore, do not allow download of additional language packs. They are not a
@@ -523,10 +554,6 @@ pref("security.certerrors.mitm.priming.enabled", false);
 
 // Don't automatically enable enterprise roots, see bug 40166
 pref("security.certerrors.mitm.auto_enable_enterprise_roots", false);
-
-// Don't allow any domain overrides access to offscreen rendering, see tor-browser#41135
-pref("gfx.offscreencanvas.domain-enabled", false);
-pref("gfx.offscreencanvas.domain-allowlist", "");
 
 // Disable share menus on Mac and Windows tor-browser#41117
 pref("browser.menu.share_url.allow", false, locked);
