@@ -336,6 +336,10 @@ pref("media.devices.enumerate.legacy.enabled", false);
 // Bug 10286: Always disable Touch API.
 // We might need to deepen this topic, see tor-browser#42069.
 pref("dom.w3c_touch_events.enabled", 0);
+#ifndef ANDROID
+// Bug 42138: Disable touch-based overscroll UX
+pref("apz.overscroll.enabled", false);
+#endif
 pref("dom.vr.enabled", false); // Bug 21607: Disable WebVR for now
 pref("security.webauth.webauthn", false); // Bug 26614: Disable Web Authentication API for now
 // Disable SAB, no matter if the sites are cross-origin isolated.
