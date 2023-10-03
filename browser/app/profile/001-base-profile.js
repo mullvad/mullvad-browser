@@ -60,6 +60,11 @@ pref("browser.download.useDownloadDir", false);
 pref("browser.download.always_ask_before_handling_new_types", true);
 pref("browser.download.manager.addToRecentDocs", false);
 pref("browser.download.start_downloads_in_tmp_dir", true);
+// tor-browser#42147: Always delete temporary files, also on macOS (this pref is
+// already true for other platforms).
+// Also, this always happens in PBM. If not in PBM, requires
+// browser.download.start_downloads_in_tmp_dir to be true too.
+pref("browser.helperApps.deleteTempFileOnExit", true);
 
 // Prevent download stuffing / DOS (tor-browser#41764)
 pref("browser.download.enable_spam_prevention", true);
@@ -74,7 +79,7 @@ pref("signon.autofillForms", false, locked);
 pref("browser.sessionstore.privacy_level", 2);
 // Use the in-memory media cache and increase its maximum size (#29120)
 pref("browser.privatebrowsing.forceMediaMemoryCache", true);
-pref("media.memory_cache_max_size", 16384);
+pref("media.memory_cache_max_size", 65536);
 // Disable restore in case of crash (tor-browser#41503)
 // This should not be needed in PBM, but we added it anyway like other options.
 pref("browser.sessionstore.resume_from_crash", false);
@@ -182,6 +187,8 @@ pref("default-browser-agent.enabled", false);
 #endif
 // Disable sync by default
 pref("identity.fxaccounts.enabled", false);
+// Blank the sync URL as a defense in depth (added with tor-browser#41496)
+pref("identity.sync.tokenserver.uri", "");
 // Never sync with other browsers
 pref("services.sync.engine.addons", false);
 pref("services.sync.engine.addresses", false);
@@ -373,6 +380,9 @@ pref("dom.textMetrics.fontBoundingBox.enabled", false);
 pref("pdfjs.enableScripting", false);
 // Bug 40057: Ensure system colors are not used for CSS4 colors
 pref("browser.display.use_system_colors", false);
+// Enforce non-native widget theme (true by default, defense in depth).
+// Provides a uniform look and feel across platforms. Added with tor-browser#41496.
+pref("widget.non-native-theme.enabled", true);
 
 // tor-browser#41943: lock and revisit after it gets flipped to true in stable Firefox
 pref("javascript.options.spectre.disable_for_isolated_content", false, locked);
@@ -517,6 +527,12 @@ pref("network.process.enabled", false);
 
 // Extension support
 pref("extensions.autoDisableScopes", 0);
+// Only load extensions from the application and user profile.
+// Do not load from the user directory (AddonManager.SCOPE_USER=2, which is
+// shared between profiles, e.g., %appdata%\Mozilla\Extensions\ on Windows, or
+// ~/.mozilla/extensions on Linux for Firefox), and do not load from system
+// directories/the Windows registry (AddonManager.SCOPE_SYSTEM=8).
+// More information: https://archive.ph/DYjAM
 pref("extensions.enabledScopes", 5); // AddonManager.SCOPE_PROFILE=1 | AddonManager.SCOPE_APPLICATION=4
 // We don't know what extensions Mozilla is advertising to our users and we
 // don't want to have some random Google Analytics script running either on the
