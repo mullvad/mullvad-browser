@@ -507,6 +507,32 @@
           <div class="addon-detail-sitepermissions">
             <addon-sitepermissions-list></addon-sitepermissions-list>
           </div>
+          <!-- Add an option to show the NoScript toolbar button, if this is the
+             - NoScript addon. See tor-browser#41581. -->
+          <div
+            class="addon-detail-row addon-detail-row-noscript-visibility"
+            role="radiogroup"
+            hidden="hidden"
+          >
+            <span
+              class="addon-noscript-visibility-label"
+              data-l10n-id="basebrowser-addon-noscript-visibility-label"
+            ></span>
+            <div class="addon-detail-actions">
+              <label class="radio-container-with-text">
+                <input type="radio" name="noscript-visibility" value="show" />
+                <span
+                  data-l10n-id="basebrowser-addon-noscript-visibility-show"
+                ></span>
+              </label>
+              <label class="radio-container-with-text">
+                <input type="radio" name="noscript-visibility" value="hide" />
+                <span
+                  data-l10n-id="basebrowser-addon-noscript-visibility-hide"
+                ></span>
+              </label>
+            </div>
+          </div>
           <div
             class="addon-detail-row addon-detail-row-updates"
             role="group"
