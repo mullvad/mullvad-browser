@@ -26,6 +26,9 @@ XPCOMUtils.defineLazyGetter(lazy, "l10n", function () {
   );
 });
 
+const HIDE_NO_SCRIPT_PREF = "extensions.hideNoScript";
+const HIDE_UNIFIED_WHEN_EMPTY_PREF = "extensions.hideUnifiedWhenEmpty";
+
 /**
  * Mapping of error code -> [error-id, local-error-id]
  *
@@ -1186,6 +1189,18 @@ var gUnifiedExtensions = {
     gNavToolbox.addEventListener("customizationstarting", this);
     CustomizableUI.addListener(this);
 
+    // Listen out for changes in extensions.hideNoScript and
+    // extension.hideUnifiedWhenEmpty, which can effect the visibility of the
+    // unified-extensions-button.
+    // See tor-browser#41581.
+    this._hideNoScriptObserver = () => this._updateVisibility();
+    Services.prefs.addObserver(HIDE_NO_SCRIPT_PREF, this._hideNoScriptObserver);
+    Services.prefs.addObserver(
+      HIDE_UNIFIED_WHEN_EMPTY_PREF,
+      this._hideNoScriptObserver
+    );
+    this._updateVisibility();
+
     this._initialized = true;
   },
 
@@ -1201,6 +1216,15 @@ var gUnifiedExtensions = {
 
     gNavToolbox.removeEventListener("customizationstarting", this);
     CustomizableUI.removeListener(this);
+
+    Services.prefs.removeObserver(
+      HIDE_NO_SCRIPT_PREF,
+      this._hideNoScriptObserver
+    );
+    Services.prefs.removeObserver(
+      HIDE_UNIFIED_WHEN_EMPTY_PREF,
+      this._hideNoScriptObserver
+    );
   },
 
   onLocationChange(browser, webProgress, _request, _uri, flags) {
@@ -1278,6 +1302,15 @@ var gUnifiedExtensions = {
         return false;
       }
 
+      // When an extensions is about to be removed, it may still appear in
+      // getActiveExtensions.
+      // This is needed for hasExtensionsInPanel, when called through
+      // onWidgetDestroy when an extension is being removed.
+      // See tor-browser#41581.
+      if (extension.hasShutdown) {
+        return false;
+      }
+
       // Ignore hidden and extensions that cannot access the current window
       // (because of PB mode when we are in a private window), since users
       // cannot do anything with those extensions anyway.
@@ -1293,6 +1326,20 @@ var gUnifiedExtensions = {
   },
 
   /**
+   * Potentially hide the unified-extensions-button if it would be empty.
+   */
+  // See tor-browser#41581.
+  // The behaviour overlaps with a proposal in mozilla Bug 1778684, which has
+  // not been implemented, or had much recent activity as of 5th October 2023.
+  _updateVisibility() {
+    this.button.classList.toggle(
+      "hide-empty",
+      Services.prefs.getBoolPref(HIDE_UNIFIED_WHEN_EMPTY_PREF, true) &&
+        !this.hasExtensionsInPanel()
+    );
+  },
+
+  /**
    * Returns true when there are active extensions listed/shown in the unified
    * extensions panel, and false otherwise (e.g. when extensions are pinned in
    * the toolbar OR there are 0 active extensions).
@@ -1300,7 +1347,13 @@ var gUnifiedExtensions = {
    * @returns {boolean} Whether there are extensions listed in the panel.
    */
   hasExtensionsInPanel() {
-    const policies = this.getActivePolicies();
+    let policies = this.getActivePolicies();
+    // If the NoScript button is hidden, we won't count it towards the list of
+    // extensions in the panel.
+    // See tor-browser#41581.
+    if (Services.prefs.getBoolPref(HIDE_NO_SCRIPT_PREF, true)) {
+      policies = policies.filter(policy => !policy.extension?.isNoScript);
+    }
 
     return !!policies
       .map(policy => this.browserActionFor(policy)?.widget)
@@ -1795,7 +1848,17 @@ var gUnifiedExtensions = {
     }
   },
 
+  onWidgetRemoved() {
+    this._updateVisibility();
+  },
+
+  onWidgetDestroyed() {
+    this._updateVisibility();
+  },
+
   onWidgetAdded(aWidgetId, aArea, aPosition) {
+    this._updateVisibility();
+
     // When we pin a widget to the toolbar from a narrow window, the widget
     // will be overflowed directly. In this case, we do not want to change the
     // class name since it is going to be changed by `onWidgetOverflow()`
@@ -1811,6 +1874,8 @@ var gUnifiedExtensions = {
   },
 
   onWidgetOverflow(aNode, aContainer) {
+    this._updateVisibility();
+
     // We register a CUI listener for each window so we make sure that we
     // handle the event for the right window here.
     if (window !== aNode.ownerGlobal) {
@@ -1821,6 +1886,8 @@ var gUnifiedExtensions = {
   },
 
   onWidgetUnderflow(aNode, aContainer) {
+    this._updateVisibility();
+
     // We register a CUI listener for each window so we make sure that we
     // handle the event for the right window here.
     if (window !== aNode.ownerGlobal) {
