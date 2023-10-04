@@ -238,3 +238,21 @@ unified-extensions-item > .subviewbutton {
     border-color: transparent;
   }
 }
+
+/* Extra rule for tor-browser. See tor-browser#41581.
+ * We want to hide the unified-extensions-button when it is empty.
+ * However, this button is needed as an anchor for addon notifications. E.g.
+ * when installing another addon and permissions pop up.
+ * If we simply marked it as "hidden" then it would not be used as an anchor, so
+ * the popup would fall back to using the identity button as an anchor instead.
+ * So instead, we use "visibility: collapse" whilst it is empty *and* it is not
+ * being used as an anchor (the open attribute is missing). */
+#unified-extensions-button.hide-empty:not([open]) {
+  visibility: collapse;
+  /* Ensure getBoundingClientRect().width returns 0.
+   * Even though this button is collapsed, and therefore should not take up any
+   * layout space, getBoundingClientRect will still measure the padding.
+   * If this was not zero, OverflowableToolbar#getOverflowInfo would
+   * over-measure the children width and would always overflow. */
+  padding-inline: 0;
+}
