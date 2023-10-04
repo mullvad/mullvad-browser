@@ -2062,6 +2062,8 @@ class AddonSitePermissionsList extends HTMLElement {
 }
 customElements.define("addon-sitepermissions-list", AddonSitePermissionsList);
 
+const HIDE_NO_SCRIPT_PREF = "extensions.hideNoScript";
+
 class AddonDetails extends HTMLElement {
   connectedCallback() {
     if (!this.children.length) {
@@ -2069,12 +2071,61 @@ class AddonDetails extends HTMLElement {
     }
     this.deck.addEventListener("view-changed", this);
     this.descriptionShowMoreButton.addEventListener("click", this);
+
+    // If this is for the NoScript extension, we listen for changes in the
+    // visibility of its toolbar button.
+    // See tor-browser#41581.
+    // NOTE: The addon should be set before being connected, so isNoScript will
+    // return a correct value.
+    if (this.isNoScript && !this._noScriptVisibilityObserver) {
+      this._noScriptVisibilityObserver = () => this.updateNoScriptVisibility();
+      Services.prefs.addObserver(
+        HIDE_NO_SCRIPT_PREF,
+        this._noScriptVisibilityObserver
+      );
+    }
   }
 
   disconnectedCallback() {
     this.inlineOptions.destroyBrowser();
     this.deck.removeEventListener("view-changed", this);
     this.descriptionShowMoreButton.removeEventListener("click", this);
+
+    if (this._noScriptVisibilityObserver) {
+      Services.prefs.removeObserver(
+        HIDE_NO_SCRIPT_PREF,
+        this._noScriptVisibilityObserver
+      );
+      // Clear in case this is called again, or if connectedCallback is called.
+      delete this._noScriptVisibilityObserver;
+    }
+  }
+
+  /**
+   * Whether this is a description for the NoScript extension.
+   *
+   * @type {boolean}
+   */
+  get isNoScript() {
+    return this.addon?.id === "{73a6fe31-595d-460b-a920-fcc0f8843232}";
+  }
+
+  /**
+   * Update the shown visibility value for the NoScript extension's toolbar
+   * button.
+   */
+  updateNoScriptVisibility() {
+    if (!this.isNoScript) {
+      return;
+    }
+    const visibility = Services.prefs.getBoolPref(HIDE_NO_SCRIPT_PREF, true)
+      ? "hide"
+      : "show";
+    for (const input of this.querySelectorAll(
+      ".addon-detail-row-noscript-visibility input"
+    )) {
+      input.checked = input.value === visibility;
+    }
   }
 
   handleEvent(e) {
@@ -2269,6 +2320,27 @@ class AddonDetails extends HTMLElement {
       addon,
       "upgrade"
     );
+
+    // If this is the NoScript extension, we want to show an option to change
+    // the visibility of its toolbar button.
+    // See tor-browser#41581.
+    const visibilityRow = this.querySelector(
+      ".addon-detail-row-noscript-visibility"
+    );
+    visibilityRow.hidden = !this.isNoScript;
+    if (this.isNoScript) {
+      // Set up the aria-label for the role="radiogroup".
+      const visibilityLabel = visibilityRow.querySelector(
+        ".addon-noscript-visibility-label"
+      );
+      visibilityLabel.id = ExtensionCommon.makeWidgetId(
+        `${addon.id}-noscript-visibility-label`
+      );
+      visibilityRow.setAttribute("aria-labelledby", visibilityLabel.id);
+
+      // Set the initial displayed value.
+      this.updateNoScriptVisibility();
+    }
 
     if (addon.type != "extension") {
       // Don't show any private browsing related section for non-extension
@@ -2661,6 +2733,11 @@ class AddonCard extends HTMLElement {
           // Update the card if the add-on isn't active.
           this.update();
         }
+      } else if (name == "noscript-visibility") {
+        // Update the NoScript toolbar button visibility.
+        // See tor-browser#41581.
+        const hide = e.target.value !== "show";
+        Services.prefs.setBoolPref(HIDE_NO_SCRIPT_PREF, hide);
       }
     } else if (e.type == "mousedown") {
       // Open panel on mousedown when the mouse is used.
