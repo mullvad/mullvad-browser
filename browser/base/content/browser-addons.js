@@ -29,6 +29,9 @@ ChromeUtils.defineLazyGetter(lazy, "l10n", function () {
   );
 });
 
+const HIDE_NO_SCRIPT_PREF = "extensions.hideNoScript";
+const HIDE_UNIFIED_WHEN_EMPTY_PREF = "extensions.hideUnifiedWhenEmpty";
+
 /**
  * Mapping of error code -> [
  *   error-id,
@@ -2060,6 +2063,18 @@ var gUnifiedExtensions = {
 
     Glean.extensionsButton.prefersHiddenButton.set(!this.buttonAlwaysVisible);
 
+    // Listen out for changes in extensions.hideNoScript and
+    // extension.hideUnifiedWhenEmpty, which can effect the visibility of the
+    // unified-extensions-button.
+    // See tor-browser#41581.
+    this._hideNoScriptObserver = () => this._updateHideEmpty();
+    Services.prefs.addObserver(HIDE_NO_SCRIPT_PREF, this._hideNoScriptObserver);
+    Services.prefs.addObserver(
+      HIDE_UNIFIED_WHEN_EMPTY_PREF,
+      this._hideNoScriptObserver
+    );
+    this._updateHideEmpty(); // Will trigger updateButtonVisibility;
+
     this._initialized = true;
   },
 
@@ -2081,6 +2096,15 @@ var gUnifiedExtensions = {
     gNavToolbox.removeEventListener("aftercustomization", this);
     CustomizableUI.removeListener(this);
     AddonManager.removeManagerListener(this);
+
+    Services.prefs.removeObserver(
+      HIDE_NO_SCRIPT_PREF,
+      this._hideNoScriptObserver
+    );
+    Services.prefs.removeObserver(
+      HIDE_UNIFIED_WHEN_EMPTY_PREF,
+      this._hideNoScriptObserver
+    );
   },
 
   _updateButtonBarListeners() {
@@ -2110,10 +2134,14 @@ var gUnifiedExtensions = {
   },
 
   onAppMenuShowing() {
+    // Only show the extension menu item if the extension button is not pinned
+    // and the extension popup is not empty.
+    // NOTE: This condition is different than _shouldShowButton.
+    const hideExtensionItem = this.buttonAlwaysVisible || this._hideEmpty;
     document.getElementById("appMenu-extensions-themes-button").hidden =
-      !this.buttonAlwaysVisible;
+      !hideExtensionItem;
     document.getElementById("appMenu-unified-extensions-button").hidden =
-      this.buttonAlwaysVisible;
+      hideExtensionItem;
   },
 
   onLocationChange(browser, webProgress, _request, _uri, flags) {
@@ -2128,9 +2156,14 @@ var gUnifiedExtensions = {
   },
 
   updateButtonVisibility() {
+    if (this._hideEmpty === null) {
+      return;
+    }
     // TODO: Bug 1778684 - Auto-hide button when there is no active extension.
+    // Hide the extension button when it is empty. See tor-browser#41581.
+    // Likely will conflict with mozilla's Bug 1778684. See tor-browser#42635.
     let shouldShowButton =
-      this.buttonAlwaysVisible ||
+      this._shouldShowButton ||
       // If anything is anchored to the button, keep it visible.
       this._button.open ||
       // Button will be open soon - see ensureButtonShownBeforeAttachingPanel.
@@ -2156,7 +2189,7 @@ var gUnifiedExtensions = {
   },
 
   ensureButtonShownBeforeAttachingPanel(panel) {
-    if (!this.buttonAlwaysVisible && !this._button.open) {
+    if (!this._shouldShowButton && !this._button.open) {
       // When the panel is anchored to the button, its "open" attribute will be
       // set, which visually renders as a "button pressed". Until we get there,
       // we need to make sure that the button is visible so that it can serve
@@ -2170,7 +2203,7 @@ var gUnifiedExtensions = {
     if (this._button.open) {
       this._buttonShownBeforeButtonOpen = false;
     }
-    if (!this.buttonAlwaysVisible && !this._button.open) {
+    if (!this._shouldShowButton && !this._button.open) {
       this.updateButtonVisibility();
     }
   },
@@ -2277,6 +2310,15 @@ var gUnifiedExtensions = {
         return false;
       }
 
+      // When an extensions is about to be removed, it may still appear in
+      // getActiveExtensions.
+      // This is needed for hasExtensionsInPanel, when called through
+      // onWidgetDestroy when an extension is being removed.
+      // See tor-browser#41581.
+      if (extension.hasShutdown) {
+        return false;
+      }
+
       // Ignore hidden and extensions that cannot access the current window
       // (because of PB mode when we are in a private window), since users
       // cannot do anything with those extensions anyway.
@@ -2296,6 +2338,38 @@ var gUnifiedExtensions = {
   },
 
   /**
+   * Whether the extension button should be hidden because it is empty. Or
+   * `null` when uninitialised.
+   *
+   * @type {?boolean}
+   */
+  _hideEmpty: null,
+
+  /**
+   * Update the _hideEmpty attribute when the preference or hasExtensionsInPanel
+   * value may have changed.
+   */
+  _updateHideEmpty() {
+    const prevHideEmpty = this._hideEmpty;
+    this._hideEmpty =
+      Services.prefs.getBoolPref(HIDE_UNIFIED_WHEN_EMPTY_PREF, true) &&
+      !this.hasExtensionsInPanel();
+    if (this._hideEmpty !== prevHideEmpty) {
+      this.updateButtonVisibility();
+    }
+  },
+
+  /**
+   * Whether we should show the extension button, regardless of whether it is
+   * needed as a popup anchor, etc.
+   *
+   * @type {boolean}
+   */
+  get _shouldShowButton() {
+    return this.buttonAlwaysVisible && !this._hideEmpty;
+  },
+
+  /**
    * Returns true when there are active extensions listed/shown in the unified
    * extensions panel, and false otherwise (e.g. when extensions are pinned in
    * the toolbar OR there are 0 active extensions).
@@ -2306,7 +2380,11 @@ var gUnifiedExtensions = {
    * @returns {boolean} Whether there are extensions listed in the panel.
    */
   hasExtensionsInPanel(policies = this.getActivePolicies()) {
+    const hideNoScript = Services.prefs.getBoolPref(HIDE_NO_SCRIPT_PREF, true);
     return policies.some(policy => {
+      if (hideNoScript && policy.extension?.isNoScript) {
+        return false;
+      }
       let widget = this.browserActionFor(policy)?.widget;
       return (
         !widget ||
@@ -3021,7 +3099,20 @@ var gUnifiedExtensions = {
     }
   },
 
+  onWidgetRemoved() {
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
+  },
+
+  onWidgetDestroyed() {
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
+  },
+
   onWidgetAdded(aWidgetId, aArea) {
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
+
     if (CustomizableUI.isWebExtensionWidget(aWidgetId)) {
       this.updateAttention();
     }
@@ -3047,6 +3138,9 @@ var gUnifiedExtensions = {
   },
 
   onWidgetOverflow(aNode) {
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
+
     // We register a CUI listener for each window so we make sure that we
     // handle the event for the right window here.
     if (window !== aNode.documentGlobal) {
@@ -3057,6 +3151,9 @@ var gUnifiedExtensions = {
   },
 
   onWidgetUnderflow(aNode) {
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
+
     // We register a CUI listener for each window so we make sure that we
     // handle the event for the right window here.
     if (window !== aNode.documentGlobal) {
