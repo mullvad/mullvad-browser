@@ -220,6 +220,10 @@ pref("privacy.annotate_channels.strict_list.enabled", false);
 // Disable the Pocket extension (Bug #18886 and #31602)
 pref("extensions.pocket.enabled", false);
 
+// Custom extensions preferences tor-browser#41581
+pref("extensions.hideNoScript", true);
+pref("extensions.hideUnifiedWhenEmpty", true);
+
 // Disable activity stream/"Recommended by Pocket" in about:home (Bug #41029)
 pref("browser.newtabpage.activity-stream.discoverystream.enabled", false);
 pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
