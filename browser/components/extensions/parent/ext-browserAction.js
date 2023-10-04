@@ -270,6 +270,22 @@ this.browserAction = class extends ExtensionAPIPersistent {
         node.append(button, menuButton);
         node.viewButton = button;
 
+        if (extension.isNoScript) {
+          // Hide NoScript by default.
+          // See tor-browser#41581.
+          const HIDE_NO_SCRIPT_PREF = "extensions.hideNoScript";
+          const changeNoScriptVisibility = () => {
+            node.hidden = Services.prefs.getBoolPref(HIDE_NO_SCRIPT_PREF, true);
+          };
+          // Since we expect the NoScript widget to only be destroyed on exit,
+          // we do not set up to remove the observer.
+          Services.prefs.addObserver(
+            HIDE_NO_SCRIPT_PREF,
+            changeNoScriptVisibility
+          );
+          changeNoScriptVisibility();
+        }
+
         return node;
       },
 
