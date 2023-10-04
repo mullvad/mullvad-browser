@@ -297,6 +297,30 @@ this.browserAction = class extends ExtensionAPIPersistent {
         node.append(rowWrapper, messagebarWrapper);
         node.viewButton = button;
 
+        if (extension.isNoScript) {
+          // Hide NoScript by default.
+          // See tor-browser#41581.
+          const HIDE_NO_SCRIPT_PREF = "extensions.hideNoScript";
+          const changeNoScriptVisibility = () => {
+            node.hidden = Services.prefs.getBoolPref(HIDE_NO_SCRIPT_PREF, true);
+          };
+          Services.prefs.addObserver(
+            HIDE_NO_SCRIPT_PREF,
+            changeNoScriptVisibility
+          );
+          document.defaultView.addEventListener(
+            "unload",
+            () => {
+              Services.prefs.removeObserver(
+                HIDE_NO_SCRIPT_PREF,
+                changeNoScriptVisibility
+              );
+            },
+            { once: true }
+          );
+          changeNoScriptVisibility();
+        }
+
         return node;
       },
 
