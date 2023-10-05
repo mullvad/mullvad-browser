@@ -143,6 +143,12 @@ pref("browser.search.suggest.enabled.private", false);
 pref("browser.urlbar.suggest.searches", false);
 pref("browser.urlbar.suggest.quicksuggest.nonsponsored", false);
 pref("browser.urlbar.suggest.quicksuggest.sponsored", false);
+// tor-browser#41576: Do not suggest weather and addons.
+pref("browser.urlbar.suggest.addons", false);
+pref("browser.urlbar.addons.featureGate", false);
+pref("browser.urlbar.suggest.weather", false);
+pref("browser.urlbar.weather.featureGate", false);
+// tor-browser#41691: Hide "Firefox Suggets" in the UI
 pref("browser.urlbar.groupLabels.enabled", false);
 pref("browser.safebrowsing.malware.enabled", false);
 pref("browser.safebrowsing.phishing.enabled", false);
