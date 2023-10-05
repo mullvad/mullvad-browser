@@ -65,7 +65,8 @@ var kVersion = 19;
 /**
  * The current version for base browser.
  */
-var kVersionBaseBrowser = 1;
+var kVersionBaseBrowser = 2;
+const NoScriptId = "_73a6fe31-595d-460b-a920-fcc0f8843232_-browser-action";
 
 /**
  * Buttons removed from built-ins by version they were removed. kVersion must be
@@ -849,6 +850,57 @@ var CustomizableUIInternal = {
       // "browser.uiCustomization.state".
       delete gSavedState.placements["PanelUI-contents"];
       delete gSavedState.placements["addon-bar"];
+    }
+
+    if (currentVersion < 2) {
+      // Matches against kVersion 19, i.e. when the unified-extensions-button
+      // was introduced and extensions were moved from the palette to
+      // AREA_ADDONS.
+      // For base browser, we want the NoScript addon to be moved from the
+      // default palette to AREA_NAVBAR, so that if it becomes shown through the
+      // preference extensions.hideNoScript it will appear in the toolbar.
+      // If the NoScript addon is already in AREA_NAVBAR, we instead flip the
+      // extensions.hideNoScript preference so that it remains visible.
+      // See tor-browser#41581.
+      const navbarPlacements =
+        gSavedState.placements[CustomizableUI.AREA_NAVBAR];
+      if (navbarPlacements) {
+        let noScriptVisible = false;
+        for (const [area, placements] of Object.entries(
+          gSavedState.placements
+        )) {
+          const index = placements.indexOf(NoScriptId);
+          if (index === -1) {
+            continue;
+          }
+          if (area === CustomizableUI.AREA_ADDONS) {
+            // Has been placed in the ADDONS area.
+            // Most likely, this is an alpha or nightly user who received the
+            // firefox update in a run before this one. In this case, we want to
+            // match the same behaviour as a stable user: hide the button and
+            // move it to the NAVBAR instead.
+            placements.splice(index, 1);
+          } else {
+            // It is in an area other than the ADDON (and not in the palette).
+            noScriptVisible = true;
+          }
+        }
+        if (noScriptVisible) {
+          // Keep the button where it is and make sure it is visible.
+          Services.prefs.setBoolPref("extensions.hideNoScript", false);
+        } else {
+          // Should appear just before unified-extensions-button, which is
+          // currently not part of the default placements.
+          const placeIndex = navbarPlacements.indexOf(
+            "unified-extensions-button"
+          );
+          if (placeIndex === -1) {
+            navbarPlacements.push(NoScriptId);
+          } else {
+            navbarPlacements.splice(placeIndex, 0, NoScriptId);
+          }
+        }
+      }
     }
   },
 
@@ -3409,7 +3461,17 @@ var CustomizableUIInternal = {
         CustomizableUI.isWebExtensionWidget(widgetId) &&
         !oldAddonPlacements.includes(widgetId)
       ) {
-        this.addWidgetToArea(widgetId, CustomizableUI.AREA_ADDONS);
+        // When resetting, NoScript goes to the toolbar instead. This matches
+        // its initial placement anyway. And since the button may be hidden by
+        // default by extensions.hideNoScript, we want to make sure that if it
+        // becomes unhidden it is shown rather than in the unified extensions
+        // panel. See tor-browser#41581.
+        this.addWidgetToArea(
+          widgetId,
+          widgetId === NoScriptId
+            ? CustomizableUI.AREA_NAVBAR
+            : CustomizableUI.AREA_ADDONS
+        );
       }
     }
   },
