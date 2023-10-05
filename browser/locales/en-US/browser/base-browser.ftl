@@ -24,6 +24,11 @@ basebrowser-rfp-restore-window-size-button-ak = R
 basebrowser-addon-badge-recommended = Mozilla only recommends extensions that meet their standards for security and performance
 basebrowser-addon-badge-verified = Mozilla has reviewed this extension to meet their standards for security and performance
 
+## Option to show or hide the NoScript extension button/item.
+basebrowser-addon-noscript-visibility-label = Toolbar button
+basebrowser-addon-noscript-visibility-show = Show
+basebrowser-addon-noscript-visibility-hide = Hide
+
 ## About dialog
 
 # "Mozilla Firefox" should be treated like a brand and it should be neither translated nor transliterated.
