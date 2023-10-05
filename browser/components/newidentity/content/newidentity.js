@@ -433,11 +433,8 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
     openNewWindow() {
       logger.info("Opening a new window");
       return new Promise(resolve => {
-        // Open a new window with the default homepage
-        // We could pass {private: true} but we do not because we enforce
-        // browser.privatebrowsing.autostart = true.
-        // What about users that change settings?
-        const win = OpenBrowserWindow();
+        // Open a new window forcing the about:privatebrowsing page (tor-browser#41765)
+        const win = OpenBrowserWindow({private: "no-home"});
         // This mechanism to know when the new window is ready is used by
         // OpenBrowserWindow itself (see its definition in browser.js).
         win.addEventListener("MozAfterPaint", () => resolve(), { once: true });

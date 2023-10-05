@@ -4523,7 +4523,7 @@ function OpenBrowserWindow(options) {
   var extraFeatures = "";
   if (options && options.private && PrivateBrowsingUtils.enabled) {
     extraFeatures = ",private";
-    if (!PrivateBrowsingUtils.permanentPrivateBrowsing) {
+    if (!PrivateBrowsingUtils.permanentPrivateBrowsing || options.private === "no-home") {
       // Force the new window to load about:privatebrowsing instead of the default home page
       defaultArgs = "about:privatebrowsing";
     }
