@@ -437,7 +437,7 @@ class _RFPHelper {
       // preemptively in order to beat race conditions on tab/window creation
       const LETTERBOX_CSS_URL = "chrome://browser/content/browser.css";
       const LETTERBOX_CSS_SELECTOR =
-        ".letterboxing .browserStack:not(.exclude-letterboxing) > browser";
+        ".letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing) > browser";
       for (let ss of document.styleSheets) {
         if (ss.href !== LETTERBOX_CSS_URL) {
           continue;
@@ -557,8 +557,8 @@ class _RFPHelper {
 
     const roundDimensions = (aWidth, aHeight) => {
       const r = (aWidth, aHeight) => ({
-        width: `${aWidth}px`,
-        height: `${aHeight}px`,
+        width: `var(--rdm-width, ${aWidth}px)`,
+        height: `var(--rdm-height, ${aHeight}px)`,
       });
 
       let result;
