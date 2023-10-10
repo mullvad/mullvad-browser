@@ -146,7 +146,7 @@ var SecurityLevelButton = {
       });
     }
 
-    panel.openPopup(anchorNode, "bottomcenter topright", 0, 0, false);
+    panel.openPopup(anchorNode, "bottomright topright", 0, 0, false);
   },
 
   init() {
