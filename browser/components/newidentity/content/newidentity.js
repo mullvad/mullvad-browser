@@ -415,10 +415,13 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
     async reloadAddons() {
       logger.info("Reloading add-ons to clear their temporary state.");
       // Reload all active extensions except search engines, which would throw.
-      const addons = (
-        await AddonManager.getAddonsByTypes(["extension"])
-      ).filter(a => a.isActive && !a.id.endsWith("@search.mozilla.org"));
-      await Promise.all(addons.map(a => a.reload()));
+      const addons = await AddonManager.getAddonsByTypes(["extension"]);
+      const isSearchEngine = async addon =>
+        (await (await fetch(addon.getResourceURI("manifest.json").spec)).json())
+          ?.chrome_settings_overrides?.search_provider;
+      const reloadIfNeeded = async addon =>
+        addon.isActive && !(await isSearchEngine(addon)) && addon.reload();
+      await Promise.all(addons.map(addon => reloadIfNeeded(addon)));
     }
 
     // Broadcast as a hook to clear other data
