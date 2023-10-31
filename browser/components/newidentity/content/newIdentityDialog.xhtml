@@ -21,9 +21,8 @@
 >
   <dialog id="newIdentityDialog" buttons="accept,cancel" defaultButton="accept">
     <linkset>
-      <!-- Without this document.l10n is not initialized, and we need it for the
-    cancel button. -->
       <html:link rel="localization" href="branding/brand.ftl" />
+      <html:link rel="localization" href="browser/base-browser.ftl" />
     </linkset>
 
     <div xmlns="http://www.w3.org/1999/xhtml">
@@ -33,13 +32,18 @@
             <xul:image id="infoIcon" />
           </div>
           <div id="infoContainer">
-            <xul:description id="infoTitle" />
+            <xul:description
+              id="infoTitle"
+              data-l10n-id="new-identity-dialog-title"
+            />
             <xul:description
               id="infoBody"
-              context="contentAreaContextMenu"
-              noinitialfocus="true"
+              data-l10n-id="new-identity-dialog-description"
             />
-            <xul:checkbox id="neverAskAgain" />
+            <xul:checkbox
+              id="neverAskAgain"
+              data-l10n-id="new-identity-dialog-never-ask-checkbox"
+            />
           </div>
         </div>
       </div>

@@ -5,20 +5,13 @@
 document.addEventListener("dialogaccept", () => {
   const retvals = window.arguments[0];
   retvals.confirmed = true;
-  retvals.neverAskAgain = document.querySelector("#neverAskAgain").checked;
+  retvals.neverAskAgain = document.getElementById("neverAskAgain").checked;
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const { NewIdentityStrings } = window.arguments[0];
-  const dialog = document.querySelector("#newIdentityDialog");
+  const dialog = document.getElementById("newIdentityDialog");
 
-  dialog.querySelector("#infoTitle").textContent =
-    NewIdentityStrings.new_identity_prompt_title;
-  dialog.querySelector("#infoBody").textContent =
-    NewIdentityStrings.new_identity_prompt;
-  dialog.querySelector("#neverAskAgain").label =
-    NewIdentityStrings.new_identity_ask_again;
   const accept = dialog.getButton("accept");
-  accept.label = NewIdentityStrings.new_identity_restart;
+  document.l10n.setAttributes(accept, "new-identity-dialog-confirm");
   accept.classList.add("danger-button");
 });
