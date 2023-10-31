@@ -1,40 +1,6 @@
 "use strict";
 
-/* globals CustomizableUI Services gFindBarInitialized gFindBar
-   OpenBrowserWindow PrivateBrowsingUtils XPCOMUtils
- */
-
-XPCOMUtils.defineLazyGetter(this, "NewIdentityStrings", () => {
-  const brandBundle = Services.strings.createBundle(
-    "chrome://branding/locale/brand.properties"
-  );
-  const brandShortName = brandBundle.GetStringFromName("brandShortName");
-
-  const fallbackBundle = Services.strings.createBundle(
-    "resource:///chrome/en-US/locale/browser/newIdentity.properties"
-  );
-  const strings = {};
-  const brandedStrings = ["new_identity_prompt", "new_identity_restart"];
-  for (let { key } of fallbackBundle.getSimpleEnumeration()) {
-    strings[key] = fallbackBundle.GetStringFromName(key);
-  }
-  try {
-    const bundle = Services.strings.createBundle(
-      "chrome://browser/locale/newIdentity.properties"
-    );
-    for (const key of Object.keys(strings)) {
-      try {
-        strings[key] = bundle.GetStringFromName(key);
-      } catch (e) {}
-    }
-  } catch (e) {
-    console.warn("Could not load localized New Identity strings");
-  }
-  for (let key of brandedStrings) {
-    strings[key] = strings[key].replaceAll("%S", brandShortName);
-  }
-  return strings;
-});
+/* eslint-env mozilla/browser-window */
 
 // Use a lazy getter because NewIdentityButton is declared more than once
 // otherwise.
@@ -471,11 +437,6 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
                 // malformed URL, bail out
                 return;
               }
-              const label =
-                NewIdentityStrings.new_identity_home_notification.replace(
-                  "%S",
-                  displayAddress
-                );
               const callback = () => {
                 Services.prefs.setStringPref(trustedHomePref, homeURL);
                 win.BrowserHome();
@@ -484,12 +445,15 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
               notificationBox.appendNotification(
                 "new-identity-safe-home",
                 {
-                  label,
+                  label: {
+                    "l10n-id": "new-identity-blocked-home-notification",
+                    "l10n-args": { url: displayAddress },
+                  },
                   priority: notificationBox.PRIORITY_INFO_MEDIUM,
                 },
                 [
                   {
-                    label: NewIdentityStrings.new_identity_home_load_button,
+                    "l10n-id": "new-identity-blocked-home-ignore-button",
                     callback,
                   },
                 ]
@@ -550,37 +514,20 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
       const button =
         document.getElementById("new-identity-button") ||
         window.gNavToolbox.palette.querySelector("#new-identity-button");
-      if (button) {
-        button.setAttribute("tooltiptext", NewIdentityStrings.new_identity);
-        // Include an equal label, shown in the overflow menu or during
-        // customization.
-        button.setAttribute("label", NewIdentityStrings.new_identity);
-        button.addEventListener("command", () => {
+      button?.addEventListener("command", () => {
+        this.onCommand();
+      });
+      document
+        .getElementById("appMenu-viewCache")
+        .content.querySelector("#appMenu-new-identity")
+        ?.addEventListener("command", () => {
           this.onCommand();
         });
-      }
-      const viewCache = document.getElementById("appMenu-viewCache").content;
-      const appButton = viewCache.querySelector("#appMenu-new-identity");
-      if (appButton) {
-        appButton.setAttribute(
-          "label",
-          NewIdentityStrings.new_identity_sentence_case
-        );
-        appButton.addEventListener("command", () => {
+      document
+        .getElementById("menu_newIdentity")
+        ?.addEventListener("command", () => {
           this.onCommand();
         });
-      }
-      const menu = document.querySelector("#menu_newIdentity");
-      if (menu) {
-        menu.setAttribute("label", NewIdentityStrings.new_identity);
-        menu.setAttribute(
-          "accesskey",
-          NewIdentityStrings.new_identity_menu_accesskey
-        );
-        menu.addEventListener("command", () => {
-          this.onCommand();
-        });
-      }
     },
 
     uninit() {},
@@ -598,7 +545,6 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
         const shouldConfirm = Services.prefs.getBoolPref(prefConfirm, true);
         if (shouldConfirm) {
           const params = {
-            NewIdentityStrings,
             confirmed: false,
             neverAskAgain: false,
           };
