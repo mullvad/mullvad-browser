@@ -70,6 +70,7 @@ new-identity-dialog-confirm =
 new-identity-blocked-home-notification = { -brand-short-name } blocked your homepage ({ $url }) from loading because it might recognize your previous session.
 # Button to continue loading the home page, despite the warning message.
 new-identity-blocked-home-ignore-button = Load it anyway
+
 ## Preferences - Letterboxing.
 
 # The word "Letterboxing" is the proper noun for the Tor Browser feature, and is therefore capitalised.
@@ -94,3 +95,74 @@ letterboxing-disabled-description = Letterboxing is currently disabled.
 # "Letterboxing" should be treated as a feature/product name, and likely not changed in other languages.
 letterboxing-enable-button =
     .label = Enable Letterboxing
+
+## Security level toolbar button.
+## Uses sentence case in English (US).
+## ".label" is the accessible name, and shown in the overflow menu and when customizing the toolbar.
+
+security-level-toolbar-button-standard =
+    .label = Security level
+    .tooltiptext = Security level: Standard
+security-level-toolbar-button-safer =
+    .label = Security level
+    .tooltiptext = Security level: Safer
+security-level-toolbar-button-safest =
+    .label = Security level
+    .tooltiptext = Security level: Safest
+# Used when the user is in some custom configuration that does not match a security level.
+security-level-toolbar-button-custom =
+    .label = Security level
+    .tooltiptext = Security level: Custom
+
+## Security level popup panel.
+
+# Uses sentence case in English (US).
+security-level-panel-heading = Security level
+
+security-level-panel-level-standard = Standard
+security-level-panel-level-safer = Safer
+security-level-panel-level-safest = Safest
+security-level-panel-learn-more-link = Learn more
+# Button to open security level settings.
+security-level-panel-open-settings-button = Settings…
+
+## Security level settings.
+
+security-level-preferences-heading = Security Level
+security-level-preferences-overview = Disable certain web features that can be used to attack your security and anonymity.
+security-level-preferences-learn-more-link = Learn more
+security-level-preferences-level-standard =
+    .label = Standard
+security-level-preferences-level-safer =
+    .label = Safer
+security-level-preferences-level-safest =
+    .label = Safest
+
+## Security level summaries shown in security panel and settings.
+
+security-level-summary-standard = All browser and website features are enabled.
+security-level-summary-safer = Disables website features that are often dangerous, causing some sites to lose functionality.
+security-level-summary-safest = Only allows website features required for static sites and basic services. These changes affect images, media, and scripts.
+
+## Security level feature bullet points.
+## Shown in the settings under the security level when it is selected.
+
+security-level-preferences-bullet-https-only-javascript = JavaScript is disabled on non-HTTPS sites.
+security-level-preferences-bullet-limit-font-and-symbols = Some fonts and math symbols are disabled.
+security-level-preferences-bullet-limit-media = Audio and video (HTML5 media), and WebGL are click-to-play.
+security-level-preferences-bullet-disabled-javascript = JavaScript is disabled by default on all sites.
+security-level-preferences-bullet-limit-font-and-symbols-and-images = Some fonts, icons, math symbols, and images are disabled.
+
+## Custom security level.
+## Some custom preferences configuration has placed the user outside one of the standard three levels.
+
+# Shown in the security level panel as an orange badge next to the expected level.
+security-level-panel-custom-badge = Custom
+# Shown in the security level settings in a warning box.
+security-level-preferences-custom-heading = Custom security level configured
+# Description of custom state and recommended action.
+# Shown in the security level panel and settings.
+security-level-summary-custom = Your custom browser preferences have resulted in unusual security settings. For security and privacy reasons, we recommend you choose one of the default security levels.
+# Button to undo custom changes to the security level and place the user in one of the standard security levels.
+# Shown in the security level panel and settings.
+security-level-restore-defaults-button = Restore defaults
