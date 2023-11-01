@@ -8,65 +8,6 @@ ChromeUtils.defineModuleGetter(
   "resource://gre/modules/SecurityLevel.jsm"
 );
 
-XPCOMUtils.defineLazyGetter(this, "SecurityLevelStrings", () => {
-  let strings = {
-    // Generic terms
-    security_level: "Security Level",
-    security_level_standard: "Standard",
-    security_level_safer: "Safer",
-    security_level_safest: "Safest",
-    security_level_tooltip_standard: "Security Level: Standard",
-    security_level_tooltip_safer: "Security Level: Safer",
-    security_level_tooltip_safest: "Security Level: Safest",
-    // Shown only for custom level
-    security_level_custom: "Custom",
-    security_level_restore: "Restore Defaults",
-    security_level_learn_more: "Learn more",
-    // Panel
-    security_level_open_settings: "Settings…",
-    security_level_standard_summary:
-      "All browser and website features are enabled.",
-    security_level_safer_summary:
-      "Disables website features that are often dangerous, causing some sites to lose functionality.",
-    security_level_safest_summary:
-      "Only allows website features required for static sites and basic services. These changes affect images, media, and scripts.",
-    security_level_custom_heading: "Custom security level configured",
-    security_level_custom_summary:
-      "Your custom browser preferences have resulted in unusual security settings. For security and privacy reasons, we recommend you choose one of the default security levels.",
-    // Security level section in about:preferences#privacy
-    security_level_overview:
-      "Disable certain web features that can be used to attack your security and anonymity.",
-    security_level_list_safer: "At the safer setting:",
-    security_level_list_safest: "At the safest setting:",
-    // Strings for descriptions
-    security_level_js_https_only: "JavaScript is disabled on non-HTTPS sites.",
-    security_level_js_disabled:
-      "JavaScript is disabled by default on all sites.",
-    security_level_limit_typography:
-      "Some fonts and math symbols are disabled.",
-    security_level_limit_typography_svg:
-      "Some fonts, icons, math symbols, and images are disabled.",
-    security_level_limit_media:
-      "Audio and video (HTML5 media), and WebGL are click-to-play.",
-  };
-  let bundle = null;
-  try {
-    bundle = Services.strings.createBundle(
-      "chrome://browser/locale/securityLevel.properties"
-    );
-  } catch (e) {
-    console.warn("Could not load the Security Level strings");
-  }
-  if (bundle) {
-    for (const key of Object.keys(strings)) {
-      try {
-        strings[key] = bundle.GetStringFromName(key);
-      } catch (e) {}
-    }
-  }
-  return strings;
-});
-
 /*
   Security Level Button Code
 
@@ -100,12 +41,30 @@ var SecurityLevelButton = {
     if (!level) {
       return;
     }
-    const customStr = SecurityLevelPrefs.securityCustom ? "_custom" : "";
-    this._button.setAttribute("level", `${level}${customStr}`);
-    this._button.setAttribute(
-      "tooltiptext",
-      SecurityLevelStrings[`security_level_tooltip_${level}`]
-    );
+    const custom = SecurityLevelPrefs.securityCustom;
+    this._button.setAttribute("level", custom ? `${level}_custom` : level);
+
+    let l10nIdLevel;
+    switch (level) {
+      case "standard":
+        l10nIdLevel = "security-level-toolbar-button-standard";
+        break;
+      case "safer":
+        l10nIdLevel = "security-level-toolbar-button-safer";
+        break;
+      case "safest":
+        l10nIdLevel = "security-level-toolbar-button-safest";
+        break;
+      default:
+        throw Error(`Unhandled level: ${level}`);
+    }
+    if (custom) {
+      // Don't distinguish between the different levels when in the custom
+      // state. We just want to emphasise that it is custom rather than any
+      // specific level.
+      l10nIdLevel = "security-level-toolbar-button-custom";
+    }
+    document.l10n.setAttributes(this._button, l10nIdLevel);
   },
 
   /**
@@ -159,7 +118,6 @@ var SecurityLevelButton = {
       window.gNavToolbox.palette.querySelector("#security-level-button");
     // Set a label to be be used as the accessible name, and to be shown in the
     // overflow menu and during customization.
-    this._button.setAttribute("label", SecurityLevelStrings.security_level);
     this._button.addEventListener("command", () => this.openPopup());
     // set the initial class based off of the current pref
     this._configUIFromPrefs();
@@ -213,21 +171,12 @@ var SecurityLevelPanel = {
       settingsButton: document.getElementById("securityLevel-settings"),
     };
 
-    document.getElementById("securityLevel-header").textContent =
-      SecurityLevelStrings.security_level;
-    this._elements.customName.textContent =
-      SecurityLevelStrings.security_level_custom;
     const learnMoreEl = document.getElementById("securityLevel-learnMore");
-    learnMoreEl.textContent = SecurityLevelStrings.security_level_learn_more;
     learnMoreEl.addEventListener("click", event => {
       window.openTrustedLinkIn(learnMoreEl.href, "tab");
       this.hide();
       event.preventDefault();
     });
-    this._elements.restoreDefaultsButton.textContent =
-      SecurityLevelStrings.security_level_restore;
-    this._elements.settingsButton.textContent =
-      SecurityLevelStrings.security_level_open_settings;
 
     this._elements.restoreDefaultsButton.addEventListener("command", () => {
       this.restoreDefaults();
@@ -268,11 +217,30 @@ var SecurityLevelPanel = {
 
     // Descriptions change based on security level
     this._elements.background.setAttribute("level", level);
-    this._elements.levelName.textContent =
-      SecurityLevelStrings[`security_level_${level}`];
-    this._elements.summary.textContent = custom
-      ? SecurityLevelStrings.security_level_custom_summary
-      : SecurityLevelStrings[`security_level_${level}_summary`];
+    let l10nIdLevel;
+    let l10nIdSummary;
+    switch (level) {
+      case "standard":
+        l10nIdLevel = "security-level-panel-level-standard";
+        l10nIdSummary = "security-level-summary-standard";
+        break;
+      case "safer":
+        l10nIdLevel = "security-level-panel-level-safer";
+        l10nIdSummary = "security-level-summary-safer";
+        break;
+      case "safest":
+        l10nIdLevel = "security-level-panel-level-safest";
+        l10nIdSummary = "security-level-summary-safest";
+        break;
+      default:
+        throw Error(`Unhandled level: ${level}`);
+    }
+    if (custom) {
+      l10nIdSummary = "security-level-summary-custom";
+    }
+
+    document.l10n.setAttributes(this._elements.levelName, l10nIdLevel);
+    document.l10n.setAttributes(this._elements.summary, l10nIdSummary);
   },
 
   /**
@@ -358,25 +326,13 @@ var SecurityLevelPreferences = {
     this._customNotification = document.getElementById(
       "securityLevel-customNotification"
     );
-    this._radiogroup = document.getElementById("securityLevel-radiogroup");
-
-    document.querySelector("#securityLevel-groupbox h2").textContent =
-      SecurityLevelStrings.security_level;
-    document.getElementById("securityLevel-overview").textContent =
-      SecurityLevelStrings.security_level_overview;
     document
-      .getElementById("securityLevel-learnMore")
-      .setAttribute("value", SecurityLevelStrings.security_level_learn_more);
+      .getElementById("securityLevel-restoreDefaults")
+      .addEventListener("command", () => {
+        SecurityLevelPrefs.securityCustom = false;
+      });
 
-    document.getElementById("securityLevel-customHeading").textContent =
-      SecurityLevelStrings.security_level_custom_heading;
-    document.getElementById("securityLevel-customDescription").textContent =
-      SecurityLevelStrings.security_level_custom_summary;
-    const restoreDefaultsButton = document.getElementById(
-      "securityLevel-restoreDefaults"
-    );
-    restoreDefaultsButton.textContent =
-      SecurityLevelStrings.security_level_restore;
+    this._radiogroup = document.getElementById("securityLevel-radiogroup");
 
     this._radioOptions = Array.from(
       this._radiogroup.querySelectorAll(".securityLevel-radio-option"),
@@ -384,46 +340,7 @@ var SecurityLevelPreferences = {
         return { container, radio: container.querySelector("radio") };
       }
     );
-    const descListItemsMap = {
-      safer: [
-        SecurityLevelStrings.security_level_js_https_only,
-        SecurityLevelStrings.security_level_limit_typography,
-        SecurityLevelStrings.security_level_limit_media,
-      ],
-      safest: [
-        SecurityLevelStrings.security_level_js_disabled,
-        SecurityLevelStrings.security_level_limit_typography_svg,
-        SecurityLevelStrings.security_level_limit_media,
-      ],
-    };
-    for (const { container, radio } of this._radioOptions) {
-      const level = radio.value;
-      radio.setAttribute(
-        "label",
-        SecurityLevelStrings[`security_level_${level}`]
-      );
-      container.querySelector(".summary").textContent =
-        SecurityLevelStrings[`security_level_${level}_summary`];
-      const descListItems = descListItemsMap[level];
-      if (!descListItems) {
-        continue;
-      }
-      const descrList = container.querySelector(
-        ".securityLevel-descriptionList"
-      );
-      // TODO: Add the elements in securityLevelPreferences.inc.xhtml again
-      // when we switch to Fluent
-      for (const text of descListItems) {
-        let elem = document.createXULElement("description");
-        elem.textContent = text;
-        elem.className = "indent";
-        descrList.append(elem);
-      }
-    }
 
-    restoreDefaultsButton.addEventListener("command", () => {
-      SecurityLevelPrefs.securityCustom = false;
-    });
     this._radiogroup.addEventListener("select", () => {
       SecurityLevelPrefs.securityLevel = this._radiogroup.value;
     });
