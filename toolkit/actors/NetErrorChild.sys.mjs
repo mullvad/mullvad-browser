@@ -133,12 +133,15 @@ export class NetErrorChild extends RemotePageChild {
         shortDesc.appendChild(span);
       },
     };
-
-    Services.uriFixup.checkHost(
-      info.fixedURI,
-      onLookupCompleteListener,
-      this.document.nodePrincipal.originAttributes
-    );
+    try {
+      Services.uriFixup.checkHost(
+        info.fixedURI,
+        onLookupCompleteListener,
+        this.document.nodePrincipal.originAttributes
+      );
+    } catch (e) {
+      // DNS resolution may fail synchronously if forbidden by proxy
+    }
   }
 
   // Get the header from the http response of the failed channel. This function
