@@ -968,7 +968,7 @@ pref("privacy.panicButton.enabled",         true);
 // Time until temporary permissions expire, in ms
 pref("privacy.temporary_permission_expire_time_ms",  3600000);
 
-// Enables protection mechanism against password spoofing for cross domain auh requests
+// Enables protection mechanism against password spoofing for cross domain auth requests
 // See bug 791594
 pref("privacy.authPromptSpoofingProtection",         true);
 
@@ -2097,6 +2097,12 @@ pref("privacy.webrtc.sharedTabWarning", false);
 // common case of a web conference asking them for the camera in a lobby page,
 // before navigating to the actual meeting room page. Doesn't survive tab close.
 pref("privacy.webrtc.deviceGracePeriodTimeoutMs", 3600000);
+
+// Enable including the content in the window title.
+// PBM users might want to disable this to avoid a possible source of disk
+// leaks.
+pref("privacy.exposeContentTitleInWindow", true);
+pref("privacy.exposeContentTitleInWindow.pbm", true);
 
 // Start the browser in e10s mode
 pref("browser.tabs.remote.autostart", true);
