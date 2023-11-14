@@ -567,8 +567,6 @@ pref("extensions.abuseReport.enabled", false);
 // Therefore, do not allow download of additional language packs. They are not a
 // privacy/security threat, we are disabling them for UX reasons. See bug 41377.
 pref("intl.multilingual.downloadEnabled", false);
-// Disk activity: Disable storage.sync (tor-browser#41424)
-pref("webextensions.storage.sync.enabled", false);
 
 // Enforce certificate pinning, see: https://bugs.torproject.org/16206
 pref("security.cert_pinning.enforcement_level", 2);
