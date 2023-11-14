@@ -86,6 +86,12 @@ pref("browser.sessionstore.resume_from_crash", false);
 // Disable capturing thumbnails (tor-browser#41595)
 // Also not needed in PBM at the moment.
 pref("browser.pagethumbnails.capturing_disabled", true);
+// tor-browser#41988: Remove page titles from window titles to prevent possible
+// disk leaks, e.g., in system logs.
+// For example, it happened that GNOME shell logged the window name that caused
+// JS errors/unexpected conditions for unrelated issues.
+pref("privacy.exposeContentTitleInWindow", false);
+pref("privacy.exposeContentTitleInWindow.pbm", false);
 
 // Enable HTTPS-Only mode (tor-browser#19850)
 pref("dom.security.https_only_mode", true);
