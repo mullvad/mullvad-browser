@@ -90,8 +90,9 @@ pref("browser.pagethumbnails.capturing_disabled", true);
 // disk leaks, e.g., in system logs.
 // For example, it happened that GNOME shell logged the window name that caused
 // JS errors/unexpected conditions for unrelated issues.
-pref("privacy.exposeContentTitleInWindow", false);
-pref("privacy.exposeContentTitleInWindow.pbm", false);
+// TODO: Enable again after more UX considerations.
+// pref("privacy.exposeContentTitleInWindow", false);
+// pref("privacy.exposeContentTitleInWindow.pbm", false);
 
 // Empty clipboard content from private windows on exit (tor-browser#42154)
 pref("browser.privatebrowsing.preserveClipboard", false);
