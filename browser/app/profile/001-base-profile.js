@@ -90,8 +90,9 @@ pref("browser.pagethumbnails.capturing_disabled", true);
 // disk leaks, e.g., in system logs.
 // For example, it happened that GNOME shell logged the window name that caused
 // JS errors/unexpected conditions for unrelated issues.
-pref("privacy.exposeContentTitleInWindow", false);
-pref("privacy.exposeContentTitleInWindow.pbm", false);
+// TODO: Enable again after more UX considerations.
+// pref("privacy.exposeContentTitleInWindow", false);
+// pref("privacy.exposeContentTitleInWindow.pbm", false);
 
 // Enable HTTPS-Only mode (tor-browser#19850)
 pref("dom.security.https_only_mode", true);
