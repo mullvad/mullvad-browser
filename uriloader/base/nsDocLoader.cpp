@@ -1206,7 +1206,7 @@ NS_IMETHODIMP nsDocLoader::OnStatus(nsIRequest* aRequest, nsresult aStatus,
         mozilla::components::StringBundle::Service();
     if (!sbs) return NS_ERROR_FAILURE;
     nsAutoString msg;
-    nsresult rv = sbs->FormatStatusMessage(aStatus, aStatusArg, msg);
+    nsresult rv = sbs->FormatStatusMessage(aStatus, aStatusArg, false, msg);
     if (NS_FAILED(rv)) return rv;
 
     // Keep around the message. In case a request finishes, we need to make sure
