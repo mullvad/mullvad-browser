@@ -86,9 +86,13 @@ interface nsIStringBundleService : nsISupports
    *            used in the string lookup process.
    * @param aStatusArg - The status message argument(s). Multiple arguments
    *            can be separated by newline ('\n') characters.
+   * @param aSpoofLocale - If true (default is false), forces the en-US
+                locale on content-accessible messages (XSLT errors so far).
    * @return the formatted message
    */
-  AString formatStatusMessage(in nsresult aStatus, in wstring aStatusArg);
+  AString formatStatusMessage(in nsresult aStatus,
+                              in wstring aStatusArg,
+                              [optional] in boolean aSpoofLocale);
 
   /**
    * flushes the string bundle cache - useful when the locale changes or
