@@ -940,11 +940,17 @@ void txMozillaXSLTProcessor::reportError(nsresult aResult,
         mozilla::components::StringBundle::Service();
     if (sbs) {
       nsString errorText;
-      sbs->FormatStatusMessage(aResult, u"", errorText);
+      bool spoofLocale = nsContentUtils::SpoofLocaleEnglish();
+      if (spoofLocale && mSource) {
+        Document* sourceDoc = mSource->OwnerDoc();
+        spoofLocale = !(sourceDoc && sourceDoc->AllowsL10n());
+      }
+      sbs->FormatStatusMessage(aResult, u"", spoofLocale, errorText);
 
       nsAutoString errorMessage;
       nsCOMPtr<nsIStringBundle> bundle;
-      sbs->CreateBundle(XSLT_MSGS_URL, getter_AddRefs(bundle));
+      sbs->CreateBundle(spoofLocale ? XSLT_MSGS_URL_en_US : XSLT_MSGS_URL,
+                        getter_AddRefs(bundle));
 
       if (bundle) {
         AutoTArray<nsString, 1> error = {errorText};
