@@ -7,5 +7,6 @@
 #define DOM_XSLT_XSLT_TXXSLTMSGSURL_H_
 
 #define XSLT_MSGS_URL "chrome://global/locale/xslt/xslt.properties"
+#define XSLT_MSGS_URL_en_US "resource://gre/res/locale/xslt/xslt.properties"
 
 #endif  // DOM_XSLT_XSLT_TXXSLTMSGSURL_H_
