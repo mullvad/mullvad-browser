@@ -21,6 +21,7 @@
 - [ ] **Critical bug-fix**: patchset fixes a bug in core-functionality
 - [ ] **Consistency**: patchset which would make development easier if it were in both the alpha and release branches; developer tools, build system changes, etc
 - [ ] **Sponsor required**: patchset required for sponsor
+- [ ] **Localization**: typos and other localization changes that should be also in the release branch
 - [ ] **Other**: please explain
 
 ### Merging
