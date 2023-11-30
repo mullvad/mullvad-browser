@@ -155,12 +155,17 @@ const ClipboardPrivacy = {
   _globalActivation: false,
   _isPrivateClipboard: false,
   _hasher: null,
+  _shuttingDown: false,
 
-  _computeClipboardHash(win = Services.ww.activeWindow) {
+  _createTransferable() {
     const trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(
       Ci.nsITransferable
     );
-    trans.init(win?.docShell?.QueryInterface(Ci.nsILoadContext) || null);
+    trans.init(null);
+    return trans;
+  },
+  _computeClipboardHash() {
+    const trans = this._createTransferable();
     ["text/x-moz-url", "text/plain"].forEach(trans.addDataFlavor);
     try {
       Services.clipboard.getData(trans, Ci.nsIClipboard.kGlobalClipboard);
@@ -199,16 +204,26 @@ const ClipboardPrivacy = {
           this._globalActivation = !Services.focus.activeWindow;
         }, 100);
       }
-      const clipboardHash = this._computeClipboardHash(win);
-      if (clipboardHash !== this._lastClipboardHash) {
-        this._isPrivateClipboard =
-          !activation &&
-          (lazy.PrivateBrowsingUtils.permanentPrivateBrowsing ||
-            lazy.PrivateBrowsingUtils.isWindowPrivate(win));
-        this._lastClipboardHash = clipboardHash;
-        console.log(
-          `Clipboard changed: private ${this._isPrivateClipboard}, hash ${clipboardHash}.`
-        );
+
+      const checkClipboardContent = () => {
+        const clipboardHash = this._computeClipboardHash();
+        if (clipboardHash !== this._lastClipboardHash) {
+          this._isPrivateClipboard =
+            !activation &&
+            (lazy.PrivateBrowsingUtils.permanentPrivateBrowsing ||
+              lazy.PrivateBrowsingUtils.isWindowPrivate(win));
+          this._lastClipboardHash = clipboardHash;
+          console.log(
+            `Clipboard changed: private ${this._isPrivateClipboard}, hash ${clipboardHash}.`
+          );
+        }
+      };
+
+      if (win.closed) {
+        checkClipboardContent();
+      } else {
+        // defer clipboard access on DOM events to work-around tor-browser#42306
+        lazy.setTimeout(checkClipboardContent, 0);
       }
     };
     const focusListener = e =>
@@ -231,18 +246,28 @@ const ClipboardPrivacy = {
           if (
             this._isPrivateClipboard &&
             lazy.PrivateBrowsingUtils.isWindowPrivate(win) &&
-            !(
-              lazy.PrivateBrowsingUtils.permanentPrivateBrowsing ||
-              Array.from(Services.ww.getWindowEnumerator()).find(w =>
-                lazy.PrivateBrowsingUtils.isWindowPrivate(w)
-              )
-            )
+            (this._shuttingDown ||
+              !Array.from(Services.ww.getWindowEnumerator()).find(
+                w =>
+                  lazy.PrivateBrowsingUtils.isWindowPrivate(w) &&
+                  // We need to filter out the HIDDEN WebExtensions window,
+                  // which might be private as well but is not UI-relevant.
+                  !w.location.href.startsWith("chrome://extensions/")
+              ))
           ) {
             // no more private windows, empty private content if needed
             this.emptyPrivate();
           }
       }
     });
+
+    lazy.AsyncShutdown.quitApplicationGranted.addBlocker(
+      "ClipboardPrivacy: removing private data",
+      () => {
+        this._shuttingDown = true;
+        this.emptyPrivate();
+      }
+    );
   },
   emptyPrivate() {
     if (
@@ -253,7 +278,20 @@ const ClipboardPrivacy = {
       ) &&
       this._lastClipboardHash === this._computeClipboardHash()
     ) {
-      Services.clipboard.emptyClipboard(Ci.nsIClipboard.kGlobalClipboard);
+      // nsIClipboard.emptyClipboard() does nothing in Wayland:
+      // we'll set an empty string as a work-around.
+      const trans = this._createTransferable();
+      const flavor = "text/plain";
+      trans.addDataFlavor(flavor);
+      const emptyString = Cc["@mozilla.org/supports-string;1"].createInstance(
+        Ci.nsISupportsString
+      );
+      emptyString.data = "";
+      trans.setTransferData(flavor, emptyString);
+      const { clipboard } = Services,
+        { kGlobalClipboard } = clipboard;
+      clipboard.setData(trans, null, kGlobalClipboard);
+      clipboard.emptyClipboard(kGlobalClipboard);
       this._lastClipboardHash = null;
       this._isPrivateClipboard = false;
       console.log("Private clipboard emptied.");
@@ -2027,7 +2065,6 @@ BrowserGlue.prototype = {
           lazy.UpdateListener.reset();
         }
       },
-      () => ClipboardPrivacy.emptyPrivate(), // tor-browser#42019
     ];
 
     for (let task of tasks) {
