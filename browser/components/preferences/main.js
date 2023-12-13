@@ -1469,7 +1469,9 @@ var gMainPane = {
         name,
       };
     });
-    locales.sort((a, b) => a.code.localeCompare(b.code));
+    // tor-browser#42335: Sort language codes independently from the locale,
+    // so do not use localeCompare.
+    locales.sort((a, b) => a.code > b.code);
 
     let fragment = document.createDocumentFragment();
     for (let { code, name } of locales) {
