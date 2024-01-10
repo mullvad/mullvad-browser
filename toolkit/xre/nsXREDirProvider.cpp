@@ -1109,7 +1109,14 @@ nsresult nsXREDirProvider::GetUpdateRootDir(nsIFile** aResult,
   rv = GetUserDataDirectory(getter_AddRefs(updRoot), false);
   NS_ENSURE_SUCCESS(rv, rv);
 #  else
-  rv = GetUserDataDirectoryHome(getter_AddRefs(updRoot), false);
+  bool isPortable = true;
+  rv = GetIsPortableMode(&isPortable);
+  NS_ENSURE_SUCCESS(rv, rv);
+  if (isPortable) {
+    rv = GetUserDataDirectoryHome(getter_AddRefs(updRoot), false);
+  } else {
+    rv = GetUserDataDirectory(getter_AddRefs(updRoot), true);
+  }
   NS_ENSURE_SUCCESS(rv, rv);
 #  endif
   rv = updRoot->AppendNative("UpdateInfo"_ns);

@@ -2807,7 +2807,7 @@ int LaunchCallbackAndPostProcessApps(int argc, NS_tchar** argv,
 #endif
 
   if (argc > callbackIndex) {
-#if defined(XP_WIN) && !defined(BASE_BROWSER_UPDATE)
+#if defined(XP_WIN)
     if (gSucceeded) {
       if (!LaunchWinPostProcess(gInstallDirPath, gPatchDirPath)) {
         fprintf(stderr, "The post update process was not launched");
