@@ -49,6 +49,13 @@ void ICUUtils::LanguageTagIterForContent::GetNext(nsACString& aBCP47LangTag) {
     mCurrentFallbackIndex = 2;
     // Else take the app's locale:
 
+    const bool spoofLocale = nsContentUtils::SpoofLocaleEnglish() &&
+                             !mContent->OwnerDoc()->AllowsL10n();
+    if (spoofLocale) {
+      aBCP47LangTag.AssignLiteral("en-US");
+      return;
+    }
+
     nsAutoCString appLocale;
     LocaleService::GetInstance()->GetAppLocaleAsBCP47(aBCP47LangTag);
     return;
