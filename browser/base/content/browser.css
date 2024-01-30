@@ -127,6 +127,11 @@ body {
   -moz-window-dragging: drag;
 }
 
+/**
+  Never modify the following selector without synchronizing
+  LETTERBOX_CSS_SELECTOR in RFPHelper.sys.jsm, where
+  --letterboxing-width & --letterboxing-height are actually set.
+**/
 .letterboxing .browserContainer {
   /*
   From Firefox 115 on, .browserContainer layout is flex / column,
@@ -137,6 +142,14 @@ body {
   background: var(--letterboxing-bgcolor);
 }
 
+.browserDecorator {
+  display: none;
+  pointer-events: none;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
 .letterboxing {
   --letterboxing-border-radius: 8px;
   --letterboxing-border-top-radius: 0;
@@ -145,6 +158,7 @@ body {
   --letterboxing-bgcolor: var(--tabpanel-background-color);
   --letterboxing-gradient-color1: var(--letterboxing-bgcolor);
   --letterboxing-gradient-color2: color-mix(in srgb, var(--chrome-content-separator-color) 50%, var(--letterboxing-bgcolor));
+  --letterboxing-border-color: var(--letterboxing-bgcolor);
 }
 
 .letterboxing.letterboxing-vcenter .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing) {
@@ -157,6 +171,26 @@ body {
   box-shadow: rgba(0, 0, 0, 0.5) 0px -1px 2px;
 }
 
+:root:not([inDOMFullscreen]) .letterboxing .browserContainer:not(.responsive-mode)
+  > .browserStack:not(.exclude-letterboxing)
+  > .browserDecorator {
+  display: initial;
+  visibility: visible;
+  border-radius: var(--letterboxing-border-radius);
+  border-top-left-radius: var(--letterboxing-border-top-radius);
+  border-top-right-radius: var(--letterboxing-border-top-radius);
+  box-shadow: var(--letterboxing-border-color) 0px 0px .1px inset, var(--letterboxing-border-color) 0 0 .1px;
+  border: .1px solid var(--letterboxing-border-color);
+  outline: .1px solid var(--letterboxing-bgcolor);
+  height: calc(var(--letterboxing-height) + 1px);
+  top: -1px;
+}
+
+.letterboxing-vcenter .browserDecorator {
+  height: auto !important;
+  top: 0 !important;
+}
+
 /*
   Align status bar with content.
   TODO: switch to nested CSS selectors for conciseness when available (Firefox >= 117)
@@ -167,6 +201,7 @@ body {
   place-self: end left;
   left: 0;
   right: 0;
+  z-index: 2;
   --letterboxing-status-left-radius: var(--letterboxing-border-radius);
   --letterboxing-status-right-radius: 0;
 }
@@ -184,23 +219,24 @@ body {
 .letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing)
 #statuspanel-label {
   border-radius: 0 0 var(--letterboxing-status-right-radius) var(--letterboxing-status-left-radius);
+  margin: 0;
+  border: 1px solid var(--letterboxing-border-color);
+  max-width: calc(var(--letterboxing-width) * .5);
 }
 
-/**
-  Never modify the following selector without synchronizing
-  LETTERBOX_CSS_SELECTOR in RFPHelper.jsm!
-**/
 .letterboxing .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing) > browser {
-  /* width & height to be dynamically set by RFPHelper.jsm */
   box-shadow: 0px 4px 8px 0px var(--letterboxing-shadow-color);
   border-radius: var(--letterboxing-border-radius);
   border-top-left-radius: var(--letterboxing-border-top-radius);
   border-top-right-radius: var(--letterboxing-border-top-radius);
+  width: var(--letterboxing-width) !important;
+  height: var(--letterboxing-height) !important;
 }
 
 :root:not([inDOMFullscreen]) .letterboxing.letterboxing-ready .browserContainer:not(.responsive-mode)
   > .browserStack:not(.exclude-letterboxing) {
   place-content: var(--letterboxing-vertical-alignment) center;
+  background: var(--letterboxing-bgcolor);
 }
 
 #toolbar-menubar[autohide="true"] {
