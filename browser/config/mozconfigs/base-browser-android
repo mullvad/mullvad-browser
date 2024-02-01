@@ -15,9 +15,6 @@ ac_add_options --with-android-ndk=$ANDROID_NDK_HOME
 ac_add_options --with-android-min-sdk=21
 ac_add_options --with-gradle=$GRADLE_HOME/bin/gradle
 
-# https://bugzilla.mozilla.org/show_bug.cgi?id=1758568
-ac_add_options --enable-minify=properties
-
 ac_add_options --enable-strip
 ac_add_options --enable-install-strip
 ac_add_options --disable-tests
@@ -39,6 +36,7 @@ if test -n "$LOCAL_DEV_BUILD"; then
     # You must use the "default" bogus channel for dev builds
     ac_add_options --enable-update-channel=default
     ac_add_options --with-base-browser-version=dev-build
+    ac_add_options --disable-minify
 fi
 
 if test -z "$WASI_SYSROOT"; then
