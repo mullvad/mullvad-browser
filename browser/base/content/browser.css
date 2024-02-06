@@ -168,7 +168,6 @@ body {
 
 .letterboxing.letterboxing-gradient .browserContainer {
   background: linear-gradient(283deg, var(--letterboxing-gradient-color1) 0%, var(--letterboxing-gradient-color2) 100%), var(--letterboxing-bgcolor);
-  box-shadow: rgba(0, 0, 0, 0.5) 0px -1px 2px;
 }
 
 :root:not([inDOMFullscreen]) .letterboxing .browserContainer:not(.responsive-mode)
@@ -231,12 +230,12 @@ body {
   border-top-right-radius: var(--letterboxing-border-top-radius);
   width: var(--letterboxing-width) !important;
   height: var(--letterboxing-height) !important;
+  background: var(--letterboxing-gradient-color2);
 }
 
 :root:not([inDOMFullscreen]) .letterboxing.letterboxing-ready .browserContainer:not(.responsive-mode)
   > .browserStack:not(.exclude-letterboxing) {
   place-content: var(--letterboxing-vertical-alignment) center;
-  background: var(--letterboxing-bgcolor);
 }
 
 #toolbar-menubar[autohide="true"] {
