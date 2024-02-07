@@ -159,6 +159,7 @@ body {
   --letterboxing-gradient-color1: var(--letterboxing-bgcolor);
   --letterboxing-gradient-color2: color-mix(in srgb, var(--chrome-content-separator-color) 50%, var(--letterboxing-bgcolor));
   --letterboxing-border-color: var(--letterboxing-bgcolor);
+  --letterboxing-decorator-visibility: visible;
 }
 
 .letterboxing.letterboxing-vcenter .browserContainer:not(.responsive-mode) > .browserStack:not(.exclude-letterboxing) {
@@ -174,7 +175,7 @@ body {
   > .browserStack:not(.exclude-letterboxing)
   > .browserDecorator {
   display: initial;
-  visibility: visible;
+  visibility: var(--letterboxing-decorator-visibility);
   border-radius: var(--letterboxing-border-radius);
   border-top-left-radius: var(--letterboxing-border-top-radius);
   border-top-right-radius: var(--letterboxing-border-top-radius);
