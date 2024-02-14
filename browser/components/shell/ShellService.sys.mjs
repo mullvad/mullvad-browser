@@ -64,7 +64,8 @@ let ShellServiceInternal = {
   },
 
   isDefaultBrowserOptOut() {
-    if (AppConstants.platform == "win") {
+    // Mozilla is also going to disable this, see Bug 1274517 and Bug 1272162.
+    if (AppConstants.platform == "win" && !AppConstants.BASE_BROWSER_VERSION) {
       let optOutValue = lazy.WindowsRegistry.readRegKey(
         Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
         "Software\\Mozilla\\Firefox",
@@ -295,7 +296,7 @@ let ShellServiceInternal = {
       ) {
         if (this._shouldSetDefaultPDFHandler()) {
           lazy.log.info("Setting Firefox as default PDF handler");
-          exeArgs.push(".pdf", "FirefoxPDF");
+          exeArgs.push(".pdf", "MullvadBrowserPDF");
         } else {
           lazy.log.info("Not setting Firefox as default PDF handler");
         }
@@ -338,7 +339,7 @@ let ShellServiceInternal = {
           "set-default-extension-handlers-user-choice",
           aumi,
           ".pdf",
-          "FirefoxPDF",
+          "MullvadBrowserPDF",
         ],
       });
       telemetryResult = "ErrOther";
