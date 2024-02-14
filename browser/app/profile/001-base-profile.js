@@ -620,11 +620,6 @@ pref("privacy.query_stripping.strip_on_share.enabled", true);
 pref("dom.text-recognition.enabled", false);
 
 #ifdef XP_WIN
-// prefs to disable jump-list entries in the taskbar on Windows (see bug #12885)
-// this pref changes the app's set AUMID to be dependent on the profile path, rather than
-// attempting to read it from the registry; this is necessary so that the file generated
-// by the jumplist system can be properly deleted if it is disabled
-pref("taskbar.grouping.useprofile", true);
 pref("browser.taskbar.lists.enabled", false);
 pref("browser.taskbar.lists.frequent.enabled", false);
 pref("browser.taskbar.lists.tasks.enabled", false);
