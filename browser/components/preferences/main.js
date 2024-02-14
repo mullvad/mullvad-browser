@@ -1761,8 +1761,11 @@ var gMainPane = {
       let shellSvc = getShellService();
       let defaultBrowserBox = document.getElementById("defaultBrowserBox");
       let isInFlatpak = gGIOService?.isRunningUnderFlatpak;
+      const xreDirProvider = Cc[
+        "@mozilla.org/xre/directory-provider;1"
+      ].getService(Ci.nsIXREDirProvider);
       // Flatpak does not support setting nor detection of default browser
-      if (!shellSvc || isInFlatpak) {
+      if (!shellSvc || isInFlatpak || xreDirProvider.isPortableMode) {
         defaultBrowserBox.hidden = true;
         return;
       }
