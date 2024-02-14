@@ -224,19 +224,19 @@ static bool VerifyUserDefault(const wchar_t* aExt, const wchar_t* aProgID) {
 
 HRESULT SetDefaultBrowserUserChoice(
     const wchar_t* aAumi, const wchar_t* const* aExtraFileExtensions) {
-  auto urlProgID = FormatProgID(L"FirefoxURL", aAumi);
+  auto urlProgID = FormatProgID(L"MullvadBrowserURL", aAumi);
   if (!CheckProgIDExists(urlProgID.get())) {
     LOG_ERROR_MESSAGE(L"ProgID %s not found", urlProgID.get());
     return MOZ_E_NO_PROGID;
   }
 
-  auto htmlProgID = FormatProgID(L"FirefoxHTML", aAumi);
+  auto htmlProgID = FormatProgID(L"MullvadBrowserHTML", aAumi);
   if (!CheckProgIDExists(htmlProgID.get())) {
     LOG_ERROR_MESSAGE(L"ProgID %s not found", htmlProgID.get());
     return MOZ_E_NO_PROGID;
   }
 
-  auto pdfProgID = FormatProgID(L"FirefoxPDF", aAumi);
+  auto pdfProgID = FormatProgID(L"MullvadBrowserPDF", aAumi);
   if (!CheckProgIDExists(pdfProgID.get())) {
     LOG_ERROR_MESSAGE(L"ProgID %s not found", pdfProgID.get());
     return MOZ_E_NO_PROGID;
@@ -362,4 +362,42 @@ HRESULT SetDefaultExtensionHandlersUserChoiceImpl(
   }
 
   return S_OK;
+}
+
+#ifdef LOG_ERRORS_FILE
+FILE* gLogFile;
+#endif
+
+// Simplified version of wmain that uses only this file from main.cpp.
+int wmain(int argc, wchar_t** argv) {
+  if (argc < 3 || !argv[1] || !argv[2]) {
+    return E_INVALIDARG;
+  }
+
+#ifdef LOG_ERRORS_FILE
+  std::unique_ptr<FILE, decltype(&fclose)> logFile(fopen(LOG_ERRORS_FILE, "a+"),
+                                                   &fclose);
+  gLogFile = logFile.get();
+#endif
+
+  HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+  if (FAILED(hr)) {
+    LOG_ERROR(hr);
+    return hr;
+  }
+  const struct ComUninitializer {
+    ~ComUninitializer() { CoUninitialize(); }
+  } kCUi;
+
+  if (!wcscmp(argv[1], L"set-default-browser-user-choice")) {
+    // `argv` is itself null-terminated, so we can safely pass the tail of the
+    // array here.
+    return SetDefaultBrowserUserChoice(argv[2], &argv[3]);
+  } else if (!wcscmp(argv[1], L"set-default-extension-handlers-user-choice")) {
+    // `argv` is itself null-terminated, so we can safely pass the tail of the
+    // array here.
+    return SetDefaultExtensionHandlersUserChoice(argv[2], &argv[3]);
+  } else {
+    return E_INVALIDARG;
+  }
 }
