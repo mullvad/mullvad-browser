@@ -35,7 +35,8 @@ unsigned int g_stringsize;
 TCHAR *g_variables;
 
 // Indicates that an application supports dual desktop and immersive modes. In Windows 8, this property is only applicable for web browsers.
-DEFINE_PROPERTYKEY(PKEY_AppUserModel_IsDualMode, 0x9F4C2855, 0x9F79, 0x4B39, 0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3, 11);
+// mingw already defines this in propkey.h.
+// DEFINE_PROPERTYKEY(PKEY_AppUserModel_IsDualMode, 0x9F4C2855, 0x9F79, 0x4B39, 0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3, 11);
 
 int popstring(TCHAR *str, int len);
 void pushstring(const TCHAR *str, int len);
