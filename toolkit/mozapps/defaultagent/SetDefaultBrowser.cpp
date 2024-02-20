@@ -364,11 +364,21 @@ HRESULT SetDefaultExtensionHandlersUserChoiceImpl(
   return S_OK;
 }
 
+#ifdef LOG_ERRORS_FILE
+FILE* gLogFile;
+#endif
+
 // Simplified version of wmain that uses only this file from main.cpp.
 int wmain(int argc, wchar_t** argv) {
   if (argc < 3 || !argv[1] || !argv[2]) {
     return E_INVALIDARG;
   }
+
+#ifdef LOG_ERRORS_FILE
+  std::unique_ptr<FILE, decltype(&fclose)> logFile(fopen(LOG_ERRORS_FILE, "a+"),
+                                                   &fclose);
+  gLogFile = logFile.get();
+#endif
 
   HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
   if (FAILED(hr)) {
