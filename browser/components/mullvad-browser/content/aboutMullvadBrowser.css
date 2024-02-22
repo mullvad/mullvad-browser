@@ -44,19 +44,45 @@ p {
 
 #header {
   display: grid;
-  grid-template-rows: auto auto;
-  grid-template-columns: auto;
+  grid-template: "heading" auto "text" auto / auto;
   justify-items: center;
   align-content: center;
   gap: 1.5em;
 }
 
 #headingContainer {
+  grid-area: heading;
   display: inline flex;
   flex-direction: row;
   white-space: nowrap;
   align-items: center;
   gap: 16px;
+}
+
+#mullvad-browser-update,
+#mullvad-browser-intro {
+  grid-area: text;
+}
+
+body:not(.has-update) #mullvad-browser-update {
+  display: none;
+}
+
+body:not(.no-update) #mullvad-browser-intro {
+  /* Invisible but still reserves space for when the page is initially loaded to
+   * prevent the Mullvad title from jumping. */
+  visibility: hidden;
+}
+
+#mullvad-browser-update-img {
+  height: 1em;
+  vertical-align: sub;
+  margin-inline-end: 0.3em;
+}
+
+#mullvad-browser-update a {
+  /* Increase gap between the link and the rest of the text. */
+  margin-inline: 0.4em;
 }
 
 #footer {

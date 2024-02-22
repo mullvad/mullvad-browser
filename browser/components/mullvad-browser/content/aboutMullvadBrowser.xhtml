@@ -21,6 +21,8 @@
       rel="localization"
       href="browser/mullvad-browser/aboutMullvadBrowser.ftl"
     />
+
+    <script src="chrome://browser/content/mullvad-browser/aboutMullvadBrowser.js"></script>
   </head>
   <body>
     <div id="header">
@@ -48,10 +50,21 @@
           data-l10n-id="about-mullvad-browser-heading"
         ></h1>
       </div>
-      <p data-l10n-id="about-mullvad-browser-developed-by">
+      <p
+        id="mullvad-browser-intro"
+        data-l10n-id="about-mullvad-browser-developed-by"
+      >
         <a data-l10n-name="tor-project-link" href="https://www.torproject.org">
         </a>
         <a data-l10n-name="mullvad-vpn-link" href="https://mullvad.net"> </a>
+      </p>
+      <p id="mullvad-browser-update">
+        <img
+          id="mullvad-browser-update-img"
+          alt=""
+          src="chrome://browser/content/mullvad-browser/2728-sparkles.svg"
+        />
+        <span><a data-l10n-name="update-link"></a></span>
       </p>
     </div>
     <div id="footer">
