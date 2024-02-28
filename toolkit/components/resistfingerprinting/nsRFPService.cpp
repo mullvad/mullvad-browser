@@ -904,12 +904,17 @@ void nsRFPService::GetSpoofedUserAgent(nsACString& userAgent,
   // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorID/userAgent
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent
 
+  const bool spoofOs =
+      isForHTTPHeader &&
+      Preferences::GetBool(
+          "privacy.resistFingerprinting.spoofOsInUserAgentHeader", true);
+
   // These magic numbers are the lengths of the UA string literals below.
   // Assume three-digit Firefox version numbers so we have room to grow.
   size_t preallocatedLength =
       13 +
-      (isForHTTPHeader ? mozilla::ArrayLength(SPOOFED_HTTP_UA_OS)
-                       : mozilla::ArrayLength(SPOOFED_UA_OS)) -
+      (spoofOs ? mozilla::ArrayLength(SPOOFED_HTTP_UA_OS)
+               : mozilla::ArrayLength(SPOOFED_UA_OS)) -
       1 + 5 + 3 + 10 + mozilla::ArrayLength(LEGACY_UA_GECKO_TRAIL) - 1 + 9 + 3 +
       2;
   userAgent.SetCapacity(preallocatedLength);
@@ -917,7 +922,7 @@ void nsRFPService::GetSpoofedUserAgent(nsACString& userAgent,
   // "Mozilla/5.0 (%s; rv:%d.0) Gecko/%d Firefox/%d.0"
   userAgent.AssignLiteral("Mozilla/5.0 (");
 
-  if (isForHTTPHeader) {
+  if (spoofOs) {
     userAgent.AppendLiteral(SPOOFED_HTTP_UA_OS);
   } else {
     userAgent.AppendLiteral(SPOOFED_UA_OS);
