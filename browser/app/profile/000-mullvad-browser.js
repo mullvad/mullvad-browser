@@ -34,7 +34,7 @@ pref("browser.shell.checkDefaultBrowser", false);
 // mullvad-browser#228: default to spoof en-US and skip showing the dialog
 pref("privacy.spoof_english", 2);
 
-// privacy-browser#131: Review a few updater preferences
+// mullvad-browser#131: Review a few updater preferences
 pref("app.update.notifyDuringDownload", true);
 pref("app.update.url.manual", "https://mullvad.net/download/browser");
 pref("app.update.url.details", "https://mullvad.net/download/browser");
