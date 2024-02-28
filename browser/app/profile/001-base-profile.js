@@ -398,6 +398,9 @@ pref("browser.display.use_system_colors", false);
 // Enforce non-native widget theme (true by default, defense in depth).
 // Provides a uniform look and feel across platforms. Added with tor-browser#41496.
 pref("widget.non-native-theme.enabled", true);
+// tor-browser#41676: Set the TZ environment variable as a defense-in-depth.
+// TODO: Remove this in ESR-128, as it has been removed in 116 with Bug 1837582.
+pref("privacy.resistFingerprinting.testing.setTZtoUTC", true);
 
 // tor-browser#41943: lock and revisit after it gets flipped to true in stable Firefox
 pref("javascript.options.spectre.disable_for_isolated_content", false, locked);
