@@ -5,23 +5,23 @@
 // a result.
 pref("browser.toolbars.bookmarks.visibility", "never");
 
-// privacy-browser#19: Enable Mullvad's DOH
+// mullvad-browser#19: Enable Mullvad's DOH
 pref("network.trr.uri", "https://dns.mullvad.net/dns-query");
 pref("network.trr.default_provider_uri", "https://dns.mullvad.net/dns-query");
 pref("network.trr.mode", 3);
 pref("doh-rollout.provider-list", "[{\"UIName\":\"Mullvad\",\"autoDefault\":true,\"canonicalName\":\"\",\"id\":\"mullvad\",\"last_modified\":0,\"schema\":0,\"uri\":\"https://dns.mullvad.net/dns-query\"},{\"UIName\":\"Mullvad (Ad-blocking)\",\"autoDefault\":false,\"canonicalName\":\"\",\"id\":\"mullvad\",\"last_modified\":0,\"schema\":0,\"uri\":\"https://adblock.dns.mullvad.net/dns-query\"}]");
-// privacy-browser#122: Audit DoH heuristics
+// mullvad-browser#122: Audit DoH heuristics
 pref("doh-rollout.disable-heuristics", true);
 
-// privacy-browser#37: Customization for the about dialog
+// mullvad-browser#37: Customization for the about dialog
 pref("app.releaseNotesURL.aboutDialog", "about:blank");
 
-// privacy-browser#94: Disable legacy global microphone/webcam indicator
+// mullvad-browser#94: Disable legacy global microphone/webcam indicator
 // Disable the legacy Firefox Quantum-styled global webcam/microphone indicator in favor of each
 // platform's native indicator
 pref("privacy.webrtc.legacyGlobalIndicator", false);
 
-// privacy-browser#87: Windows and Linux need additional work to make the
+// mullvad-browser#87: Windows and Linux need additional work to make the
 // default browser choice working.
 // We are shipping only the portable versions for the initial release anyway, so
 // we leave this popup enabled only on macOS.
