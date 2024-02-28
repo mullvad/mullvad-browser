@@ -45,3 +45,6 @@ pref("app.releaseNotesURL", "https://github.com/mullvad/mullvad-browser/releases
 pref("app.releaseNotesURL.aboutDialog", "about:blank");
 // point to our feedback url rather than Mozilla's
 pref("app.feedback.baseURL", "https://mullvad.net/help/tag/browser/");
+
+// mullvad-browser#234: Do not spoof the OS in the User-Agent header
+pref("privacy.resistFingerprinting.spoofOsInUserAgentHeader", false);
