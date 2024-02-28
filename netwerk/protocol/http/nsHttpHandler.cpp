@@ -482,6 +482,9 @@ nsresult nsHttpHandler::Init() {
     // obsService->AddObserver(this, "net:failed-to-process-uri-content", true);
   }
 
+  Preferences::AddWeakObserver(
+      this, "privacy.resistFingerprinting.spoofOsInUserAgentHeader"_ns);
+
   MakeNewRequestTokenBucket();
   mWifiTickler = new Tickler();
   if (NS_FAILED(mWifiTickler->Init())) mWifiTickler = nullptr;
@@ -2105,6 +2108,9 @@ nsHttpHandler::Observe(nsISupports* subject, const char* topic,
     // Inform nsIOService that network is tearing down.
     gIOService->SetHttpHandlerAlreadyShutingDown();
 
+    Preferences::RemoveObserver(
+        this, "privacy.resistFingerprinting.spoofOsInUserAgentHeader"_ns);
+
     ShutdownConnectionManager();
 
     // need to reset the session start time since cache validation may
@@ -2227,6 +2233,11 @@ nsHttpHandler::Observe(nsISupports* subject, const char* topic,
     ShutdownConnectionManager();
     mConnMgr = nullptr;
     Unused << InitConnectionMgr();
+  } else if (!strcmp(topic, "nsPref:changed") &&
+             !NS_strcmp(
+                 data,
+                 u"privacy.resistFingerprinting.spoofOsInUserAgentHeader")) {
+    nsRFPService::GetSpoofedUserAgent(mSpoofedUserAgent, true);
   }
 
   return NS_OK;
