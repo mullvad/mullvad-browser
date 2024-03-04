@@ -10,37 +10,28 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityStrings", () => {
   );
   const brandShortName = brandBundle.GetStringFromName("brandShortName");
 
-  let strings = {
-    new_identity: "New Identity",
-    new_identity_sentence_case: "New identity",
-    new_identity_prompt_title: "Reset your identity?",
-    new_identity_prompt: `${brandShortName} will close all windows and tabs. All website sessions will be lost. \nRestart ${brandShortName} now to reset your identity?`,
-    new_identity_restart: `Restart ${brandShortName}`,
-    new_identity_ask_again: "Never ask me again",
-    new_identity_menu_accesskey: "I",
-  };
-  let bundle = null;
+  const fallbackBundle = Services.strings.createBundle(
+    "resource:///chrome/en-US/locale/browser/newIdentity.properties"
+  );
+  const strings = {};
+  const brandedStrings = ["new_identity_prompt", "new_identity_restart"];
+  for (let { key } of fallbackBundle.getSimpleEnumeration()) {
+    strings[key] = fallbackBundle.GetStringFromName(key);
+  }
   try {
-    bundle = Services.strings.createBundle(
+    const bundle = Services.strings.createBundle(
       "chrome://browser/locale/newIdentity.properties"
     );
-  } catch (e) {
-    console.warn("Could not load the New Identity strings");
-  }
-  if (bundle) {
     for (const key of Object.keys(strings)) {
       try {
         strings[key] = bundle.GetStringFromName(key);
       } catch (e) {}
     }
-    strings.new_identity_prompt = strings.new_identity_prompt.replaceAll(
-      "%S",
-      brandShortName
-    );
-    strings.new_identity_restart = strings.new_identity_restart.replaceAll(
-      "%S",
-      brandShortName
-    );
+  } catch (e) {
+    console.warn("Could not load localized New Identity strings");
+  }
+  for (let key of brandedStrings) {
+    strings[key] = strings[key].replaceAll("%S", brandShortName);
   }
   return strings;
 });
@@ -437,10 +428,76 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
       logger.info("Opening a new window");
       return new Promise(resolve => {
         // Open a new window forcing the about:privatebrowsing page (tor-browser#41765)
-        const win = OpenBrowserWindow({private: "no-home"});
+        // unless user explicitly overrides this policy (tor-browser #42236)
+        const homePref = "browser.startup.homepage";
+        const trustedHomePref = "browser.startup.homepage.new_identity";
+        const homeURL = Services.prefs.getStringPref(homePref, "");
+        const isTrustedHome =
+          homeURL === "about:tor" ||
+          homeURL.startsWith("chrome://") || // about:blank and other built-ins
+          homeURL === Services.prefs.getStringPref(trustedHomePref, "");
+        const isCustomHome =
+          Services.prefs.getIntPref("browser.startup.page") === 1;
+        const win = OpenBrowserWindow({
+          private: isCustomHome && isTrustedHome ? "private" : "no-home",
+        });
         // This mechanism to know when the new window is ready is used by
         // OpenBrowserWindow itself (see its definition in browser.js).
-        win.addEventListener("MozAfterPaint", () => resolve(), { once: true });
+        win.addEventListener(
+          "MozAfterPaint",
+          () => {
+            resolve();
+            if (isTrustedHome || !isCustomHome) {
+              return;
+            }
+            const tbl = win.TabsProgressListener;
+            const { onLocationChange } = tbl;
+            tbl.onLocationChange = (...args) => {
+              tbl.onLocationChange = onLocationChange;
+              tbl.onLocationChange(...args);
+              let displayAddress;
+              try {
+                const url = new URL(homeURL);
+                displayAddress = url.hostname;
+                if (!displayAddress) {
+                  // no host, use full address and truncate if too long
+                  const MAX_LEN = 32;
+                  displayAddress = url.href;
+                  if (displayAddress.length > MAX_LEN) {
+                    displayAddress = `${displayAddress.substring(0, MAX_LEN)}…`;
+                  }
+                }
+              } catch (e) {
+                // malformed URL, bail out
+                return;
+              }
+              const label =
+                NewIdentityStrings.new_identity_home_notification.replace(
+                  "%S",
+                  displayAddress
+                );
+              const callback = () => {
+                Services.prefs.setStringPref(trustedHomePref, homeURL);
+                win.BrowserHome();
+              };
+              const notificationBox = win.gBrowser.getNotificationBox();
+              notificationBox.appendNotification(
+                "new-identity-safe-home",
+                {
+                  label,
+                  priority: notificationBox.PRIORITY_INFO_MEDIUM,
+                },
+                [
+                  {
+                    label: NewIdentityStrings.new_identity_home_load_button,
+                    callback,
+                  },
+                ]
+              );
+            };
+          },
+          { once: true }
+        );
       });
     }
 
