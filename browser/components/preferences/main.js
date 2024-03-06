@@ -742,6 +742,7 @@ var gMainPane = {
     ]);
 
     AppearanceChooser.init();
+    gLetterboxingPrefs.init();
 
     // Notify observers that the UI is now ready
     Services.obs.notifyObservers(window, "main-pane-loaded");
@@ -2597,6 +2598,7 @@ var gMainPane = {
     Services.prefs.removeObserver(PREF_CONTAINERS_EXTENSION, this);
     Services.obs.removeObserver(this, AUTO_UPDATE_CHANGED_TOPIC);
     Services.obs.removeObserver(this, BACKGROUND_UPDATE_CHANGED_TOPIC);
+    gLetterboxingPrefs.destroy();
     AppearanceChooser.destroy();
   },
 

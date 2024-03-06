@@ -22,3 +22,10 @@ browser.jar:
    content/browser/preferences/more-from-mozilla-qr-code-simple-cn.svg
    content/browser/preferences/web-appearance-dark.svg
    content/browser/preferences/web-appearance-light.svg
+
+   content/browser/preferences/letterboxing.js
+   content/browser/preferences/letterboxing.css
+   content/browser/preferences/letterboxing-middle-dark.svg
+   content/browser/preferences/letterboxing-middle-light.svg
+   content/browser/preferences/letterboxing-top-dark.svg
+   content/browser/preferences/letterboxing-top-light.svg
