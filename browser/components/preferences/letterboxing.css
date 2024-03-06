@@ -1,0 +1,7 @@
+#letterboxingCategory.hide-all-letterboxing {
+  display: none;
+}
+
+.letterboxing-overview {
+  margin-block-end: var(--space-xxlarge);
+}

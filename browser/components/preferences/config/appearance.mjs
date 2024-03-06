@@ -5,6 +5,11 @@
 import { Preferences } from "chrome://global/content/preferences/Preferences.mjs";
 import { SettingGroupManager } from "chrome://browser/content/preferences/config/SettingGroupManager.mjs";
 
+ChromeUtils.importESModule(
+  "chrome://browser/content/preferences/config/letterboxing.mjs",
+  { global: "current" }
+);
+
 const FORCED_COLORS_QUERY = matchMedia("(forced-colors)");
 
 Preferences.addAll([
