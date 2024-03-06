@@ -450,6 +450,8 @@ pref("privacy.resistFingerprinting.letterboxing", true);
 pref("privacy.resistFingerprinting.letterboxing.vcenter", true);
 // tor-browser#41917: Letterboxing gradient background
 pref("privacy.resistFingerprinting.letterboxing.gradient", true);
+// tor-browser#41918: Should we reuse last window sizes if letterboxing is enabled
+pref("privacy.resistFingerprinting.letterboxing.rememberSize", false);
 // tor-browser#43402: Avoid a resize from the skeleton to the newwin size.
 // Should be fixed in ESR-140 with Bug 1448423.
 pref("browser.startup.blankWindow", false);
