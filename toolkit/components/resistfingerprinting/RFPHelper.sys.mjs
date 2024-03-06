@@ -140,14 +140,14 @@ class _RFPHelper {
   _handlePrefChanged(data) {
     switch (data) {
       case kPrefResistFingerprinting:
-        Service.prefs.clearUserPref(kPrefLetterboxingDidForceSize);
+        Services.prefs.clearUserPref(kPrefLetterboxingDidForceSize);
         this._handleResistFingerprintingChanged();
         break;
       case kPrefSpoofEnglish:
         this._handleSpoofEnglishChanged();
         break;
       case kPrefLetterboxing:
-        Service.prefs.clearUserPref(kPrefLetterboxingDidForceSize);
+        Services.prefs.clearUserPref(kPrefLetterboxingDidForceSize);
       case kPrefLetterboxingVcenter:
       case kPrefLetterboxingGradient:
         this._handleLetterboxingPrefChanged();
