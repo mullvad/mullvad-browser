@@ -317,7 +317,10 @@ export var ChromeMigrationUtils = {
     for (let subfolders of options) {
       let rootDir = subfolders[0];
       try {
-        let targetPath = Services.dirsvc.get(rootDir, Ci.nsIFile).path;
+        let targetPath =
+          rootDir === "Home" && Services.env.get("BB_ORIGINAL_HOME")
+            ? Services.env.get("BB_ORIGINAL_HOME")
+            : Services.dirsvc.get(rootDir, Ci.nsIFile).path;
         targetPath = PathUtils.join(targetPath, ...subfolders.slice(1));
         if (await IOUtils.exists(targetPath)) {
           return targetPath;
