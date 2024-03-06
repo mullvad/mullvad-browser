@@ -342,6 +342,8 @@ export var ChromeMigrationUtils = {
 
         if (rootDir == SNAP_REAL_HOME) {
           targetPath = Services.env.get("SNAP_REAL_HOME");
+        } else if (rootDir === "Home" && Services.env.get("BB_ORIGINAL_HOME")) {
+          targetPath = Services.env.get("BB_ORIGINAL_HOME");
         } else {
           targetPath = Services.dirsvc.get(rootDir, Ci.nsIFile).path;
         }
