@@ -2333,7 +2333,9 @@ static void SizeOpenedWindow(nsIDocShellTreeOwner* aTreeOwner,
           screenDesktopRect.Size() / screenCssToDesktopScale;
 
       if (aSizeSpec.SizeSpecified()) {
-        if (!nsContentUtils::ShouldResistFingerprinting()) {
+        if (!(nsContentUtils::ShouldResistFingerprinting() &&
+              nsContentUtils::
+                  ShouldRoundWindowSizeForResistingFingerprinting())) {
           /* Unlike position, force size out-of-bounds check only if
              size actually was specified. Otherwise, intrinsically sized
              windows are broken. */
