@@ -1,0 +1,126 @@
+<script src="chrome://browser/content/preferences/letterboxing.js" />
+<vbox
+  id="letterboxingCategory"
+  class="subcategory"
+  hidden="true"
+  data-category="paneGeneral"
+>
+  <html:h1 data-l10n-id="letterboxing-header" />
+  <description class="letterboxing-overview">
+    <html:span
+      data-l10n-id="letterboxing-overview"
+      class="tail-with-learn-more"
+    ></html:span>
+    <html:a
+      is="moz-support-link"
+      tor-manual-page="anti-fingerprinting_letterboxing"
+      data-l10n-id="letterboxing-learn-more"
+    ></html:a>
+  </description>
+</vbox>
+<groupbox
+  class="letterboxing-category"
+  data-category="paneGeneral"
+  hidden="true"
+>
+  <label><html:h2
+    data-l10n-id="letterboxing-window-size-header"/></label>
+  <description class="letterboxing-search-overview">
+    <html:span
+      data-l10n-id="letterboxing-overview"
+      class="tail-with-learn-more"
+    ></html:span>
+    <html:a
+      is="moz-support-link"
+      tor-manual-page="anti-fingerprinting_letterboxing"
+      data-l10n-id="letterboxing-learn-more"
+    ></html:a>
+  </description>
+  <checkbox
+    id="letterboxingRememberSize"
+    data-l10n-id="letterboxing-remember-size"
+    preference="privacy.resistFingerprinting.letterboxing.rememberSize"
+  />
+</groupbox>
+<groupbox
+  class="letterboxing-category"
+  data-category="paneGeneral"
+  hidden="true"
+>
+  <label><html:h2
+    data-l10n-id="letterboxing-alignment-header"
+    /></label>
+  <description class="letterboxing-search-overview">
+    <html:span
+      data-l10n-id="letterboxing-overview"
+      class="tail-with-learn-more"
+    ></html:span>
+    <html:a
+      is="moz-support-link"
+      tor-manual-page="anti-fingerprinting_letterboxing"
+      data-l10n-id="letterboxing-learn-more"
+    ></html:a>
+  </description>
+  <description
+    id="letterboxingAlignmentDesc"
+    flex="1"
+    data-l10n-id="letterboxing-alignment-description"
+  />
+  <form
+    xmlns="http://www.w3.org/1999/xhtml"
+    id="letterboxingAligner"
+    autocomplete="off"
+    aria-labelledby="letterboxingAlignmentDesc"
+  >
+    <label class="web-appearance-choice letterboxing-align-top">
+      <div class="web-appearance-choice-image-container">
+        <img role="presentation" />
+      </div>
+      <div class="web-appearance-choice-footer">
+        <input type="radio" name="alignment" value="top" />
+        <span data-l10n-id="letterboxing-alignment-top"></span>
+      </div>
+    </label>
+    <label class="web-appearance-choice letterboxing-align-middle">
+      <div class="web-appearance-choice-image-container">
+        <img role="presentation" />
+      </div>
+      <div class="web-appearance-choice-footer">
+        <input type="radio" name="alignment" value="middle" />
+        <span data-l10n-id="letterboxing-alignment-middle"></span>
+      </div>
+    </label>
+  </form>
+</groupbox>
+<groupbox
+  id="letterboxingDisabled"
+  data-category="paneGeneral"
+  hidden="true"
+>
+  <label class="letterboxing-search-heading"><html:h2
+    data-l10n-id="letterboxing-header"/></label>
+  <description class="letterboxing-search-overview">
+    <html:span
+      data-l10n-id="letterboxing-overview"
+      class="tail-with-learn-more"
+    ></html:span>
+    <html:a
+      is="moz-support-link"
+      tor-manual-page="anti-fingerprinting_letterboxing"
+      data-l10n-id="letterboxing-learn-more"
+    ></html:a>
+  </description>
+  <hbox align="center">
+    <label
+      class="face-sad"
+      flex="1"
+      data-l10n-id="letterboxing-disabled-description"
+    />
+    <button
+      id="letterboxingEnableButton"
+      class="accessory-button"
+      is="highlightable-button"
+      data-l10n-id="letterboxing-enable-button"
+    />
+  </hbox>
+</groupbox>
