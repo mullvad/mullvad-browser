@@ -416,7 +416,10 @@ export class MigrationWizard extends HTMLElement {
     }
 
     let key = panelItem.getAttribute("key");
-    let resourceTypes = panelItem.resourceTypes;
+    const allowedTypes = ["BOOKMARKS"];
+    let resourceTypes = panelItem.resourceTypes.filter(t =>
+      allowedTypes.includes(t)
+    );
 
     for (let child of this.#resourceTypeList.querySelectorAll(
       "label[data-resource-type]"
