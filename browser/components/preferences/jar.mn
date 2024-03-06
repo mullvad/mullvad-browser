@@ -26,3 +26,10 @@ browser.jar:
    content/browser/preferences/widgets/setting-control.mjs              (widgets/setting-control/setting-control.mjs)
    content/browser/preferences/widgets/setting-group.mjs                (widgets/setting-group/setting-group.mjs)
    content/browser/preferences/widgets/setting-group.css                (widgets/setting-group/setting-group.css)
+
+   content/browser/preferences/letterboxing.js
+   content/browser/preferences/letterboxing.css
+   content/browser/preferences/letterboxing-middle-dark.svg
+   content/browser/preferences/letterboxing-middle-light.svg
+   content/browser/preferences/letterboxing-top-dark.svg
+   content/browser/preferences/letterboxing-top-light.svg
