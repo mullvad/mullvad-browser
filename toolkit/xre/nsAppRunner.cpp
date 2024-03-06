@@ -297,6 +297,7 @@ static const char kPrefThemeId[] = "extensions.activeThemeID";
 static const char kPrefBrowserStartupBlankWindow[] =
     "browser.startup.blankWindow";
 static const char kPrefPreXulSkeletonUI[] = "browser.startup.preXulSkeletonUI";
+static const char kPrefResistFingerprinting[] = "privacy.resistFingerprinting";
 #endif  // defined(XP_WIN)
 
 #if defined(MOZ_WIDGET_GTK)
@@ -2267,6 +2268,7 @@ static void ReflectSkeletonUIPrefToRegistry(const char* aPref, void* aData) {
   bool shouldBeEnabled =
       Preferences::GetBool(kPrefPreXulSkeletonUI, false) &&
       Preferences::GetBool(kPrefBrowserStartupBlankWindow, false) &&
+      !Preferences::GetBool(kPrefResistFingerprinting, false) &&
       LookAndFeel::DrawInTitlebar();
   if (shouldBeEnabled && Preferences::HasUserValue(kPrefThemeId)) {
     nsCString themeId;
