@@ -441,6 +441,8 @@ pref("privacy.resistFingerprinting.letterboxing", true);
 pref("privacy.resistFingerprinting.letterboxing.vcenter", true);
 // tor-browser#41917: Letterboxing gradient background
 pref("privacy.resistFingerprinting.letterboxing.gradient", true);
+// tor-browser#41918: Should we reuse last window sizes if letterboxing is enabled
+pref("privacy.resistFingerprinting.letterboxing.rememberSize", false);
 // Enforce Network Information API as disabled
 pref("dom.netinfo.enabled", false);
 pref("network.http.referer.defaultPolicy", 2); // Bug 32948: Make referer behavior consistent regardless of private browing mode status
