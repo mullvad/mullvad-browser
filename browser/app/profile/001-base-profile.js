@@ -466,6 +466,8 @@ pref("privacy.resistFingerprinting.randomDataOnCanvasExtract", true, locked);
 pref("privacy.resistFingerprinting", true);
 pref("privacy.resistFingerprinting.exemptedDomains", "");
 #endif
+// tor-browser#43904: Enable this so we skip the blank window if user is resisting fingerprinting.
+pref("privacy.resistFingerprinting.skipEarlyBlankFirstPaint", true);
 // tor-browser#18603: failIfMajorPerformanceCaveat is an optional attribute that
 // can be used when creating a WebGL context if the browser detects that the
 // performance would be low. That could be used to fingerpting users with a not
@@ -515,6 +517,8 @@ pref("privacy.resistFingerprinting.letterboxing", true);
 pref("privacy.resistFingerprinting.letterboxing.vcenter", true);
 // tor-browser#41917: Letterboxing gradient background
 pref("privacy.resistFingerprinting.letterboxing.gradient", true);
+// tor-browser#41918: Should we reuse last window sizes if letterboxing is enabled
+pref("privacy.resistFingerprinting.letterboxing.rememberSize", false);
 // tor-browser#43402: Avoid a resize from the skeleton to the newwin size.
 // Should be fixed in ESR-140 with Bug 1448423.
 pref("browser.startup.blankWindow", false);
