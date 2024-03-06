@@ -836,6 +836,7 @@ var gMainPane = {
     initSettingGroup("tabs");
     initSettingGroup("profiles");
     initSettingGroup("profilePane");
+    initSettingGroup("letterboxing");
 
     setEventListener("manageBrowserLanguagesButton", "command", function () {
       gMainPane.showBrowserLanguagesSubDialog({ search: false });
