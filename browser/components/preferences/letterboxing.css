@@ -1,0 +1,72 @@
+.letterboxing-overview {
+  margin-block-end: 32px;
+}
+
+.letterboxing-search-overview {
+  margin-block-end: 16px;
+}
+#letterboxingAligner {
+  display: flex;
+  justify-content: start;
+  gap: 16px;
+  margin-block: 12px;
+
+  --letterboxing-alignment-img-top: url("chrome://browser/content/preferences/letterboxing-top-light.svg");
+  --letterboxing-alignment-img-middle: url("chrome://browser/content/preferences/letterboxing-middle-light.svg");
+}
+
+@media (prefers-color-scheme: dark) {
+  #letterboxingAligner  {
+    --letterboxing-alignment-img-top: url("chrome://browser/content/preferences/letterboxing-top-dark.svg");
+    --letterboxing-alignment-img-middle: url("chrome://browser/content/preferences/letterboxing-middle-dark.svg");
+  }
+}
+
+#letterboxingAligner .letterboxing-align-top img {
+  content: var(--letterboxing-alignment-img-top);
+}
+#letterboxingAligner .letterboxing-align-middle img {
+  content: var(--letterboxing-alignment-img-middle);
+}
+
+#letterboxingAligner label {
+  width: 200px;
+  flex: 0 0 auto;
+}
+
+#letterboxingAligner img {
+  border: none;
+  box-shadow: none;
+}
+
+/* Hide letterboxing options depending on whether ResistFingerprinting or
+ * Letterboxing is enabled. */
+#letterboxingCategory:not(.rfp-enabled),
+#letterboxingCategory:not(.rfp-enabled) ~ #letterboxingDisabled,
+#letterboxingCategory.letterboxing-enabled ~ #letterboxingDisabled,
+#letterboxingCategory:not(.rfp-enabled.letterboxing-enabled) ~ .letterboxing-category {
+  display: none;
+}
+
+/* We duplicate the Letterboxing overview to appear in search results.
+ * We want to hide them whenever they are *not* part of a search result. */
+:is(
+  /* Hide the duplicates when the category is *not* hidden. */
+  #letterboxingCategory:not(.visually-hidden) ~ .letterboxing-category,
+  /* Also hide the duplicated overview for subsequence search results if a
+   * previous groupbox is *not* hidden. */
+  .letterboxing-category:not(.visually-hidden) ~ .letterboxing-category,
+) .letterboxing-search-overview {
+  display: none;
+}
+
+/* Similarly for #letterboxingDisabled, but we also want to hide its
+ * "Letterboxing" heading.
+ * NOTE: This should only appear in isolation, so we do not need to worry about
+ * subsequent groupboxes. */
+#letterboxingCategory:not(.visually-hidden) ~ #letterboxingDisabled :is(
+  .letterboxing-search-heading,
+  .letterboxing-search-overview
+) {
+  display: none;
+}
