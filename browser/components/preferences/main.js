@@ -3,6 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* import-globals-from extensionControlled.js */
+/* import-globals-from letterboxing.js */
 /* import-globals-from preferences.js */
 /* import-globals-from /toolkit/mozapps/preferences/fontbuilder.js */
 /* import-globals-from /browser/base/content/aboutDialog-appUpdater.js */
@@ -1015,6 +1016,7 @@ var gMainPane = {
     );
 
     AppearanceChooser.init();
+    gLetterboxingPrefs.init();
 
     // Notify observers that the UI is now ready
     Services.obs.notifyObservers(window, "main-pane-loaded");
@@ -2871,6 +2873,7 @@ var gMainPane = {
       this._translationsView = null;
     }
 
+    gLetterboxingPrefs.destroy();
     AppearanceChooser.destroy();
   },
 
