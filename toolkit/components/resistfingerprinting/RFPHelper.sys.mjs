@@ -750,8 +750,27 @@ class _RFPHelper {
     });
   }
 
+  // We will attach this method to each browser window. When called
+  // it will instantly resize the window to exactly fit the selected
+  // (possibly letterboxed) browser.
+  shrinkToLetterbox() {
+    let { selectedBrowser } = this.gBrowser;
+    let stack = selectedBrowser.closest(".browserStack");
+    const outer = stack.getBoundingClientRect();
+    const inner = selectedBrowser.getBoundingClientRect();
+    this.resizeBy(inner.width - outer.width, inner.height - outer.height);
+  }
+
+  _onWindowDoubleClick(e) {
+    if (e.target.classList.contains("browserStack")) {
+      e.currentTarget.shrinkToLetterbox();
+    }
+  }
+
   _attachWindow(aWindow) {
     aWindow.addEventListener("sizemodechange", windowResizeHandler);
+    aWindow.shrinkToLetterbox = this.shrinkToLetterbox;
+    aWindow.addEventListener("dblclick", this._onWindowDoubleClick);
     aWindow.gBrowser.addTabsProgressListener(this);
     aWindow.addEventListener("TabOpen", this);
     const resizeObserver = (aWindow._rfpResizeObserver =
@@ -783,8 +802,11 @@ class _RFPHelper {
       let browser = tab.linkedBrowser;
       this._resetContentSize(browser);
     }
+    aWindow.removeEventListener("dblclick", this._onWindowDoubleClick);
+    delete aWindow.shrinkToLetterbox;
     aWindow.removeEventListener("sizemodechange", windowResizeHandler);
   }
+
 
   _handleDOMWindowOpened(win) {
     let self = this;
