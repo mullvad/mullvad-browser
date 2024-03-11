@@ -105,8 +105,9 @@ void HTMLDetailsElement::SetupShadowTree() {
     }
 
     nsAutoString defaultSummaryText;
-    nsContentUtils::GetLocalizedString(nsContentUtils::eFORMS_PROPERTIES,
-                                       "DefaultSummary", defaultSummaryText);
+    nsContentUtils::GetMaybeLocalizedString(nsContentUtils::eFORMS_PROPERTIES,
+                                            "DefaultSummary", OwnerDoc(),
+                                            defaultSummaryText);
     RefPtr<nsTextNode> description = new (nim) nsTextNode(nim);
     description->SetText(defaultSummaryText, kNotify);
     summary->AppendChildTo(description, kNotify, IgnoreErrors());
