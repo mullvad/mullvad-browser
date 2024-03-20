@@ -4100,10 +4100,11 @@ void Document::SetDocumentURI(nsIURI* aURI) {
   }
 }
 
-static void GetFormattedTimeString(PRTime aTime,
+static void GetFormattedTimeString(PRTime aTime, bool aUniversal,
                                    nsAString& aFormattedTimeString) {
   PRExplodedTime prtime;
-  PR_ExplodeTime(aTime, PR_LocalTimeParameters, &prtime);
+  PR_ExplodeTime(aTime, aUniversal ? PR_GMTParameters : PR_LocalTimeParameters,
+                 &prtime);
   // "MM/DD/YYYY hh:mm:ss"
   char formatedTime[24];
   if (SprintfLiteral(formatedTime, "%02d/%02d/%04d %02d:%02d:%02d",
@@ -4121,7 +4122,9 @@ void Document::GetLastModified(nsAString& aLastModified) const {
   if (!mLastModified.IsEmpty()) {
     aLastModified.Assign(mLastModified);
   } else {
-    GetFormattedTimeString(PR_Now(), aLastModified);
+    GetFormattedTimeString(PR_Now(),
+                           ShouldResistFingerprinting(RFPTarget::Unknown),
+                           aLastModified);
   }
 }
 
@@ -11050,7 +11053,8 @@ void Document::RetrieveRelevantHeaders(nsIChannel* aChannel) {
 
   mLastModified.Truncate();
   if (modDate != 0) {
-    GetFormattedTimeString(modDate, mLastModified);
+    GetFormattedTimeString(
+        modDate, ShouldResistFingerprinting(RFPTarget::Unknown), mLastModified);
   }
 }
 
