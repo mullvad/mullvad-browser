@@ -70,3 +70,27 @@ new-identity-dialog-confirm =
 new-identity-blocked-home-notification = { -brand-short-name } blocked your homepage ({ $url }) from loading because it might recognize your previous session.
 # Button to continue loading the home page, despite the warning message.
 new-identity-blocked-home-ignore-button = Load it anyway
+## Preferences - Letterboxing.
+
+# The word "Letterboxing" is the proper noun for the Tor Browser feature, and is therefore capitalised.
+# "Letterboxing" should be treated as a feature/product name, and likely not changed in other languages.
+letterboxing-header = Letterboxing
+# The word "Letterboxing" is the proper noun for the Tor Browser feature, and is therefore capitalised.
+# "Letterboxing" should be treated as a feature/product name, and likely not changed in other languages.
+letterboxing-overview = { -brand-short-name }'s Letterboxing feature restricts websites to display at specific sizes, making it harder to single out users on the basis of their window or screen size.
+letterboxing-learn-more = Learn more
+letterboxing-window-size-header = Window size
+letterboxing-remember-size =
+    .label = Reuse last window size when opening a new window
+    .accesskey = R
+letterboxing-alignment-header = Content Alignment
+letterboxing-alignment-description = Choose where you want to align the website’s content.
+letterboxing-alignment-top = Top
+letterboxing-alignment-middle = Middle
+# The word "Letterboxing" is the proper noun for the Tor Browser feature, and is therefore capitalised.
+# "Letterboxing" should be treated as a feature/product name, and likely not changed in other languages.
+letterboxing-disabled-description = Letterboxing is currently disabled.
+# The word "Letterboxing" is the proper noun for the Tor Browser feature, and is therefore capitalised.
+# "Letterboxing" should be treated as a feature/product name, and likely not changed in other languages.
+letterboxing-enable-button =
+    .label = Enable Letterboxing
