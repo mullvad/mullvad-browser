@@ -466,6 +466,9 @@ class gfxDWriteFontList final : public gfxPlatformFontList {
       const nsTArray<nsCString>* aForceClassicFams = nullptr)
       MOZ_REQUIRES(mLock);
 
+  void AddSubstitute(const nsCString& substituteName,
+                     const nsCString& actualFontName);
+
 #ifdef MOZ_BUNDLED_FONTS
   already_AddRefed<IDWriteFontCollection> CreateBundledFontsCollection(
       IDWriteFactory* aFactory);

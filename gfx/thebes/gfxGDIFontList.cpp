@@ -31,6 +31,10 @@
 #include "mozilla/StaticPrefs_gfx.h"
 #include "mozilla/Telemetry.h"
 
+#include "nsContentUtils.h"
+
+#include "StandardFonts-win10.inc"
+
 #include <usp10.h>
 
 using namespace mozilla;
@@ -47,6 +51,10 @@ using namespace mozilla::gfx;
   MOZ_LOG_TEST(gfxPlatform::GetLog(eGfxLog_cmapdata), LogLevel::Debug)
 
 static __inline void BuildKeyNameFromFontName(nsAString& aName) {
+  if (aName.Length() >= LF_FACESIZE) aName.Truncate(LF_FACESIZE - 1);
+  ToLowerCase(aName);
+}
+static __inline void BuildKeyNameFromFontName(nsACString& aName) {
   if (aName.Length() >= LF_FACESIZE) aName.Truncate(LF_FACESIZE - 1);
   ToLowerCase(aName);
 }
@@ -529,6 +537,26 @@ static void RemoveCharsetFromFontSubstitute(nsAString& aName) {
 #define MAX_VALUE_DATA 512
 
 nsresult gfxGDIFontList::GetFontSubstitutes() {
+  if (nsContentUtils::ShouldResistFingerprinting(
+          "Ignore any fingerprintable user font customization and normalize "
+          "font substitutes across different Windows SKUs.",
+          RFPTarget::Unknown)) {
+    for (const FontSubstitute& fs : kFontSubstitutes) {
+      nsAutoCString substituteName(fs.substituteName);
+      nsAutoCString actualFontName(fs.actualFontName);
+      BuildKeyNameFromFontName(substituteName);
+      BuildKeyNameFromFontName(actualFontName);
+      gfxFontFamily* ff;
+      if (!actualFontName.IsEmpty() &&
+          (ff = mFontFamilies.GetWeak(actualFontName))) {
+        mFontSubstitutes.InsertOrUpdate(substituteName, RefPtr{ff});
+      } else {
+        mNonExistingFonts.AppendElement(substituteName);
+      }
+    }
+    return NS_OK;
+  }
+
   HKEY hKey;
   DWORD i, rv, lenAlias, lenActual, valueType;
   WCHAR aliasName[MAX_VALUE_NAME];
