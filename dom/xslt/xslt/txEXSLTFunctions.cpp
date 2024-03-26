@@ -591,7 +591,14 @@ nsresult txEXSLTFunctionCall::evaluate(txIEvalContext* aContext,
       // http://exslt.org/date/functions/date-time/
 
       PRExplodedTime prtime;
-      PR_ExplodeTime(PR_Now(), PR_LocalTimeParameters, &prtime);
+      PR_ExplodeTime(
+          PR_Now(),
+          // We are not allowed to access the Document when evaluating this, so
+          // fall back to the general function.
+          nsContentUtils::ShouldResistFingerprinting(RFPTarget::Unknown)
+              ? PR_GMTParameters
+              : PR_LocalTimeParameters,
+          &prtime);
 
       int32_t offset =
           (prtime.tm_params.tp_gmt_offset + prtime.tm_params.tp_dst_offset) /
