@@ -1953,6 +1953,20 @@ static void RemoveCharsetFromFontSubstitute(nsACString& aName) {
 #define MAX_VALUE_DATA 512
 
 nsresult gfxDWriteFontList::GetFontSubstitutes() {
+  if (nsContentUtils::ShouldResistFingerprinting(
+          "Ignore any fingerprintable user font customization and normalize "
+          "font substitutes across different Windows SKUs.",
+          RFPTarget::FontVisibilityLangPack)) {
+    for (const FontSubstitute& fs : kFontSubstitutes) {
+      nsAutoCString substituteName(fs.substituteName);
+      nsAutoCString actualFontName(fs.actualFontName);
+      BuildKeyNameFromFontName(substituteName);
+      BuildKeyNameFromFontName(actualFontName);
+      AddSubstitute(substituteName, actualFontName);
+    }
+    return NS_OK;
+  }
+
   HKEY hKey;
   DWORD i, rv, lenAlias, lenActual, valueType;
   WCHAR aliasName[MAX_VALUE_NAME];
@@ -1987,39 +2001,46 @@ nsresult gfxDWriteFontList::GetFontSubstitutes() {
     BuildKeyNameFromFontName(substituteName);
     RemoveCharsetFromFontSubstitute(actualFontName);
     BuildKeyNameFromFontName(actualFontName);
-    if (SharedFontList()) {
-      // Skip substitution if the original font is available, unless the option
-      // to apply substitutions unconditionally is enabled.
-      if (!StaticPrefs::gfx_windows_font_substitutes_always_AtStartup()) {
-        // Font substitutions are recorded for the canonical family names; we
-        // don't need FindFamily to consider localized aliases when searching.
-        if (SharedFontList()->FindFamily(substituteName,
-                                         /*aPrimaryNameOnly*/ true)) {
-          continue;
-        }
-      }
-      if (SharedFontList()->FindFamily(actualFontName,
+    AddSubstitute(substituteName, actualFontName);
+  }
+
+  return NS_OK;
+}
+
+void gfxDWriteFontList::AddSubstitute(const nsCString& substituteName,
+                                      const nsCString& actualFontName) {
+  if (SharedFontList()) {
+    // Skip substitution if the original font is available, unless the
+    // option to apply substitutions unconditionally is enabled.
+    if (!StaticPrefs::gfx_windows_font_substitutes_always_AtStartup()) {
+      // Font substitutions are recorded for the canonical family names;
+      // we don't need FindFamily to consider localized aliases when
+      // searching.
+      if (SharedFontList()->FindFamily(substituteName,
                                        /*aPrimaryNameOnly*/ true)) {
-        mSubstitutions.InsertOrUpdate(substituteName,
-                                      MakeUnique<nsCString>(actualFontName));
-      } else if (mSubstitutions.Get(actualFontName)) {
-        mSubstitutions.InsertOrUpdate(
-            substituteName,
-            MakeUnique<nsCString>(*mSubstitutions.Get(actualFontName)));
-      } else {
-        mNonExistingFonts.AppendElement(substituteName);
-      }
-    } else {
-      gfxFontFamily* ff;
-      if (!actualFontName.IsEmpty() &&
-          (ff = mFontFamilies.GetWeak(actualFontName))) {
-        mFontSubstitutes.InsertOrUpdate(substituteName, RefPtr{ff});
-      } else {
-        mNonExistingFonts.AppendElement(substituteName);
+        return;
       }
     }
+    if (SharedFontList()->FindFamily(actualFontName,
+                                     /*aPrimaryNameOnly*/ true)) {
+      mSubstitutions.InsertOrUpdate(substituteName,
+                                    MakeUnique<nsCString>(actualFontName));
+    } else if (mSubstitutions.Get(actualFontName)) {
+      mSubstitutions.InsertOrUpdate(
+          substituteName,
+          MakeUnique<nsCString>(*mSubstitutions.Get(actualFontName)));
+    } else {
+      mNonExistingFonts.AppendElement(substituteName);
+    }
+  } else {
+    gfxFontFamily* ff;
+    if (!actualFontName.IsEmpty() &&
+        (ff = mFontFamilies.GetWeak(actualFontName))) {
+      mFontSubstitutes.InsertOrUpdate(substituteName, RefPtr{ff});
+    } else {
+      mNonExistingFonts.AppendElement(substituteName);
+    }
   }
-  return NS_OK;
 }
 
 struct FontSubstitution {
