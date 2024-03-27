@@ -1,17 +1,10 @@
-"use strict";
-
-var EXPORTED_SYMBOLS = ["SecurityLevel", "SecurityLevelPrefs"];
-
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-const { ConsoleAPI } = ChromeUtils.import("resource://gre/modules/Console.jsm");
+import { ConsoleAPI } from "resource://gre/modules/Console.sys.mjs";
 
 const lazy = {};
 
-ChromeUtils.defineModuleGetter(
-  lazy,
-  "ExtensionParent",
-  "resource://gre/modules/ExtensionParent.jsm"
-);
+ChromeUtils.defineESModuleGetters(lazy, {
+  ExtensionParent: "resource://gre/modules/ExtensionParent.sys.mjs",
+});
 
 const logger = new ConsoleAPI({
   maxLogLevel: "info",
@@ -263,6 +256,7 @@ var initializeNoScriptControl = () => {
 // bind NoScript settings to the browser.security_level.security_slider
 // (see noscript-control.js).
 /* eslint-disable */
+// prettier-ignore
 const kSecuritySettings = {
   // Preference name :                                          [0, 1-high 2-m    3-m    4-low]
   "javascript.options.ion" :                                    [,  false, false, false, true ],
@@ -427,7 +421,7 @@ function migratePreferences() {
 }
 
 // This class is used to initialize the security level stuff at the startup
-class SecurityLevel {
+export class SecurityLevel {
   QueryInterface = ChromeUtils.generateQI(["nsIObserver"]);
 
   init() {
@@ -448,7 +442,7 @@ class SecurityLevel {
 
   Getters and Setters for relevant torbutton prefs
 */
-const SecurityLevelPrefs = {
+export const SecurityLevelPrefs = {
   SecurityLevels: Object.freeze({
     safest: 1,
     safer: 2,

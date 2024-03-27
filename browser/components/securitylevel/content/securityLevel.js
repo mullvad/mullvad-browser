@@ -2,11 +2,9 @@
 
 /* global AppConstants, Services, openPreferences, XPCOMUtils */
 
-ChromeUtils.defineModuleGetter(
-  this,
-  "SecurityLevelPrefs",
-  "resource://gre/modules/SecurityLevel.jsm"
-);
+ChromeUtils.defineESModuleGetters(this, {
+  SecurityLevelPrefs: "resource://gre/modules/SecurityLevel.sys.mjs",
+});
 
 /*
   Security Level Button Code
