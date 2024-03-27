@@ -485,7 +485,10 @@ LocaleService::GetAppLocaleAsBCP47(nsACString& aRetVal) {
 
 NS_IMETHODIMP
 LocaleService::GetRegionalPrefsLocales(nsTArray<nsCString>& aRetVal) {
-  if (nsContentUtils::ShouldResistFingerprinting()) {
+  if (nsContentUtils::ShouldResistFingerprinting(
+          "This is probably a patch that should be refined. But to get the "
+          "build going, we just keep applying this generic check.",
+          RFPTarget::JSLocale)) {
     GetAppLocalesAsBCP47(aRetVal);
     return NS_OK;
   }
