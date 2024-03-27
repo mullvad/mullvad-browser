@@ -1,5 +1,5 @@
 EXTRA_JS_MODULES += [
-    "SecurityLevel.jsm",
+    "SecurityLevel.sys.mjs",
 ]
 
 XPCOM_MANIFESTS += [

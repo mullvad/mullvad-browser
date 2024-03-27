@@ -12,13 +12,8 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   NimbusFeatures: "resource://nimbus/ExperimentAPI.sys.mjs",
   SearchUtils: "resource://gre/modules/SearchUtils.sys.mjs",
+  SecurityLevelPrefs: "resource://gre/modules/SecurityLevel.sys.mjs",
 });
-
-ChromeUtils.defineModuleGetter(
-  lazy,
-  "SecurityLevelPrefs",
-  "resource://gre/modules/SecurityLevel.jsm"
-);
 
 const BinaryInputStream = Components.Constructor(
   "@mozilla.org/binaryinputstream;1",
