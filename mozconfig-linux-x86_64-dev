@@ -15,3 +15,6 @@ ac_add_options --disable-strip
 ac_add_options --disable-install-strip
 
 ac_add_options --with-base-browser-version=dev-build
+
+# Let's make sure no preference is enabling either Adobe's or Google's CDM.
+ac_add_options --disable-eme

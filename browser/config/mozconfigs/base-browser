@@ -28,8 +28,6 @@ ac_add_options --disable-crashreporter
 # Before removing, please notice that WebRTC does not work on mingw (Bug 1393901)
 ac_add_options --disable-webrtc
 ac_add_options --disable-parental-controls
-# Let's make sure no preference is enabling either Adobe's or Google's CDM.
-ac_add_options --disable-eme
 ac_add_options --enable-proxy-bypass-protection
 # See bugs #30575 and #32418: system policies are harmful either because they
 # could allow proxy bypass, and override a number of other preferences we set
