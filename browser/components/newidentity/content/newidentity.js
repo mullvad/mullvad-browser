@@ -432,8 +432,11 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
         const homePref = "browser.startup.homepage";
         const trustedHomePref = "browser.startup.homepage.new_identity";
         const homeURL = Services.prefs.getStringPref(homePref, "");
+        const defaultHomeURL = Services.prefs
+          .getDefaultBranch("")
+          .getStringPref(homePref, "");
         const isTrustedHome =
-          homeURL === "about:tor" ||
+          homeURL === defaultHomeURL ||
           homeURL.startsWith("chrome://") || // about:blank and other built-ins
           homeURL === Services.prefs.getStringPref(trustedHomePref, "");
         const isCustomHome =
