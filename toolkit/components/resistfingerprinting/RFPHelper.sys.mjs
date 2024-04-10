@@ -448,22 +448,23 @@ class _RFPHelper {
     const roundDimensions = (aWidth, aHeight) => {
       const r = (width, height) => {
         lastRoundedSize = { width, height };
+        log(
+          `${logPrefix} roundDimensions(${aWidth}, ${aHeight}) = ${width} x ${height}`
+        );
         return {
           "--letterboxing-width": `var(--rdm-width, ${width}px)`,
           "--letterboxing-height": `var(--rdm-height, ${height}px)`,
         };
       };
 
-      let result;
       log(`${logPrefix} roundDimensions(${aWidth}, ${aHeight})`);
+
+      let result;
+
       // If the set is empty, we will round the content with the default
       // stepping size.
       if (!this._letterboxingDimensions.length) {
-        result = r(this.steppedSize(aWidth, true), this.steppedSize(aHeight));
-        log(
-          `${logPrefix} roundDimensions(${aWidth}, ${aHeight}) = ${result.width} x ${result.height}`
-        );
-        return result;
+        return r(this.steppedSize(aWidth, true), this.steppedSize(aHeight));
       }
 
       let matchingArea = aWidth * aHeight;
@@ -489,14 +490,9 @@ class _RFPHelper {
       // If we cannot find any dimensions match to the real content window, this
       // means the content area is smaller the smallest size in the set. In this
       // case, we won't round the size and default to the max.
-      result = targetDimensions
+      return targetDimensions
         ? r(targetDimensions.width, targetDimensions.height)
         : r(aWidth, aHeight);
-
-      log(
-        `${logPrefix} roundDimensions(${aWidth}, ${aHeight}) = ${result.width} x ${result.height}`
-      );
-      return result;
     };
 
     const styleChanges = Object.assign([], {
