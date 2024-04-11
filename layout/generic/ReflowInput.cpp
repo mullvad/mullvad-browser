@@ -34,7 +34,6 @@
 #include "nsTableCellFrame.h"
 #include "nsTableFrame.h"
 #include "StickyScrollContainer.h"
-#include "nsContentUtils.h"
 
 using namespace mozilla;
 using namespace mozilla::css;
@@ -2724,12 +2723,12 @@ void ReflowInput::CalculateBlockSideMargins() {
 // This is necessary because without this compensation, normal line height might
 // look too tight.
 constexpr float kNormalLineHeightFactor = 1.2f;
-static nscoord GetNormalLineHeight(nsFontMetrics* aFontMetrics, bool aRFP) {
+static nscoord GetNormalLineHeight(nsFontMetrics* aFontMetrics) {
   MOZ_ASSERT(aFontMetrics, "no font metrics");
   nscoord externalLeading = aFontMetrics->ExternalLeading();
   nscoord internalLeading = aFontMetrics->InternalLeading();
   nscoord emHeight = aFontMetrics->EmHeight();
-  if ((!internalLeading && !externalLeading) || aRFP) {
+  if (!internalLeading && !externalLeading) {
     return NSToCoordRound(emHeight * kNormalLineHeightFactor);
   }
   return emHeight + internalLeading + externalLeading;
@@ -2769,9 +2768,7 @@ static inline nscoord ComputeLineHeight(const StyleLineHeight& aLh,
     RefPtr<nsFontMetrics> fm = nsLayoutUtils::GetMetricsFor(
         aPresContext, aIsVertical, &aRelativeToFont, size,
         /* aUseUserFontSet = */ true);
-    return GetNormalLineHeight(
-        fm, aPresContext->Document()->ShouldResistFingerprinting(
-                RFPTarget::Unknown));
+    return GetNormalLineHeight(fm);
   }
   // If we don't have a pres context, use a 1.2em fallback.
   size.ScaleBy(kNormalLineHeightFactor);
