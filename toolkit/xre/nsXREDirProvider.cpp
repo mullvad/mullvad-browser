@@ -1282,19 +1282,30 @@ nsresult nsXREDirProvider::GetPortableDataDir(nsIFile** aFile,
   }
 #  endif
 
-  nsCOMPtr<nsIFile> systemInstallFile;
-  rv = exeDir->Clone(getter_AddRefs(systemInstallFile));
-  NS_ENSURE_SUCCESS(rv, rv);
-  rv = systemInstallFile->AppendNative("system-install"_ns);
-  NS_ENSURE_SUCCESS(rv, rv);
+#  if defined(MOZ_WIDGET_GTK)
+  // On Linux, Firefox supports the is-packaged-app for the .deb distribution.
+  // We cannot use mozilla::widget::IsPackagedAppFileExists because it relies on
+  // this service to be initialized, but this function is called during the
+  // initialization. Therefore, we need to re-implement this check.
+  nsLiteralCString systemInstallNames[] = {"system-install"_ns,
+                                           "is-packaged-app"_ns};
+#  else
+  nsLiteralCString systemInstallNames[] = {"system-install"_ns};
+#  endif
+  for (const nsLiteralCString& fileName : systemInstallNames) {
+    nsCOMPtr<nsIFile> systemInstallFile;
+    rv = exeDir->Clone(getter_AddRefs(systemInstallFile));
+    NS_ENSURE_SUCCESS(rv, rv);
+    rv = systemInstallFile->AppendNative(fileName);
+    NS_ENSURE_SUCCESS(rv, rv);
 
-  bool exists = false;
-  rv = systemInstallFile->Exists(&exists);
-  NS_ENSURE_SUCCESS(rv, rv);
-  if (exists) {
-    aIsPortable = false;
-    gDataDirPortable.emplace(nullptr);
-    return NS_OK;
+    bool exists = false;
+    rv = systemInstallFile->Exists(&exists);
+    NS_ENSURE_SUCCESS(rv, rv);
+    if (exists) {
+      gDataDirPortable.emplace(nullptr);
+      return NS_OK;
+    }
   }
 
   nsCOMPtr<nsIFile> localDir = exeDir;
