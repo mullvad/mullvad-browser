@@ -1956,7 +1956,7 @@ nsresult gfxDWriteFontList::GetFontSubstitutes() {
   if (nsContentUtils::ShouldResistFingerprinting(
           "Ignore any fingerprintable user font customization and normalize "
           "font substitutes across different Windows SKUs.",
-          RFPTarget::Unknown)) {
+          RFPTarget::FontVisibilityLangPack)) {
     for (const FontSubstitute& fs : kFontSubstitutes) {
       nsAutoCString substituteName(fs.substituteName);
       nsAutoCString actualFontName(fs.actualFontName);
