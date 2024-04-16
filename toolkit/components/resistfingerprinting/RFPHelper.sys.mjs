@@ -633,9 +633,16 @@ class _RFPHelper {
               lazy.logConsole.error(e);
             }
           }
-          if (needToShrink) {
-            win.shrinkToLetterbox();
-            this._recordWindowSize(win);
+          if (needToShrink && win.shrinkToLetterbox()) {
+            win.addEventListener(
+              "resize",
+              () => {
+                // We need to record the "new" initial size in this listener
+                // because resized dimensions are not immediately available.
+                RFPHelper._recordWindowSize(win);
+              },
+              { once: true }
+            );
           }
         });
       },
@@ -741,23 +748,30 @@ class _RFPHelper {
   }
 
   _recordWindowSize(aWindow) {
-    aWindow._rfpOriginalSize = {
-      width: aWindow.outerWidth,
-      height: aWindow.outerHeight,
-      containerHeight: aWindow.gBrowser.getBrowserContainer()?.clientHeight,
-    };
-    log("Recording original window size", aWindow._rfpOriginalSize);
+    aWindow.promiseDocumentFlushed(() => {
+      aWindow._rfpOriginalSize = {
+        width: aWindow.outerWidth,
+        height: aWindow.outerHeight,
+        containerHeight: aWindow.gBrowser.getBrowserContainer()?.clientHeight,
+      };
+      log("Recording original window size", aWindow._rfpOriginalSize);
+    });
   }
 
   // We will attach this method to each browser window. When called
   // it will instantly resize the window to exactly fit the selected
   // (possibly letterboxed) browser.
+  // Returns true if a window resize will occur, false otherwise.
   shrinkToLetterbox() {
     let { selectedBrowser } = this.gBrowser;
     let stack = selectedBrowser.closest(".browserStack");
     const outer = stack.getBoundingClientRect();
     const inner = selectedBrowser.getBoundingClientRect();
-    this.resizeBy(inner.width - outer.width, inner.height - outer.height);
+    if (inner.width !== outer.witdh || inner.height !== outer.height) {
+      this.resizeBy(inner.width - outer.width, inner.height - outer.height);
+      return true;
+    }
+    return false;
   }
 
   _onWindowDoubleClick(e) {
