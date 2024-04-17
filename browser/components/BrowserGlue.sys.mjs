@@ -1581,6 +1581,13 @@ BrowserGlue.prototype = {
       return;
     }
 
+    // We don't want to mess up with RFP new window / letterboxing machinery.
+    if (
+      Services.prefs.getBoolPref("privacy.resistFingerprinting", false)
+    ) {
+      return;
+    }
+
     let store = Services.xulStore;
     let getValue = attr =>
       store.getValue(AppConstants.BROWSER_CHROME_URL, "main-window", attr);
