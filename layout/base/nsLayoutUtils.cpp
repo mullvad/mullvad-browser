@@ -9708,7 +9708,10 @@ static void GetSpoofedSystemFontForRFP(LookAndFeel::FontID aFontID,
   // does.
   aName = u"sans-serif"_ns;
   aStyle.size = 12;
-#elif !defined(MOZ_WIDGET_ANDROID)
+#elif defined(MOZ_WIDGET_ANDROID)
+  aName = u"Roboto"_ns;
+  aStyle.size = 12;
+#else
   // On Linux, there is not a default. For example, GNOME on Debian uses
   // Cantarell, 14.667px. Ubuntu Mate uses the Ubuntu font, but also 14.667px.
   // Fedora with KDE uses Noto Sans, 13.3333px, but it uses Noto Sans on
@@ -9719,7 +9722,6 @@ static void GetSpoofedSystemFontForRFP(LookAndFeel::FontID aFontID,
   aName = u"sans-serif"_ns;
   aStyle.size = 15;
 #endif
-  // No need to do anything on Android, as font and sizes are already fixed.
 }
 
 /* static */
