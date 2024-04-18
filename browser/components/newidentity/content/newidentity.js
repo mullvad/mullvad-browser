@@ -395,15 +395,12 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
       return new Promise(resolve => {
         // Open a new window forcing the about:privatebrowsing page (tor-browser#41765)
         // unless user explicitly overrides this policy (tor-browser #42236)
-        const homePref = "browser.startup.homepage";
         const trustedHomePref = "browser.startup.homepage.new_identity";
-        const homeURL = Services.prefs.getStringPref(homePref, "");
-        const defaultHomeURL = Services.prefs
-          .getDefaultBranch("")
-          .getStringPref(homePref, "");
+        const homeURL = HomePage.get();
+        const defaultHomeURL = HomePage.getDefault();
         const isTrustedHome =
           homeURL === defaultHomeURL ||
-          homeURL.startsWith("chrome://") || // about:blank and other built-ins
+          homeURL === "chrome://browser/content/blanktab.html" || // about:blank
           homeURL === Services.prefs.getStringPref(trustedHomePref, "");
         const isCustomHome =
           Services.prefs.getIntPref("browser.startup.page") === 1;
