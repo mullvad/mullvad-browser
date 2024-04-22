@@ -1323,6 +1323,7 @@ nsresult nsXREDirProvider::GetPortableDataDir(nsIFile** aFile,
 #  if defined(XP_MACOSX)
   // On macOS we try to create the directory immediately to switch to
   // system-install mode if needed (e.g., when running from the DMG).
+  bool exists = false;
   rv = localDir->Exists(&exists);
   NS_ENSURE_SUCCESS(rv, rv);
   if (!exists) {
