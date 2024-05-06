@@ -137,8 +137,9 @@ body {
   From Firefox 115 on, .browserContainer layout is flex / column,
   and without this trick the .browserStack's resize observer
   doesn't get notified on horizontal shrinking.
+  See also tor-browser#42405.
   */
-  overflow-x: hidden;
+  overflow: hidden;
   background: var(--letterboxing-bgcolor);
 }
 
