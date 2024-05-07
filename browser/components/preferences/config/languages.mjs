@@ -673,8 +673,21 @@ Preferences.addSetting({
 });
 
 Preferences.addSetting({
+  id: "websiteSpoofEnglish",
+  pref: "privacy.spoof_english",
+  get: val => {
+    return val == 2;
+  },
+  set: val => {
+    return val ? 2 : 1;
+  },
+});
+
+Preferences.addSetting({
   id: "websiteLanguageWrapper",
   deps: ["acceptLanguages"],
+  // Hide website language settings. tor-browser#41930.
+  visible: () => false,
   onUserReorder(event, deps) {
     let re = /\s*(?:,|$)\s*/;
     let languages = /**@type {string} */ (deps.acceptLanguages.value)
@@ -901,7 +914,9 @@ SettingGroupManager.registerGroups({
   },
   websiteLanguage: {
     inProgress: true,
-    l10nId: "website-language-heading",
+    // Modify the description to remove any mention of choosing the order of
+    // languages. tor-browser#45176.
+    l10nId: "website-language-heading-no-preferred-order",
     headingLevel: 2,
     iconSrc: "chrome://global/skin/icons/defaultFavicon.svg",
     items: [
@@ -943,6 +958,10 @@ SettingGroupManager.registerGroups({
             ],
           },
         ],
+      },
+      {
+        id: "websiteSpoofEnglish",
+        l10nId: "languages-customize-spoof-english",
       },
     ],
   },
