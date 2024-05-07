@@ -444,6 +444,8 @@ pref("network.protocol-handler.warn-external.snews", true);
   pref("network.protocol-handler.warn-external.ms-windows-store", true);
 #endif
 pref("network.proxy.allow_bypass", false, locked); // #40682
+// Bug 40548: Disable proxy-bypass
+pref("network.proxy.failover_direct", false, locked);
 // Lock to 'true', which is already the firefox default, to prevent users
 // from making themselves fingerprintable by disabling. This pref
 // alters content load order in a page. See tor-browser#24686
