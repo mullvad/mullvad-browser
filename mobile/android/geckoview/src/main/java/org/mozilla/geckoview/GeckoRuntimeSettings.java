@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import org.mozilla.gecko.EventDispatcher;
 import org.mozilla.gecko.GeckoSystemStateListener;
@@ -791,29 +791,23 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
   }
 
   private String computeAcceptLanguages() {
-    final ArrayList<String> locales = new ArrayList<String>();
+    final LinkedHashMap<String, String> locales = new LinkedHashMap<>();
 
-    // In Desktop, these are defined in the `intl.accept_languages` localized property.
-    // At some point we should probably use the same values here, but for now we use a simple
-    // strategy which will hopefully result in reasonable acceptLanguage values.
-    if (mRequestedLocales != null && mRequestedLocales.length > 0) {
-      String locale = mRequestedLocales[0].toLowerCase(Locale.ROOT);
-      // No need to include `en-us` twice.
-      if (!locale.equals("en-us")) {
-        locales.add(locale);
-        if (locale.contains("-")) {
-          String lang = locale.split("-")[0];
-          // No need to include `en` twice.
-          if (!lang.equals("en")) {
-            locales.add(lang);
-          }
-        }
+    // Explicitly-set app prefs come first:
+    if (mRequestedLocales != null) {
+      for (final String locale : mRequestedLocales) {
+        locales.put(locale.toLowerCase(Locale.ROOT), locale);
       }
     }
-    locales.add("en-us");
-    locales.add("en");
+    // OS prefs come second:
+    for (final String locale : getDefaultLocales()) {
+      final String localeLowerCase = locale.toLowerCase(Locale.ROOT);
+      if (!locales.containsKey(localeLowerCase)) {
+        locales.put(localeLowerCase, locale);
+      }
+    }
 
-    return TextUtils.join(",", locales);
+    return TextUtils.join(",", locales.values());
   }
 
   private static String[] getDefaultLocales() {
