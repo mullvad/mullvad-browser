@@ -203,9 +203,13 @@ class _RFPHelper {
       // Works like disabling accept-language spoofing.
       // fall through
       case 1: // don't spoof
-        // We don't reset intl.accept_languages. Instead, setting
-        // privacy.spoof_english to 1 allows user to change preferred language
-        // settings through Preferences UI.
+        if (this.rfpEnabled) {
+          // When RFP is enabled, we force intl.accept_languages to be the
+          // default, or en-US, en when spoof English is enabled.
+          // See tor-browser#41930.
+          Services.prefs.clearUserPref("intl.accept_languages");
+          Services.prefs.addObserver("intl.accept_languages", this);
+        }
         break;
       case 2: // spoof
         Services.prefs.setCharPref("intl.accept_languages", "en-US, en");
