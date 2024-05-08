@@ -2,7 +2,7 @@
 
 // Show a prompt to suggest to the user that they can change the UI language.
 // Show it only the first time, and then do not show it anymore
-window.addEventListener("load", async () => {
+window.addEventListener("load", () => {
   const PREF_NAME = "intl.language_notification.shown";
 
   if (Services.prefs.getBoolPref(PREF_NAME, false)) {
@@ -35,12 +35,12 @@ window.addEventListener("load", async () => {
     Services.locale.requestedLocales,
     Services.locale.availableLocales
   ).length;
-  const label = await document.l10n.formatValue(
-    matchingSystem
+  const label = {
+    "l10n-id": matchingSystem
       ? "language-notification-label-system"
       : "language-notification-label",
-    { language }
-  );
+    "l10n-args": { language },
+  };
 
   const buttons = [
     {
