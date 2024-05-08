@@ -31,3 +31,6 @@ pref("browser.shell.checkDefaultBrowser", false);
 
 // mullvad-browser#228: default to spoof en-US and skip showing the dialog
 pref("privacy.spoof_english", 2);
+
+// mullvad-browser#222: Hide "List all tabs" when the tabs don't overflow
+pref("browser.tabs.tabmanager.enabled", false);
