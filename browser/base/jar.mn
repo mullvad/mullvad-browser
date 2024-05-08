@@ -105,4 +105,5 @@ browser.jar:
         content/browser/spotlight.js                  (content/spotlight.js)
 *       content/browser/default-bookmarks.html        (content/default-bookmarks.html)
 
+        content/browser/droppedSupportNotification.js (content/droppedSupportNotification.js)
         content/browser/languageNotification.js       (content/languageNotification.js)
