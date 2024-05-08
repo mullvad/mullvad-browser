@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import org.mozilla.gecko.EventDispatcher;
 import org.mozilla.gecko.GeckoSystemStateListener;
@@ -653,6 +655,17 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
       return this;
     }
 
+    public @NonNull Builder supportedLocales(final Collection<String> locales) {
+      getSettings().mSupportedLocales.clear();
+      for (String tag : locales) {
+        Locale locale = Locale.forLanguageTag(tag);
+        getSettings().mSupportedLocales.put(locale, locale);
+        Locale lang = new Locale.Builder().setLanguage(locale.getLanguage()).build();
+        getSettings().mSupportedLocales.put(lang, locale);
+      }
+      return this;
+    }
+
     /**
      * Set this flag to disable low-memory detection. Set this when running tests to avoid
      * unpredictable behavior at runtime.
@@ -883,6 +896,7 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
   /* package */ Class<? extends Service> mCrashHandler;
   /* package */ String[] mRequestedLocales;
   /* package */ ExperimentDelegate mExperimentDelegate;
+  /* package */ HashMap<Locale, Locale> mSupportedLocales = new HashMap<>();
 
   /**
    * Attach and commit the settings to the given runtime.
@@ -937,6 +951,7 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
     mRequestedLocales = settings.mRequestedLocales;
     mConfigFilePath = settings.mConfigFilePath;
     mExperimentDelegate = settings.mExperimentDelegate;
+    mSupportedLocales = settings.mSupportedLocales;
   }
 
   /* package */ void commit() {
@@ -1534,27 +1549,39 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
     EventDispatcher.getInstance().dispatch("GeckoView:SetLocale", data);
   }
 
+  private Locale getLocaleIfSupported(String tag) {
+    Locale exact = Locale.forLanguageTag(tag);
+    if (mSupportedLocales.containsKey(exact)) {
+      return exact;
+    }
+    Locale fallback = new Locale.Builder().setLanguage(exact.getLanguage()).build();
+    return mSupportedLocales.get(fallback);
+  }
+
   private String computeAcceptLanguages() {
-    final LinkedHashMap<String, String> locales = new LinkedHashMap<>();
-
-    // Explicitly-set app prefs come first:
+    Locale locale = null;
     if (mRequestedLocales != null) {
-      for (final String locale : mRequestedLocales) {
-        // Requested locales should be in language or language-region format
-        final String normalizedLocale =
-            LocaleUtils.getLanguageRegionLocale(Locale.forLanguageTag(locale));
-        locales.put(normalizedLocale.toLowerCase(Locale.ROOT), normalizedLocale);
+      for (String tag : mRequestedLocales) {
+        locale = getLocaleIfSupported(tag);
+        if (locale != null) {
+          break;
+        }
       }
     }
-    // OS prefs come second:
-    for (final String locale : getSystemLocalesForAcceptLanguage()) {
-      final String localeLowerCase = locale.toLowerCase(Locale.ROOT);
-      if (!locales.containsKey(localeLowerCase)) {
-        locales.put(localeLowerCase, locale);
+    if (locale == null) {
+      for (final String tag : getSystemLocalesForAcceptLanguage()) {
+        locale = getLocaleIfSupported(tag);
+        if (locale != null) {
+          break;
+        }
       }
     }
-
-    return TextUtils.join(",", locales.values());
+    String acceptLanguages = locale != null ? locale.toLanguageTag().replace('_', '-') : "en-US";
+    if (acceptLanguages.equals("en-US")) {
+      // For consistency with spoof English.
+      acceptLanguages += ", en";
+    }
+    return acceptLanguages;
   }
 
   private static String[] getSystemLocalesForAcceptLanguage() {
