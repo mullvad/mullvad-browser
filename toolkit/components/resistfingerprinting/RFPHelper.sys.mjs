@@ -475,6 +475,8 @@ class _RFPHelper {
     return (
       // ... privileged pages
       contentPrincipal.isSystemPrincipal ||
+      // pdf.js
+      contentPrincipal.origin.startsWith("resource://pdf.js") ||
       // ... about: URIs EXCEPT about:blank
       (currentURI.schemeIs("about") && currentURI.filePath !== "blank") ||
       // ... source code
