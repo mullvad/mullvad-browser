@@ -34,3 +34,6 @@ pref("privacy.spoof_english", 2);
 
 // mullvad-browser#234: Do not spoof the OS in the User-Agent header
 pref("privacy.resistFingerprinting.spoofOsInUserAgentHeader", false);
+
+// mullvad-browser#222: Hide "List all tabs" when the tabs don't overflow
+pref("browser.tabs.tabmanager.enabled", false);
