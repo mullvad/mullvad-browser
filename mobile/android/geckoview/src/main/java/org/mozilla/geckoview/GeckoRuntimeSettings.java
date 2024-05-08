@@ -22,7 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.LinkedHashMap;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import org.mozilla.gecko.EventDispatcher;
 import org.mozilla.gecko.GeckoSystemStateListener;
@@ -455,6 +456,16 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
       return this;
     }
 
+    public @NonNull Builder supportedLocales(final Collection<String> locales) {
+      getSettings().mSupportedLocales.clear();
+      for (String tag : locales) {
+        Locale locale = Locale.forLanguageTag(tag);
+        getSettings().mSupportedLocales.put(locale, locale);
+        getSettings().mSupportedLocales.put(new Locale(locale.getLanguage()), locale);
+      }
+      return this;
+    }
+
     /**
      * Sets whether we should spoof locale to English for webpages.
      *
@@ -526,6 +537,7 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
   /* package */ int mScreenHeightOverride;
   /* package */ Class<? extends Service> mCrashHandler;
   /* package */ String[] mRequestedLocales;
+  /* package */ HashMap<Locale, Locale> mSupportedLocales = new HashMap<>();
   /* package */ RuntimeTelemetry.Proxy mTelemetryProxy;
 
   /**
@@ -582,6 +594,7 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
     mRequestedLocales = settings.mRequestedLocales;
     mConfigFilePath = settings.mConfigFilePath;
     mTelemetryProxy = settings.mTelemetryProxy;
+    mSupportedLocales = settings.mSupportedLocales;
   }
 
   /* package */ void commit() {
@@ -790,24 +803,39 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
     EventDispatcher.getInstance().dispatch("GeckoView:SetLocale", data);
   }
 
+  private Locale getLocaleIfSupported(String tag) {
+    Locale exact = Locale.forLanguageTag(tag);
+    if (mSupportedLocales.containsKey(exact)) {
+      return exact;
+    }
+    Locale fallback = new Locale(exact.getLanguage());
+    return mSupportedLocales.get(fallback);
+  }
+
   private String computeAcceptLanguages() {
-    final LinkedHashMap<String, String> locales = new LinkedHashMap<>();
-
-    // Explicitly-set app prefs come first:
+    Locale locale = null;
     if (mRequestedLocales != null) {
-      for (final String locale : mRequestedLocales) {
-        locales.put(locale.toLowerCase(Locale.ROOT), locale);
+      for (String tag : mRequestedLocales) {
+        locale = getLocaleIfSupported(tag);
+        if (locale != null) {
+          break;
+        }
       }
     }
-    // OS prefs come second:
-    for (final String locale : getDefaultLocales()) {
-      final String localeLowerCase = locale.toLowerCase(Locale.ROOT);
-      if (!locales.containsKey(localeLowerCase)) {
-        locales.put(localeLowerCase, locale);
+    if (locale == null) {
+      for (final String tag : getDefaultLocales()) {
+        locale = getLocaleIfSupported(tag);
+        if (locale != null) {
+          break;
+        }
       }
     }
-
-    return TextUtils.join(",", locales.values());
+    String acceptLanguages = locale != null ? locale.toLanguageTag().replace('_', '-') : "en-US";
+    if (acceptLanguages.equals("en-US")) {
+      // For consistency with spoof English.
+      acceptLanguages += ", en";
+    }
+    return acceptLanguages;
   }
 
   private static String[] getDefaultLocales() {
