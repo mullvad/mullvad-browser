@@ -4,11 +4,6 @@
 
 "use strict";
 
-const lazy = {};
-ChromeUtils.defineESModuleGetters(lazy, {
-  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
-});
-
 const {
   Component,
   createFactory,
@@ -127,12 +122,10 @@ class HTTPCustomRequestPanel extends Component {
 
   async componentDidMount() {
     let { connector, request } = this.props;
-    if (!lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
-      const persistedCustomRequest = await asyncStorage.getItem(
-        "devtools.netmonitor.customRequest"
-      );
-      request = request || persistedCustomRequest;
-    }
+    const persistedCustomRequest = await asyncStorage.getItem(
+      "devtools.netmonitor.customRequest"
+    );
+    request = request || persistedCustomRequest;
 
     if (!request) {
       this.setState({ _isStateDataReady: true });
@@ -198,9 +191,7 @@ class HTTPCustomRequestPanel extends Component {
   }
 
   componentWillUnmount() {
-    if (!lazy.PrivateBrowsingUtils.isWindowPrivate(window)) {
-      asyncStorage.setItem("devtools.netmonitor.customRequest", this.state);
-    }
+    asyncStorage.setItem("devtools.netmonitor.customRequest", this.state);
   }
 
   handleChangeURL(event) {
