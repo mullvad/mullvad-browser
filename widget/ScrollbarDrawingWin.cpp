@@ -167,7 +167,7 @@ void ScrollbarDrawingWin::RecomputeScrollbarParams() {
 
   // Do not leak system size when using ResistFingerprinting.
   if (!nsContentUtils::ShouldResistFingerprinting("No context available",
-                                                  RFPTarget::Unknown) &&
+                                                  RFPTarget::CSSResolution) &&
       StaticPrefs::widget_non_native_theme_win_scrollbar_use_system_size()) {
     ConfigureScrollbarSize(LookAndFeel::GetInt(
         LookAndFeel::IntID::SystemScrollbarSize, defaultSize));

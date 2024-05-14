@@ -354,7 +354,7 @@ bool ScrollbarDrawingWin11::PaintScrollbarThumb(
 void ScrollbarDrawingWin11::RecomputeScrollbarParams() {
   ScrollbarDrawingWin::RecomputeScrollbarParams();
   if (nsContentUtils::ShouldResistFingerprinting("No context available",
-                                                 RFPTarget::Unknown)) {
+                                                 RFPTarget::CSSResolution)) {
     // Do not distinguish sizes between windows 10 and 11.
     return;
   }
