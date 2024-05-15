@@ -1076,7 +1076,7 @@ public final class GeckoRuntimeSettings extends RuntimeSettings {
         }
       }
     }
-    String acceptLanguages = locale != null ? locale.toString().replace('_', '-') : "en-US";
+    String acceptLanguages = locale != null ? locale.toLanguageTag().replace('_', '-') : "en-US";
     if (acceptLanguages.equals("en-US")) {
       // For consistency with spoof English.
       acceptLanguages += ", en";
