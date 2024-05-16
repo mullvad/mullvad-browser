@@ -157,6 +157,9 @@ var SecurityLevelPanel = {
   _populated: false,
 
   _populateXUL() {
+    // TODO: Used for #securityLevel-learnMore. Remove with esr 128.
+    window.ensureCustomElements("moz-support-link");
+
     this._elements = {
       panel: document.getElementById("securityLevel-panel"),
       background: document.getElementById("securityLevel-background"),
@@ -171,9 +174,7 @@ var SecurityLevelPanel = {
 
     const learnMoreEl = document.getElementById("securityLevel-learnMore");
     learnMoreEl.addEventListener("click", event => {
-      window.openTrustedLinkIn(learnMoreEl.href, "tab");
       this.hide();
-      event.preventDefault();
     });
 
     this._elements.restoreDefaultsButton.addEventListener("command", () => {
