@@ -17,7 +17,9 @@ window.MozXULElement?.insertFTLIfNeeded("toolkit/global/mozSupportLink.ftl");
 export default class MozSupportLink extends HTMLAnchorElement {
   static SUPPORT_URL = "https://www.mozilla.org/";
   static get observedAttributes() {
-    return ["support-page", "utm-content"];
+    // We add tor-manual-page for pages hosted at tor project. Also shared with
+    // base-browser/mullvad-browser. See tor-browser#42583.
+    return ["support-page", "utm-content", "tor-manual-page"];
   }
 
   /**
@@ -95,13 +97,50 @@ export default class MozSupportLink extends HTMLAnchorElement {
   }
 
   attributeChangedCallback(attrName) {
-    if (attrName === "support-page" || attrName === "utm-content") {
+    if (
+      attrName === "support-page" ||
+      attrName === "utm-content" ||
+      attrName === "tor-manual-page"
+    ) {
       this.#setHref();
     }
   }
 
   #setHref() {
+    let torManualPage = this.getAttribute("tor-manual-page");
+    if (torManualPage) {
+      const [page, anchor] = torManualPage.split("_", 2);
+
+      let locale = Services.locale.appLocaleAsBCP47;
+      if (locale === "ja-JP-macos") {
+        // Convert quirk-locale to the locale used for tor project.
+        locale = "ja";
+      }
+
+      let href = `https://tb-manual.torproject.org/${locale}/${page}/`;
+      if (anchor) {
+        href = `${href}#${anchor}`;
+      }
+      this.href = href;
+      return;
+    }
     let supportPage = this.getAttribute("support-page") ?? "";
+    // For base-browser we sometimes want to override firefox support links with
+    // our own.
+    // See tor-browser#40899.
+    switch (supportPage) {
+      case "preferences":
+        // Shown twice in preferences, both as `{ -brand-short-name } Support`.
+        // Instead of directing to support for preferences, we link to general
+        // tor browser support.
+        // See tor-browser#32092.
+        this.href = Services.prefs.getStringPref(
+          "browser.base-browser-support-url",
+          ""
+        );
+        return;
+      // Fall through to support.mozilla.org
+    }
     let base = MozSupportLink.SUPPORT_URL + supportPage;
     this.href = this.hasAttribute("utm-content")
       ? formatUTMParams(this.getAttribute("utm-content"), base)
@@ -121,21 +160,7 @@ customElements.define("moz-support-link", MozSupportLink, { extends: "a" });
  *          Otherwise the url in unmodified form.
  */
 export function formatUTMParams(contentAttribute, url) {
-  if (!contentAttribute) {
-    return url;
-  }
-  let parsedUrl = new URL(url);
-  let domain = `.${parsedUrl.hostname}`;
-  if (
-    !domain.endsWith(".mozilla.org") &&
-    // For testing: addons-dev.allizom.org and addons.allizom.org
-    !domain.endsWith(".allizom.org")
-  ) {
-    return url;
-  }
-
-  parsedUrl.searchParams.set("utm_source", "firefox-browser");
-  parsedUrl.searchParams.set("utm_medium", "firefox-browser");
-  parsedUrl.searchParams.set("utm_content", contentAttribute);
-  return parsedUrl.href;
+  // Do not add utm parameters. See tor-browser#42583.
+  // NOTE: This method is also present in about:addons.
+  return url;
 }
