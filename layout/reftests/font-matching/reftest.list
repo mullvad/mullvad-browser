@@ -195,3 +195,6 @@ pref(ui.font.menu,"serif") test-pref(ui.font.menu.weight,"800") != system-font-p
 
 # Reset default prefs.
 defaults
+
+# Bug 1787790 - Normalize system fonts when using RFP
+test-pref(privacy.resistFingerprinting,true) == system-font-rfp.html system-font-rfp-ref.html
