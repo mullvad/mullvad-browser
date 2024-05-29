@@ -327,8 +327,7 @@ class SortedItemSelectList {
  * @prop {string} id - A unique ID.
  * @prop {string} label - The localized display name.
  * @prop {string} value - The BCP 47 locale identifier or the word "search".
- * @prop {boolean} canRemove - Locales that are part of the packaged locales cannot be
- *                             removed.
+ * @prop {boolean} canRemove - The default locale cannot be removed.
  * @prop {boolean} installed - Whether or not the locale is installed.
  */
 
@@ -338,7 +337,6 @@ class SortedItemSelectList {
  */
 async function getLocaleDisplayInfo(localeCodes) {
   let availableLocales = new Set(await LangPackMatcher.getAvailableLocales());
-  let packagedLocales = new Set(Services.locale.packagedLocales);
   let localeNames = Services.intl.getLocaleDisplayNames(
     undefined,
     localeCodes,
@@ -349,7 +347,7 @@ async function getLocaleDisplayInfo(localeCodes) {
       id: "locale-" + code,
       label: localeNames[i],
       value: code,
-      canRemove: !packagedLocales.has(code),
+      canRemove: code != Services.locale.defaultLocale,
       installed: availableLocales.has(code),
     };
   });
