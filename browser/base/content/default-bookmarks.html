@@ -15,7 +15,18 @@
 <h1>Bookmarks</h1>
 
 <dl><p>
-    <dt><a href="https://mullvad.net/" icon="@mullvad_icon@">Mullvad VPN</a></dt>
+  <dt><a href="https://mullvad.net/" icon="@mullvad_icon@">Mullvad VPN</a></dt>
+#if MOZ_UPDATE_CHANNEL != release
+        <dt><h3>QA</h3></dt>
+        <dl><p>
+            <dt><a href="https://mullvad.net/check">connection check</a></dt>
+            <dt><a href="https://webrtc.github.io/samples/src/content/getusermedia/gum/">webcam | webRTC</a></dt>
+            <dt><a href="https://webrtc.github.io/samples/src/content/getusermedia/audio/">audio | webRTC</a></dt>
+            <dt><a href="https://webrtc.github.io/samples/src/content/getusermedia/getdisplaymedia/">screenshare | webRTC</a></dt>
+            <dt><a href="https://youtube.com/">youtube</a></dt>
+            <dt><a href="https://theguardian.com/">the guardian</a></dt>
+        </dl><p>
+#endif
 </dl><p>
 </body>
 </html>
