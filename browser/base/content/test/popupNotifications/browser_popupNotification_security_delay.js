@@ -558,5 +558,7 @@ add_task(async function test_notificationDuringFullScreenTransition() {
     info("Wait for full screen transition end.");
     await promiseFullScreenTransitionEnd;
     info("Full screen transition end");
+
+    await SpecialPowers.popPrefEnv();
   });
 });
