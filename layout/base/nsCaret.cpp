@@ -855,7 +855,7 @@ size_t nsCaret::SizeOfIncludingThis(mozilla::MallocSizeOf aMallocSizeOf) const {
 bool nsCaret::IsMenuPopupHidingCaret() {
   // Check if there are open popups.
   nsXULPopupManager* popMgr = nsXULPopupManager::GetInstance();
-  nsTArray<nsIFrame*> popups;
+  nsTArray<nsMenuPopupFrame*> popups;
   popMgr->GetVisiblePopups(popups);
 
   if (popups.Length() == 0)
@@ -873,7 +873,7 @@ bool nsCaret::IsMenuPopupHidingCaret() {
   // If there's a menu popup open before the popup with
   // the caret, don't show the caret.
   for (uint32_t i = 0; i < popups.Length(); i++) {
-    nsMenuPopupFrame* popupFrame = static_cast<nsMenuPopupFrame*>(popups[i]);
+    nsMenuPopupFrame* popupFrame = popups[i];
     nsIContent* popupContent = popupFrame->GetContent();
 
     if (caretContent->IsInclusiveDescendantOf(popupContent)) {
