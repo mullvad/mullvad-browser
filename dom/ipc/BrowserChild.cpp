@@ -39,6 +39,7 @@
 #include "mozilla/MouseEvents.h"
 #include "mozilla/NativeKeyBindingsType.h"
 #include "mozilla/NullPrincipal.h"
+#include "mozilla/PointerLockManager.h"
 #include "mozilla/Preferences.h"
 #include "mozilla/PresShell.h"
 #include "mozilla/ProcessHangMonitor.h"
@@ -3181,6 +3182,11 @@ mozilla::ipc::IPCResult BrowserChild::RecvAllowScriptsToClose() {
 
 mozilla::ipc::IPCResult BrowserChild::RecvReleaseAllPointerCapture() {
   PointerEventHandler::ReleaseAllPointerCapture();
+  return IPC_OK();
+}
+
+mozilla::ipc::IPCResult BrowserChild::RecvReleasePointerLock() {
+  PointerLockManager::Unlock();
   return IPC_OK();
 }
 
