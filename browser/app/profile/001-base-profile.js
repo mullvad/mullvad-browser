@@ -433,10 +433,6 @@ pref("privacy.purge_trackers.enabled", false);
 // Do not allow cross-origin sub-resources to open HTTP authentication
 // credentials dialogs. Hardens against potential credentials phishing.
 pref("network.auth.subresource-http-auth-allow", 1);
-// Disable sending additional analytics to web servers.
-// This disables navigator.sendBeacon, even though this is discouraged by the
-// standard: https://w3c.github.io/beacon/#privacy-and-security
-pref("beacon.enabled", false);
 
 pref("network.dns.disablePrefetch", true);
 pref("network.dns.disablePrefetchFromHTTPS", true);
