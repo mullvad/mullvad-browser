@@ -1765,7 +1765,10 @@ var gMainPane = {
         "@mozilla.org/xre/directory-provider;1"
       ].getService(Ci.nsIXREDirProvider);
       // Flatpak does not support setting nor detection of default browser
-      if (!shellSvc || isInFlatpak || xreDirProvider.isPortableMode) {
+      // Mullvad Bug 298: the ability to set Mullvad as the default browser in
+      // Windows is currently not functioning so hide the DOM Element containing
+      // default browser settings on non-portable Windows installs as well
+      if (!shellSvc || isInFlatpak || xreDirProvider.isPortableMode || AppConstants.platform == "win") {
         defaultBrowserBox.hidden = true;
         return;
       }

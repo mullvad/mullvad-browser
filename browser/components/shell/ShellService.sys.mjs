@@ -92,6 +92,13 @@ let ShellServiceInternal = {
    */
   _checkedThisSession: false,
   get shouldCheckDefaultBrowser() {
+    // Mullvad Bug 298: the ability to set Mullvad as the default browser in
+    // Windows is currently not functioning so in lieu of overwriting user prefs
+    // or shipping a new default return early here
+    if(AppConstants.platform == "win") {
+      return false;
+    }
+
     // If we've already checked, the browser has been started and this is a
     // new window open, and we don't want to check again.
     if (this._checkedThisSession) {
