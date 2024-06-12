@@ -1406,7 +1406,8 @@ var gUnifiedExtensions = {
    */
   // See tor-browser#41581.
   // The behaviour overlaps with a proposal in mozilla Bug 1778684, which has
-  // not been implemented, or had much recent activity as of 5th October 2023.
+  // not yet been implemented as of June 2024 (start of ESR 128).
+  // See tor-browser#42635
   _updateVisibility() {
     this.button.classList.toggle(
       "hide-empty",
