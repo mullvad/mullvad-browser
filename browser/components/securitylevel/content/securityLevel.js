@@ -157,9 +157,6 @@ var SecurityLevelPanel = {
   _populated: false,
 
   _populateXUL() {
-    // TODO: Used for #securityLevel-learnMore. Remove with esr 128.
-    window.ensureCustomElements("moz-support-link");
-
     this._elements = {
       panel: document.getElementById("securityLevel-panel"),
       background: document.getElementById("securityLevel-background"),
