@@ -510,12 +510,16 @@ def split_triplet(triplet, allow_wasi=False):
         canonical_kernel = "kFreeBSD"
     elif os.startswith("gnu"):
         canonical_os = canonical_kernel = "GNU"
-    elif os.startswith("mingw") or os in ("windows-msvc", "windows-gnu"):
+    elif os.startswith("mingw") or os in (
+        "windows-msvc",
+        "windows-gnu",
+        "windows-gnullvm",
+    ):
         canonical_os = canonical_kernel = "WINNT"
         if not os.startswith("mingw"):
             if os == "windows-msvc":
                 abi = "msvc"
-            elif os == "windows-gnu":
+            elif os == "windows-gnu" or os == "windows-gnullvm":
                 abi = "mingw"
             # Many things down the line are looking for the string "mingw32"
             # until they are all fixed, we pretend that's the raw os we had
