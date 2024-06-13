@@ -310,9 +310,9 @@ def detect_rustc_target(
                 if host_or_target.abi == "msvc":
                     suffix = "windows-msvc"
                 elif host_or_target.abi == "mingw":
-                    suffix = "windows-gnu"
+                    suffix = "windows-gnullvm"
             elif compiler_info.type in ("gcc", "clang"):
-                suffix = "windows-gnu"
+                suffix = "windows-gnullvm"
             else:
                 suffix = "windows-msvc"
             narrowed = [
