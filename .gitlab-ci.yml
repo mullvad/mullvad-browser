@@ -1,0 +1,9 @@
+stages:
+  - lint
+
+variables:
+  IMAGE_PATH: containers.torproject.org/tpo/applications/tor-browser/base:latest
+  LOCAL_REPO_PATH: /srv/apps-repos/${CI_PROJECT_NAME}.git
+
+include:
+  - local: '.gitlab/ci/lint.yml'
