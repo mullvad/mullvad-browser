@@ -1,0 +1,14 @@
+stages:
+  - lint
+  - test
+  - update-translations
+
+variables:
+  IMAGE_PATH: containers.torproject.org/tpo/applications/tor-browser/desktop:latest
+  LOCAL_REPO_PATH: /srv/apps-repos/tor-browser.git
+
+include:
+  - local: '.gitlab/ci/mixins.yml'
+  - local: '.gitlab/ci/jobs/lint/lint.yml'
+  - local: '.gitlab/ci/jobs/test/python-test.yml'
+  - local: '.gitlab/ci/jobs/update-translations.yml'
