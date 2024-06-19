@@ -1,0 +1,5 @@
+stages:
+  - lint
+
+include:
+  - local: '.gitlab/ci/lint.yml'
