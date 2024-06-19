@@ -1,0 +1,53 @@
+.update-translation-base:
+  stage: update-translations
+  rules:
+    - if: ($TRANSLATION_FILES != "" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push")
+      changes:
+        - "**/*.ftl"
+        - "**/*.properties"
+        - "**/*.dtd"
+        - "**/*strings.xml"
+        - "**/update-translations.yml"
+        - "**/l10n/combine/combine.py"
+        - "**/l10n/combine-translation-versions.py"
+    - if: ($TRANSLATION_FILES != "" && $FORCE_UPDATE_TRANSLATIONS == "true")
+  variables:
+    COMBINED_FILES_JSON: "combined-translation-files.json"
+    TRANSLATION_FILES: ''
+
+
+combine-en-US-translations:
+  extends: .update-translation-base
+  needs: []
+  image: python
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    paths:
+      - .cache/pip
+  # Artifact is for translation project job
+  artifacts:
+    paths:
+      - "$COMBINED_FILES_JSON"
+    expire_in: "60 min"
+    reports:
+      dotenv: job_id.env
+  # Don't load artifacts for this job.
+  dependencies: []
+  script:
+    # Save this CI_JOB_ID to the dotenv file to be used in the variables for the
+    # push-en-US-translations job.
+    - echo 'COMBINE_TRANSLATIONS_JOB_ID='"$CI_JOB_ID" >job_id.env
+    - pip install compare_locales
+    - python ./tools/base-browser/l10n/combine-translation-versions.py "$CI_COMMIT_BRANCH" "$TRANSLATION_FILES" "$COMBINED_FILES_JSON"
+
+push-en-US-translations:
+  extends: .update-translation-base
+  needs:
+    - job: combine-en-US-translations
+  variables:
+    COMBINED_FILES_JSON_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/jobs/${COMBINE_TRANSLATIONS_JOB_ID}/artifacts/${COMBINED_FILES_JSON}"
+  trigger:
+    strategy: depend
+    project: tor-browser-translation-bot/translation
+    branch: tor-browser-ci
