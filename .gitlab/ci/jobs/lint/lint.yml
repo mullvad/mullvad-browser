@@ -1,0 +1,25 @@
+lint-all:
+  extends: .with-local-repo-bash
+  stage: lint
+  image: $IMAGE_PATH
+  interruptible: true
+  variables:
+    MOZBUILD_STATE_PATH: "$CI_PROJECT_DIR/.cache/mozbuild"
+  cache:
+    paths:
+      - node_modules
+      - .cache/mozbuild
+    # Store the cache regardless on job outcome
+    when: 'always'
+    # Share the cache throughout all pipelines running for a given branch
+    key: $CI_COMMIT_REF_SLUG
+  tags:
+    # Run these jobs in the browser dedicated runners.
+    - firefox
+  script:
+    - ./mach configure --without-wasm-sandboxed-libraries --with-base-browser-version=0.0.0
+    - .gitlab/ci/jobs/lint/helpers.py --get-changed-files | xargs -d '\n' ./mach lint -v
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    # Run job whenever a commit is merged to a protected branch
+    - if: ($CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true' && $CI_PIPELINE_SOURCE == 'push')
