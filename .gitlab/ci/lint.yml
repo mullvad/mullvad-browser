@@ -1,0 +1,312 @@
+.base:
+  stage: lint
+  image: $IMAGE_PATH
+  interruptible: true
+  needs:
+    - job: setup-env
+      artifacts: true
+    - job: create-bundle
+      artifacts: true
+  variables:
+    MOZBUILD_STATE_PATH: "$CI_PROJECT_DIR/.cache/mozbuild"
+    GIT_STRATEGY: "none"
+  cache:
+    paths:
+      - node_modules
+      - .cache/mozbuild
+    # Store the cache regardless on job outcome
+    when: 'always'
+    # Share the cache throughout all pipelines running for a given branch
+    key: $CI_COMMIT_REF_SLUG
+  before_script:
+    # DEBUG: Are all artifacts here?
+    - ls -a
+    - mkdir app && cd app
+    # Initialize a fresh git repo
+    - git init
+    # Add app.bundle as the remote. All operations that communicate with the remote will be local.
+    - git remote add origin ../app.bundle
+    # shallow.txt contains the SHA of the base commit of the bundle.
+    # The bundle is shallow, therefore it's base commit will not have a parent.
+    # Adding the SHA of the base commit to .git/shallow tells git that it doesn't need
+    # to crash when it realizes said base commit doesn't have a parent.
+    - cp ../shallow.txt .git/shallow
+    # Finally, unpack the bundle. Time it for debugging purposes.
+    - time git pull origin $BRANCH_NAME
+
+eslint:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l eslint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        # Files that are likely audited.
+        - '**/*.js'
+        - '**/*.jsm'
+        - '**/*.json'
+        - '**/*.jsx'
+        - '**/*.mjs'
+        - '**/*.sjs'
+        - '**/*.html'
+        - '**/*.xhtml'
+        - '**/*.xml'
+        - 'tools/lint/eslint.yml'
+        # Run when eslint policies change.
+        - '**/.eslintignore'
+        - '**/*eslintrc*'
+        # The plugin implementing custom checks.
+        - 'tools/lint/eslint/eslint-plugin-mozilla/**'
+        - 'tools/lint/eslint/eslint-plugin-spidermonkey-js/**'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+stylelint:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l stylelint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        # Files that are likely audited.
+        - '**/*.css'
+        - 'tools/lint/styleint.yml'
+        # Run when stylelint policies change.
+        - '**/.stylelintignore'
+        - '**/*stylelintrc*'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+py-black:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l black
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        # The list of extensions should match tools/lint/black.yml
+        - '**/*.py'
+        - '**/moz.build'
+        - '**/*.configure'
+        - '**/*.mozbuild'
+        - 'pyproject.toml'
+        - 'tools/lint/black.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+py-ruff:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l ruff
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.py'
+        - '**/*.configure'
+        - '**/.ruff.toml'
+        - 'pyproject.toml'
+        - 'tools/lint/ruff.yml'
+        - 'tools/lint/python/ruff.py'
+        - 'tools/lint/python/ruff_requirements.txt'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+yaml:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l yaml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.yml'
+        - '**/*.yaml'
+        - '**/.ymllint'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+shellcheck:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l shellcheck
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.sh'
+        - 'tools/lint/shellcheck.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+clang-format:
+  extends: .base
+  script:
+    - ./mach configure --without-wasm-sandboxed-libraries --with-base-browser-version=0.0.0
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l clang-format
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.cpp'
+        - '**/*.c'
+        - '**/*.cc'
+        - '**/*.h'
+        - '**/*.m'
+        - '**/*.mm'
+        - 'tools/lint/clang-format.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+rustfmt:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l rustfmt
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.rs'
+        - 'tools/lint/rustfmt.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+fluent-lint:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l fluent-lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.ftl'
+        - 'tools/lint/fluent-lint.yml'
+        - 'tools/lint/fluent-lint/exclusions.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+localization:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l l10n
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/locales/en-US/**'
+        - '**/l10n.toml'
+        - 'third_party/python/compare-locales/**'
+        - 'third_party/python/fluent/**'
+        - 'tools/lint/l10n.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+mingw-capitalization:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l mingw-capitalization
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.cpp'
+        - '**/*.cc'
+        - '**/*.c'
+        - '**/*.h'
+        - 'tools/lint/mingw-capitalization.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+mscom-init:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l mscom-init
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.cpp'
+        - '**/*.cc'
+        - '**/*.c'
+        - '**/*.h'
+        - 'tools/lint/mscom-init.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+file-whitespace:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l file-whitespace
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.c'
+        - '**/*.cc'
+        - '**/*.cpp'
+        - '**/*.css'
+        - '**/*.dtd'
+        - '**/*.idl'
+        - '**/*.ftl'
+        - '**/*.h'
+        - '**/*.html'
+        - '**/*.md'
+        - '**/*.properties'
+        - '**/*.py'
+        - '**/*.rs'
+        - '**/*.rst'
+        - '**/*.webidl'
+        - '**/*.xhtml'
+        - 'tools/lint/file-whitespace.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+test-manifest:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l test-manifest-alpha -l test-manifest-disable -l test-manifest-skip-if
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.ini'
+        - 'python/mozlint/**'
+        - 'tools/lint/**'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+
+trojan-source:
+  extends: .base
+  script:
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l trojan-source
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        # List copied from: taskcluster/ci/source-test/mozlint.yml
+        #
+        - '**/*.c'
+        - '**/*.cc'
+        - '**/*.cpp'
+        - '**/*.h'
+        - '**/*.py'
+        - '**/*.rs'
+        - 'tools/lint/trojan-source.yml'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'

@@ -1,0 +1,56 @@
+setup-env:
+  stage: setup
+  interruptible: true
+  variables:
+    GIT_STRATEGY: "none"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_REF_PROTECTED == 'true'
+  script:
+    - |
+      if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME" ]; then
+        echo "BRANCH_NAME=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME" > build.env
+      else
+        echo "BRANCH_NAME=$CI_COMMIT_REF_NAME" > build.env
+      fi
+  artifacts:
+    reports:
+      dotenv:
+        - build.env
+
+create-bundle:
+  stage: setup
+  # TODO: Find a better suited image, this one just has git.
+  image: python
+  needs:
+    - job: setup-env
+      artifacts: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_REF_PROTECTED == 'true'
+  variables:
+    GIT_DEPTH: "1"
+  interruptible: true
+  script:
+    # DEBUG: Check repository status.
+    - git status
+    # DEBUG: Check branches in repository
+    - git branch
+    # Force switch to a named branch. We force it in case there is already
+    # a branch with the same name from previous runs.
+    - git switch -C $BRANCH_NAME
+    # Create a git bundle -- this will generate the app.bundle file,
+    # which can be used as a git remote for offline fetching.
+    - git bundle create app.bundle $BRANCH_NAME
+    # Retain the SHA of the base of this shallow repository.
+    - cat .git/shallow > shallow.txt
+    # DEBUG: Check sizes.
+    - du -sh .git
+    - du -sh app.bundle
+    # Since this is the only job we have access to the Gitlab remote,
+    # let's get a list of changed files to use in the next jobs.
+    - .gitlab/ci/scripts/helpers.py --get-changed-files > changedfiles.txt
+  artifacts:
+    paths:
+      - app.bundle
+      - shallow.txt
+      - changedfiles.txt
+    expire_in: 1 hour
