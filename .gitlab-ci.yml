@@ -1,0 +1,10 @@
+stages:
+  - setup
+  - lint
+
+variables:
+  IMAGE_PATH: containers.torproject.org/tpo/applications/tor-browser/base:latest
+
+include:
+  - local: '.gitlab/ci/setup.yml'
+  - local: '.gitlab/ci/lint.yml'
