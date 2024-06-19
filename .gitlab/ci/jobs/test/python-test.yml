@@ -1,0 +1,24 @@
+python-test:
+  extends: .with-local-repo-bash
+  stage: test
+  image: $IMAGE_PATH
+  interruptible: true
+  variables:
+    MOZBUILD_STATE_PATH: "/var/tmp/mozbuild"
+  cache:
+    paths:
+      - node_modules
+    # Store the cache regardless on job outcome
+    when: 'always'
+    # Share the cache throughout all pipelines running for a given branch
+    key: $CI_COMMIT_REF_SLUG
+  tags:
+    # Run these jobs in the browser dedicated runners.
+    - firefox
+  script:
+    - ./mach configure --with-base-browser-version=0.0.0
+    - ./mach python-test --subsuite base-browser
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' || ($CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true' && $CI_PIPELINE_SOURCE == 'push')
+      changes:
+        - "**/test_*.py"
