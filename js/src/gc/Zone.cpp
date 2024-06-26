@@ -918,7 +918,13 @@ void Zone::clearScriptCounts(Realm* realm) {
   // Clear all hasScriptCounts_ flags of BaseScript, in order to release all
   // ScriptCounts entries of the given realm.
   for (auto i = scriptCountsMap->modIter(); !i.done(); i.next()) {
-    BaseScript* script = i.get().key();
+    const HeapPtr<BaseScript*>& script = i.get().key();
+    if (IsAboutToBeFinalized(script)) {
+      // Dead scripts may be present during incremental GC until script
+      // finalizers have been run.
+      continue;
+    }
+
     if (script->realm() != realm) {
       continue;
     }
@@ -939,7 +945,13 @@ void Zone::clearScriptLCov(Realm* realm) {
   }
 
   for (auto i = scriptLCovMap->modIter(); !i.done(); i.next()) {
-    BaseScript* script = i.get().key();
+    const HeapPtr<BaseScript*>& script = i.get().key();
+    if (IsAboutToBeFinalized(script)) {
+      // Dead scripts may be present during incremental GC until script
+      // finalizers have been run.
+      continue;
+    }
+
     if (script->realm() == realm) {
       i.remove();
     }
