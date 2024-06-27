@@ -908,7 +908,7 @@ class TelemetryHandler {
    * @returns {Array | null} Returns an array of provider name and the provider information.
    */
   _getProviderInfoForURL(url) {
-    return this._searchProviderInfo.find(info =>
+    return this._searchProviderInfo?.find(info =>
       info.searchPageRegexp.test(url)
     );
   }
