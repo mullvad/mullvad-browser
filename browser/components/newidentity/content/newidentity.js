@@ -4,7 +4,7 @@
 
 // Use a lazy getter because NewIdentityButton is declared more than once
 // otherwise.
-XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
+ChromeUtils.defineLazyGetter(this, "NewIdentityButton", () => {
   // Logger adapted from CustomizableUI.jsm
   const logger = (() => {
     const { ConsoleAPI } = ChromeUtils.import(
@@ -314,11 +314,10 @@ XPCOMUtils.defineLazyGetter(this, "NewIdentityButton", () => {
 
     clearPreferencesAndPermissions() {
       logger.info("Clearing Content Preferences");
-      ChromeUtils.defineModuleGetter(
-        this,
-        "PrivateBrowsingUtils",
-        "resource://gre/modules/PrivateBrowsingUtils.jsm"
-      );
+      ChromeUtils.defineESModuleGetters(this, {
+        PrivateBrowsingUtils:
+          "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
+      });
       const pbCtxt = PrivateBrowsingUtils.privacyContextFromWindow(window);
       const cps = Cc["@mozilla.org/content-pref/service;1"].getService(
         Ci.nsIContentPrefService2

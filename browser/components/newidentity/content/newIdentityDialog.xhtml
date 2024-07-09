@@ -6,11 +6,6 @@
 
 <!-- based on resetProfile.xhtml -->
 
-<?xml-stylesheet href="chrome://global/skin/global.css"?>
-<?xml-stylesheet href="chrome://global/content/commonDialog.css"?>
-<?xml-stylesheet href="chrome://global/skin/commonDialog.css"?>
-<?xml-stylesheet href="chrome://browser/content/newIdentityDialog.css"?>
-
 <window
   id="newIdentityDialogWindow"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -21,6 +16,20 @@
 >
   <dialog id="newIdentityDialog" buttons="accept,cancel" defaultButton="accept">
     <linkset>
+      <html:link rel="stylesheet" href="chrome://global/skin/global.css" />
+      <html:link
+        rel="stylesheet"
+        href="chrome://global/content/commonDialog.css"
+      />
+      <html:link
+        rel="stylesheet"
+        href="chrome://global/skin/commonDialog.css"
+      />
+      <html:link
+        rel="stylesheet"
+        href="chrome://browser/content/newIdentityDialog.css"
+      />
+
       <html:link rel="localization" href="branding/brand.ftl" />
       <html:link rel="localization" href="toolkit/global/base-browser.ftl" />
     </linkset>
