@@ -563,6 +563,11 @@ parent:
     async RequestPointerCapture(uint32_t aPointerId) returns (bool aSuccess);
     async ReleasePointerCapture(uint32_t aPointerId);
 
+    /**
+     * Child informs the parent that a pointer lock has requested.
+     */
+    async RequestPointerLock() returns (nsCString error);
+
 both:
     /**
      * informs that a pointer lock has released.
