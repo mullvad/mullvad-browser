@@ -1262,6 +1262,7 @@ nsresult nsXREDirProvider::GetPortableDataDir(nsIFile** aFile,
   // mode.
   if (exeDirPath.LowerCaseFindASCII("/applications/") == 0) {
     aIsPortable = false;
+    gDataDirPortable.emplace(nullptr);
     return NS_OK;
   }
 #  endif
@@ -1314,6 +1315,7 @@ nsresult nsXREDirProvider::GetPortableDataDir(nsIFile** aFile,
     rv = localDir->Create(nsIFile::DIRECTORY_TYPE, 0700);
     if (NS_FAILED(rv)) {
       aIsPortable = false;
+      gDataDirPortable.emplace(nullptr);
       return NS_OK;
     }
   }
