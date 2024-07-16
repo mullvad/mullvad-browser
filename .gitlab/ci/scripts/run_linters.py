@@ -98,13 +98,13 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    command = [
-        "./mach",
-        "lint",
-        "-v",
-        *(s for l in args.linters for s in ("-l", l)),
-        *get_list_of_changed_files(),
-    ]
-    result = subprocess.run(command, text=True)
-
-    sys.exit(result.returncode)
+    changed_files = get_list_of_changed_files()
+    if changed_files:
+        command = ["./mach", "lint", "-v"]
+        for linter in args.linters:
+            command.extend(["-l", linter])
+        command.extend(changed_files)
+        result = subprocess.run(command, text=True)
+        sys.exit(result.returncode)
+    else:
+        print("No files changed, skipping linting.")

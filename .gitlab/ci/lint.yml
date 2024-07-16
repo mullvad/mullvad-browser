@@ -2,11 +2,15 @@
   stage: lint
   interruptible: true
   variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    MOZBUILD_STATE_PATH: "$CI_PROJECT_DIR/.cache/mozbuild"
   cache:
     paths:
       - node_modules
-      - .cache/pip
+      - .cache/mozbuild
+    # Store the cache regardless on job outcome
+    when: 'always'
+    # Share the cache throughout all pipelines running for a given branch
+    key: $CI_COMMIT_REF_SLUG
 
 eslint:
   extends: .base
