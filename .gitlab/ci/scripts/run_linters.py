@@ -54,7 +54,7 @@ def get_firefox_tag_from_branch_name(branch_name):
         return match.group(0).split()[0]
     else:
         raise ValueError(
-            f"Failed to find reference specifier for Firefox tag in branch '{branch_name}'."
+            f"Failed to find reference specifier for Firefox tag '{tag}' in branch '{branch_name}'."
         )
 
 
