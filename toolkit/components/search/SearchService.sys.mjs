@@ -81,6 +81,7 @@ export const NON_SPLIT_ENGINE_IDS = [
   "engine-purpose",
   "engine-fr",
   "fixup_search",
+  "ddg-html",
 ];
 
 const TOPIC_LOCALES_CHANGE = "intl:app-locales-changed";
@@ -2579,16 +2580,111 @@ export class SearchService {
   // called in test_remove_engine_notification_box.js
   async _fetchEngineSelectorEngines() {
     const engines = [
-      { webExtension: { id: "ddg@search.mozilla.org" }, orderHint: 100 },
-      { webExtension: { id: "ddg-html@search.mozilla.org" }, orderHint: 90 },
       {
-        webExtension: { id: "mullvad-leta@search.mozilla.org" },
-        orderHint: 80,
+        aliases: ["duckduckgo", "ddg"],
+        name: "DuckDuckGo",
+        urls: {
+          search: {
+            base: "https://duckduckgo.com/",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "04e99a38-13ee-47d8-8aa4-64482b3dea99",
+        identifier: "ddg",
+        recordType: "engine",
+        variants: [],
       },
-      { webExtension: { id: "mojeek@search.mozilla.org" }, orderHint: 70 },
-      { webExtension: { id: "brave@search.mozilla.org" }, orderHint: 60 },
-      { webExtension: { id: "startpage@search.mozilla.org" }, orderHint: 50 },
-      { webExtension: { id: "metager@search.mozilla.org" }, orderHint: 40 },
+      {
+        aliases: ["ddg-html", "duckduckgohtml", "ddgh"],
+        name: "DuckDuckGo (HTML)",
+        urls: {
+          search: {
+            base: "https://html.duckduckgo.com/html/",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "98d8c84b-7455-431d-98b9-890e7bcc0041",
+        identifier: "ddg-html",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["mullvad-leta", "leta", "mullvad", "ml"],
+        name: "Mullvad Leta",
+        urls: {
+          search: {
+            base: "https://leta.mullvad.net/",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "ee88d691-6d7a-4adb-9fec-5a205565505a",
+        identifier: "mullvad-leta",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["mojeek", "mj"],
+        name: "Mojeek",
+        urls: {
+          search: {
+            base: "https://www.mojeek.com/search",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "10df12ac-2b39-4aa9-8845-d5b35d5bb70c",
+        identifier: "mojeek",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["brave", "bv"],
+        name: "Brave Search",
+        urls: {
+          search: {
+            base: "https://search.brave.com/search",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "f479314b-030b-49a8-a2fe-7e1c5d1d9071",
+        identifier: "brave",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["startpage", "sp"],
+        name: "Startpage",
+        urls: {
+          search: {
+            base: "https://www.startpage.com/sp/search",
+            params: [],
+            searchTermParamName: "q",
+          },
+        },
+        id: "049f86fd-28fe-4389-910f-aac28f07d745",
+        identifier: "startpage",
+        recordType: "engine",
+        variants: [],
+      },
+      {
+        aliases: ["metager", "mg"],
+        name: "MetaGer",
+        urls: {
+          search: {
+            base: "https://metager.org/meta/meta.ger3",
+            params: [],
+            searchTermParamName: "eingabe",
+          },
+        },
+        id: "a9d07d93-469c-4bf4-8dd1-fa137f1cc85f",
+        identifier: "metager",
+        recordType: "engine",
+        variants: [],
+      },
     ];
 
     for (let e of engines) {
@@ -2597,6 +2693,29 @@ export class SearchService {
       }
       e.webExtension.locale =
         e.webExtension?.locale ?? lazy.SearchUtils.DEFAULT_TAG;
+
+      // TODO Bug 1875912 - Remove the webextension.id and webextension.locale when
+      // we're ready to remove old search-config and use search-config-v2 for all
+      // clients. The id in appProvidedSearchEngine should be changed to
+      // engine.identifier.
+      if (lazy.SearchUtils.newSearchConfigEnabled) {
+        let identifierComponents = NON_SPLIT_ENGINE_IDS.includes(e.identifier)
+          ? [e.identifier]
+          : e.identifier.split("-");
+
+        if (e.identifier == "amazon-se") {
+          identifierComponents[1] = "sweden";
+        }
+
+        if (e.identifier == "amazon-es") {
+          identifierComponents[1] = "spain";
+        }
+
+        let locale = identifierComponents.slice(1).join("-") || "default";
+
+        e.webExtension.id = identifierComponents[0] + "@search.mozilla.org";
+        e.webExtension.locale = locale;
+      }
     }
 
     return { engines, privateDefault: undefined };
