@@ -5,6 +5,8 @@ permalink: /changelog/
 ---
 
 # 128.0 (In Development)
+* **feature-prompts**:
+  * ⚠️ **Breaking change**: `FullScreenNotification` interface is now implemented using a `FullScreenNotificationToast`. `FullScreenNotificationDialog` has been removed, see [Bug 1902996](https://bugzilla.mozilla.org/show_bug.cgi?id=1902996).
 
 * **browser-toolbar**
   * Added new data classes `CustomTabsToolbarButtonConfig` and `CustomTabsToolbarListeners` to `CustomTabsToolbarFeature`, see [Bug 1897811](https://bugzilla.mozilla.org/show_bug.cgi?id=1897811).
