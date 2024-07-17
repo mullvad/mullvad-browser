@@ -2752,4 +2752,8 @@ To buźo jano pomagaś, kwalitu pógódnośenjow pósuźiś, nic kwalitu produkt
     <string name="debug_drawer_logins_add_login_button">Pśidajśo sfalšowane pśizjawjenje za toś tu domenu</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">Pśizjawjenje z wužywaŕskim mjenim %s wulašowaś</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">Aby połnu wobrazowku spušćił, śěgniśo wót górjejka dołoj a wužywajśo gestu slědk</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">Aby połnu wobrazowku spušćił, śěgniśo wót górjejka dołoj a tłocćo Slědk</string>
 </resources>

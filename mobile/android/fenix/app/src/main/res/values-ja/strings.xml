@@ -2780,4 +2780,8 @@
     <string name="debug_drawer_logins_add_login_button">このドメインの疑似ログイン情報を追加</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">ユーザー名 %s のログイン情報を削除します</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">全画面表示を終了するには、上からドラッグし、戻るジェスチャーをしてください</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">全画面表示を終了するには、上からドラッグし、[戻る] を押してください</string>
 </resources>

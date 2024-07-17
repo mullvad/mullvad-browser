@@ -2761,4 +2761,8 @@
     <string name="debug_drawer_logins_add_login_button">Добавете фалшиви данни за вход за този домейн</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">Изтриване на данни за вход с потребителско име %s</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">За да излезете от цял екран, плъзнете отгоре и използвайте жест за връщане назад</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">За да излезете от цял екран, плъзнете отгоре и натиснете назад</string>
 </resources>

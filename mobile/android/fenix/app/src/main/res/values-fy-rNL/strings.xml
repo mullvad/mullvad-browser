@@ -2750,4 +2750,8 @@ Dizze analyze sil jo allinnich helpe om de beoardielingskwaliteit te beoardielen
     <string name="debug_drawer_logins_add_login_button">Nepoanmelding foar dit domein tafoegje</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">Oanmelding mei brûkersnamme %s fuortsmite</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">Sleep fan de boppekant ôf en brûk it tebek-gebear om it folslein skerm ôf te sluten</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">Sleep fan de boppekant ôf en druk op tebek om it folslein skerm ôf te sluten</string>
 </resources>

@@ -2447,4 +2447,8 @@
 
     <!-- Micro survey -->
 
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">පූර්ණ තිරයෙන් පිටවීමට මුදුනින් ඇද ආපසු අභිනය භාවිතා කරන්න</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">පූර්ණ තිරයෙන් පිටවීමට මුදුනින් ඇද ආපසු බොත්තම ඔබන්න</string>
     </resources>
