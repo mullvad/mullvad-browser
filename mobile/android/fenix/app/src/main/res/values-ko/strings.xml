@@ -2809,4 +2809,8 @@
     <string name="debug_drawer_logins_add_login_button">이 도메인에 대한 가짜 로그인 추가</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">사용자 이름 %s의 로그인 삭제</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">전체 화면을 종료하려면, 위에서 드래그하고 뒤로 제스처를 사용하세요</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">전체 화면을 종료하려면, 위에서 드래그하고 뒤로를 누르세요</string>
 </resources>
