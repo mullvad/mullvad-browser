@@ -2729,4 +2729,8 @@
     <string name="debug_drawer_logins_add_login_button">Engade un inicio de sesión falso para este dominio</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">Eliminar o inicio de sesión co nome de usuario %s</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">Para saír da pantalla completa, arrastra desde arriba e usa o xesto cara atrás</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">Para saír da pantalla completa, arrastra dende a parte superior e preme cara atrás</string>
 </resources>
