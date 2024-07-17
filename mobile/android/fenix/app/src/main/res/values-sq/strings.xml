@@ -2750,4 +2750,8 @@
     <string name="debug_drawer_logins_add_login_button">Shtoni për këtë përkatësi një palë kredenciale të rreme hyrjeje</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">Fshi kredenciale hyrjeje me emër përdoruesi %s</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">Që të dilet nga mënyra “sa krejt ekrani”, tërhiqeni që nga kreu dhe përdorni gjestin për mbrapsht</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">Që të dilet nga mënyra “sa krejt ekrani”, tërhiqeni që nga kreu dhe shtypni tastin për mbrapsht</string>
 </resources>
