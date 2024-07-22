@@ -22,3 +22,6 @@ ac_add_options --disable-notification-server
 # Let's make sure no preference is enabling either Adobe's or Google's CDM.
 ac_add_options --disable-eme
 
+# tor-browser#320: Temporarily disable until we resolve the mingw problems.
+ac_add_options --disable-webrtc
+ac_add_options --disable-default-browser-agent
