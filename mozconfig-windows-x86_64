@@ -24,3 +24,6 @@ ac_add_options --disable-eme
 
 # tor-browser#44028: Disable zucchini for now, as it needs SEH.
 ac_add_options --disable-zucchini
+
+# mullvad-browser#320: Temporarily disable until we resolve the mingw problems.
+ac_add_options --disable-default-browser-agent
