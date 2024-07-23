@@ -193,7 +193,7 @@ class WindowSpamProtection {
  * Helper to grant a certain principal permission for automatic downloads
  * and to clear its download spam messages from the UI
  */
-class DownloadSpamEnabler{
+class DownloadSpamEnabler {
   /**
    * Constructs a DownloadSpamEnabler object
    * @param {nsIPrincipal} principal
@@ -216,7 +216,7 @@ class DownloadSpamEnabler{
       pm.EXPIRE_SESSION
     );
     downloadSpam.hasBlockedData = downloadSpam.hasPartialData = false;
-    const {url} = downloadSpam.source;
+    const { url } = downloadSpam.source;
     for (let window of lazy.BrowserWindowTracker.orderedWindows) {
       this.downloadSpamProtection.removeDownloadSpamForWindow(url, window);
     }
@@ -257,7 +257,10 @@ export class DownloadSpamProtection {
     let wsp =
       this._forWindowMap.get(window) ?? new WindowSpamProtection(window);
     this._forWindowMap.set(window, wsp);
-    wsp.addDownloadSpam(url, new DownloadSpamEnabler(loadInfo.triggeringPrincipal, this));
+    wsp.addDownloadSpam(
+      url,
+      new DownloadSpamEnabler(loadInfo.triggeringPrincipal, this)
+    );
   }
 
   /**
