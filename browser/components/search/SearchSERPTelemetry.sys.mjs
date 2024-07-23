@@ -229,6 +229,7 @@ class TelemetryHandler {
    * can be tracked.
    */
   async init() {
+    // eslint-disable-next-line no-constant-condition
     if (this._initialized || true) {
       return;
     }
@@ -2502,6 +2503,7 @@ class DomainToCategoriesMap {
    */
   async #setupClientAndStore() {
     return;
+    // eslint-disable-next-line no-unreachable
     if (this.#client && !this.empty) {
       return;
     }

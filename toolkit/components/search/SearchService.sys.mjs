@@ -1470,6 +1470,7 @@ export class SearchService {
    * handled via a sync listener.
    *
    */
+  // eslint-disable-next-line no-unused-private-class-members
   async #getIgnoreListAndSubscribe() {
     let listener = this.#handleIgnoreListUpdated.bind(this);
     const current = await lazy.IgnoreLists.getAndSubscribe(listener);
