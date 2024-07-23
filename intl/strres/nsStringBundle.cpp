@@ -1014,7 +1014,7 @@ nsStringBundleService::FormatStatusMessage(nsresult aStatus,
   switch (NS_ERROR_GET_MODULE(aStatus)) {
     case NS_ERROR_MODULE_XSLT:
       getStringBundle(aSpoofLocale ? XSLT_MSGS_URL_en_US : XSLT_MSGS_URL,
-        getter_AddRefs(bundle));
+                      getter_AddRefs(bundle));
       break;
     case NS_ERROR_MODULE_NETWORK:
       getStringBundle(NECKO_MSGS_URL, getter_AddRefs(bundle));

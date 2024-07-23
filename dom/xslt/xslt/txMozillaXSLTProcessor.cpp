@@ -950,7 +950,7 @@ void txMozillaXSLTProcessor::reportError(nsresult aResult,
       nsAutoString errorMessage;
       nsCOMPtr<nsIStringBundle> bundle;
       sbs->CreateBundle(spoofLocale ? XSLT_MSGS_URL_en_US : XSLT_MSGS_URL,
-        getter_AddRefs(bundle));
+                        getter_AddRefs(bundle));
 
       if (bundle) {
         AutoTArray<nsString, 1> error = {errorText};
