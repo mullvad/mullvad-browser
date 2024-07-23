@@ -956,7 +956,7 @@ set_define("ZLIB_IN_MOZGLUE", zlib_in_mozglue)
 option(
     "--with-relative-data-dir",
     nargs=1,
-    help="Sets the data directories to be relative to the application directory"
+    help="Sets the data directories to be relative to the application directory",
 )
 
 
