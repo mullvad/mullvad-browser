@@ -183,6 +183,7 @@ class _RFPHelper {
         break;
       case kPrefLetterboxing:
         Services.prefs.clearUserPref(kPrefLetterboxingDidForceSize);
+      // fall-through
       case kPrefLetterboxingVcenter:
       case kPrefLetterboxingGradient:
         this._handleLetterboxingPrefChanged();
