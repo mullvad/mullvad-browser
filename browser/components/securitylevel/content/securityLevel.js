@@ -170,7 +170,7 @@ var SecurityLevelPanel = {
     };
 
     const learnMoreEl = document.getElementById("securityLevel-learnMore");
-    learnMoreEl.addEventListener("click", event => {
+    learnMoreEl.addEventListener("click", () => {
       this.hide();
     });
 

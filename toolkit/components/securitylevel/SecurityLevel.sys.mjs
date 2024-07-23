@@ -1,13 +1,11 @@
-import { ConsoleAPI } from "resource://gre/modules/Console.sys.mjs";
-
 const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
   ExtensionParent: "resource://gre/modules/ExtensionParent.sys.mjs",
 });
 
-const logger = new ConsoleAPI({
-  maxLogLevel: "info",
+const logger = console.createInstance({
+  maxLogLevel: "Info",
   prefix: "SecurityLevel",
 });
 
@@ -420,7 +418,9 @@ function migratePreferences() {
   );
 }
 
-// This class is used to initialize the security level stuff at the startup
+/**
+ * This class is used to initialize the security level stuff at the startup
+ */
 export class SecurityLevel {
   QueryInterface = ChromeUtils.generateQI(["nsIObserver"]);
 
@@ -430,7 +430,7 @@ export class SecurityLevel {
     initializeSecurityPrefs();
   }
 
-  observe(aSubject, aTopic, aData) {
+  observe(aSubject, aTopic) {
     if (aTopic === BrowserTopics.ProfileAfterChange) {
       this.init();
     }
