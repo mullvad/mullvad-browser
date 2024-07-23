@@ -956,7 +956,7 @@ set_define("ZLIB_IN_MOZGLUE", zlib_in_mozglue)
 option(
     "--with-base-browser-version",
     nargs=1,
-    help="Set the Base Browser version, e.g., 7.0a1"
+    help="Set the Base Browser version, e.g., 7.0a1",
 )
 
 
@@ -976,7 +976,7 @@ def base_browser_version_quoted(value):
             "--with-base-browser-version is required for Base Browser and derived browsers."
         )
     if '"' in value or "\\" in value:
-        die("--with-base-browser-version cannot contain \" or \\.")
+        die('--with-base-browser-version cannot contain " or \\.')
     return '"{}"'.format(value[0])
 
 
