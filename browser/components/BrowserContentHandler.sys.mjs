@@ -740,10 +740,7 @@ nsBrowserContentHandler.prototype = {
       );
 
       // We do the same for the fork version.
-      let old_forkVersion = Services.prefs.getCharPref(
-        FORK_VERSION_PREF,
-        null
-      );
+      let old_forkVersion = Services.prefs.getCharPref(FORK_VERSION_PREF, null);
 
       override = needHomepageOverride();
       if (override != OVERRIDE_NONE) {
