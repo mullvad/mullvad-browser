@@ -238,7 +238,7 @@ const ClipboardPrivacy = {
             (lazy.PrivateBrowsingUtils.permanentPrivateBrowsing ||
               lazy.PrivateBrowsingUtils.isWindowPrivate(win));
           this._lastClipboardHash = clipboardHash;
-          console.log(
+          lazy.log.debug(
             `Clipboard changed: private ${this._isPrivateClipboard}, hash ${clipboardHash}.`
           );
         }
@@ -319,7 +319,7 @@ const ClipboardPrivacy = {
       clipboard.emptyClipboard(kGlobalClipboard);
       this._lastClipboardHash = null;
       this._isPrivateClipboard = false;
-      console.log("Private clipboard emptied.");
+      lazy.log.info("Private clipboard emptied.");
     }
   },
 };
