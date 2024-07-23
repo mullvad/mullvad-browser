@@ -230,6 +230,9 @@ pref("privacy.annotate_channels.strict_list.enabled", false);
 // Disable the Pocket extension (Bug #18886 and #31602)
 pref("extensions.pocket.enabled", false);
 
+// Disable Privacy-Preserving-Attribution (Bug #42687)
+pref("dom.private-attribution.submission.enabled", false);
+
 // Custom extensions preferences tor-browser#41581
 pref("extensions.hideNoScript", true);
 pref("extensions.hideUnifiedWhenEmpty", true);
