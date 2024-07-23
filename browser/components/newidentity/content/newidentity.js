@@ -7,21 +7,22 @@
 ChromeUtils.defineLazyGetter(this, "NewIdentityButton", () => {
   // Logger adapted from CustomizableUI.jsm
   const logger = (() => {
-    const { ConsoleAPI } = ChromeUtils.import(
-      "resource://gre/modules/Console.jsm"
-    );
     const consoleOptions = {
-      maxLogLevel: "info",
+      maxLogLevel: "Info",
       maxLogLevelPref: "browser.new_identity.log_level",
       prefix: "NewIdentity",
     };
-    return new ConsoleAPI(consoleOptions);
+    return console.createInstance(consoleOptions);
   })();
 
   const topics = Object.freeze({
     newIdentityRequested: "new-identity-requested",
   });
 
+  /**
+   * This class contains the actual implementation of the various step involved
+   * when running new identity.
+   */
   class NewIdentityImpl {
     async run() {
       this.disableAllJS();
@@ -469,7 +470,7 @@ ChromeUtils.defineLazyGetter(this, "NewIdentityButton", () => {
 
       // Run garbage collection and cycle collection after window is gone.
       // This ensures that blob URIs are forgotten.
-      window.addEventListener("unload", function (event) {
+      window.addEventListener("unload", function () {
         logger.debug("Initiating New Identity GC pass");
         // Clear out potential pending sInterSliceGCTimer:
         window.windowUtils.runNextCollectorTimer();
