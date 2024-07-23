@@ -1532,6 +1532,8 @@ class AddonOptions extends HTMLElement {
           el.disabled = false;
           el.hidden = false;
           document.l10n.setAttributes(el, "remove-addon-button");
+          // eslint-disable-next-line max-len
+          // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
         } else if (true || addon.isBuiltin) {
           // Just hide the uninstall button for any "special" add-on
           // which can't be removed (tor-browser#41834)
