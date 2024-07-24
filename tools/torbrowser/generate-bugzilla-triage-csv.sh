@@ -158,7 +158,7 @@ printf "\n]\n" >> "${git_json}"
 query_tail="&f1=product&n1=1&o1=anyexact&v1=Thunderbird%2CCalendar%2CChat%20Core%2CMailNews%20Core&f2=target_milestone&o2=substring&v2=${firefox_version}&limit=0"
 
 bugzilla_query="https://bugzilla.mozilla.org/buglist.cgi?${query_tail}"
-bugzilla_json_query="https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary${query_tail}"
+bugzilla_json_query="https://bugzilla.mozilla.org/rest/bug?include_fields=id,component,summary${query_tail}"
 
 wget "${bugzilla_json_query}" -O ${bugzilla_json}
 
@@ -174,13 +174,14 @@ jq -s '[ (.[0].bugs)[], (.[1])[] ] | group_by(.id) | map(.[0])' "${bugzilla_json
 # Generate Triage CSV
 #
 
-echo "\"Review\",,\"Bugzilla Bug\""
+echo "\"Review\",,\"Bugzilla Component\",\"Bugzilla Bug\""
 
-jq '. | sort_by(.id)[] | "\(.id)|\(.summary)"' ${union_json} \
-| while IFS='|' read -r id summary; do
+jq '. | sort_by([.component, .id])[] | "\(.id)|\(.component)|\(.summary)"' ${union_json} \
+| while IFS='|' read -r id component summary; do
 
     # bugzilla info
     id="${id:1}"
+    component="${component:0}"
     summary="${summary:0:-1}"
     summary=$(jq_unescape "${summary}")
     # short summary for gitlab issue title
@@ -207,6 +208,7 @@ jq '. | sort_by(.id)[] | "\(.id)|\(.summary)"' ${union_json} \
         echoerr "Skipped Bugzilla ${id}: ${summary_short}"
     else
         csv_summary=$(csv_escape "${summary}")
+        csv_component=$(csv_escape "${component}")
 
         # parent issue
         bugzilla_url="https://bugzilla.mozilla.org/show_bug.cgi?id=${id}"
@@ -221,7 +223,7 @@ jq '. | sort_by(.id)[] | "\(.id)|\(.summary)"' ${union_json} \
         create_issue=$(csv_escape "=HYPERLINK(\"${new_issue_url}\", \"New Issue\")")
         bugzilla_link=$(csv_escape "=HYPERLINK(\"${bugzilla_url}\", \"Bugzilla ${id}: ${csv_summary}\")")
 
-        echo "FALSE,\"${create_issue}\",\"${bugzilla_link}\","
+        echo "FALSE,\"${create_issue}\",\"${csv_component}\",\"${bugzilla_link}\","
     fi
 done
 
