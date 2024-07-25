@@ -544,58 +544,70 @@ class PromptFeature private constructor(
      *
      * @param session The session which requested the dialog.
      */
-    @Suppress("NestedBlockDepth")
     @VisibleForTesting(otherwise = PRIVATE)
     internal fun onPromptRequested(session: SessionState) {
         // Some requests are handle with intents
         session.content.promptRequests.lastOrNull()?.let { promptRequest ->
-            store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.let {
-                promptRequest.executeIfWindowedPrompt { exitFullscreenUsecase(it.id) }
+            if (session.content.permissionRequestsList.isNotEmpty()) {
+                onCancel(session.id, promptRequest.uid)
+            } else {
+                processPromptRequest(promptRequest, session)
+            }
+        }
+    }
+
+    @Suppress("NestedBlockDepth")
+    private fun processPromptRequest(
+        promptRequest: PromptRequest,
+        session: SessionState,
+    ) {
+        store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.let {
+            promptRequest.executeIfWindowedPrompt { exitFullscreenUsecase(it.id) }
+        }
+
+        when (promptRequest) {
+            is File -> {
+                emitPromptDisplayedFact(promptName = "FilePrompt")
+                filePicker.handleFileRequest(promptRequest)
             }
 
-            when (promptRequest) {
-                is File -> {
-                    emitPromptDisplayedFact(promptName = "FilePrompt")
-                    filePicker.handleFileRequest(promptRequest)
+            is Share -> handleShareRequest(promptRequest, session)
+            is SelectCreditCard -> {
+                emitSuccessfulCreditCardAutofillFormDetectedFact()
+                if (isCreditCardAutofillEnabled() && promptRequest.creditCards.isNotEmpty()) {
+                    creditCardPicker?.handleSelectCreditCardRequest(promptRequest)
                 }
-
-                is Share -> handleShareRequest(promptRequest, session)
-                is SelectCreditCard -> {
-                    emitSuccessfulCreditCardAutofillFormDetectedFact()
-                    if (isCreditCardAutofillEnabled() && promptRequest.creditCards.isNotEmpty()) {
-                        creditCardPicker?.handleSelectCreditCardRequest(promptRequest)
-                    }
-                }
-
-                is SelectLoginPrompt -> {
-                    if (!isLoginAutofillEnabled()) {
-                        return
-                    }
-                    if (promptRequest.generatedPassword != null && isSuggestStrongPasswordEnabled) {
-                        val currentUrl =
-                            store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.content?.url
-                        if (currentUrl != null) {
-                            strongPasswordPromptViewListener?.handleSuggestStrongPasswordRequest(
-                                promptRequest,
-                                currentUrl,
-                                onSaveLoginWithStrongPassword,
-                            )
-                        }
-                    } else {
-                        loginPicker?.handleSelectLoginRequest(promptRequest)
-                    }
-                    emitPromptDisplayedFact(promptName = "SelectLoginPrompt")
-                }
-
-                is SelectAddress -> {
-                    emitSuccessfulAddressAutofillFormDetectedFact()
-                    if (isAddressAutofillEnabled() && promptRequest.addresses.isNotEmpty()) {
-                        addressPicker?.handleSelectAddressRequest(promptRequest)
-                    }
-                }
-
-                else -> handleDialogsRequest(promptRequest, session)
             }
+
+            is SelectLoginPrompt -> {
+                if (!isLoginAutofillEnabled()) {
+                    return
+                }
+
+                if (promptRequest.generatedPassword != null && isSuggestStrongPasswordEnabled) {
+                    val currentUrl =
+                        store.state.findTabOrCustomTabOrSelectedTab(customTabId)?.content?.url
+                    if (currentUrl != null) {
+                        strongPasswordPromptViewListener?.handleSuggestStrongPasswordRequest(
+                            promptRequest,
+                            currentUrl,
+                            onSaveLoginWithStrongPassword,
+                        )
+                    }
+                } else {
+                    loginPicker?.handleSelectLoginRequest(promptRequest)
+                }
+                emitPromptDisplayedFact(promptName = "SelectLoginPrompt")
+            }
+
+            is SelectAddress -> {
+                emitSuccessfulAddressAutofillFormDetectedFact()
+                if (isAddressAutofillEnabled() && promptRequest.addresses.isNotEmpty()) {
+                    addressPicker?.handleSelectAddressRequest(promptRequest)
+                }
+            }
+
+            else -> handleDialogsRequest(promptRequest, session)
         }
     }
 
