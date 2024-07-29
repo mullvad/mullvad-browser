@@ -285,6 +285,22 @@ let JSWINDOWACTORS = {
     allFrames: true,
   },
 
+  FilesFilter: {
+    parent: {
+      esModuleURI: "resource://gre/actors/FilesFilterParent.sys.mjs",
+    },
+
+    child: {
+      esModuleURI: "resource://gre/actors/FilesFilterChild.sys.mjs",
+      events: {
+        drop: {},
+        paste: { capture: true },
+      },
+    },
+
+    allFrames: true,
+  },
+
   FindBar: {
     parent: {
       esModuleURI: "resource://gre/actors/FindBarParent.sys.mjs",
