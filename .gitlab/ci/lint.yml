@@ -39,9 +39,8 @@ eslint:
         # The plugin implementing custom checks.
         - 'tools/lint/eslint/eslint-plugin-mozilla/**'
         - 'tools/lint/eslint/eslint-plugin-spidermonkey-js/**'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 stylelint:
   extends: .base
@@ -59,9 +58,8 @@ stylelint:
         # Run when stylelint policies change.
         - '**/.stylelintignore'
         - '**/*stylelintrc*'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 py-black:
   extends: .base
@@ -80,9 +78,8 @@ py-black:
         - '**/*.mozbuild'
         - 'pyproject.toml'
         - 'tools/lint/black.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 py-ruff:
   extends: .base
@@ -101,9 +98,8 @@ py-ruff:
         - 'tools/lint/ruff.yml'
         - 'tools/lint/python/ruff.py'
         - 'tools/lint/python/ruff_requirements.txt'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 yaml:
   extends: .base
@@ -118,9 +114,8 @@ yaml:
         - '**/*.yml'
         - '**/*.yaml'
         - '**/.ymllint'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 shellcheck:
   extends: .base
@@ -134,9 +129,8 @@ shellcheck:
         #
         - '**/*.sh'
         - 'tools/lint/shellcheck.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 clang-format:
   extends: .base
@@ -156,9 +150,8 @@ clang-format:
         - '**/*.m'
         - '**/*.mm'
         - 'tools/lint/clang-format.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 rustfmt:
   extends: .base
@@ -172,9 +165,8 @@ rustfmt:
         #
         - '**/*.rs'
         - 'tools/lint/rustfmt.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 fluent-lint:
   extends: .base
@@ -189,9 +181,8 @@ fluent-lint:
         - '**/*.ftl'
         - 'tools/lint/fluent-lint.yml'
         - 'tools/lint/fluent-lint/exclusions.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 localization:
   extends: .base
@@ -208,9 +199,8 @@ localization:
         - 'third_party/python/compare-locales/**'
         - 'third_party/python/fluent/**'
         - 'tools/lint/l10n.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 mingw-capitalization:
   extends: .base
@@ -227,9 +217,8 @@ mingw-capitalization:
         - '**/*.c'
         - '**/*.h'
         - 'tools/lint/mingw-capitalization.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 mscom-init:
   extends: .base
@@ -246,9 +235,8 @@ mscom-init:
         - '**/*.c'
         - '**/*.h'
         - 'tools/lint/mscom-init.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 file-whitespace:
   extends: .base
@@ -277,9 +265,8 @@ file-whitespace:
         - '**/*.webidl'
         - '**/*.xhtml'
         - 'tools/lint/file-whitespace.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 test-manifest:
   extends: .base
@@ -294,9 +281,8 @@ test-manifest:
         - '**/*.ini'
         - 'python/mozlint/**'
         - 'tools/lint/**'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 trojan-source:
   extends: .base
@@ -315,6 +301,5 @@ trojan-source:
         - '**/*.py'
         - '**/*.rs'
         - 'tools/lint/trojan-source.yml'
-    # Run job whenever a new tag is created
-    # or whenever a commit is merged to a protected branch
-    - if: $CI_COMMIT_TAG || $CI_COMMIT_REF_PROTECTED == 'true'
+    # Run job whenever a commit is merged to a protected branch
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
