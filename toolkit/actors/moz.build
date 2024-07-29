@@ -90,6 +90,8 @@ MOZ_SRC_FILES += [
     "ColorPickerParent.sys.mjs",
     "DateTimePickerChild.sys.mjs",
     "DateTimePickerParent.sys.mjs",
+    "FilesFilterChild.sys.mjs",
+    "FilesFilterParent.sys.mjs",
     "InputPickerChildCommon.sys.mjs",
     "InputPickerParentCommon.sys.mjs",
 ]
