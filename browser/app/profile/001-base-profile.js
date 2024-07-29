@@ -256,6 +256,11 @@ pref("browser.newtabpage.activity-stream.asrouter.providers.messaging-experiment
 // Disable fetching asrouter.ftl and related console errors (tor-browser#40763).
 pref("browser.newtabpage.activity-stream.asrouter.useRemoteL10n", false);
 
+// tor-browser#42872, #42555: Disable translations.
+// Translation have a bad UX in 128 (and with our config). Maybe we will
+// re-enable after auditing and fixing the UX.
+pref("browser.translations.enable", false);
+
 // tor-browser#41945 - disable automatic cookie banners dismissal until
 // we're sure it does not causes fingerprinting risks or other issues.
 pref("cookiebanners.service.mode", 0);
