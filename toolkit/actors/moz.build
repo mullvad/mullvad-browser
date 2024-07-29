@@ -55,6 +55,8 @@ FINAL_TARGET_FILES.actors += [
     "DateTimePickerChild.sys.mjs",
     "DateTimePickerParent.sys.mjs",
     "ExtFindChild.sys.mjs",
+    "FilesFilterChild.sys.mjs",
+    "FilesFilterParent.sys.mjs",
     "FindBarChild.sys.mjs",
     "FindBarParent.sys.mjs",
     "FinderChild.sys.mjs",
