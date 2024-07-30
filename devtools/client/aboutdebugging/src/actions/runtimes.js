@@ -59,7 +59,7 @@ const {
 const CONNECTION_TIMING_OUT_DELAY = 3000;
 const CONNECTION_CANCEL_DELAY = 13000;
 
-async function getRuntimeIcon(runtime, channel) {
+async function getRuntimeIcon(_runtime, _channel) {
   return "chrome://branding/content/about-logo.svg";
 }
 
