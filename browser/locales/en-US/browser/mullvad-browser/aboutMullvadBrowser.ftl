@@ -8,7 +8,6 @@ about-mullvad-browser-learn-more = Curious to learn more about the browser? <a d
 # $version (String) - The new browser version.
 about-mullvad-browser-update-message =  { -brand-short-name } has been updated to { $version }. <a data-l10n-name="update-link">See what’s new</a>
 
-
 ## Deprecated. To be removed when 13.5 becomes stable.
 
 about-mullvad-browser-page-title = { -brand-product-name } Home

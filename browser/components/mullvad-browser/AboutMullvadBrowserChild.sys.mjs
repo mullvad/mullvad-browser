@@ -1,3 +1,6 @@
+/**
+ * Actor child class for the about:mullvad-browser page.
+ */
 export class AboutMullvadBrowserChild extends JSWindowActorChild {
   handleEvent(event) {
     switch (event.type) {

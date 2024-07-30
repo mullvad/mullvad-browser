@@ -1,3 +1,6 @@
+/**
+ * Actor parent class for the about:mullvad-browser page.
+ */
 export class AboutMullvadBrowserParent extends JSWindowActorParent {
   receiveMessage(message) {
     const shouldNotifyPref = "mullvadbrowser.post_update.shouldNotify";
