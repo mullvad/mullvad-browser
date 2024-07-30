@@ -881,11 +881,17 @@ nsBrowserContentHandler.prototype = {
               // the post-update "override page" directly, we include a link in
               // about:mullvad-browser.
               prefb.setCharPref("mullvadbrowser.post_update.url", overridePage);
-              prefb.setBoolPref("mullvadbrowser.post_update.shouldNotify", true);
+              prefb.setBoolPref(
+                "mullvadbrowser.post_update.shouldNotify",
+                true
+              );
               // If the user's homepage is about:tor, we will inform them
               // about the update on that page; otherwise, we arrange to
               // open about:tor in a secondary tab.
-              overridePage = startPage === "about:mullvad-browser" ? "" : "about:mullvad-browser";
+              overridePage =
+                startPage === "about:mullvad-browser"
+                  ? ""
+                  : "about:mullvad-browser";
             }
             break;
           }
