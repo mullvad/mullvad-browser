@@ -1257,7 +1257,7 @@ export const LoginHelper = {
    */
   openPasswordManager(
     window,
-    { filterString = "", entryPoint = "", loginGuid = null } = {}
+    { _filterString = "", _entryPoint = "", _loginGuid = null } = {}
   ) {
     console.error("The password manager is disabled in Mullvad Browser.");
   },
