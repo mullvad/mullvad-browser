@@ -22,7 +22,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
   Region: "resource://gre/modules/Region.sys.mjs",
   RemoteSettings: "resource://services-settings/remote-settings.sys.mjs",
   SearchEngine: "resource://gre/modules/SearchEngine.sys.mjs",
+  // eslint-disable-next-line mozilla/valid-lazy
   SearchEngineSelector: "resource://gre/modules/SearchEngineSelector.sys.mjs",
+  // eslint-disable-next-line mozilla/valid-lazy
   SearchEngineSelectorOld:
     "resource://gre/modules/SearchEngineSelectorOld.sys.mjs",
   SearchSettings: "resource://gre/modules/SearchSettings.sys.mjs",
@@ -501,8 +503,7 @@ export class SearchService {
 
   // Test-only function to reset just the engine selector so that it can
   // load a different configuration.
-  resetEngineSelector() {
-  }
+  resetEngineSelector() {}
 
   resetToAppDefaultEngine() {
     let appDefaultEngine = this.appDefaultEngine;
@@ -1542,6 +1543,7 @@ export class SearchService {
    * Handles the search configuration being - adds a wait on the user
    * being idle, before the search engine update gets handled.
    */
+  // eslint-disable-next-line no-unused-private-class-members
   #handleConfigurationUpdated() {
     if (this.#queuedIdle) {
       return;
