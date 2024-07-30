@@ -270,7 +270,7 @@ this.storage = class extends ExtensionAPIPersistent {
                 (!value.off || EXTRA_FILTERS.includes(key)) &&
                 value.content === "filters"
             )
-            .map(([key, value]) => key);
+            .map(([key]) => key);
           // we're done for this version (don't mess with user choices anymore)
           await storage.set({ [VERSION_KEY]: CURRENT_VERSION });
 
