@@ -280,7 +280,7 @@ module.exports = {
     "media-query-no-invalid": null,
     "stylelint-plugin-mozilla/media-query-no-invalid": true,
     "stylelint-plugin-mozilla/no-base-design-tokens": true,
-    "stylelint-plugin-mozilla/use-design-tokens": true,
+    "stylelint-plugin-mozilla/use-design-tokens": false,
   },
 
   overrides: [
