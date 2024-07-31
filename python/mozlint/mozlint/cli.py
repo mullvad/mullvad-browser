@@ -10,6 +10,30 @@ from pathlib import Path
 from mozlint.errors import NoValidLinter
 from mozlint.formatters import all_formatters
 
+# We (the Tor Project) do not use all of Mozilla's linters.
+# Below is a list of linters we do not use,
+# these will be skipped when running `./mach lint` commands.
+INACTIVE_LINTERS = [
+    "android-api-lint",
+    "android-checkstyle",
+    "android-format",
+    "android-javadoc",
+    "android-lint",
+    "android-test",
+    "clippy",
+    "codespell",
+    "condprof-addons",
+    "file-perm",
+    "ignorefile",
+    "license",
+    "lintpref",
+    "perfdocs",
+    "rejected-words",
+    "rst",
+    "updatebot",
+    "wpt",
+]
+
 
 class MozlintParser(ArgumentParser):
     arguments = [
@@ -276,6 +300,9 @@ def find_linters(config_paths, linters=None):
 
             name = name.rsplit(".", 1)[0]
 
+            if not linters and name in INACTIVE_LINTERS:
+                continue
+
             if linters and name not in linters:
                 continue
 
@@ -341,10 +368,14 @@ def run(
 
     if list_linters:
         lint_paths = find_linters(lintargs["config_paths"], linters)
-        linters = [
+        formatted_linters = [
             os.path.splitext(os.path.basename(l))[0] for l in lint_paths["lint_paths"]
         ]
-        print("\n".join(sorted(linters)))
+        print("\n".join(sorted(formatted_linters)))
+
+        if not linters:
+            print("\nINACTIVE -- ".join(sorted(["", *INACTIVE_LINTERS])).strip())
+
         print(
             "\nNote that clang-tidy checks are not run as part of this "
             "command, but using the static-analysis command."
