@@ -10,9 +10,11 @@ You can visit [our download page](https://mullvad.net/download/browser) to get t
 
 ### Available platforms
 
-- Linux (64 bit only)
+- Linux **\*** (64 bit only)
 - Windows 10 or later (64 bit only)
 - macOS 11 or later
+
+**\*** `.deb` and `.rpm` packages are available for Linux through [our repositories](https://mullvad.net/en/download/browser/linux).
 
 ### Verifying the download
 
