@@ -32,6 +32,9 @@
 #include "nsILoadInfo.h"
 #include "nsILoadContext.h"
 #include "nsThreadUtils.h"
+// It seems ESR-115 is missing the definitions of CSSIntSize, so add this
+// header to include it
+#include "Units.h"
 
 class nsDocShellLoadState;
 class nsGlobalWindowInner;
@@ -266,7 +269,10 @@ struct EmbedderColorSchemes {
    * a content process. */                                                    \
   FIELD(EmbeddedInContentDocument, bool)                                      \
   /* If true, this browsing context is within a hidden embedded document. */  \
-  FIELD(IsUnderHiddenEmbedderElement, bool)
+  FIELD(IsUnderHiddenEmbedderElement, bool)                                   \
+  /* Used to propagate window.top's inner size for RFPTarget::Window*         \
+   * protections */                                                           \
+  FIELD(TopInnerSizeForRFP, mozilla::CSSIntSize)
 
 // BrowsingContext, in this context, is the cross process replicated
 // environment in which information about documents is stored. In
@@ -1230,6 +1236,10 @@ class BrowsingContext : public nsILoadContext, public nsWrapperCache {
   bool CanSet(FieldIndex<IDX_IsUnderHiddenEmbedderElement>,
               const bool& aIsUnderHiddenEmbedderElement,
               ContentParent* aSource);
+
+  bool CanSet(FieldIndex<IDX_TopInnerSizeForRFP>, bool, ContentParent*) {
+    return IsTop();
+  }
 
   bool CanSet(FieldIndex<IDX_EmbeddedInContentDocument>, bool,
               ContentParent* aSource) {
