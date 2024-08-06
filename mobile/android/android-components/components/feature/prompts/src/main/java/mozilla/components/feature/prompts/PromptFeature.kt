@@ -594,7 +594,6 @@ class PromptFeature private constructor(
                             onSaveLoginWithStrongPassword,
                         )
                     }
-                    strongPasswordPromptViewListener?.handleSuggestStrongPasswordRequest()
                 } else {
                     loginPicker?.handleSelectLoginRequest(promptRequest)
                 }
