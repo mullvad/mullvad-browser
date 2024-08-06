@@ -1448,6 +1448,26 @@ void nsPresContext::SetOverrideDPPX(float aDPPX) {
                             MediaFeatureChangePropagation::JustThisDocument);
 }
 
+void nsPresContext::UpdateTopInnerSizeForRFP() {
+// RFPTarget::WindowOuterSize does not exist in ESR-115 so use fallback
+  if (!mDocument->ShouldResistFingerprinting(RFPTarget::Unknown) ||
+      !mDocument->GetBrowsingContext() ||
+      !mDocument->GetBrowsingContext()->IsTop()) {
+    return;
+  }
+
+  CSSSize size = CSSPixel::FromAppUnits(GetVisibleArea().Size());
+
+  // The upstream version of this patch had conditional logic based on the
+  // dom.innerSize.rounding pref which does not exist in ESR-115, so we
+  // pick the branch it would have taken for the pref's default value (2)
+  size.width = std::truncf(size.width);
+  size.height = std::truncf(size.height);
+
+  Unused << mDocument->GetBrowsingContext()->SetTopInnerSizeForRFP(
+      CSSIntSize{(int)size.width, (int)size.height});
+}
+
 gfxSize nsPresContext::ScreenSizeInchesForFontInflation(bool* aChanged) {
   if (aChanged) {
     *aChanged = false;
@@ -2979,6 +2999,8 @@ void nsPresContext::SetVisibleArea(const nsRect& r) {
           {mozilla::MediaFeatureChangeReason::ViewportChange},
           MediaFeatureChangePropagation::JustThisDocument);
     }
+
+    UpdateTopInnerSizeForRFP();
   }
 }
 

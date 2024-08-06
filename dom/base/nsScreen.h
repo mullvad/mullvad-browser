@@ -127,7 +127,9 @@ class nsScreen : public mozilla::DOMEventTargetHelper {
   nsDeviceContext* GetDeviceContext() const;
   nsresult GetRect(mozilla::CSSIntRect& aRect);
   nsresult GetAvailRect(mozilla::CSSIntRect& aRect);
-  nsresult GetWindowInnerRect(mozilla::CSSIntRect& aRect);
+  // Sometime between ESR-115 and ESR-128 the function signature changed, so we
+  // revert to the ESR-115 way of doing things
+  nsresult GetTopWindowInnerRectForRFP(mozilla::CSSIntRect& aRect);
 
  private:
   explicit nsScreen(nsPIDOMWindowInner* aWindow);
