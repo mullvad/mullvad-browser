@@ -69,7 +69,6 @@ var SecurityLevelButton = {
    * Open the panel popup for the button.
    */
   openPopup() {
-    let anchorNode;
     const overflowPanel = document.getElementById("widget-overflow");
     if (overflowPanel.contains(this._button)) {
       // We are in the overflow panel.
@@ -84,10 +83,8 @@ var SecurityLevelButton = {
       // panel rather than our dialog-like panel.
       overflowPanel.hidePopup();
       this._anchorButton = document.getElementById("nav-bar-overflow-button");
-      anchorNode = this._anchorButton.icon;
     } else {
       this._anchorButton = this._button;
-      anchorNode = this._button.badgeStack;
     }
 
     const panel = SecurityLevelPanel.panel;
@@ -103,7 +100,13 @@ var SecurityLevelButton = {
       });
     }
 
-    panel.openPopup(anchorNode, "bottomright topright", 0, 0, false);
+    panel.openPopup(
+      this._anchorButton.icon,
+      "bottomright topright",
+      0,
+      0,
+      false
+    );
   },
 
   init() {
