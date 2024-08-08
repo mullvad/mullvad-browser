@@ -1,8 +1,15 @@
 .base:
   stage: lint
+  image: $IMAGE_PATH
   interruptible: true
+  needs:
+    - job: setup-env
+      artifacts: true
+    - job: create-bundle
+      artifacts: true
   variables:
     MOZBUILD_STATE_PATH: "$CI_PROJECT_DIR/.cache/mozbuild"
+    GIT_STRATEGY: "none"
   cache:
     paths:
       - node_modules
@@ -11,12 +18,26 @@
     when: 'always'
     # Share the cache throughout all pipelines running for a given branch
     key: $CI_COMMIT_REF_SLUG
+  before_script:
+    # DEBUG: Are all artifacts here?
+    - ls -a
+    - mkdir app && cd app
+    # Initialize a fresh git repo
+    - git init
+    # Add app.bundle as the remote. All operations that communicate with the remote will be local.
+    - git remote add origin ../app.bundle
+    # shallow.txt contains the SHA of the base commit of the bundle.
+    # The bundle is shallow, therefore it's base commit will not have a parent.
+    # Adding the SHA of the base commit to .git/shallow tells git that it doesn't need
+    # to crash when it realizes said base commit doesn't have a parent.
+    - cp ../shallow.txt .git/shallow
+    # Finally, unpack the bundle. Time it for debugging purposes.
+    - time git pull origin $BRANCH_NAME
 
 eslint:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py eslint
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l eslint
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -44,9 +65,8 @@ eslint:
 
 stylelint:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py stylelint
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l stylelint
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -63,9 +83,8 @@ stylelint:
 
 py-black:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py black
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l black
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -83,9 +102,8 @@ py-black:
 
 py-ruff:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py ruff
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l ruff
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -103,9 +121,8 @@ py-ruff:
 
 yaml:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py yaml
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l yaml
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -119,9 +136,8 @@ yaml:
 
 shellcheck:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py shellcheck
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l shellcheck
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -134,10 +150,9 @@ shellcheck:
 
 clang-format:
   extends: .base
-  image: $IMAGE_PATH
   script:
     - ./mach configure --without-wasm-sandboxed-libraries --with-base-browser-version=0.0.0
-    - .gitlab/ci/scripts/run_linters.py clang-format
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l clang-format
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -155,9 +170,8 @@ clang-format:
 
 rustfmt:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py rustfmt
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l rustfmt
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -170,9 +184,8 @@ rustfmt:
 
 fluent-lint:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py fluent-lint
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l fluent-lint
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -186,9 +199,8 @@ fluent-lint:
 
 localization:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py l10n
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l l10n
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -204,9 +216,8 @@ localization:
 
 mingw-capitalization:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py mingw-capitalization
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l mingw-capitalization
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -222,9 +233,8 @@ mingw-capitalization:
 
 mscom-init:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py mscom-init
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l mscom-init
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -240,9 +250,8 @@ mscom-init:
 
 file-whitespace:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py file-whitespace
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l file-whitespace
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -270,9 +279,8 @@ file-whitespace:
 
 test-manifest:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py test-manifest-alpha test-manifest-disable test-manifest-skip-if
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l test-manifest-alpha -l test-manifest-disable -l test-manifest-skip-if
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
@@ -286,9 +294,8 @@ test-manifest:
 
 trojan-source:
   extends: .base
-  image: $IMAGE_PATH
   script:
-    - .gitlab/ci/scripts/run_linters.py trojan-source
+    - cat ../changedfiles.txt | xargs -d '\n' ./mach lint -l trojan-source
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
