@@ -485,10 +485,12 @@ LocaleService::GetAppLocaleAsBCP47(nsACString& aRetVal) {
 
 NS_IMETHODIMP
 LocaleService::GetRegionalPrefsLocales(nsTArray<nsCString>& aRetVal) {
+  // tor-browser#42349, #42771: We cannot use JSLocale because it is spoof
+  // English. So, we use another target for now.
   if (nsContentUtils::ShouldResistFingerprinting(
           "This is probably a patch that should be refined. But to get the "
           "build going, we just keep applying this generic check.",
-          RFPTarget::JSLocale)) {
+          RFPTarget::JSDateTimeUTC)) {
     GetAppLocalesAsBCP47(aRetVal);
     return NS_OK;
   }
