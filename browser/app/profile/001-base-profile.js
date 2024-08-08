@@ -622,6 +622,9 @@ pref("corroborator.enabled", false);
 
 // tor-browser#41417: do not allow live reload until we switch to Fluent and
 // stop using .textContent.
+// Even after that, it might be a good idea to keep it off, as it is not handled
+// very well, and it might give a window during which websites could fingerprint
+// the change (see tor-browser#42349 and tor-browser#42771).
 pref("intl.multilingual.liveReload", false);
 
 // Enable URL query stripping to protect against cross-site tracking (tor-browser#41092)
