@@ -5,7 +5,6 @@ import os
 import re
 import shlex
 import subprocess
-import sys
 
 
 def git(command):
@@ -15,8 +14,8 @@ def git(command):
     return result.stdout.strip()
 
 
-def get_firefox_tag_from_branch_name(branch_name):
-    """Extracts the Firefox tag associated with a branch name.
+def get_firefox_tag(reference):
+    """Extracts the Firefox tag associated with a branch or tag name.
 
        The "firefox tag" is the tag that marks
        the end of the Mozilla commits and the start of the Tor Project commits.
@@ -25,26 +24,26 @@ def get_firefox_tag_from_branch_name(branch_name):
        this function may return the incorrect reference number.
 
     Args:
-        branch_name: The branch name to extract the tag from.
+        reference: The branch or tag name to extract the Firefox tag from.
         Expected format is tor-browser-91.2.0esr-11.0-1,
         where 91.2.0esr is the Firefox version.
 
     Returns:
         The reference specifier of the matching Firefox tag.
-        An exception wil be raised if anything goes wrong.
+        An exception will be raised if anything goes wrong.
     """
 
-    # Extracts the version number from a branch name.
+    # Extracts the version number from a branch or tag name.
     firefox_version = ""
-    match = re.search(r"(?<=browser-)([^-]+)", branch_name)
+    match = re.search(r"(?<=browser-)([^-]+)", reference)
     if match:
         # TODO: Validate that what we got is actually a valid semver string?
         firefox_version = match.group(1)
     else:
-        raise ValueError(f"Failed to extract version from branch name '{branch_name}'.")
+        raise ValueError(f"Failed to extract version from reference '{reference}'.")
 
     tag = f"FIREFOX_{firefox_version.replace('.', '_')}_"
-    remote_tags = git("ls-remote --tags")
+    remote_tags = git("ls-remote --tags origin")
 
     # Each line looks like:
     # 9edd658bfd03a6b4743ecb75fd4a9ad968603715  refs/tags/FIREFOX_91_9_0esr_BUILD1
@@ -54,7 +53,7 @@ def get_firefox_tag_from_branch_name(branch_name):
         return match.group(0).split()[0]
     else:
         raise ValueError(
-            f"Failed to find reference specifier for Firefox tag '{tag}' in branch '{branch_name}'."
+            f"Failed to find reference specifier for Firefox tag '{tag}' from '{reference}'."
         )
 
 
@@ -74,37 +73,42 @@ def get_list_of_changed_files():
     base_reference = ""
 
     if os.getenv("CI_PIPELINE_SOURCE") == "merge_request_event":
-        # For merge requests, the base_reference is the common ancestor between the MR and the target branch.
+        # For merge requests, the base_reference is the common ancestor between the MR and the target branch
         base_reference = os.getenv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
     else:
         # When not in merge requests, the base reference is the Firefox tag
-        base_reference = get_firefox_tag_from_branch_name(os.getenv("CI_COMMIT_BRANCH"))
+        base_reference = get_firefox_tag(os.getenv("CI_COMMIT_BRANCH"))
 
     if not base_reference:
         raise RuntimeError("No base reference found. There might be more errors above.")
 
     # Fetch the tag reference
     git(f"fetch origin {base_reference} --depth=1 --filter=blob:none")
-    # Return the list of changed files
-    return git(f"diff --diff-filter=d --name-only {base_reference} HEAD").split("\n")
+    # Return but filter the issue_templates files because those file names have spaces which can cause issues
+    return git("diff --diff-filter=d --name-only FETCH_HEAD HEAD").split("\n")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Run ./mach linters in CI. Warning: if you run this in your local environment it might mess up your git history."
+    parser = argparse.ArgumentParser(description="")
+
+    parser.add_argument(
+        "--get-firefox-tag",
+        help="Get the Firefox tag related to a given (tor-mullvad-base)-browser tag or branch name.",
+        type=str,
     )
     parser.add_argument(
-        "linters", metavar="L", type=str, nargs="+", help="A list of linters to run."
+        "--get-changed-files",
+        help="Get list of changed files."
+        "When running from a merge request get sthe list of changed files since the merge-base of the current branch."
+        "When running from a protected branch i.e. any branch that starts with <something>-browser-, gets the list of files changed since the FIREFOX_ tag.",
+        action="store_true",
     )
+
     args = parser.parse_args()
 
-    changed_files = get_list_of_changed_files()
-    if changed_files:
-        command = ["./mach", "lint", "-v"]
-        for linter in args.linters:
-            command.extend(["-l", linter])
-        command.extend(changed_files)
-        result = subprocess.run(command, text=True)
-        sys.exit(result.returncode)
+    if args.get_firefox_tag:
+        print(get_firefox_tag(args.get_firefox_tag))
+    elif args.get_changed_files:
+        print("\n".join(get_list_of_changed_files()))
     else:
-        print("No files changed, skipping linting.")
+        print("No valid option provided.")
