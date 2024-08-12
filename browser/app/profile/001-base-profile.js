@@ -158,6 +158,8 @@ pref("browser.urlbar.suggest.addons", false);
 pref("browser.urlbar.addons.featureGate", false);
 pref("browser.urlbar.suggest.weather", false);
 pref("browser.urlbar.weather.featureGate", false);
+// tor-browser#42792: Explicitly turn off Pocket suggestions in the URL bar.
+pref("browser.urlbar.pocket.featureGate", false);
 // tor-browser#41691: Hide "Firefox Suggets" in the UI
 pref("browser.urlbar.groupLabels.enabled", false);
 pref("browser.safebrowsing.malware.enabled", false);
