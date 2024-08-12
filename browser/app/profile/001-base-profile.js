@@ -317,6 +317,10 @@ pref("security.pki.crlite_mode", 0);
 
 // Disable website password breach alerts
 pref("signon.management.page.breach-alerts.enabled", false);
+// tor-browser#42814: Opt out from Firefox relay by default.
+// Firefox would normally assign disabled when a user has been presented the
+// opportunity to use the service and opted out (see firefox.js).
+pref("signon.firefoxRelay.feature", "disabled");
 
 // Disable remote "password recipes". They are a way to improve the UX of the
 // password manager by havinc specific heuristics for some sites.
