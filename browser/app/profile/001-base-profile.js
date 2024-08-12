@@ -74,6 +74,9 @@ pref("signon.rememberSignons", false);
 pref("browser.formfill.enable", false);
 pref("signon.formlessCapture.enabled", false); // Added with tor-browser#41496
 pref("signon.autofillForms", false);
+pref("extensions.formautofill.available", "");
+pref("extensions.formautofill.addresses.enabled", false);
+pref("extensions.formautofill.creditCards.enabled", false);
 // Do not store extra data (form, scrollbar positions, cookies, POST data) for
 // the session restore functionality.
 pref("browser.sessionstore.privacy_level", 2);
