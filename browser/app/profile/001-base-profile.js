@@ -647,6 +647,8 @@ pref("privacy.query_stripping.strip_on_share.enabled", true);
 // Disable platform text recogniition functionality (tor-browser#42057)
 pref("dom.text-recognition.enabled", false);
 
+// Log levels
+
 #ifdef XP_WIN
 pref("browser.taskbar.lists.enabled", false);
 pref("browser.taskbar.lists.frequent.enabled", false);
