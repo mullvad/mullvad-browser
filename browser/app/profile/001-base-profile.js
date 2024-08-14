@@ -651,6 +651,9 @@ pref("browser.privacySegmentation.createdShortcut", true);
 // Do not re-open the browser automatically after reboots when "Restart apps" is
 // enabled (tor-browser#41503)
 pref("toolkit.winRegisterApplicationRestart", false);
+// tor-browser#43051: Hide the checkbox to open the browser automatically on
+// Windows startup.
+pref("browser.startup.windowsLaunchOnLogin.enabled", false);
 #endif
 
 // If we are bundling fonts, whitelist those bundled fonts, and restrict system fonts to a selection.
