@@ -8,7 +8,6 @@ ChromeUtils.defineLazyGetter(this, "NewIdentityButton", () => {
   // Logger adapted from CustomizableUI.jsm
   const logger = (() => {
     const consoleOptions = {
-      maxLogLevel: "Info",
       maxLogLevelPref: "browser.new_identity.log_level",
       prefix: "NewIdentity",
     };

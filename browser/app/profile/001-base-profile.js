@@ -648,6 +648,7 @@ pref("privacy.query_stripping.strip_on_share.enabled", true);
 pref("dom.text-recognition.enabled", false);
 
 // Log levels
+pref("browser.new_identity.log_level", "Info");
 
 #ifdef XP_WIN
 pref("browser.taskbar.lists.enabled", false);
