@@ -45,78 +45,82 @@
       </hbox>
     </hbox>
     <radiogroup id="securityLevel-radiogroup">
-      <vbox class="securityLevel-radio-option">
+      <vbox class="securityLevel-radio-option privacy-detailedoption info-box-container">
         <radio
           value="standard"
           data-l10n-id="security-level-preferences-level-standard"
           aria-describedby="securityLevelSummary-standard"
         />
-        <vbox id="securityLevelSummary-standard">
-          <description
-            class="summary indent"
-            flex="1"
-            data-l10n-id="security-level-summary-standard"
-          />
+        <vbox id="securityLevelSummary-standard" class="indent">
+          <label data-l10n-id="security-level-summary-standard" />
         </vbox>
       </vbox>
-      <vbox class="securityLevel-radio-option">
+      <vbox class="securityLevel-radio-option privacy-detailedoption info-box-container">
         <!-- NOTE: We point the accessible description to the wrapping vbox
           - rather than its first description element. This means that when the
-          - securityLevel-descriptionList is shown or hidden, its text content
-          - is included or excluded from the accessible description,
-          - respectively. -->
+          - privacy-extra-information is shown or hidden, its text content is
+          - included or excluded from the accessible description, respectively.
+          -->
         <radio
           value="safer"
           data-l10n-id="security-level-preferences-level-safer"
           aria-describedby="securityLevelSummary-safer"
         />
-        <vbox id="securityLevelSummary-safer">
-          <description
-            class="summary indent"
-            flex="1"
-            data-l10n-id="security-level-summary-safer"
-          />
-          <vbox class="securityLevel-descriptionList indent">
-            <description
-              class="indent"
-              data-l10n-id="security-level-preferences-bullet-https-only-javascript"
-            />
-            <description
-              class="indent"
-              data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols"
-            />
-            <description
-              class="indent"
-              data-l10n-id="security-level-preferences-bullet-limit-media"
-            />
+        <vbox id="securityLevelSummary-safer" class="indent">
+          <label data-l10n-id="security-level-summary-safer" />
+          <vbox class="privacy-extra-information">
+            <vbox class="indent">
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-https-only-javascript"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-media"
+                />
+              </hbox>
+            </vbox>
           </vbox>
         </vbox>
       </vbox>
-      <vbox class="securityLevel-radio-option">
+      <vbox class="securityLevel-radio-option privacy-detailedoption info-box-container">
         <radio
           value="safest"
           data-l10n-id="security-level-preferences-level-safest"
           aria-describedby="securityLevelSummary-safest"
         />
-        <vbox id="securityLevelSummary-safest">
-          <description
-            class="summary indent"
-            flex="1"
-            data-l10n-id="security-level-summary-safest"
-          />
-          <vbox class="securityLevel-descriptionList indent">
-            <description
-              class="indent"
-              data-l10n-id="security-level-preferences-bullet-disabled-javascript"
-            />
-            <description
-              class="indent"
-              data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols-and-images"
-            />
-            <description
-              class="indent"
-              data-l10n-id="security-level-preferences-bullet-limit-media"
-            />
+        <vbox id="securityLevelSummary-safest" class="indent">
+          <label data-l10n-id="security-level-summary-safest" />
+          <vbox class="privacy-extra-information">
+            <vbox class="indent">
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-disabled-javascript"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-font-and-symbols-and-images"
+                />
+              </hbox>
+              <hbox class="extra-information-label">
+                <label
+                  class="content-blocking-label"
+                  data-l10n-id="security-level-preferences-bullet-limit-media"
+                />
+              </hbox>
+            </vbox>
           </vbox>
         </vbox>
       </vbox>

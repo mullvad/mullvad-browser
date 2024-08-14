@@ -195,7 +195,6 @@ var SecurityLevelPanel = {
 
   _configUIFromPrefs() {
     if (!this._populated) {
-      console.warn("_configUIFromPrefs before XUL was populated.");
       return;
     }
 
@@ -353,10 +352,7 @@ var SecurityLevelPreferences = {
     // Have the container's selection CSS class match the selection state of the
     // radio elements.
     for (const { container, radio } of this._radioOptions) {
-      container.classList.toggle(
-        "securityLevel-radio-option-selected",
-        radio.selected
-      );
+      container.classList.toggle("selected", radio.selected);
     }
   },
 
