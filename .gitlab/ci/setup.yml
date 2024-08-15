@@ -32,11 +32,14 @@ create-bundle:
   script:
     # DEBUG: Check repository status.
     - git status
-    # Switch to a named branch.
-    - git switch -c $BRANCH_NAME
+    # DEBUG: Check branches in repository
+    - git branch
+    # Force switch to a named branch. We force it in case there is already
+    # a branch with the same name from previous runs.
+    - git switch -C $BRANCH_NAME
     # Create a git bundle -- this will generate the app.bundle file,
     # which can be used as a git remote for offline fetching.
-    - git bundle create app.bundle --all
+    - git bundle create app.bundle $BRANCH_NAME
     # Retain the SHA of the base of this shallow repository.
     - cat .git/shallow > shallow.txt
     # DEBUG: Check sizes.
