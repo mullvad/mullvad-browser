@@ -2325,15 +2325,9 @@ bool DocumentLoadListener::DocShellWillDisplayContent(nsresult aStatus) {
 
   auto* loadingContext = GetLoadingBrowsingContext();
 
-  bool isInitialDocument = true;
-  if (WindowGlobalParent* currentWindow =
-          loadingContext->GetCurrentWindowGlobal()) {
-    isInitialDocument = currentWindow->IsInitialDocument();
-  }
-
   nsresult rv = nsDocShell::FilterStatusForErrorPage(
       aStatus, mChannel, mLoadStateLoadType, loadingContext->IsTop(),
-      loadingContext->GetUseErrorPages(), isInitialDocument, nullptr);
+      loadingContext->GetUseErrorPages(), nullptr);
 
   if (NS_SUCCEEDED(rv)) {
     MOZ_LOG(gProcessIsolationLog, LogLevel::Verbose,
