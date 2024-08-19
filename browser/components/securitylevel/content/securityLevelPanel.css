@@ -51,7 +51,7 @@
 
 #securityLevel-custom {
   border-radius: 4px;
-  background-color: var(--warning-color);
+  background-color: var(--warning-icon-bgcolor);
   color: black;
   padding: 0.4em 0.5em;
   margin-inline-start: 1em;
