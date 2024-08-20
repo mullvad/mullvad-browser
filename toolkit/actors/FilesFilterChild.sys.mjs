@@ -12,11 +12,14 @@ ChromeUtils.defineLazyGetter(lazy, "console", () => {
 
 export class FilesFilterChild extends JSWindowActorChild {
   handleEvent(event) {
+    if (!Services.prefs.getBoolPref("browser.filesfilter.enabled", true)) {
+      return;
+    }
     // drop or paste
     const { composedTarget } = event;
     const dt = event.clipboardData || event.dataTransfer;
 
-    if (dt.files.length) {
+    if ([...dt.files].some(f => f.mozFullPath)) {
       if (
         ["HTMLInputElement", "HTMLTextAreaElement"].includes(
           ChromeUtils.getClassName(composedTarget)
@@ -25,7 +28,7 @@ export class FilesFilterChild extends JSWindowActorChild {
         event.preventDefault();
         lazy.console.log(
           `Preventing path leak on ${event.type} for ${[...dt.files]
-            .map(f => f.name)
+            .map(f => `${f.name} (${f.mozFullPath})`)
             .join(", ")}.`
         );
       }
@@ -33,7 +36,7 @@ export class FilesFilterChild extends JSWindowActorChild {
     }
 
     // "Paste Without Formatting" (ctrl+shift+V) in HTML editors coerces files into paths
-    if (!(event.clipboardData && dt.getData("text"))) {
+    if (!(event.clipboardData && /[\/\\]/.test(dt.getData("text")))) {
       return;
     }
 
