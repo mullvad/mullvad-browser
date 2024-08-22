@@ -97,6 +97,11 @@ pref("browser.pagethumbnails.capturing_disabled", true);
 // pref("privacy.exposeContentTitleInWindow", false);
 // pref("privacy.exposeContentTitleInWindow.pbm", false);
 
+// tor-browser#42611: Do not include the URL of the image, when copying it.
+// Also, do not save clipboard in history/cloud.
+pref("clipboard.imageAsFile.enabled", false);
+pref("clipboard.copyPrivateDataToClipboardCloudOrHistory", false);
+
 // Enable HTTPS-Only mode (tor-browser#19850)
 pref("dom.security.https_only_mode", true);
 // The previous pref automatically sets this to true (see StaticPrefList.yaml),
