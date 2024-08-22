@@ -358,9 +358,13 @@ class CanvasTranslator final : public gfx::InlineTranslator,
 
   struct CanvasShmem {
     RefPtr<ipc::SharedMemoryBasic> shmem;
-    auto Size() { return shmem->Size(); }
+    bool IsValid() const { return !!shmem; }
+    auto Size() { return shmem ? shmem->Size() : 0; }
     gfx::MemReader CreateMemReader() {
-      return {static_cast<char*>(shmem->memory()), Size()};
+      if (!shmem) {
+        return {nullptr, 0};
+      }
+      return {static_cast<char*>(shmem->Memory()), Size()};
     }
   };
   std::queue<CanvasShmem> mCanvasShmems;
