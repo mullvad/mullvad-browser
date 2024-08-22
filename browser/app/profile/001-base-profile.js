@@ -374,8 +374,7 @@ pref("dom.disable_window_move_resize", true);
 // Set video VP9 to 0 for everyone (bug 22548)
 pref("media.benchmark.vp9.threshold", 0);
 pref("privacy.resistFingerprinting.block_mozAddonManager", true); // Bug 26114
-pref("dom.webaudio.enabled", false); // Bug 13017: Disable Web Audio API
-pref("dom.webmidi.enabled", false); //  Bug 41398: Disable Web MIDI API
+pref("dom.webmidi.enabled", false); // Bug 41398: Disable Web MIDI API
 // tor-browser#42043: Stop reporting device IDs (and spoof their number without
 // RFP, RFP already reports 1 audioinput and 1 videoinput, but still has
 // randomized IDs when this pref is true).
