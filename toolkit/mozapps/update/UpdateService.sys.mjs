@@ -3680,18 +3680,20 @@ UpdateService.prototype = {
 
       switch (aUpdate.type) {
         case "major":
-          if (!majorUpdate) {
+          if (!majorUpdate || majorUpdate.unsupported) {
             majorUpdate = aUpdate;
           } else if (
+            !aUpdate.unsupported &&
             vc.compare(majorUpdate.appVersion, aUpdate.appVersion) <= 0
           ) {
             majorUpdate = aUpdate;
           }
           break;
         case "minor":
-          if (!minorUpdate) {
+          if (!minorUpdate || minorUpdate.unsupported) {
             minorUpdate = aUpdate;
           } else if (
+            !aUpdate.unsupported &&
             vc.compare(minorUpdate.appVersion, aUpdate.appVersion) <= 0
           ) {
             minorUpdate = aUpdate;
