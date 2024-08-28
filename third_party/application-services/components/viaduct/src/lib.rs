@@ -96,7 +96,8 @@ impl Request {
     }
 
     pub fn send(self) -> Result<Response, ViaductError> {
-        crate::backend::send(self)
+        // tor-browser#44576: Force an error as a defense-in-depth.
+        Err(ViaductError::NetworkError("Viaduct requests are disabled.".into()))
     }
 
     /// Alias for `Request::new(Method::Get, url)`, for convenience.
