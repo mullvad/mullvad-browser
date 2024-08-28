@@ -419,11 +419,6 @@ pref("network.http.referer.XOriginTrimmingPolicy", 2); // Bug 17228: Force trim 
 pref("media.videocontrols.picture-in-picture.enabled", false); // Bug 40148: disable until audited in #40147
 // Bug 40463: Disable Windows SSO
 pref("network.http.windows-sso.enabled", false, locked);
-// Disable API for measuring text width and height.
-pref("dom.textMetrics.actualBoundingBox.enabled", false);
-pref("dom.textMetrics.baselines.enabled", false);
-pref("dom.textMetrics.emHeight.enabled", false);
-pref("dom.textMetrics.fontBoundingBox.enabled", false);
 // tor-browser#40424
 pref("pdfjs.enableScripting", false);
 // Bug 40057: Ensure system colors are not used for CSS4 colors
