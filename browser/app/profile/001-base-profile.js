@@ -290,9 +290,6 @@ pref("cookiebanners.ui.desktop.enabled", false);
 // Disable moreFromMozilla pane in the preferences/settings (tor-browser#41292).
 pref("browser.preferences.moreFromMozilla", false);
 
-// Disable the screenshot menu when right-clicking (Bug #40912 and #40007)
-pref("extensions.screenshots.disabled", true);
-
 // Disable webcompat reporter
 pref("extensions.webcompat-reporter.enabled", false);
 
