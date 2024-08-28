@@ -66,6 +66,11 @@ var kVersionBaseBrowser = 2;
 const NoScriptId = "_73a6fe31-595d-460b-a920-fcc0f8843232_-browser-action";
 
 /**
+ * The current version for mullvad browser.
+ */
+var kVersionMullvadBrowser = 1;
+
+/**
  * Buttons removed from built-ins by version they were removed. kVersion must be
  * bumped any time a new id is added to this. Use the button id as key, and
  * version the button is removed in as the value.  e.g. "pocket-button": 5
@@ -228,6 +233,7 @@ var CustomizableUIInternal = {
     this._updateForNewProtonVersion();
     this._markObsoleteBuiltinButtonsSeen();
     this._updateForBaseBrowser();
+    this._updateForMullvadBrowser();
 
     this.registerArea(
       CustomizableUI.AREA_FIXED_OVERFLOW_PANEL,
@@ -264,7 +270,11 @@ var CustomizableUIInternal = {
       // Base-browser additions tor-browser#41736. If you want to add to, remove
       // from, or rearrange this list, then bump the kVersionBaseBrowser and
       // update existing saved states in _updateForBaseBrowser.
-      "security-level-button",
+      // Or if the change is only meant for mullvad-browser, bump
+      // kVersionMullvadBrowser instead and update the existing saved states in
+      // _updateForMullvadBrowser.
+      // Do not show the security-level-button by default in Mullvad Browser.
+      // See mullvad-browser#329
       "new-identity-button",
       "downloads-button",
       AppConstants.MOZ_DEV_EDITION ? "developer-button" : null,
@@ -924,6 +934,44 @@ var CustomizableUIInternal = {
             navbarPlacements.push(NoScriptId);
           } else {
             navbarPlacements.splice(placeIndex, 0, NoScriptId);
+          }
+        }
+      }
+    }
+  },
+
+  _updateForMullvadBrowser() {
+    if (!gSavedState) {
+      // Use the defaults.
+      return;
+    }
+
+    const currentVersion = gSavedState.currentVersionMullvadBrowser;
+
+    if (currentVersion < 1) {
+      // Remove security-level-button if:
+      // + it hasn't been moved out of the navbar by the user, and
+      // + the user does not have a custom security level.
+      //
+      // NOTE: _updateForBaseBrowser adds this button when
+      // currentVersionBaseBrowser < 1. This should only happen when
+      // currentVersionMullvadBrowser < 1, and this method runs after, so should
+      // reverse it.
+      const navbarPlacements =
+        gSavedState.placements[CustomizableUI.AREA_NAVBAR];
+      if (navbarPlacements) {
+        const buttonIndex = navbarPlacements.indexOf("security-level-button");
+        // Test if security level icon exists in the navbar.
+        // Even though a user may have moved the button within the navbar,
+        // there is no simple way to know whether the button was moved, or if
+        // other components were moved around it.
+        if (buttonIndex >= 0) {
+          // NOTE: We expect the SecurityLevel module to already be initialized.
+          const { SecurityLevelPrefs } = ChromeUtils.importESModule(
+            "resource://gre/modules/SecurityLevel.sys.mjs"
+          );
+          if (!SecurityLevelPrefs.securityCustom) {
+            navbarPlacements.splice(buttonIndex, 1);
           }
         }
       }
@@ -2773,6 +2821,10 @@ var CustomizableUIInternal = {
       gSavedState.currentVersionBaseBrowser = 0;
     }
 
+    if (!("currentVersionMullvadBrowser" in gSavedState)) {
+      gSavedState.currentVersionMullvadBrowser = 0;
+    }
+
     gSeenWidgets = new Set(gSavedState.seen || []);
     gDirtyAreaCache = new Set(gSavedState.dirtyAreaCache || []);
     gNewElementCount = gSavedState.newElementCount || 0;
@@ -2856,6 +2908,7 @@ var CustomizableUIInternal = {
       dirtyAreaCache: gDirtyAreaCache,
       currentVersion: kVersion,
       currentVersionBaseBrowser: kVersionBaseBrowser,
+      currentVersionMullvadBrowser: kVersionMullvadBrowser,
       newElementCount: gNewElementCount,
     };
 
