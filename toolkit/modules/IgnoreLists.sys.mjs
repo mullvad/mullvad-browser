@@ -5,16 +5,18 @@
 const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
+  RemoteSettings: "resource://services-settings/remote-settings.sys.mjs",
   RemoteSettingsClient:
     "resource://services-settings/RemoteSettingsClient.sys.mjs",
 });
 
-class IgnoreListsManager {
-  _ignoreListSettings = null;
+const SETTINGS_IGNORELIST_KEY = "hijack-blocklists";
 
+class IgnoreListsManager {
   async init() {
-    // TODO: Restore the initialization, once we use only the local dumps for
-    // the remote settings.
+    if (!this._ignoreListSettings) {
+      this._ignoreListSettings = lazy.RemoteSettings(SETTINGS_IGNORELIST_KEY);
+    }
   }
 
   async getAndSubscribe(listener) {
@@ -24,7 +26,7 @@ class IgnoreListsManager {
     const settings = await this._getIgnoreList();
 
     // Listen for future updates after we first get the values.
-    this._ignoreListSettings?.on("sync", listener);
+    this._ignoreListSettings.on("sync", listener);
 
     return settings;
   }
@@ -65,14 +67,6 @@ class IgnoreListsManager {
    *   could be obtained.
    */
   async _getIgnoreListSettings(firstTime = true) {
-    if (!this._ignoreListSettings) {
-      const dump = await fetch(
-        "resource:///defaults/settings/main/hijack-blocklists.json"
-      );
-      const { data } = await dump.json();
-      return data;
-    }
-
     let result = [];
     try {
       result = await this._ignoreListSettings.get({
