@@ -774,8 +774,8 @@ nsBrowserContentHandler.prototype = {
             additionalPage = Services.urlFormatter.formatURLPref(
               "startup.homepage_welcome_url.additional"
             );
-            // Disable 'later run' pages for new profiles (tor-browser#41568)
-            lazy.LaterRun.selfDestruct();
+            // Turn on 'later run' pages for new profiles.
+            lazy.LaterRun.enable(lazy.LaterRun.ENABLE_REASON_NEW_PROFILE);
             break;
           case OVERRIDE_NEW_MSTONE: {
             // Check whether we will restore a session. If we will, we assume
