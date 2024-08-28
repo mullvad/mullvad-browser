@@ -181,6 +181,8 @@ function remoteSettingsFunction() {
     return _clients.get(collectionName);
   };
 
+  remoteSettings._initialized = false;
+
   /**
    * Internal helper to retrieve existing instances of clients or new instances
    * with default options if possible, or `null` if bucket/collection are unknown.
@@ -215,6 +217,43 @@ function remoteSettingsFunction() {
     // completely unknown (ie. no database and no JSON dump).
     lazy.console.debug(`No known client for ${bucketName}/${collectionName}`);
     return null;
+  }
+
+  /**
+   * Internal helper that checks all registered remote settings clients for the presence
+   * of a newer local data dump. If a local dump is found and its last modified timestamp
+   * is more recent than the client's current data, imports the dump by triggering a sync.
+   * Notifies observers if any data was imported from a dump.
+   *
+   * @param {string} [trigger="manual"] - The reason or source for triggering the import (e.g., "manual", "startup").
+   * @returns {Promise<void>} Resolves when the import process is complete.
+   * @private
+   */
+  async function _maybeImportFromLocalDump(trigger = "manual") {
+    let importedFromDump = false;
+    for (const client of _clients.values()) {
+      const hasLocalDump = await lazy.Utils.hasLocalDump(
+        client.bucketName,
+        client.collectionName
+      );
+      if (hasLocalDump) {
+        const lastModified = await client.getLastModified();
+        const lastModifiedDump = await lazy.Utils.getLocalDumpLastModified(
+          client.bucketName,
+          client.collectionName
+        );
+        if (lastModified < lastModifiedDump) {
+          await client.maybeSync(lastModifiedDump, {
+            loadDump: true,
+            trigger,
+          });
+          importedFromDump = true;
+        }
+      }
+    }
+    if (importedFromDump) {
+      Services.obs.notifyObservers(null, "remote-settings:changes-poll-end");
+    }
   }
 
   /**
@@ -352,6 +391,16 @@ function remoteSettingsFunction() {
     full = false,
     // eslint-disable-next-line complexity
   } = {}) => {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // Called multiple times on GeckoView due to bug 1730026
+      if (remoteSettings._initialized) {
+        return;
+      }
+      remoteSettings._initialized = true;
+      _maybeImportFromLocalDump(trigger);
+      return;
+    }
+
     if (lazy.Utils.shouldSkipRemoteActivity) {
       return;
     }

@@ -215,14 +215,16 @@ export var AppConstants = Object.freeze({
   ENABLE_WEBDRIVER: @ENABLE_WEBDRIVER_BOOL@,
 
   REMOTE_SETTINGS_SERVER_URLS:
-#ifdef MOZ_THUNDERBIRD
+#if defined(BASE_BROWSER_VERSION)
+    [ "" ],
+#elif defined(MOZ_THUNDERBIRD)
     [ "https://thunderbird-settings.thunderbird.net/v1" ],
 #else
     [ "https://firefox.settings.services.mozilla.com/v1", "https://firefox.settings.services.mozilla.com/v2" ],
 #endif
 
   REMOTE_SETTINGS_VERIFY_SIGNATURE:
-#ifdef MOZ_THUNDERBIRD
+#if defined(MOZ_THUNDERBIRD) || defined(BASE_BROWSER_VERSION)
     false,
 #else
     true,
