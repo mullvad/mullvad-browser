@@ -666,6 +666,12 @@ pref("toolkit.winRegisterApplicationRestart", false);
 pref("browser.startup.windowsLaunchOnLogin.enabled", false);
 #endif
 
+#ifdef ANDROID
+// tor-browser#43023 Force use of only standard emoji font
+// (not actually stopping samsung emoji font detection, but defense in depth and a step towards normalization)
+pref("font.name-list.emoji", "Noto Color Emoji");
+#endif
+
 // If we are bundling fonts, whitelist those bundled fonts, and restrict system fonts to a selection.
 
 #ifdef MOZ_BUNDLED_FONTS
