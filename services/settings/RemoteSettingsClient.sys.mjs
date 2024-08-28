@@ -448,11 +448,19 @@ export class RemoteSettingsClient extends EventEmitter {
       order = "", // not sorted by default.
       dumpFallback = true,
       emptyListFallback = true,
-      forceSync = false,
       loadDumpIfNewer = true,
-      syncIfEmpty = true,
     } = options;
-    let { verifySignature = false } = options;
+
+    const hasLocalDump = await lazy.Utils.hasLocalDump(
+      this.bucketName,
+      this.collectionName
+    );
+    if (!hasLocalDump) {
+      return [];
+    }
+    const forceSync = false;
+    const syncIfEmpty = true;
+    let verifySignature = false;
 
     const hasParallelCall = !!this._importingPromise;
     let data;
@@ -651,6 +659,10 @@ export class RemoteSettingsClient extends EventEmitter {
    * @param {object} options See #maybeSync() options.
    */
   async sync(options) {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      return;
+    }
+
     if (lazy.Utils.shouldSkipRemoteActivity) {
       lazy.console.debug(`${this.identifier} Skip remote sync.`);
       return;
@@ -730,7 +742,7 @@ export class RemoteSettingsClient extends EventEmitter {
     let thrownError = null;
     try {
       // If network is offline, we can't synchronize.
-      if (lazy.Utils.isOffline) {
+      if (!AppConstants.BASE_BROWSER_VERSION && lazy.Utils.isOffline) {
         throw new RemoteSettingsClient.NetworkOfflineError();
       }
 
@@ -1148,8 +1160,6 @@ export class RemoteSettingsClient extends EventEmitter {
   ) {
     const hasLocalData = localTimestamp !== null;
     const { retry = false } = options;
-    // On retry, we fully re-fetch the collection (no `?_since`).
-    const since = retry || !hasLocalData ? undefined : localTimestamp;
 
     // Define an executor that will verify the signature of the local data.
     const verifySignatureLocalData = (resolve, reject) => {
@@ -1177,53 +1187,26 @@ export class RemoteSettingsClient extends EventEmitter {
         });
     };
 
-    // Fetch collection metadata and list of changes from server.
-    lazy.console.debug(
-      `${this.identifier} Fetch changes from server (expected=${expectedTimestamp}, since=${since})`
-    );
-    const { metadata, remoteTimestamp, remoteRecords } =
-      await this._fetchChangeset(expectedTimestamp, since);
+    let metadata, remoteTimestamp;
 
-    lazy.console.debug(
-      `${this.identifier} local timestamp: ${localTimestamp}, remote: ${remoteTimestamp} (expected: ${expectedTimestamp})`
-    );
-
-    if (remoteTimestamp < localTimestamp) {
-      // This should never happen. Unless the CDN serves stale data.
-      // If the local data is valid, then we can safely ignore this stage remote changeset.
-      let localTrustworthy = false;
-      try {
-        localTrustworthy = await new Promise(verifySignatureLocalData);
-      } catch (exc) {
-        // Verifying the local data failed for another reason than an invalid
-        // signature (eg. its cert chain could not be fetched). Consider it
-        // untrustworthy and carry on with reset/import.
-        lazy.console.error(exc);
-      }
-      if (localTrustworthy) {
-        lazy.console.info(`${this.identifier} CDN served staled data, ignore.`);
-        return {
-          current: localRecords,
-          created: [],
-          updated: [],
-          deleted: [],
-        };
-      }
-      // Otherwise, continue with importing, since we prefer stale data over corrupt/tempered.
-      lazy.console.warn(
-        `${this.identifier} CDN served staled data, but local data is corrupted, import anyway.`
-      );
+    try {
+      await this._importJSONDump();
+    } catch (e) {
+      return {
+        current: localRecords,
+        created: [],
+        updated: [],
+        deleted: [],
+      };
     }
-
-    await this.db.importChanges(metadata, remoteTimestamp, remoteRecords, {
-      clear: retry,
-    });
 
     // Read the new local data, after updating.
     const newLocal = await this.db.list();
     const newRecords = newLocal.map(r => this._cleanLocalFields(r));
     // And verify the signature on what is now stored.
-    if (this.verifySignature) {
+    if (metadata === undefined) {
+      // When working only with dumps, we do not have signatures.
+    } else if (this.verifySignature) {
       try {
         await this.validateCollectionSignature(
           newRecords,

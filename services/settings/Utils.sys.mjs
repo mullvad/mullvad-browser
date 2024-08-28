@@ -113,6 +113,9 @@ export var Utils = {
   log,
 
   get shouldSkipRemoteActivity() {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      return true;
+    }
     if (
       (lazy.isRunningTests || Cu.isInAutomation) &&
       this.SERVER_URL == "data:,#remote-settings-dummy/v1"
