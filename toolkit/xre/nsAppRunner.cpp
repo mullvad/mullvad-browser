@@ -460,13 +460,14 @@ bool IsWaylandEnabled() {
         return true;
       }
     }
+    // Keep wayland disabled in Base Browser. See tor-browser#43092.
+    return false;
     // Enable by default when we're running on a recent enough GTK version. We'd
     // like to check further details like compositor version and so on ideally
     // to make sure we don't enable it on old Mutter or what not, but we can't,
     // so let's assume that if the user is running on a Wayland session by
     // default we're ok, since either the distro has enabled Wayland by default,
     // or the user has gone out of their way to use Wayland.
-    return !gtk_check_version(3, 24, 30);
   }();
   return isWaylandEnabled;
 }
