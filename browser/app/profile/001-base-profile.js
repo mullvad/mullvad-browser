@@ -459,8 +459,12 @@ pref("privacy.purge_trackers.enabled", false);
 // credentials dialogs. Hardens against potential credentials phishing.
 pref("network.auth.subresource-http-auth-allow", 1);
 
+// tor-browser#42684: Disable network prefetch
 pref("network.dns.disablePrefetch", true);
 pref("network.dns.disablePrefetchFromHTTPS", true);
+pref("dom.prefetch_dns_for_anchor_http_document", false);
+pref("dom.prefetch_dns_for_anchor_https_document", false);
+
 pref("network.protocol-handler.external-default", false);
 pref("network.protocol-handler.external.mailto", false);
 pref("network.protocol-handler.external.news", false);
