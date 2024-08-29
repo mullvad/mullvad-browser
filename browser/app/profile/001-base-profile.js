@@ -168,7 +168,7 @@ pref("browser.urlbar.suggest.trending", false);
 pref("browser.urlbar.trending.featureGate", false);
 // tor-browser#42792: Explicitly turn off Pocket suggestions in the URL bar.
 pref("browser.urlbar.pocket.featureGate", false);
-// tor-browser#41691: Hide "Firefox Suggets" in the UI
+// tor-browser#41691: Hide "Firefox Suggest" in the UI
 pref("browser.urlbar.groupLabels.enabled", false);
 pref("browser.safebrowsing.malware.enabled", false);
 pref("browser.safebrowsing.phishing.enabled", false);
@@ -184,6 +184,10 @@ pref("browser.safebrowsing.provider.mozilla.updateURL", "");
 pref("browser.safebrowsing.provider.mozilla.gethashURL", "");
 pref("datareporting.healthreport.uploadEnabled", false);
 pref("datareporting.policy.dataSubmissionEnabled", false);
+// tor-browser#42735: Disable recent search suggestions
+pref("browser.urlbar.recentsearches.featureGate", false);
+pref("browser.urlbar.suggest.recentsearches", false);
+
 // Make sure Unified Telemetry is really disabled, see: #18738.
 pref("toolkit.telemetry.unified", false);
 // This needs to be locked, or nightly builds will automatically lock it to true
