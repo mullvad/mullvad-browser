@@ -61,6 +61,20 @@ export let LaterRun = {
   },
 
   init(reason) {
+    // Keep disabled in Base Browser. See tor-browser#41568.
+    // NOTE: This means that users cannot benefit from feature prompts gated
+    // behind LaterRun.
+    // In mozilla ESR 128 it is only used in one place, and is gated behind a
+    // feature recommendation preference that we switch off in Base Browser
+    // anyway. See tor-browser#42630.
+    // But this decision should be reviewed. See tor-browser#43093.
+    Services.prefs.setBoolPref(kEnabledPref, false);
+    // Clear any preferences that may have been set before LaterRun was
+    // disabled.
+    Services.prefs.clearUserPref(kSessionCountPref);
+    Services.prefs.clearUserPref(kProfileCreationTime);
+    Services.prefs.clearUserPref(kUpdateAppliedTime);
+
     if (!this.enabled) {
       return;
     }
@@ -99,11 +113,8 @@ export let LaterRun = {
     return Services.prefs.getBoolPref(kEnabledPref, false);
   },
 
-  enable(reason) {
-    if (!this.enabled) {
-      Services.prefs.setBoolPref(kEnabledPref, true);
-      this.init(reason);
-    }
+  enable(_reason) {
+    // Keep disabled in Base Browser. See tor-browser#41568.
   },
 
   get hoursSinceInstall() {
