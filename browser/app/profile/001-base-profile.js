@@ -291,7 +291,7 @@ pref("extensions.screenshots.disabled", true);
 pref("extensions.webcompat-reporter.enabled", false);
 
 // Disable contentRelevancy component (which itself is gated on Nimbus) (tor-browser#42867)
-pref("toolkit.contentRelevancy.enabled", false;
+pref("toolkit.contentRelevancy.enabled", false);
 pref("toolkit.contentRelevancy.ingestEnabled", false);
 pref("toolkit.contentRelevancy.log", false);
 
