@@ -292,6 +292,8 @@ pref("browser.preferences.moreFromMozilla", false);
 
 // Disable the screenshot menu when right-clicking (Bug #40912 and #40007)
 pref("extensions.screenshots.disabled", true);
+
+// Disable webcompat reporter
 pref("extensions.webcompat-reporter.enabled", false);
 
 // Disable contentRelevancy component (which itself is gated on Nimbus) (tor-browser#42867)
