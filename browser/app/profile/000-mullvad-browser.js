@@ -31,3 +31,6 @@ pref("browser.shell.checkDefaultBrowser", false);
 
 // mullvad-browser#228: default to spoof en-US and skip showing the dialog
 pref("privacy.spoof_english", 2);
+
+// mullvad-browser#234: Do not spoof the OS in the User-Agent header
+pref("privacy.resistFingerprinting.spoofOsInUserAgentHeader", false);
