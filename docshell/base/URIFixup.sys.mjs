@@ -934,6 +934,10 @@ function fileURIFixup(uriString) {
   } else {
     // UNIX: Check if it starts with "/" or "~".
     attemptFixup = /^[~/]/.test(uriString);
+    const originalHome = Services.env.get("BB_ORIGINAL_HOME");
+    if (originalHome && (uriString === "~" || uriString.startsWith("~/"))) {
+      path = originalHome + path.substring(1);
+    }
   }
   if (attemptFixup) {
     try {
