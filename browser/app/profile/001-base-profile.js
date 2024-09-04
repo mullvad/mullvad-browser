@@ -23,6 +23,11 @@ pref("browser.tabs.firefox-view", false, locked);
 // Disable 'Switching to a new device" help menu item (tor-browser#41774)
 pref("browser.device-migration.help-menu.hidden", true);
 
+#if MOZ_UPDATE_CHANNEL == release
+// tor-browser#42640: Disable Firefox Flame buttond due to unknown interactions with New Identity
+pref("browser.privatebrowsing.resetPBM.enabled", false, locked);
+#endif
+
 // Bug 41668: allow users to apply updates. This is set also in firefox.js for
 // all platforms, except for Windows. As explained on firefox.js, Firefox uses a
 // per-installation preference on Windows. However, we patch this behavior, and
