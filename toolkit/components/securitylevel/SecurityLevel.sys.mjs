@@ -268,17 +268,16 @@ var initializeNoScriptControl = () => {
 /* eslint-disable */
 // prettier-ignore
 const kSecuritySettings = {
-  // Preference name :                                          [0, 1-high 2-m    3-m    4-low]
-  "javascript.options.ion" :                                    [,  false, false, false, true ],
-  "javascript.options.baselinejit" :                            [,  false, false, false, true ],
-  "javascript.options.native_regexp" :                          [,  false, false, false, true ],
-  "mathml.disabled" :                                           [,  true,  true,  true,  false],
-  "gfx.font_rendering.graphite.enabled" :                       [,  false, false, false, true ],
-  "gfx.font_rendering.opentype_svg.enabled" :                   [,  false, false, false, true ],
-  "svg.disabled" :                                              [,  true,  false, false, false],
-  "javascript.options.asmjs" :                                  [,  false, false, false, true ],
-  "javascript.options.wasm" :                                   [,  false, false, false, true ],
-  "dom.security.https_only_mode_send_http_background_request" : [,  false, false, false, true ],
+  // Preference name:                        [0, 1-high 2-m    3-m    4-low]
+  "javascript.options.ion":                  [,  false, false, false, true ],
+  "javascript.options.baselinejit":          [,  false, false, false, true ],
+  "javascript.options.native_regexp":        [,  false, false, false, true ],
+  "mathml.disabled":                         [,  true,  true,  true,  false],
+  "gfx.font_rendering.graphite.enabled":     [,  false, false, false, true ],
+  "gfx.font_rendering.opentype_svg.enabled": [,  false, false, false, true ],
+  "svg.disabled":                            [,  true,  false, false, false],
+  "javascript.options.asmjs":                [,  false, false, false, true ],
+  "javascript.options.wasm":                 [,  false, false, false, true ],
 };
 /* eslint-enable */
 
