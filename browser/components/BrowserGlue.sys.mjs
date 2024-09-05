@@ -4661,8 +4661,11 @@ BrowserGlue.prototype = {
   _migrateUIBB() {
     // Version 1: 13.0a3. Reset layout.css.prefers-color-scheme.content-override
     //            for tor-browser#41739.
-    // Version 2: Reset the privacy tracking headers preferences since the UI
-    //            is hidden. tor-browser#42777.
+    // Version 2: 14.0a5:Reset the privacy tracking headers preferences since
+    //            the UI is hidden. tor-browser#42777.
+    //            Also, do not set
+    //            dom.security.https_only_mode_send_http_background_request in
+    //            the security level anymore (tor-browser#42149).
     const MIGRATION_VERSION = 2;
     const MIGRATION_PREF = "basebrowser.migration.version";
     // We do not care whether this is a new or old profile, since in version 1
@@ -4685,11 +4688,11 @@ BrowserGlue.prototype = {
         // The last two preferences have no corresponding UI, but are related.
         "privacy.globalprivacycontrol.functionality.enabled",
         "privacy.globalprivacycontrol.pbmode.enabled",
+        "dom.security.https_only_mode_send_http_background_request",
       ]) {
         Services.prefs.clearUserPref(prefName);
       }
     }
-
     Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
   },
 
