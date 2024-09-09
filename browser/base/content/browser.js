@@ -8079,6 +8079,11 @@ var FirefoxViewHandler = {
     }
   },
   openTab(section) {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // about:firefoxview is disabled. tor-browser#42037.
+      return;
+    }
+
     if (!CustomizableUI.getPlacementOfWidget(this.BUTTON_ID)) {
       CustomizableUI.addWidgetToArea(
         this.BUTTON_ID,
