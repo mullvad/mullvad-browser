@@ -2279,3 +2279,28 @@ Maybe<RFPTarget> nsRFPService::GetOverriddenFingerprintingSettingsForURI(
 
   return result;
 }
+
+/* static */
+dom::OrientationType nsRFPService::OrientationSecondaryToPrimary(
+    dom::OrientationType aOrientation) {
+  switch (aOrientation) {
+    case dom::OrientationType::Landscape_secondary:
+      return dom::OrientationType::Landscape_primary;
+    case dom::OrientationType::Portrait_secondary:
+      return dom::OrientationType::Portrait_primary;
+    default:
+      return aOrientation;
+  }
+}
+
+/* static */
+uint16_t nsRFPService::OrientationSecondaryToPrimary(uint16_t aAngle) {
+  switch (aAngle) {
+    case 180:
+      return 0;
+    case 270:
+      return 90;
+    default:
+      return aAngle;
+  }
+}
