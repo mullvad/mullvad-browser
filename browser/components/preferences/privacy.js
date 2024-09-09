@@ -3041,8 +3041,12 @@ var gPrivacyPane = {
   },
 
   _updateRelayIntegrationUI() {
-    document.getElementById("relayIntegrationBox").hidden =
-      !FirefoxRelay.isAvailable;
+    // In Base Browser, we always hide the integration checkbox since
+    // FirefoxRelay should remain disabled.
+    // See tor-browser#43109 and tor-browser#42814.
+    // NOTE: FirefoxRelay.isAvailable will be true whenever
+    // FirefoxRelay.isDisabled is true.
+    document.getElementById("relayIntegrationBox").hidden = true;
     document.getElementById("relayIntegration").checked =
       FirefoxRelay.isAvailable && !FirefoxRelay.isDisabled;
   },
