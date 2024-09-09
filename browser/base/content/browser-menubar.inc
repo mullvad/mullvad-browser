@@ -499,6 +499,7 @@
                           hidden="true"/>
                 <menuitem id="helpSwitchDevice"
                           oncommand="openSwitchingDevicesPage();"
+                          hidden="true"
                           data-l10n-id="menu-help-switch-device"
                           appmenu-data-l10n-id="appmenu-help-switch-device"/>
                 <menuseparator id="aboutSeparator"/>
