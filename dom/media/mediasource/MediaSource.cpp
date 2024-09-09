@@ -23,6 +23,7 @@
 #include "mozilla/Sprintf.h"
 #include "mozilla/StaticPrefs_media.h"
 #include "mozilla/dom/BindingDeclarations.h"
+#include "mozilla/dom/Document.h"
 #include "mozilla/dom/HTMLMediaElement.h"
 #include "mozilla/gfx/gfxVars.h"
 #include "mozilla/mozalloc.h"
@@ -133,7 +134,8 @@ static void RecordTypeForTelemetry(const nsAString& aType,
 /* static */
 void MediaSource::IsTypeSupported(const nsAString& aType,
                                   DecoderDoctorDiagnostics* aDiagnostics,
-                                  ErrorResult& aRv) {
+                                  ErrorResult& aRv,
+                                  Maybe<bool> aShouldResistFingerprinting) {
   if (aType.IsEmpty()) {
     return aRv.ThrowTypeError("Empty type");
   }
@@ -159,16 +161,25 @@ void MediaSource::IsTypeSupported(const nsAString& aType,
 
   // Now we know that this media type could be played.
   // MediaSource imposes extra restrictions, and some prefs.
+  // Avoid leaking information about the fact that it's pref-disabled,
+  // or that HW acceleration is available (only applicable to VP9 on Android).
+  bool shouldResistFingerprinting =
+      aShouldResistFingerprinting.isSome()
+          ? aShouldResistFingerprinting.value()
+          : nsContentUtils::ShouldResistFingerprinting(
+                "Couldn't drill down ShouldResistFingerprinting",
+                RFPTarget::MediaCapabilities);
   const MediaMIMEType& mimeType = containerType->Type();
   if (mimeType == MEDIAMIMETYPE("video/mp4") ||
       mimeType == MEDIAMIMETYPE("audio/mp4")) {
-    if (!StaticPrefs::media_mediasource_mp4_enabled()) {
+    if (!StaticPrefs::media_mediasource_mp4_enabled() &&
+        !shouldResistFingerprinting) {
       // Don't leak information about the fact that it's pref-disabled; just act
       // like we can't play it.  Or should this throw "Unknown type"?
       return aRv.ThrowNotSupportedError("Can't play type");
     }
     if (!StaticPrefs::media_mediasource_vp9_enabled() && hasVP9 &&
-        !IsVP9Forced(aDiagnostics)) {
+        !IsVP9Forced(aDiagnostics) && !shouldResistFingerprinting) {
       // Don't leak information about the fact that it's pref-disabled; just act
       // like we can't play it.  Or should this throw "Unknown type"?
       return aRv.ThrowNotSupportedError("Can't play type");
@@ -177,13 +188,14 @@ void MediaSource::IsTypeSupported(const nsAString& aType,
     return;
   }
   if (mimeType == MEDIAMIMETYPE("video/webm")) {
-    if (!StaticPrefs::media_mediasource_webm_enabled()) {
+    if (!StaticPrefs::media_mediasource_webm_enabled() &&
+        !shouldResistFingerprinting) {
       // Don't leak information about the fact that it's pref-disabled; just act
       // like we can't play it.  Or should this throw "Unknown type"?
       return aRv.ThrowNotSupportedError("Can't play type");
     }
     if (!StaticPrefs::media_mediasource_vp9_enabled() && hasVP9 &&
-        !IsVP9Forced(aDiagnostics)) {
+        !IsVP9Forced(aDiagnostics) && !shouldResistFingerprinting) {
       // Don't leak information about the fact that it's pref-disabled; just act
       // like we can't play it.  Or should this throw "Unknown type"?
       return aRv.ThrowNotSupportedError("Can't play type");
@@ -191,7 +203,8 @@ void MediaSource::IsTypeSupported(const nsAString& aType,
     return;
   }
   if (mimeType == MEDIAMIMETYPE("audio/webm")) {
-    if (!StaticPrefs::media_mediasource_webm_enabled()) {
+    if (!StaticPrefs::media_mediasource_webm_enabled() &&
+        !shouldResistFingerprinting) {
       // Don't leak information about the fact that it's pref-disabled; just act
       // like we can't play it.  Or should this throw "Unknown type"?
       return aRv.ThrowNotSupportedError("Can't play type");
@@ -280,13 +293,16 @@ void MediaSource::SetDuration(const media::TimeUnit& aDuration) {
 already_AddRefed<SourceBuffer> MediaSource::AddSourceBuffer(
     const nsAString& aType, ErrorResult& aRv) {
   MOZ_ASSERT(NS_IsMainThread());
+  nsCOMPtr<nsPIDOMWindowInner> window = GetOwner();
+  Document* doc = window ? window->GetExtantDoc() : nullptr;
   DecoderDoctorDiagnostics diagnostics;
-  IsTypeSupported(aType, &diagnostics, aRv);
-  RecordTypeForTelemetry(aType, GetOwner());
+  IsTypeSupported(
+      aType, &diagnostics, aRv,
+      doc ? Some(doc->ShouldResistFingerprinting(RFPTarget::MediaCapabilities))
+          : Nothing());
+  RecordTypeForTelemetry(aType, window);
   bool supported = !aRv.Failed();
-  diagnostics.StoreFormatDiagnostics(
-      GetOwner() ? GetOwner()->GetExtantDoc() : nullptr, aType, supported,
-      __func__);
+  diagnostics.StoreFormatDiagnostics(doc, aType, supported, __func__);
   MSE_API("AddSourceBuffer(aType=%s)%s", NS_ConvertUTF16toUTF8(aType).get(),
           supported ? "" : " [not supported]");
   if (!supported) {
@@ -433,13 +449,16 @@ bool MediaSource::IsTypeSupported(const GlobalObject& aOwner,
   MOZ_ASSERT(NS_IsMainThread());
   DecoderDoctorDiagnostics diagnostics;
   IgnoredErrorResult rv;
-  IsTypeSupported(aType, &diagnostics, rv);
-  bool supported = !rv.Failed();
   nsCOMPtr<nsPIDOMWindowInner> window =
       do_QueryInterface(aOwner.GetAsSupports());
+  Document* doc = window ? window->GetExtantDoc() : nullptr;
+  IsTypeSupported(
+      aType, &diagnostics, rv,
+      doc ? Some(doc->ShouldResistFingerprinting(RFPTarget::MediaCapabilities))
+          : Nothing());
+  bool supported = !rv.Failed();
   RecordTypeForTelemetry(aType, window);
-  diagnostics.StoreFormatDiagnostics(window ? window->GetExtantDoc() : nullptr,
-                                     aType, supported, __func__);
+  diagnostics.StoreFormatDiagnostics(doc, aType, supported, __func__);
   MOZ_LOG(GetMediaSourceAPILog(), mozilla::LogLevel::Debug,
           ("MediaSource::%s: IsTypeSupported(aType=%s) %s", __func__,
            NS_ConvertUTF16toUTF8(aType).get(),
