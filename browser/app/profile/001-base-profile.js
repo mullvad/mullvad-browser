@@ -422,6 +422,10 @@ pref("network.http.referer.XOriginTrimmingPolicy", 2); // Bug 17228: Force trim 
 pref("network.http.windows-sso.enabled", false, locked);
 // tor-browser#40424
 pref("pdfjs.enableScripting", false);
+#if MOZ_UPDATE_CHANNEL == release
+// tor-browser#42255: pdfjs.disabled used to be part of RFP until Bug 1838415; lock pref to false in stable
+pref("pdfjs.disabled", false, locked);
+#endif
 // Bug 40057: Ensure system colors are not used for CSS4 colors
 pref("browser.display.use_system_colors", false);
 // Enforce non-native widget theme (true by default, defense in depth).
