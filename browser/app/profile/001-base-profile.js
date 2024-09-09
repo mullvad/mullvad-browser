@@ -17,9 +17,6 @@ pref("startup.homepage_welcome_url.additional", "");
 // Disable Firefox Welcome Dialog
 pref("browser.aboutwelcome.enabled", false);
 
-// Disable the Firefox View tab (tor-browser#41876)
-pref("browser.tabs.firefox-view", false, locked);
-
 #if MOZ_UPDATE_CHANNEL == release
 // tor-browser#42640: Disable Firefox Flame buttond due to unknown interactions with New Identity
 pref("browser.privatebrowsing.resetPBM.enabled", false, locked);
