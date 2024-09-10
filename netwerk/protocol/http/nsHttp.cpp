@@ -35,6 +35,8 @@
 namespace mozilla {
 namespace net {
 
+extern const char kProxyType_SOCKS[];
+
 const uint32_t kHttp3VersionCount = 5;
 const nsCString kHttp3Versions[] = {"h3-29"_ns, "h3-30"_ns, "h3-31"_ns,
                                     "h3-32"_ns, "h3"_ns};
@@ -1163,6 +1165,20 @@ void DisallowHTTPSRR(uint32_t& aCaps) {
   // NS_HTTP_DISALLOW_HTTPS_RR should take precedence than
   // NS_HTTP_FORCE_WAIT_HTTP_RR.
   aCaps = (aCaps | NS_HTTP_DISALLOW_HTTPS_RR) & ~NS_HTTP_FORCE_WAIT_HTTP_RR;
+}
+
+ProxyDNSStrategy GetProxyDNSStrategyHelper(const char* aType, uint32_t aFlag) {
+  if (!aType) {
+    return ProxyDNSStrategy::ORIGIN;
+  }
+
+  if (!(aFlag & nsIProxyInfo::TRANSPARENT_PROXY_RESOLVES_HOST)) {
+    if (aType == kProxyType_SOCKS) {
+      return ProxyDNSStrategy::ORIGIN;
+    }
+  }
+
+  return ProxyDNSStrategy::PROXY;
 }
 
 }  // namespace net
