@@ -314,34 +314,72 @@ nsresult nsDocumentOpenInfo::DispatchContent(nsIRequest* request) {
     forceExternalHandling = false;
   }
 
-  // Check if this is a PDF which should be opened internally. We also handle
-  // octet-streams that look like they might be PDFs based on their extension.
   if (forceExternalHandling &&
-      mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline() &&
-      IsContentPDF(aChannel, mContentType)) {
-    // For a PDF, check if the preference is set that forces attachments to be
-    // opened inline. If so, treat it as a non-attachment by clearing
-    // 'forceExternalHandling' again. This allows it open a PDF directly
-    // instead of downloading it first. It may still end up being handled by
-    // a helper app depending anyway on the later checks.
-    nsCOMPtr<nsILoadInfo> loadInfo;
-    aChannel->GetLoadInfo(getter_AddRefs(loadInfo));
+      (mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline() ||
+       mozilla::StaticPrefs::browser_download_ignore_content_disposition())) {
+    // Check if this is a PDF which should be opened internally. We also handle
+    // octet-streams that look like they might be PDFs based on their extension.
+    bool isPDF = IsContentPDF(aChannel, mContentType);
+    nsAutoCString ext;
+    if (!isPDF &&
+        (mContentType.LowerCaseEqualsASCII(APPLICATION_OCTET_STREAM) ||
+         mContentType.IsEmpty())) {
+      nsAutoString flname;
+      aChannel->GetContentDispositionFilename(flname);
+      if (!flname.IsEmpty()) {
+        int32_t extStart = flname.RFindChar(u'.');
+        if (extStart != kNotFound) {
+          CopyUTF16toUTF8(Substring(flname, extStart + 1), ext);
+        }
+      }
+      if (ext.IsEmpty()) {
+        nsCOMPtr<nsIURI> uri;
+        aChannel->GetURI(getter_AddRefs(uri));
+        nsCOMPtr<nsIURL> url(do_QueryInterface(uri));
+        if (url) {
+          url->GetFileExtension(ext);
+        }
+      }
+    }
 
-    nsCOMPtr<nsIMIMEInfo> mimeInfo;
+    // One of the preferences to forces attachments to be opened inline is set.
+    // If so, treat it as a non-attachment by clearing 'forceExternalHandling'
+    // again. This allows it open a file directly instead of downloading it
+    // first. It may still end up being handled by a helper app depending anyway
+    // on the later checks.
+    if (isPDF ||
+        (mozilla::StaticPrefs::browser_download_ignore_content_disposition() &&
+         // we want to exclude html and svg files, which could execute
+         // scripts (tor-browser#43211)
+         kNotFound == mContentType.LowerCaseFindASCII("html") &&
+         kNotFound == ext.LowerCaseFindASCII("htm") &&
+         kNotFound == mContentType.LowerCaseFindASCII("/svg+") &&
+         !ext.EqualsIgnoreCase("svg"))) {
+      nsCOMPtr<nsILoadInfo> loadInfo;
+      aChannel->GetLoadInfo(getter_AddRefs(loadInfo));
 
-    nsCOMPtr<nsIMIMEService> mimeSvc(do_GetService(NS_MIMESERVICE_CONTRACTID));
-    NS_ENSURE_TRUE(mimeSvc, NS_ERROR_FAILURE);
-    mimeSvc->GetFromTypeAndExtension(nsLiteralCString(APPLICATION_PDF), ""_ns,
-                                     getter_AddRefs(mimeInfo));
+      nsCOMPtr<nsIMIMEInfo> mimeInfo;
 
-    if (mimeInfo) {
-      int32_t action = nsIMIMEInfo::saveToDisk;
-      mimeInfo->GetPreferredAction(&action);
+      nsCOMPtr<nsIMIMEService> mimeSvc(
+          do_GetService(NS_MIMESERVICE_CONTRACTID));
+      NS_ENSURE_TRUE(mimeSvc, NS_ERROR_FAILURE);
+      if (isPDF) {
+        mimeSvc->GetFromTypeAndExtension(nsLiteralCString(APPLICATION_PDF),
+                                         ""_ns, getter_AddRefs(mimeInfo));
+      } else {
+        mimeSvc->GetFromTypeAndExtension(mContentType, ext,
+                                         getter_AddRefs(mimeInfo));
+      }
 
-      bool alwaysAsk = true;
-      mimeInfo->GetAlwaysAskBeforeHandling(&alwaysAsk);
-      forceExternalHandling =
-          alwaysAsk || action != nsIMIMEInfo::handleInternally;
+      if (mimeInfo) {
+        int32_t action = nsIMIMEInfo::saveToDisk;
+        mimeInfo->GetPreferredAction(&action);
+
+        bool alwaysAsk = true;
+        mimeInfo->GetAlwaysAskBeforeHandling(&alwaysAsk);
+        forceExternalHandling =
+            alwaysAsk || action != nsIMIMEInfo::handleInternally;
+      }
     }
   }
 
