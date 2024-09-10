@@ -4683,7 +4683,9 @@ BrowserGlue.prototype = {
   _migrateUIBB() {
     // Version 1: 13.0a3. Reset layout.css.prefers-color-scheme.content-override
     //            for tor-browser#41739.
-    const MIGRATION_VERSION = 1;
+    // Version 2: Reset the privacy tracking headers preferences since the UI
+    //            is hidden. tor-browser#42777.
+    const MIGRATION_VERSION = 2;
     const MIGRATION_PREF = "basebrowser.migration.version";
     // We do not care whether this is a new or old profile, since in version 1
     // we just quickly clear a user preference, which should not do anything to
@@ -4696,6 +4698,20 @@ BrowserGlue.prototype = {
         "layout.css.prefers-color-scheme.content-override"
       );
     }
+    if (currentVersion < 2) {
+      for (const prefName of [
+        "privacy.globalprivacycontrol.enabled",
+        "privacy.donottrackheader.enabled",
+        // Telemetry preference for if the user changed the value.
+        "privacy.globalprivacycontrol.was_ever_enabled",
+        // The last two preferences have no corresponding UI, but are related.
+        "privacy.globalprivacycontrol.functionality.enabled",
+        "privacy.globalprivacycontrol.pbmode.enabled",
+      ]) {
+        Services.prefs.clearUserPref(prefName);
+      }
+    }
+
     Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
   },
 
