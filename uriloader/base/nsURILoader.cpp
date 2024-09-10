@@ -292,34 +292,42 @@ nsresult nsDocumentOpenInfo::DispatchContent(nsIRequest* request) {
   LOG(("  forceExternalHandling: %s", forceExternalHandling ? "yes" : "no"));
 
   if (forceExternalHandling &&
-      mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline()) {
+      (mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline() ||
+       mozilla::StaticPrefs::browser_download_ignore_content_disposition())) {
     // Check if this is a PDF which should be opened internally. We also handle
     // octet-streams that look like they might be PDFs based on their extension.
     bool isPDF = mContentType.LowerCaseEqualsASCII(APPLICATION_PDF);
-    if (!isPDF &&
-        (mContentType.LowerCaseEqualsASCII(APPLICATION_OCTET_STREAM) ||
-         mContentType.IsEmpty())) {
+    nsAutoCString ext;
+    if (mContentType.LowerCaseEqualsASCII(APPLICATION_OCTET_STREAM) ||
+        mContentType.IsEmpty()) {
       nsAutoString flname;
       aChannel->GetContentDispositionFilename(flname);
-      isPDF = StringEndsWith(flname, u".pdf"_ns);
-      if (!isPDF) {
+      if (!flname.IsEmpty()) {
+        int32_t extStart = flname.RFindChar(u'.');
+        if (extStart != kNotFound) {
+          CopyUTF16toUTF8(Substring(flname, extStart + 1), ext);
+        }
+      }
+      if (ext.IsEmpty() || (!mozilla::StaticPrefs::
+                                browser_download_ignore_content_disposition() &&
+                            !ext.EqualsLiteral("pdf"))) {
         nsCOMPtr<nsIURI> uri;
         aChannel->GetURI(getter_AddRefs(uri));
         nsCOMPtr<nsIURL> url(do_QueryInterface(uri));
         if (url) {
-          nsAutoCString ext;
           url->GetFileExtension(ext);
-          isPDF = ext.EqualsLiteral("pdf");
         }
       }
+      isPDF = ext.EqualsLiteral("pdf");
     }
 
-    // For a PDF, check if the preference is set that forces attachments to be
-    // opened inline. If so, treat it as a non-attachment by clearing
-    // 'forceExternalHandling' again. This allows it open a PDF directly
-    // instead of downloading it first. It may still end up being handled by
-    // a helper app depending anyway on the later checks.
-    if (isPDF) {
+    // One of the preferences to forces attachments to be opened inline is set.
+    // If so, treat it as a non-attachment by clearing 'forceExternalHandling'
+    // again. This allows it open a file directly instead of downloading it
+    // first. It may still end up being handled by a helper app depending anyway
+    // on the later checks.
+    if (mozilla::StaticPrefs::browser_download_ignore_content_disposition() ||
+        isPDF) {
       nsCOMPtr<nsILoadInfo> loadInfo;
       aChannel->GetLoadInfo(getter_AddRefs(loadInfo));
 
@@ -328,8 +336,13 @@ nsresult nsDocumentOpenInfo::DispatchContent(nsIRequest* request) {
       nsCOMPtr<nsIMIMEService> mimeSvc(
           do_GetService(NS_MIMESERVICE_CONTRACTID));
       NS_ENSURE_TRUE(mimeSvc, NS_ERROR_FAILURE);
-      mimeSvc->GetFromTypeAndExtension(nsLiteralCString(APPLICATION_PDF), ""_ns,
-                                       getter_AddRefs(mimeInfo));
+      if (isPDF) {
+        mimeSvc->GetFromTypeAndExtension(nsLiteralCString(APPLICATION_PDF),
+                                         ""_ns, getter_AddRefs(mimeInfo));
+      } else {
+        mimeSvc->GetFromTypeAndExtension(mContentType, ext,
+                                         getter_AddRefs(mimeInfo));
+      }
 
       if (mimeInfo) {
         int32_t action = nsIMIMEInfo::saveToDisk;

@@ -1446,6 +1446,12 @@
   value: false
   mirror: always
 
+# tor-browser#42220
+- name: browser.download.ignore_content_disposition
+  type: bool
+  value: true
+  mirror: always
+
 # See bug 1811830
 - name: browser.download.force_save_internally_handled_attachments
   type: bool
