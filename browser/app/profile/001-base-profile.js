@@ -533,9 +533,6 @@ pref("media.peerconnection.ice.default_address_only", true);
 pref("media.peerconnection.ice.no_host", true);
 pref("media.peerconnection.ice.proxy_only_if_behind_proxy", true);
 
-// Disables media devices but only if `media.peerconnection.enabled` is set to
-// `false` as well. (see bug 16328 for this defense-in-depth measure)
-pref("media.navigator.enabled", false);
 // GMPs (Gecko Media Plugins, https://wiki.mozilla.org/GeckoMediaPlugins)
 // We make sure they don't show up on the Add-on panel and confuse users.
 // And the external update/donwload server must not get pinged. We apply a
