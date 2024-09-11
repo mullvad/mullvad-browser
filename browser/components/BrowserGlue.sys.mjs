@@ -4683,11 +4683,13 @@ BrowserGlue.prototype = {
   _migrateUIBB() {
     // Version 1: 13.0a3. Reset layout.css.prefers-color-scheme.content-override
     //            for tor-browser#41739.
-    // Version 2: 14.0a5:Reset the privacy tracking headers preferences since
+    // Version 2: 14.0a5: Reset the privacy tracking headers preferences since
     //            the UI is hidden. tor-browser#42777.
     //            Also, do not set
     //            dom.security.https_only_mode_send_http_background_request in
     //            the security level anymore (tor-browser#42149).
+    //            Also, reset security.xfocsp.errorReporting.automatic since we
+    //            hid its neterror checkbox. tor-browser#42653.
     const MIGRATION_VERSION = 2;
     const MIGRATION_PREF = "basebrowser.migration.version";
     // We do not care whether this is a new or old profile, since in version 1
@@ -4707,10 +4709,11 @@ BrowserGlue.prototype = {
         "privacy.donottrackheader.enabled",
         // Telemetry preference for if the user changed the value.
         "privacy.globalprivacycontrol.was_ever_enabled",
-        // The last two preferences have no corresponding UI, but are related.
+        // The next two preferences have no corresponding UI, but are related.
         "privacy.globalprivacycontrol.functionality.enabled",
         "privacy.globalprivacycontrol.pbmode.enabled",
         "dom.security.https_only_mode_send_http_background_request",
+        "security.xfocsp.errorReporting.automatic",
       ]) {
         Services.prefs.clearUserPref(prefName);
       }
