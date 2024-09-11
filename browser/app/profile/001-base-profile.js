@@ -212,6 +212,9 @@ pref("browser.tabs.crashReporting.sendReport", false);
 pref("browser.crashReports.unsubmittedCheck.autoSubmit2", false);
 // Added in tor-browser#41496 even though false by default
 pref("browser.crashReports.unsubmittedCheck.enabled", false);
+// Disable checkbox in about:neterror that controls
+// security.xfocsp.errorReporting.automatic. See tor-browser#42653.
+pref("security.xfocsp.errorReporting.enabled", false);
 // Added in tor-browser#41496 even though it shuld be already always disabled
 // since we disable MOZ_CRASHREPORTER.
 pref("breakpad.reportURL", "data:");
