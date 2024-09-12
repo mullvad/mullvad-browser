@@ -729,17 +729,6 @@
         }
       }
 
-      setAlertRole() {
-        // Wait a little for this to render before setting the role for more
-        // consistent alerts to screen readers.
-        this.removeAttribute("role");
-        window.requestAnimationFrame(() => {
-          window.requestAnimationFrame(() => {
-            this.setAttribute("role", "alert");
-          });
-        });
-      }
-
       handleEvent(e) {
         // If clickjacking delay is active, prevent any "click"/"command" from
         // going through. Also restart the delay if the user tries to click too early.
