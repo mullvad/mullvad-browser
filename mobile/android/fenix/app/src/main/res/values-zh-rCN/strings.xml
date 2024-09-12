@@ -2810,4 +2810,8 @@
     <string name="debug_drawer_logins_add_login_button">为此域名添加虚构登录信息</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">删除用户名为“%s”的登录信息</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">从顶部下拉并使用返回手势，以退出全屏</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">从顶部下拉并按返回键，以退出全屏</string>
 </resources>

@@ -2772,4 +2772,8 @@ Exemple :\nhttps://suggestqueries.google.com/complete/search?client=firefox&amp
     <string name="debug_drawer_logins_add_login_button">Apondre un fals identificant per aqueste domeni</string>
     <!-- Content description for delete button where parameter will be the username of the login -->
     <string name="debug_drawer_logins_delete_login_button_content_description">Suprimir l’identificant amb lo nom d’utilizaire %s</string>
+    <!-- Message shown to explain how to exit fullscreen mode when gesture navigation is enabled -->
+    <string name="exit_fullscreen_with_gesture">Per sortir del mòde ecran complèt, lisatz d’ennaut e utilizatz lo gèst de retorn</string>
+    <!-- Message shown to explain how to exit fullscreen mode when using back button navigation -->
+    <string name="exit_fullscreen_with_back_button">Per sortir del mòde ecran complèt, lisatz d’ennaut e utilizatz quichatz retorn</string>
 </resources>
