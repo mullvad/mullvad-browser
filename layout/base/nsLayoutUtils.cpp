@@ -9720,7 +9720,9 @@ static void GetSpoofedSystemFontForRFP(LookAndFeel::FontID aFontID,
   // In general, Linux uses some sans-serif, but its size can vary between
   // 12px and 16px. We chose 15px because it is what Firefox is doing for the
   // UI font-size.
-  aName = u"sans-serif"_ns;
+  // tor-browser#43141: Hardcode Arimo in case our custom fontconfig is
+  // missing.
+  aName = u"Arimo"_ns;
   aStyle.size = 15;
 #else
 #  error "Unknown platform"
