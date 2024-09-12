@@ -65,7 +65,9 @@ export default class MozMessageBar extends MozLitElement {
     supportPage: { type: String },
     messageL10nId: { type: String },
     messageL10nArgs: { type: String },
-    role: { type: String, reflect: true },
+    // Move the role from the widget to its shadow root, where we can apply
+    // aria-labelledby and aria-describedby. tor-browser#45186.
+    role: { type: String, mapped: true },
   };
 
   constructor() {
@@ -187,7 +189,9 @@ export default class MozMessageBar extends MozLitElement {
 
   headingTemplate() {
     if (this.heading) {
-      return html`<strong class="heading">${this.heading}</strong>`;
+      return html`
+        <strong id="heading" class="heading">${this.heading}</strong>
+      `;
     }
     return "";
   }
@@ -208,18 +212,33 @@ export default class MozMessageBar extends MozLitElement {
   }
 
   render() {
+    let ariaLabelledBy;
+    let ariaDescribedBy;
+    if (this.role === "alert") {
+      if (this.heading) {
+        ariaLabelledBy = "heading";
+        ariaDescribedBy = "content";
+      } else {
+        ariaLabelledBy = "content";
+      }
+    }
     return html`
       <link
         rel="stylesheet"
         href="chrome://global/content/elements/moz-message-bar.css"
       />
-      <div class="container">
+      <div
+        class="container"
+        role=${ifDefined(this.role || undefined)}
+        aria-labelledby=${ifDefined(ariaLabelledBy)}
+        aria-describedby=${ifDefined(ariaDescribedBy)}
+      >
         ${this.iconTemplate()}
         <div class="content">
           <div class="text-container">
             <div class="text-content">
               ${this.headingTemplate()}
-              <div>
+              <div id="content">
                 <slot name="message">
                   <span
                     id="message"
