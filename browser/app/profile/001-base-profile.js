@@ -239,6 +239,7 @@ pref("privacy.donottrackheader.enabled", false); // (mullvad-browser#17)
 // Make sure there is no Tracking Protection active in Tor Browser, see: #17898.
 pref("privacy.trackingprotection.enabled", false);
 pref("privacy.trackingprotection.pbmode.enabled", false);
+pref("privacy.trackingprotection.emailtracking.pbmode.enabled", false);
 pref("privacy.trackingprotection.annotate_channels", false);
 pref("privacy.trackingprotection.cryptomining.enabled", false);
 pref("privacy.trackingprotection.fingerprinting.enabled", false);
