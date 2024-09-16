@@ -655,6 +655,11 @@ pref("privacy.query_stripping.enabled", true);
 pref("privacy.query_stripping.enabled.pbmode", true);
 pref("privacy.query_stripping.strip_on_share.enabled", true);
 
+// Ensure global privacy control headers are consistent in private browsing and
+// non-private browsing (tor-browser#42777).
+pref("privacy.globalprivacycontrol.enabled", true);
+pref("privacy.globalprivacycontrol.pbmode.enabled", true);
+
 // Disable platform text recogniition functionality (tor-browser#42057)
 pref("dom.text-recognition.enabled", false);
 
