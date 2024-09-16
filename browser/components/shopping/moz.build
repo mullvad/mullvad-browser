@@ -6,14 +6,8 @@
 
 JAR_MANIFESTS += ["jar.mn"]
 
-FINAL_TARGET_FILES.actors += [
-    "ShoppingSidebarChild.sys.mjs",
-    "ShoppingSidebarParent.sys.mjs",
-]
-
-EXTRA_JS_MODULES += [
-    "ShoppingUtils.sys.mjs",
-]
+# Removed ShoppingSidebarParent, ShoppingSidebarChild and ShoppingUtils.
+# tor-browser#42831.
 
 BROWSER_CHROME_MANIFESTS += ["tests/browser/browser.toml"]
 
