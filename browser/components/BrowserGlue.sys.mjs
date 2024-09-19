@@ -4668,7 +4668,8 @@ BrowserGlue.prototype = {
     //            the security level anymore (tor-browser#42149).
     //            Also, reset security.xfocsp.errorReporting.automatic since we
     //            hid its neterror checkbox. tor-browser#42653.
-    const MIGRATION_VERSION = 2;
+    // Version 3: 14.0a7: Reset general.smoothScroll. tor-browser#42070.
+    const MIGRATION_VERSION = 3;
     const MIGRATION_PREF = "basebrowser.migration.version";
     // We do not care whether this is a new or old profile, since in version 1
     // we just quickly clear a user preference, which should not do anything to
@@ -4695,6 +4696,9 @@ BrowserGlue.prototype = {
       ]) {
         Services.prefs.clearUserPref(prefName);
       }
+    }
+    if (currentVersion < 3) {
+      Services.prefs.clearUserPref("general.smoothScroll");
     }
     Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
   },
