@@ -87,7 +87,6 @@ ID01:
         # The webext-perms-description-* IDs are generated programmatically
         # from permission names
         - toolkit/locales/en-US/toolkit/global/extensionPermissions.ftl
-        - browser/locales/en-US/browser/aboutDialogMullvad.ftl
 ID02:
     messages:
         # browser/components/ion/content/ion.ftl
