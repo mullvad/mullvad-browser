@@ -283,10 +283,7 @@ var gBrowserInit = {
     this._boundDelayedStartup = this._delayedStartup.bind(this);
     window.addEventListener("MozAfterPaint", this._boundDelayedStartup);
 
-    if (
-      PrivateBrowsingUtils.permanentPrivateBrowsing ||
-      !PrivateBrowsingUtils.enabled
-    ) {
+    if (!PrivateBrowsingUtils.enabled) {
       document.getElementById("Tools:PrivateBrowsing").hidden = true;
       // Setting disabled doesn't disable the shortcut, so we just remove
       // the keybinding.
