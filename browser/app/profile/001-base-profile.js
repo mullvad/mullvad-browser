@@ -9,6 +9,11 @@ pref("intl.locale.requested", "");
 pref("browser.startup.homepage", "about:blank");
 pref("browser.newtabpage.enabled", false);
 
+// tor-browser#43164: Prevent search-bar from being auto-hidden when not used for awhile
+// This preference is locked so that the browser itself can never set an actual
+// value that would trigger the migration.
+pref("browser.search.widget.lastUsed", "", locked);
+
 // Disable initial homepage notifications
 pref("browser.search.update", false);
 pref("startup.homepage_welcome_url", "");
