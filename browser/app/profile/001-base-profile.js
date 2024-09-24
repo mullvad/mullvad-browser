@@ -383,6 +383,8 @@ pref("webgl.disable-fail-if-major-performance-caveat", true);
 // tor-browser#16404: disable until we investigate it further (#22333)
 pref("webgl.enable-webgl2", false);
 pref("browser.link.open_newwindow.restriction", 0); // Bug 9881: Open popups in new tabs (to avoid fullscreen popups)
+// tor-browser#42767: Disable offscreen canvas until verified it is not fingerprintable
+pref("gfx.offscreencanvas.enabled", false);
 // Prevent scripts from moving and resizing open windows
 pref("dom.disable_window_move_resize", true);
 // Set video VP9 to 0 for everyone (bug 22548)
