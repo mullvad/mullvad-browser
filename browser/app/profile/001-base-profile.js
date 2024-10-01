@@ -101,6 +101,12 @@ pref("browser.pagethumbnails.capturing_disabled", true);
 // pref("privacy.exposeContentTitleInWindow", false);
 // pref("privacy.exposeContentTitleInWindow.pbm", false);
 
+// tor-browser#42054: Opt-out from any built-in backup system, even though
+// local, as it might be a violation of our standalone mode.
+// Users can still opt-in if they wish.
+pref("browser.backup.enabled", false);
+pref("browser.backup.scheduled.enabled", false);
+
 // Empty clipboard content from private windows on exit (tor-browser#42154)
 pref("browser.privatebrowsing.preserveClipboard", false);
 
@@ -251,6 +257,9 @@ pref("privacy.trackingprotection.fingerprinting.enabled", false);
 pref("privacy.trackingprotection.socialtracking.enabled", false);
 pref("privacy.socialtracking.block_cookies.enabled", false);
 pref("privacy.annotate_channels.strict_list.enabled", false);
+// tor-browser#43178: for defense-in-depth, avoid remote overrides to FPP.
+// Notice that it should not apply to RFP anyway...
+pref("privacy.fingerprintingProtection.remoteOverrides.enabled", false);
 
 // Disable the Pocket extension (Bug #18886 and #31602)
 pref("extensions.pocket.enabled", false);
@@ -283,6 +292,9 @@ pref("browser.newtabpage.activity-stream.asrouter.providers.messaging-experiment
 
 // Disable fetching asrouter.ftl and related console errors (tor-browser#40763).
 pref("browser.newtabpage.activity-stream.asrouter.useRemoteL10n", false);
+
+// tor-browser#42054: make sure search result telemetry is disabled.
+pref("browser.search.serpEventTelemetryCategorization.enabled", false);
 
 // tor-browser#42872, #42555: Disable translations.
 // Translation have a bad UX in 128 (and with our config). Maybe we will
@@ -444,9 +456,6 @@ pref("pdfjs.disabled", false, locked);
 #endif
 // Bug 40057: Ensure system colors are not used for CSS4 colors
 pref("browser.display.use_system_colors", false);
-// Enforce non-native widget theme (true by default, defense in depth).
-// Provides a uniform look and feel across platforms. Added with tor-browser#41496.
-pref("widget.non-native-theme.enabled", true);
 // tor-browser#41676: Set the TZ environment variable as a defense-in-depth.
 // TODO: Remove this in ESR-128, as it has been removed in 116 with Bug 1837582.
 pref("privacy.resistFingerprinting.testing.setTZtoUTC", true);
@@ -524,7 +533,9 @@ pref("network.http.http2.websockets", true, locked);
 pref("network.http.http2.enable-hpack-dump", false, locked);
 
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
-// (defense in depth measure)
+// (defense in depth measure).
+// As of Firefox 118 (Bug 1843763), upstream does not add any protocol by
+// default, but setting it to blank seems a good idea (tor-browser#42054).
 pref("network.gio.supported-protocols", "");
 // Mullvad Browser enables WebRTC by default, meaning that there the following prefs
 // are first-line defense, rather than "in depth" (mullvad-browser#40)
@@ -626,9 +637,6 @@ pref("security.cert_pinning.enforcement_level", 2);
 
 // Don't load OS client certs.
 pref("security.osclientcerts.autoload", false);
-
-// Don't allow MitM via Microsoft Family Safety, see bug 21686
-pref("security.family_safety.mode", 0);
 
 // Don't allow MitM via enterprise roots, see bug 30681
 pref("security.enterprise_roots.enabled", false);
