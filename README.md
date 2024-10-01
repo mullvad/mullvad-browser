@@ -24,7 +24,7 @@ To verify your download, [follow our guide](https://mullvad.net/en/help/verifyin
 
 ## I have some feedback / I encountered a bug
 
-Please open an issue in this repository or send an email to [support@mullvad.net](mailto:support@mullvad.net).
+Please open an issue in this repository or send an email to [support@mullvadvpn.net](mailto:support@mullvadvpn.net).
 
 ## Source Code
 
