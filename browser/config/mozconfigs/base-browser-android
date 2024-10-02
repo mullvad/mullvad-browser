@@ -1,3 +1,6 @@
+# Changes on this file might need to be synchronized with mozconfig-android-all!
+# See also tor-browser#43151.
+
 export MOZILLA_OFFICIAL=1
 
 ac_add_options --enable-optimize
@@ -28,6 +31,9 @@ ac_add_options --disable-parental-controls
 
 ac_add_options --enable-proxy-bypass-protection
 ac_add_options --disable-system-policies
+
+# See tor-browser#41131
+ac_add_options --disable-backgroundtasks
 
 # Disable telemetry
 ac_add_options MOZ_TELEMETRY_REPORTING=
