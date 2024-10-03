@@ -14,7 +14,7 @@
 
 #include "absl/base/internal/thread_identity.h"
 
-#if !defined(_WIN32) || defined(__MINGW32__)
+#if !defined(_WIN32)
 #include <pthread.h>
 #ifndef __wasi__
 // WASI does not provide this header, either way we disable use
