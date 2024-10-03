@@ -11,7 +11,7 @@
 #ifndef MODULES_DESKTOP_CAPTURE_WIN_WGC_CAPTURER_WIN_H_
 #define MODULES_DESKTOP_CAPTURE_WIN_WGC_CAPTURER_WIN_H_
 
-#include <DispatcherQueue.h>
+#include <dispatcherqueue.h>
 #include <d3d11.h>
 #include <wrl/client.h>
 
