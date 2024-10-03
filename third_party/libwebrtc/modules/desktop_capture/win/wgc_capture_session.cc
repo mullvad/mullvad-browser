@@ -10,9 +10,9 @@
 
 #include "modules/desktop_capture/win/wgc_capture_session.h"
 
-#include <DispatcherQueue.h>
+#include <dispatcherqueue.h>
 #include <windows.graphics.capture.interop.h>
-#include <windows.graphics.directX.direct3d11.interop.h>
+#include <windows.graphics.directx.direct3d11.interop.h>
 #include <windows.graphics.h>
 #include <wrl/client.h>
 #include <wrl/event.h>
@@ -193,8 +193,7 @@ bool WgcCaptureSession::MayContainCursor() const {
   // IsCursorCaptureEnabled was introduced in IGraphicsCaptureSession2.
   // Default to true (cursor captured) if the interface is not available.
   ComPtr<ABI::Windows::Graphics::Capture::IGraphicsCaptureSession2> session2;
-  HRESULT hr = session_->QueryInterface(
-      ABI::Windows::Graphics::Capture::IID_IGraphicsCaptureSession2, &session2);
+  HRESULT hr = session_->QueryInterface(IID_PPV_ARGS(&session2));
   if (FAILED(hr)) {
     return true;
   }
@@ -299,9 +298,7 @@ HRESULT WgcCaptureSession::StartCapture(const DesktopCaptureOptions& options) {
       options.prefer_cursor_embedded() || allow_using_texture_;
   if (!embed_cursor) {
     ComPtr<ABI::Windows::Graphics::Capture::IGraphicsCaptureSession2> session2;
-    if (SUCCEEDED(session_->QueryInterface(
-            ABI::Windows::Graphics::Capture::IID_IGraphicsCaptureSession2,
-            &session2))) {
+    if (SUCCEEDED(session_->QueryInterface(IID_PPV_ARGS(&session2)))) {
       session2->put_IsCursorCaptureEnabled(false);
     }
   }

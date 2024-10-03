@@ -10,7 +10,7 @@
 
 #include "modules/desktop_capture/win/wgc_capturer_win.h"
 
-#include <DispatcherQueue.h>
+#include <dispatcherqueue.h>
 #include <dxgi1_4.h>
 #include <windows.foundation.metadata.h>
 #include <windows.graphics.capture.h>
