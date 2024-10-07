@@ -2594,6 +2594,8 @@ nsresult LaunchChild(bool aBlankCommandLine, bool aTryExec) {
   return NS_ERROR_LAUNCHED_CHILD_PROCESS;
 }
 
+static const char kBrandProperties[] =
+    "chrome://branding/locale/brand.properties";
 static const char kProfileProperties[] =
     "chrome://mozapps/locale/profile/profileSelection.properties";
 
@@ -2663,12 +2665,20 @@ static nsresult ProfileMissingDialog(nsINativeAppSupport* aNative) {
         mozilla::components::StringBundle::Service();
     NS_ENSURE_TRUE(sbs, NS_ERROR_FAILURE);
 
+    nsCOMPtr<nsIStringBundle> brandBundle;
+    sbs->CreateBundle(kBrandProperties, getter_AddRefs(brandBundle));
+    NS_ENSURE_TRUE_LOG(sbs, NS_ERROR_FAILURE);
     nsCOMPtr<nsIStringBundle> sb;
     sbs->CreateBundle(kProfileProperties, getter_AddRefs(sb));
     NS_ENSURE_TRUE_LOG(sbs, NS_ERROR_FAILURE);
 
-    NS_ConvertUTF8toUTF16 appName(gAppData->name);
-    AutoTArray<nsString, 2> params = {appName, appName};
+    nsAutoString appName;
+    rv = brandBundle->GetStringFromName("brandShortName", appName);
+    NS_ENSURE_SUCCESS(rv, NS_ERROR_ABORT);
+
+    AutoTArray<nsString, 2> params;
+    params.AppendElement(appName);
+    params.AppendElement(appName);
 
     // profileMissing
     nsAutoString missingMessage;
@@ -2726,12 +2736,21 @@ static ReturnAbortOnError ProfileLockedDialog(nsIFile* aProfileDir,
         mozilla::components::StringBundle::Service();
     NS_ENSURE_TRUE(sbs, NS_ERROR_FAILURE);
 
+    nsCOMPtr<nsIStringBundle> brandBundle;
+    sbs->CreateBundle(kBrandProperties, getter_AddRefs(brandBundle));
+    NS_ENSURE_TRUE_LOG(sbs, NS_ERROR_FAILURE);
     nsCOMPtr<nsIStringBundle> sb;
     sbs->CreateBundle(kProfileProperties, getter_AddRefs(sb));
     NS_ENSURE_TRUE_LOG(sbs, NS_ERROR_FAILURE);
 
-    NS_ConvertUTF8toUTF16 appName(gAppData->name);
-    AutoTArray<nsString, 3> params = {appName, appName, appName};
+    nsAutoString appName;
+    rv = brandBundle->GetStringFromName("brandShortName", appName);
+    NS_ENSURE_SUCCESS(rv, NS_ERROR_ABORT);
+
+    AutoTArray<nsString, 3> params;
+    params.AppendElement(appName);
+    params.AppendElement(appName);
+    params.AppendElement(appName);
 
     nsAutoString killMessage;
 #ifndef XP_MACOSX

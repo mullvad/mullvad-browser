@@ -23,8 +23,8 @@
 
 using namespace mozilla;
 
-extern const XREAppData* gAppData;
-
+static const char kBrandProperties[] =
+    "chrome://branding/locale/brand.properties";
 static const char kProfileProperties[] =
     "chrome://mozapps/locale/profile/profileSelection.properties";
 
@@ -49,12 +49,21 @@ nsresult ProfileResetCleanup(nsToolkitProfileService* aService,
       mozilla::components::StringBundle::Service();
   if (!sbs) return NS_ERROR_FAILURE;
 
+  nsCOMPtr<nsIStringBundle> brandBundle;
+  Unused << sbs->CreateBundle(kBrandProperties, getter_AddRefs(brandBundle));
+  if (!brandBundle) return NS_ERROR_FAILURE;
+
   nsCOMPtr<nsIStringBundle> sb;
   Unused << sbs->CreateBundle(kProfileProperties, getter_AddRefs(sb));
   if (!sb) return NS_ERROR_FAILURE;
 
-  NS_ConvertUTF8toUTF16 appName(gAppData->name);
-  AutoTArray<nsString, 2> params = {appName, appName};
+  nsAutoString appName;
+  rv = brandBundle->GetStringFromName("brandShortName", appName);
+  if (NS_FAILED(rv)) return rv;
+
+  AutoTArray<nsString, 2> params;
+  params.AppendElement(appName);
+  params.AppendElement(appName);
 
   nsAutoString resetBackupDirectoryName;
 
