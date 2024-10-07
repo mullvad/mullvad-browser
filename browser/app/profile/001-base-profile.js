@@ -120,6 +120,8 @@ pref("dom.security.https_only_mode", true);
 // The previous pref automatically sets this to true (see StaticPrefList.yaml),
 // but set it anyway only as a defense-in-depth.
 pref("dom.security.https_only_mode_pbm", true);
+// tor-browser#43197, defense in depth if ever https-only got disabled
+pref("dom.security.https_first_add_exception_on_failiure", false);
 
 // tor-browser#22320: Hide referer when comming from a .onion address
 // We enable this here (rather than in Tor Browser) in case users of other
