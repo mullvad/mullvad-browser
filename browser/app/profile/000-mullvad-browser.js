@@ -16,11 +16,6 @@ pref("doh-rollout.disable-heuristics", true);
 // mullvad-browser#37: Customization for the about dialog
 pref("app.releaseNotesURL.aboutDialog", "about:blank");
 
-// mullvad-browser#94: Disable legacy global microphone/webcam indicator
-// Disable the legacy Firefox Quantum-styled global webcam/microphone indicator in favor of each
-// platform's native indicator
-pref("privacy.webrtc.legacyGlobalIndicator", false);
-
 // mullvad-browser#87: Windows and Linux need additional work to make the
 // default browser choice working.
 // We are shipping only the portable versions for the initial release anyway, so
