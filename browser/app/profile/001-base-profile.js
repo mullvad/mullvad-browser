@@ -23,7 +23,7 @@ pref("startup.homepage_welcome_url.additional", "");
 pref("browser.aboutwelcome.enabled", false);
 
 #if MOZ_UPDATE_CHANNEL == release
-// tor-browser#42640: Disable Firefox Flame buttond due to unknown interactions with New Identity
+// tor-browser#42640: Disable Firefox Flame button due to unknown interactions with New Identity
 pref("browser.privatebrowsing.resetPBM.enabled", false, locked);
 #endif
 
@@ -58,7 +58,7 @@ pref("media.aboutwebrtc.hist.enabled", false);
 
 // Disk Activity
 
-// Disable auto-downloaing to ~/Downloads and other download tweaks to minimize
+// Disable auto-downloading to ~/Downloads and other download tweaks to minimize
 // disk leaks (tor-browser#42050).
 pref("browser.download.useDownloadDir", false);
 pref("browser.download.always_ask_before_handling_new_types", true);
@@ -97,7 +97,7 @@ pref("browser.pagethumbnails.capturing_disabled", true);
 // disk leaks, e.g., in system logs.
 // For example, it happened that GNOME shell logged the window name that caused
 // JS errors/unexpected conditions for unrelated issues.
-// TODO: Enable again after more UX considerations.
+// TODO: commented out for now because of UX concerns, to be reconsidered in 14.5
 // pref("privacy.exposeContentTitleInWindow", false);
 // pref("privacy.exposeContentTitleInWindow.pbm", false);
 
@@ -120,7 +120,7 @@ pref("dom.security.https_only_mode_pbm", true);
 // tor-browser#43197, defense in depth if ever https-only got disabled
 pref("dom.security.https_first_add_exception_on_failiure", false);
 
-// tor-browser#22320: Hide referer when comming from a .onion address
+// tor-browser#22320: Hide referer when coming from a .onion address
 // We enable this here (rather than in Tor Browser) in case users of other
 // base-browser derived browsers configure it to use a system Tor daemon
 // to visit onion services.
@@ -211,7 +211,6 @@ pref("toolkit.telemetry.bhrPing.enabled", false);
 pref("toolkit.telemetry.coverage.opt-out", true);
 pref("toolkit.coverage.opt-out", true);
 pref("toolkit.coverage.endpoint.base", "");
-pref("browser.ping-centre.telemetry", false);
 pref("browser.tabs.crashReporting.sendReport", false);
 pref("browser.crashReports.unsubmittedCheck.autoSubmit2", false);
 // Added in tor-browser#41496 even though false by default
@@ -241,7 +240,6 @@ pref("services.sync.engine.passwords", false);
 pref("services.sync.engine.prefs", false);
 pref("services.sync.engine.tabs", false);
 pref("extensions.getAddons.cache.enabled", false); // https://blog.mozilla.org/addons/how-to-opt-out-of-add-on-metadata-updates/
-pref("browser.fixup.alternate.enabled", false); // Bug #16783: Prevent .onion fixups
 pref("privacy.donottrackheader.enabled", false); // (mullvad-browser#17)
 // Make sure there is no Tracking Protection active in Tor Browser, see: #17898.
 pref("privacy.trackingprotection.enabled", false);
@@ -281,9 +279,7 @@ pref("browser.newtabpage.activity-stream.telemetry", false);
 // Notice that null is between quotes because it is a JSON string.
 // Keep checked firefox.js to see if new entries are added.
 pref("browser.newtabpage.activity-stream.asrouter.providers.cfr", "null");
-pref("browser.newtabpage.activity-stream.asrouter.providers.whats-new-panel", "null");
 pref("browser.newtabpage.activity-stream.asrouter.providers.message-groups", "null");
-pref("browser.newtabpage.activity-stream.asrouter.providers.snippets", "null");
 pref("browser.newtabpage.activity-stream.asrouter.providers.messaging-experiments", "null");
 
 // Disable fetching asrouter.ftl and related console errors (tor-browser#40763).
@@ -308,6 +304,10 @@ pref("browser.preferences.moreFromMozilla", false);
 
 // Disable webcompat reporter
 pref("extensions.webcompat-reporter.enabled", false);
+
+// Disable Content Analysis SDK (tor-browser#42364)
+pref("browser.contentanalysis.enabled", false);
+pref("browser.contentanalysis.default_result", 0);
 
 // Disable contentRelevancy component (which itself is gated on Nimbus) (tor-browser#42867)
 pref("toolkit.contentRelevancy.enabled", false);
@@ -444,12 +444,9 @@ pref("pdfjs.disabled", false, locked);
 #endif
 // Bug 40057: Ensure system colors are not used for CSS4 colors
 pref("browser.display.use_system_colors", false);
-// tor-browser#41676: Set the TZ environment variable as a defense-in-depth.
-// TODO: Remove this in ESR-128, as it has been removed in 116 with Bug 1837582.
-pref("privacy.resistFingerprinting.testing.setTZtoUTC", true);
 
-// tor-browser#41943: lock and revisit after it gets flipped to true in stable Firefox
-pref("javascript.options.spectre.disable_for_isolated_content", false, locked);
+// tor-browser#41943: defense-in-depth, but do not lock anymore (enabled in Firefox 119, http://bugzil.la/1851162)
+pref("javascript.options.spectre.disable_for_isolated_content", false);
 
 // Third party stuff
 pref("privacy.firstparty.isolate", true); // Always enforce first party isolation
@@ -498,27 +495,6 @@ pref("network.proxy.failover_direct", false, locked);
 // from making themselves fingerprintable by disabling. This pref
 // alters content load order in a page. See tor-browser#24686
 pref("network.http.tailing.enabled", true, locked);
-
-// Make sure the varoius http2 settings, buffer sizes, timings, etc are locked
-// to firefox defaults to minimize network performance fingerprinting.
-// See https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/27128
-pref("network.http.http2.enabled", true, locked);
-pref("network.http.http2.enabled.deps", true, locked);
-pref("network.http.http2.enforce-tls-profile", true, locked);
-pref("network.http.http2.chunk-size", 16000, locked);
-pref("network.http.http2.timeout", 170, locked);
-pref("network.http.http2.coalesce-hostnames", true, locked);
-pref("network.http.http2.persistent-settings", false, locked);
-pref("network.http.http2.ping-threshold", 58, locked);
-pref("network.http.http2.ping-timeout", 8, locked);
-pref("network.http.http2.send-buffer-size", 0, locked);
-pref("network.http.http2.allow-push", true, locked);
-pref("network.http.http2.push-allowance", 131072, locked);
-pref("network.http.http2.pull-allowance", 12582912, locked);
-pref("network.http.http2.default-concurrent", 100, locked);
-pref("network.http.http2.default-hpack-buffer", 65536, locked);
-pref("network.http.http2.websockets", true, locked);
-pref("network.http.http2.enable-hpack-dump", false, locked);
 
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
 // (defense in depth measure).
@@ -611,8 +587,8 @@ pref("extensions.htmlaboutaddons.recommendations.enabled", false);
 // Disable personalized Extension Recommendations in about:addons and
 // addons.mozilla.org
 pref("browser.discovery.enabled", false);
-// Bug 26114: Allow NoScript to access addons.mozilla.org etc.
-// TODO: Audit again (tor-browser#41445)
+// tor-browser#26114: Allow NoScript to work on addons.mozilla.org and other Mozilla sites.
+// Revisited and confirmed in tor-browser#41445.
 pref("extensions.webextensions.restrictedDomains", "");
 // Don't give Mozilla-recommended third-party extensions special privileges.
 pref("extensions.postDownloadThirdPartyPrompt", false);
@@ -644,15 +620,15 @@ pref("browser.menu.share_url.allow", false, locked);
 
 // Disable special URL bar behaviors
 pref("browser.urlbar.suggest.topsites", false);
+pref("browser.urlbar.quicksuggest.enabled", false);
+pref("browser.urlbar.richSuggestions.featureGate", false);
+pref("browser.urlbar.yelp.featureGate", false);
+pref("browser.urlbar.mdn.featureGate", false);
 
 // tor-browser#41884: Do not start a search when clicking on the new tab button
 // with the middle mouse button (to prevent searching for anything you might
 // have selected or already in your clipboard).
 pref("browser.tabs.searchclipboardfor.middleclick", false);
-
-// Skip checking omni.ja and other files for corruption since the result
-// is only reported via telemetry (which is disabled). See tor-browser#40048.
-pref("corroborator.enabled", false);
 
 // tor-browser#41417: do not allow live reload until we switch to Fluent and
 // stop using .textContent.
@@ -671,7 +647,7 @@ pref("privacy.query_stripping.strip_on_share.enabled", true);
 pref("privacy.globalprivacycontrol.enabled", true);
 pref("privacy.globalprivacycontrol.pbmode.enabled", true);
 
-// Disable platform text recogniition functionality (tor-browser#42057)
+// Disable platform text recognition functionality (tor-browser#42057)
 pref("dom.text-recognition.enabled", false);
 
 // Log levels
