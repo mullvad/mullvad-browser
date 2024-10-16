@@ -113,6 +113,11 @@
   background: var(--letterboxing-gradient-color2);
 }
 
+browser:fullscreen {
+  --letterboxing-border-top-radius: 0;
+  --letterboxing-border-radius: 0;
+}
+
 :root:not([inDOMFullscreen]) .letterboxing.letterboxing-ready .browserContainer:not(.responsive-mode)
   > .browserStack:not(.exclude-letterboxing) {
   place-content: var(--letterboxing-vertical-alignment) center;
