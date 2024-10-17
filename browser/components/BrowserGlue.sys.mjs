@@ -171,8 +171,17 @@ const ClipboardPrivacy = {
     return trans;
   },
   _computeClipboardHash() {
+    const flavors = ["text/x-moz-url", "text/plain"];
+    if (
+      !Services.clipboard.hasDataMatchingFlavors(
+        flavors,
+        Ci.nsIClipboard.kGlobalClipboard
+      )
+    ) {
+      return null;
+    }
     const trans = this._createTransferable();
-    ["text/x-moz-url", "text/plain"].forEach(trans.addDataFlavor);
+    flavors.forEach(trans.addDataFlavor);
     try {
       Services.clipboard.getData(trans, Ci.nsIClipboard.kGlobalClipboard);
       const clipboardContent = {};
