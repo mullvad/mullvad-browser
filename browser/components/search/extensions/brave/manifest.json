@@ -14,9 +14,7 @@
     "96": "favicon.svg",
     "128": "favicon.svg"
   },
-  "web_accessible_resources": [
-    "favicon.svg"
-  ],
+  "web_accessible_resources": ["favicon.svg"],
   "chrome_settings_overrides": {
     "search_provider": {
       "name": "Brave Search",
