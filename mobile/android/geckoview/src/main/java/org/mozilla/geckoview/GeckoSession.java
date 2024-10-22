@@ -6301,10 +6301,10 @@ public class GeckoSession {
       }
 
       private static String normalizePath(String input) {
-          // For an unclear reason, Android media picker delivers file paths
-          // starting with double slash. Firefox performs path validation on
-          // all paths, and double slash is deemed invalid.
-          return input.startsWith("//") ? input.substring(1) : input;
+        // For an unclear reason, Android media picker delivers file paths
+        // starting with double slash. Firefox performs path validation on
+        // all paths, and double slash is deemed invalid.
+        return input.startsWith("//") ? input.substring(1) : input;
       }
 
       private static String getFile(final @NonNull Context context, final @NonNull Uri uri) {
