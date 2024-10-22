@@ -49,9 +49,7 @@ public class WebRequest extends WebMessage {
   /** The value of the Referer header for this request. */
   public final @Nullable String referrer;
 
-  /**
-   * The value of the origin of this request.
-   */
+  /** The value of the origin of this request. */
   public final @Nullable String origin;
 
   @Retention(RetentionPolicy.SOURCE)
@@ -248,10 +246,10 @@ public class WebRequest extends WebMessage {
      * @param origin A URI String
      * @return This Builder instance.
      */
-     public @NonNull Builder origin(final @Nullable String origin) {
-       mOrigin = origin;
-       return this;
-     }
+    public @NonNull Builder origin(final @Nullable String origin) {
+      mOrigin = origin;
+      return this;
+    }
 
     /**
      * @return A {@link WebRequest} constructed with the values from this Builder instance.
