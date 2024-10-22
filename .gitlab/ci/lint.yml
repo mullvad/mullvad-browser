@@ -264,6 +264,7 @@ file-whitespace:
         - '**/*.rst'
         - '**/*.webidl'
         - '**/*.xhtml'
+        - '**/*.java'
         - 'tools/lint/file-whitespace.yml'
     # Run job whenever a commit is merged to a protected branch
     - if: $CI_COMMIT_REF_PROTECTED == 'true'
