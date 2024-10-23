@@ -382,10 +382,18 @@ pref("dom.push.serverURL", "");
 
 // Fingerprinting
 // tor-browser#41797: For release builds, lock RFP
+// tor-browser#42125: Set (and lock in release) also exempted domains.
 #if MOZ_UPDATE_CHANNEL == release
 pref("privacy.resistFingerprinting", true, locked);
+pref("privacy.resistFingerprinting.exemptedDomains", "", locked);
+// tor-browser#42125: Some misleading guides suggest to set this to false, but
+// the result would be that the canvas is completely white
+// (see StaticPrefList.yaml), so lock it to true.
+// Might be removed (MozBug 1670447).
+pref("privacy.resistFingerprinting.randomDataOnCanvasExtract", true, locked);
 #else
 pref("privacy.resistFingerprinting", true);
+pref("privacy.resistFingerprinting.exemptedDomains", "");
 #endif
 // tor-browser#18603: failIfMajorPerformanceCaveat is an optional attribute that
 // can be used when creating a WebGL context if the browser detects that the
