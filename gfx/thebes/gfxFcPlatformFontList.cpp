@@ -1352,12 +1352,39 @@ bool gfxFontconfigFont::ShouldHintMetrics() const {
   return !GetStyle()->printerFont;
 }
 
+static nsresult SetFontconfigConfigFile() {
+  nsCOMPtr<nsIProperties> dirSvc(
+      do_GetService("@mozilla.org/file/directory_service;1"));
+  NS_ENSURE_TRUE(dirSvc, NS_ERROR_NOT_AVAILABLE);
+  nsCOMPtr<nsIFile> appFile, confFile;
+  nsresult rv = dirSvc->Get(XRE_EXECUTABLE_FILE, NS_GET_IID(nsIFile),
+                            getter_AddRefs(appFile));
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = appFile->GetParent(getter_AddRefs(confFile));
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = confFile->AppendNative("fonts"_ns);
+  NS_ENSURE_SUCCESS(rv, rv);
+  rv = confFile->AppendNative("fonts.conf"_ns);
+  NS_ENSURE_SUCCESS(rv, rv);
+
+  nsAutoCString confPath;
+  rv = confFile->GetNativePath(confPath);
+  if (setenv("FONTCONFIG_FILE", confPath.BeginReading(), 1) != 0) {
+    return NS_ERROR_FAILURE;
+  }
+  return NS_OK;
+}
+
 gfxFcPlatformFontList::gfxFcPlatformFontList()
     : mLocalNames(64),
       mGenericMappings(32),
       mFcSubstituteCache(64),
       mLastConfig(nullptr),
       mAlwaysUseFontconfigGenerics(true) {
+  if (NS_FAILED(SetFontconfigConfigFile())) {
+    NS_WARNING("Failed to set the fontconfig config file!");
+  }
+
   CheckFamilyList(kBaseFonts_Ubuntu_22_04);
   CheckFamilyList(kLangFonts_Ubuntu_22_04);
   CheckFamilyList(kBaseFonts_Ubuntu_20_04);
