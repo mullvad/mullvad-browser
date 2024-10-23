@@ -390,14 +390,14 @@ class _RFPHelper {
   /**
    * Given a width or height, returns the appropriate margin to apply.
    */
-  steppedRange(aDimension) {
+  steppedRange(aDimension, aIsWidth = false) {
     let stepping;
     if (aDimension <= 50) {
       return 0;
     } else if (aDimension <= 500) {
       stepping = 50;
     } else if (aDimension <= 1600) {
-      stepping = 100;
+      stepping = aIsWidth ? 200 : 100;
     } else {
       stepping = 200;
     }
@@ -473,7 +473,7 @@ class _RFPHelper {
       // stepping size.
       if (!this._letterboxingDimensions.length) {
         result = {
-          width: this.steppedRange(aWidth),
+          width: this.steppedRange(aWidth, true),
           height: this.steppedRange(aHeight),
         };
         log(
