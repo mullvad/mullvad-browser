@@ -135,6 +135,10 @@ Manual QA test check-list for major desktop releases. Please copy/paste form int
     - [ ] Onion-Location pill
     - [ ] Client authentication
         - You can create an ephemeral client-auth onion-service using [onion share](https://onionshare.org)
+        - [ ] Remember key option saves the key between sessions.
+        - [ ] Saved keys are viewable in preferences (privacy).
+          - [ ] Can remove individual keys.
+          - [ ] Can remove all keys at once.
     - [ ] Onion service errors
         - [ ] invalid onion: http://invalid.onion
         - [ ] onion offline: http://wfdn32ds656ycma5gvrh7duvdvxbg2ygzr3no3ijsya25qm6nnko4iqd.onion/
