@@ -434,9 +434,6 @@ pref("security.remote_settings.intermediates.enabled", false);
 pref("dom.use_components_shim", false);
 // Enable letterboxing
 pref("privacy.resistFingerprinting.letterboxing", true);
-// tor-browser#33282: new windows start at 1400x900 when there's enough screen space, otherwise down by 200x100 blocks
-pref("privacy.window.maxInnerWidth", 1400);
-pref("privacy.window.maxInnerHeight", 900);
 // Enforce Network Information API as disabled
 pref("dom.netinfo.enabled", false);
 pref("network.http.referer.defaultPolicy", 2); // Bug 32948: Make referer behavior consistent regardless of private browing mode status
