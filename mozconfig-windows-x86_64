@@ -23,5 +23,4 @@ ac_add_options --disable-notification-server
 ac_add_options --disable-eme
 
 # tor-browser#320: Temporarily disable until we resolve the mingw problems.
-ac_add_options --disable-webrtc
 ac_add_options --disable-default-browser-agent
