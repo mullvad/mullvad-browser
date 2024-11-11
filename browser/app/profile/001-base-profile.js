@@ -447,6 +447,9 @@ pref("network.http.referer.defaultPolicy.pbmode", 2);
 pref("network.http.referer.XOriginTrimmingPolicy", 2); // Bug 17228: Force trim referer to scheme+host+port in cross-origin requests
 // Bug 40463: Disable Windows SSO
 pref("network.http.windows-sso.enabled", false, locked);
+// Bug 43165: Disable Microsoft SSO on macOS
+pref("network.http.microsoft-entra-sso.enabled", false);
+pref("network.microsoft-sso-authority-list", "");
 // tor-browser#40424
 pref("pdfjs.enableScripting", false);
 #if MOZ_UPDATE_CHANNEL == release
