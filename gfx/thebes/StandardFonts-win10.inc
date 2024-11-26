@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#ifndef BASE_BROWSER_UPDATE
 // List of standard font families installed as part of Windows 10
 // from https://docs.microsoft.com/en-us/typography/fonts/windows_10_font_list
 // TODO: check whether we need to list legacy styled family names like "... Light".
@@ -209,6 +210,7 @@ static const char* kLangPackFonts[] = {
 //  "Rockwell Nova",  // Pan-European Supplemental Fonts - EXCLUDED
 //  "Verdana Pro",  // Pan-European Supplemental Fonts - EXCLUDED
 };
+#endif
 
 struct FontSubstitute {
   const char *substituteName;
