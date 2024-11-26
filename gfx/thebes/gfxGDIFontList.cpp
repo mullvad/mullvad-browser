@@ -35,6 +35,7 @@
 #include "nsContentUtils.h"
 
 #include "StandardFonts-win10.inc"
+#include "StandardFonts-win10-bb.inc"
 
 #include <usp10.h>
 
