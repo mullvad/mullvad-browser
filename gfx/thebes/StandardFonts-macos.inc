@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifdef StandardFonts
+#if defined(StandardFonts) && !defined(BASE_BROWSER_VERSION)
 
 // List of standard font families installed as part of macOS 10.15 "Catalina"
 // from https://developer.apple.com/fonts/system-fonts/
