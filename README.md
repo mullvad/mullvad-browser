@@ -29,7 +29,7 @@ Please open an issue in this repository or send an email to [support@mullvadvpn.
 ## Source Code
 
 The Source Code can be obtained by going to specific branches and/or tags. This `main` branch only contains this Readme.
-It is also available directly in the [Tor Project Gitlab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
+It is also available directly in the [Tor Project GitLab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
 
 ## Build instructions
 
