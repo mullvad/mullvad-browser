@@ -2,7 +2,7 @@
 
 The Mullvad Browser is a privacy-focused web browser developed in a collaboration between [Mullvad VPN](https://mullvad.net) and the [Tor Project](https://www.torproject.org). It’s designed to minimize tracking and fingerprinting. You could say it’s a Tor Browser to use without the Tor Network. Instead, you can use it with a trustworthy VPN. The idea is to provide one more alternative – beside the Tor Network – to browse the internet with more privacy. To get as many people as possible to fight the big data gathering of today. To free the internet from mass surveillance.
 
-[Read more](https://mullvad.net/browser)
+Learn more about Mullvad Browser on [our website](https://mullvad.net/browser)
 
 ## Downloads
 
@@ -29,7 +29,7 @@ Please open an issue in this repository or send an email to [support@mullvadvpn.
 ## Source Code
 
 The Source Code can be obtained by going to specific branches and/or tags. This `main` branch only contains this Readme.
-It is also available directly in the [Tor Project Gitlab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
+It is also available directly in the [Tor Project GitLab](https://gitlab.torproject.org/tpo/applications/mullvad-browser/).
 
 ## Build instructions
 
