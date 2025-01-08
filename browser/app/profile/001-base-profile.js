@@ -455,6 +455,8 @@ pref("browser.display.use_system_colors", false);
 // tor-browser#43366: do not use system accent color in inputs.
 // See also https://bugzilla.mozilla.org/show_bug.cgi?id=1861362.
 pref("widget.non-native-theme.use-theme-accent", false);
+// tor-browser#43236: Disable vsync on Wayland to prevent refresh rate leaks.
+pref("widget.wayland.vsync.enabled", false);
 
 // tor-browser#41943: defense-in-depth, but do not lock anymore (enabled in Firefox 119, http://bugzil.la/1851162)
 pref("javascript.options.spectre.disable_for_isolated_content", false);
