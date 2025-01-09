@@ -87,6 +87,15 @@ pref("browser.sessionstore.privacy_level", 2);
 // Use the in-memory media cache and increase its maximum size (#29120)
 pref("browser.privatebrowsing.forceMediaMemoryCache", true);
 pref("media.memory_cache_max_size", 65536);
+// tor-browser#41065: lie about the available quota.
+// This value is in KiB, and will be divided by 5. Currently: 50GiB, to be
+// coherent with Firefox's usual value. However, this might be too much for live
+// systems.
+// This will be the limit also after granting the persistent storage permission,
+// but we are not interested in it, since we support only PBM.
+// We can come back to it, and hardcode the two spaced differently, if we ever
+// think we need it.
+pref("dom.quotaManager.temporaryStorage.fixedLimit", 52428800);
 // Disable restore in case of crash (tor-browser#41503)
 // This should not be needed in PBM, but we added it anyway like other options.
 pref("browser.sessionstore.resume_from_crash", false);
