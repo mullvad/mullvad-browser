@@ -1044,6 +1044,48 @@ nsresult nsScriptSecurityManager::CheckLoadURIFlags(
         }
       }
 
+      // Only allow some "about:" pages to have access to contentaccessible
+      // "chrome://branding/" assets. Otherwise web pages could easily and
+      // consistently detect the differences between channels when their
+      // branding differs. See tor-browser#43308 and tor-browser#42319.
+      // NOTE: The same assets under the alternative URI
+      // "resource:///chrome/browser/content/branding/" should already be
+      // inaccessible to web content, so we only add a condition for the chrome
+      // path.
+      if (targetScheme.EqualsLiteral("chrome")) {
+        nsAutoCString targetHost;
+        rv = aTargetBaseURI->GetHost(targetHost);
+        NS_ENSURE_SUCCESS(rv, rv);
+        if (targetHost.EqualsLiteral("branding")) {
+          // Disallow any Principal whose scheme is not "about", or is a
+          // contentaccessible "about" URI ("about:blank" or "about:srcdoc").
+          // NOTE: "about:blank" and "about:srcdoc" would be unexpected here
+          // since such a document spawned by a web document should inherit the
+          // same Principal URI. I.e. they would be "http:" or "https:" schemes.
+          // But we add this condition for extra assurances.
+          // NOTE: Documents with null Principals, like "about:blank" typed by
+          // the user, would also be excluded since the Principal URI would be
+          // "moz-nullprincipal:".
+          if (!aSourceBaseURI->SchemeIs("about") ||
+              NS_IsContentAccessibleAboutURI(aSourceBaseURI)) {
+            return NS_ERROR_DOM_BAD_URI;
+          }
+          // Also exclude "about:reader" from accessing branding assets. I.e. if
+          // a web page includes `<img src="chrome://branding/..." />` we do not
+          // want it to render within "about:reader" either.
+          // Though it is unknown whether the information within "about:reader"
+          // would be exploitable by a web page, we also want to exclude
+          // "about:reader" for consistency: if it does not display in the
+          // original web page, it should not display in "about:reader" either.
+          nsAutoCString sourcePath;
+          rv = aSourceBaseURI->GetFilePath(sourcePath);
+          NS_ENSURE_SUCCESS(rv, rv);
+          if (sourcePath.EqualsLiteral("reader")) {
+            return NS_ERROR_DOM_BAD_URI;
+          }
+        }
+      }
+
       if (targetScheme.EqualsLiteral("resource")) {
         if (StaticPrefs::security_all_resource_uri_content_accessible()) {
           return NS_OK;
