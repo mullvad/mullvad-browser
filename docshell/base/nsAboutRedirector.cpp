@@ -123,10 +123,9 @@ static const RedirEntry kRedirMap[] = {
          nsIAboutModule::IS_SECURE_CHROME_UI},
     {"logging", "chrome://global/content/aboutLogging.html",
      nsIAboutModule::ALLOW_SCRIPT},
-    {"logo", "chrome://branding/content/about.png",
-     nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
-         // Linkable for testing reasons.
-         nsIAboutModule::MAKE_LINKABLE},
+    // Do not allow web pages to link to about:logo, which varies between
+    // channels. See tor-browser#43308.
+    // Moreover, it exposes firefox-specific branding.
     {"memory", "chrome://global/content/aboutMemory.xhtml",
      nsIAboutModule::ALLOW_SCRIPT},
     {"certificate", "chrome://global/content/certviewer/certviewer.html",
