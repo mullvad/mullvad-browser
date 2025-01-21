@@ -13,7 +13,49 @@
     - if: ($TRANSLATION_FILES != "" && $FORCE_UPDATE_TRANSLATIONS == "true")
   variables:
     COMBINED_FILES_JSON: "combined-translation-files.json"
-    TRANSLATION_FILES: ''
+    TRANSLATION_FILES: '[
+      {
+        "name": "brand.ftl",
+        "where": ["browser/branding/mb-release"],
+        "branch": "mullvad-browser",
+        "directory": "browser/branding/mb-release"
+      },
+      {
+        "name": "brand.properties",
+        "where": ["browser/branding/mb-release"],
+        "branch": "mullvad-browser",
+        "directory": "browser/branding/mb-release"
+      },
+      {
+        "name": "brand.ftl",
+        "where": ["browser/branding/mb-alpha"],
+        "branch": "mullvad-browser",
+        "directory": "browser/branding/mb-alpha"
+      },
+      {
+        "name": "brand.properties",
+        "where": ["browser/branding/mb-alpha"],
+        "branch": "mullvad-browser",
+        "directory": "browser/branding/mb-alpha"
+      },
+      {
+        "name": "brand.ftl",
+        "where": ["browser/branding/mb-nightly"],
+        "branch": "mullvad-browser",
+        "directory": "browser/branding/mb-nightly"
+      },
+      {
+        "name": "brand.properties",
+        "where": ["browser/branding/mb-nightly"],
+        "branch": "mullvad-browser",
+        "directory": "browser/branding/mb-nightly"
+      },
+      {
+        "name": "mullvad-browser.ftl",
+        "branch": "mullvad-browser",
+        "directory": "toolkit/toolkit/global"
+      }
+    ]'
 
 
 combine-en-US-translations:
