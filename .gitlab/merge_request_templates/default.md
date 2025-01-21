@@ -35,12 +35,12 @@
 
 #### Timeline
 - [ ] **No Backport (preferred)**: patchset for the next major stable
-- [ ] **Immediate**: patchset needed as soon as possible
+- [ ] **Immediate**: patchset needed as soon as possible (fixes CVEs, 0-days, etc)
 - [ ] **Next Minor Stable Release**: patchset that needs to be verified in nightly before backport
 - [ ] **Eventually**: patchset that needs to be verified in alpha before backport
 
 #### (Optional) Justification
-- [ ] **Emergency security update**: patchset fixes CVEs, 0-days, etc
+- [ ] **Security update**: patchset contains a security fix (be sure to select the correct item in _Timeline_)
 - [ ] **Censorship event**: patchset enables censorship circumvention
 - [ ] **Critical bug-fix**: patchset fixes a bug in core-functionality
 - [ ] **Consistency**: patchset which would make development easier if it were in both the alpha and release branches; developer tools, build system changes, etc
