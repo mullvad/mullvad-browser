@@ -1,0 +1,2 @@
+python tests to be run with pytest.
+Requires the compare-locales package.
