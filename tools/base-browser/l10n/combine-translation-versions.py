@@ -98,6 +98,10 @@ class BrowserBranch:
         self.name = branch_name
         self.prefix = version_match.group("prefix")
         self.browser_version = version_match.group("browser")
+        # Convert tor-browser to "Tor Browser", and similar.
+        browser_name = self.prefix.replace("-", " ").title()
+        self.browser_version_name = f"{browser_name} {self.browser_version}"
+
         self._is_head = is_head
         self._ref = "HEAD" if is_head else f"origin/{branch_name}"
 
@@ -306,7 +310,7 @@ for file_dict in json.loads(args.files):
         name,
         None if current_file is None else current_file.content,
         None if stable_file is None else stable_file.content,
-        f"Will be unused in Tor Browser {current_branch.browser_version}!",
+        f"Will be unused in {current_branch.browser_version_name}!",
     )
 
     if legacy_branch and not file_dict.get("exclude-legacy", False):
@@ -330,7 +334,7 @@ for file_dict in json.loads(args.files):
             name,
             content,
             legacy_file.content,
-            f"Unused in Tor Browser {stable_branch.browser_version}!",
+            f"Unused in {stable_branch.browser_version_name}!",
         )
     elif legacy_branch:
         logger.info(f"Excluding legacy branch for {name}")
