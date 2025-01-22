@@ -54,7 +54,7 @@
         "name": "mullvad-browser.ftl",
         "branch": "mullvad-browser",
         "directory": "toolkit/toolkit/global"
-      },
+      }
     ]'
 
 
