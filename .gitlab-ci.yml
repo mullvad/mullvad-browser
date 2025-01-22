@@ -8,3 +8,4 @@ variables:
 
 include:
   - local: '.gitlab/ci/jobs/lint/lint.yml'
+  - local: '.gitlab/ci/jobs/update-translations.yml'
