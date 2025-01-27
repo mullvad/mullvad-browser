@@ -1,11 +1,10 @@
 .base:
+  extends: .with-local-repo-bash
   stage: lint
   image: $IMAGE_PATH
   interruptible: true
   variables:
     MOZBUILD_STATE_PATH: "$CI_PROJECT_DIR/.cache/mozbuild"
-    # A copy of the repository already is available in the runner.
-    GIT_STRATEGY: "none"
   cache:
     paths:
       - node_modules
@@ -17,19 +16,6 @@
   tags:
     # Run these jobs in the browser dedicated runners.
     - firefox
-  before_script:
-    - git init
-    - git remote add local "$LOCAL_REPO_PATH"
-    - git fetch --depth 500 local
-    - git remote add origin "$CI_REPOSITORY_URL"
-    - |
-      if [ -z "${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]; then
-          echo "No branch specified. Stopping the pipeline."
-          exit 1
-      fi
-    - echo "Fetching from remote branch ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
-    - git fetch origin "${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
-    - git checkout origin/${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
 
 eslint:
   extends: .base

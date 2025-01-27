@@ -7,5 +7,6 @@ variables:
   LOCAL_REPO_PATH: /srv/apps-repos/tor-browser.git
 
 include:
+  - local: '.gitlab/ci/mixins.yml'
   - local: '.gitlab/ci/jobs/lint/lint.yml'
   - local: '.gitlab/ci/jobs/update-translations.yml'
