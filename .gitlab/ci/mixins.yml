@@ -18,7 +18,7 @@
             echo "Attempting to fetch the merge request branch, assuming this pipeline is not running in a fork."
             git fetch origin "merge-requests/${CI_MERGE_REQUEST_IID}/head"
       fi
-    - git checkout origin/${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
+    - git checkout FETCH_HEAD
 
 .with-local-repo-pwsh:
   variables:
@@ -44,4 +44,4 @@
         Write-Output "Attempting to fetch the merge request branch, assuming this pipeline is not running in a fork."
         git fetch origin "merge-requests/$env:CI_MERGE_REQUEST_IID/head"
       }
-    - git checkout origin/$branchName
+    - git checkout FETCH_HEAD
