@@ -4,7 +4,7 @@
   before_script:
     - git init
     - git remote add local "$LOCAL_REPO_PATH"
-    - git fetch --depth 500 local
+    - git fetch --depth 500 local ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
     - git remote add origin "$CI_REPOSITORY_URL"
     - |
       if [ -z "${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]; then
@@ -26,7 +26,12 @@
   before_script:
     - git init
     - git remote add local $env:LOCAL_REPO_PATH
-    - git fetch --depth 500 local
+    - |
+      $branchName = $env:CI_COMMIT_BRANCH
+      if ([string]::IsNullOrEmpty($branchName)) {
+          $branchName = $env:CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      }
+      git fetch --depth 500 local $branchName
     - git remote add origin $env:CI_REPOSITORY_URL
     - |
       $branchName = $env:CI_COMMIT_BRANCH
