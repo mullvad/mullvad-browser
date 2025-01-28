@@ -1,40 +1,12 @@
-@import url("chrome://browser/content/mullvad-browser/mullvadBrowserFont.css");
+@import url("chrome://branding/content/mullvad-branding.css");
 
 body {
   margin: 0;
   display: grid;
-  height: 100vh;
+  min-height: 100vh;
   grid-template-columns: auto;
   grid-template-rows: 1fr auto;
   text-align: center;
-  color: #FBFBFE;
-  background: radial-gradient(117% 58% at 50% 48%, #205C9D 0%, #1B4D83 26%, #05101B 100%);
-  font-family: 'Open Sans', sans-serif;
-}
-
-a {
-  color: #FFBD4F;
-  text-decoration: none;
-}
-
-a:hover {
-  color: #FFD567;
-  text-decoration: underline solid;
-}
-
-a:active {
-  color: #FFEA80;
-  text-decoration: none;
-}
-
-p {
-  margin-inline: 8px;
-  margin-block: 0.5em;
-}
-
-#headingImg {
-  -moz-context-properties: fill;
-  fill: currentColor;
 }
 
 .screen-reader-only {
@@ -47,16 +19,37 @@ p {
   grid-template: "heading" auto "text" auto / auto;
   justify-items: center;
   align-content: center;
-  gap: 1.5em;
+  gap: 32px;
+  padding-block: 40px;
+  padding-inline: 16px;
 }
 
-#headingContainer {
+#header p {
+  margin: 0;
+}
+
+#heading-container {
   grid-area: heading;
   display: inline flex;
   flex-direction: row;
   white-space: nowrap;
   align-items: center;
   gap: 16px;
+}
+
+#heading-logo {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+}
+
+#heading-wordmark {
+  flex: 0 0 auto;
+  height: 22.4px;
+  /* When using a contrast theme we want to replace the wordmark's default
+   * colors with the text color instead. */
+  -moz-context-properties: fill;
+  fill: currentColor;
 }
 
 #mullvad-browser-update,
@@ -80,12 +73,47 @@ body:not(.no-update) #mullvad-browser-intro {
   margin-inline-end: 0.3em;
 }
 
-#mullvad-browser-update a {
-  /* Increase gap between the link and the rest of the text. */
-  margin-inline: 0.4em;
-}
-
 #footer {
   padding-block: 40px;
-  background: rgba(0, 0, 0, 0.2);
+  border-block-start: 1px solid var(--in-content-box-border-color);
+  background-color: var(--in-content-box-info-background);
+}
+
+#footer p {
+  margin-inline: 8px;
+  margin-block: 0.5em;
+}
+
+@media not ((prefers-contrast) or (forced-colors)) {
+  :root {
+    /* Dark background. */
+    background: linear-gradient(
+      to bottom,
+      var(--branding-gradient-start) 0%,
+      var(--branding-gradient-middle) 55%,
+      var(--branding-gradient-end) 100%
+    );
+    /* Same as --in-content-page-color when "prefers-color-scheme: dark" */
+    color: var(--color-gray-05);
+
+    --link-color: var(--branding-link-color);
+    --link-color-hover: var(--branding-link-color-hover);
+    --link-color-active: var(--branding-link-color-active);
+
+    --focus-outline-color: var(--branding-focus-outline-color);
+    --focus-outline: var(--focus-outline-width) solid var(--focus-outline-color);
+    --in-content-focus-outline-color: var(--focus-outline-color);
+    --in-content-focus-outline: var(--focus-outline);
+  }
+
+  #heading-wordmark {
+    /* Have a dark background, so can use about-wordmark.svg's default colors
+     * instead. */
+    -moz-context-properties: none;
+  }
+
+  #footer {
+    border-block-start-color: transparent;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
 }
