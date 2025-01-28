@@ -3,8 +3,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 -brand-shorter-name = Mullvad Browser
--brand-short-name = Mullvad Browser
--brand-full-name = Mullvad Browser
+-brand-short-name = Mullvad Browser Nightly
+-brand-full-name = Mullvad Browser Nightly
 # This brand name can be used in messages where the product name needs to
 # remain unchanged across different versions (Nightly, Beta, etc.).
 -brand-product-name = Mullvad Browser

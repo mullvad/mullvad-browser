@@ -5,6 +5,8 @@
 
 [localization] @AB_CD@.jar:
   branding                                          (%*.ftl)
+  # Not localised:
+  branding/mullvad-about-wordmark-en.ftl            (mullvad-about-wordmark-en.ftl)
 
 @AB_CD@.jar:
 % locale branding @AB_CD@ %locale/branding/
