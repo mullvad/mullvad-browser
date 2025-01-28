@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta
       http-equiv="Content-Security-Policy"
@@ -11,11 +11,13 @@
       type="image/png"
       href="chrome://branding/content/icon32.png"
     />
+    <link rel="stylesheet" href="chrome://global/skin/in-content/common.css" />
     <link
       rel="stylesheet"
       href="chrome://browser/content/mullvad-browser/aboutMullvadBrowser.css"
     />
     <link rel="localization" href="branding/brand.ftl" />
+    <link rel="localization" href="branding/mullvad-about-wordmark-en.ftl" />
     <link rel="localization" href="browser/newtab/newtab.ftl" />
     <link rel="localization" href="toolkit/global/mullvad-browser.ftl" />
 
@@ -23,37 +25,39 @@
   </head>
   <body>
     <div id="header">
-      <div id="headingContainer">
+      <div id="heading-container">
         <img
+          id="heading-logo"
           srcset="
             chrome://branding/content/icon64.png  1x,
             chrome://branding/content/icon128.png 2x
           "
-          width="64"
-          height="64"
           alt=""
         />
         <!-- img element is a visual stand-in for the heading, but we include a
            - h1 element as semantic structure for screen readers. -->
         <img
-          id="headingImg"
-          src="chrome://branding/content/firefox-wordmark.svg"
-          width="324"
-          height="26"
+          id="heading-wordmark"
+          src="chrome://branding/content/about-wordmark.svg"
           alt=""
         />
+        <!-- The wordmark is only in English, so we keep the heading unlocalised
+           - as well and mark it as lang="en". -->
         <h1
           class="screen-reader-only"
-          data-l10n-id="about-mullvad-browser-heading"
+          lang="en"
+          data-l10n-id="mullvad-about-wordmark-en"
         ></h1>
       </div>
       <p
         id="mullvad-browser-intro"
         data-l10n-id="about-mullvad-browser-developed-by"
       >
-        <a data-l10n-name="tor-project-link" href="https://www.torproject.org">
-        </a>
-        <a data-l10n-name="mullvad-vpn-link" href="https://mullvad.net"> </a>
+        <a
+          data-l10n-name="tor-project-link"
+          href="https://www.torproject.org"
+        ></a>
+        <a data-l10n-name="mullvad-vpn-link" href="https://mullvad.net"></a>
       </p>
       <p id="mullvad-browser-update">
         <img
@@ -66,11 +70,13 @@
     </div>
     <div id="footer">
       <p data-l10n-id="about-mullvad-browser-use-vpn">
-        <a data-l10n-name="with-vpn-link" href="https://mullvad.net"> </a>
+        <a data-l10n-name="with-vpn-link" href="https://mullvad.net"></a>
       </p>
       <p data-l10n-id="about-mullvad-browser-learn-more">
-        <a data-l10n-name="learn-more-link" href="https://mullvad.net/browser">
-        </a>
+        <a
+          data-l10n-name="learn-more-link"
+          href="https://mullvad.net/browser"
+        ></a>
       </p>
     </div>
   </body>
