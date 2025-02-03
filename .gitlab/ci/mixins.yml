@@ -4,7 +4,21 @@
   before_script:
     - git init
     - git remote add local "$LOCAL_REPO_PATH"
-    - git fetch --depth 500 local
+    - |
+      # Determine the reference of the target branch in the local repository copy.
+      #
+      # 1. List all references in the local repository
+      # 2. Filter the references to the target branch
+      # 3. Remove tags
+      # 4. Keep a single line, in case there are too many matches
+      # 5. Clean up the output
+      # 6. Remove everything before the last two slashes, because the output is like `refs/heads/...` or `refs/remotes/...`
+      TARGET_BRANCH=$(git ls-remote local | grep ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_TARGET_BRANCH_NAME} |  grep -v 'refs/tags/' | awk '{print $2}' | tail -1 | sed 's|[^/]*/[^/]*/||')
+      if [ -z "$TARGET_BRANCH" ]; then
+          echo "Target branch $TARGET_BRANCH is not yet in local repository. Stopping the pipeline."
+          exit 1
+      fi
+    - git fetch --depth 500 local $TARGET_BRANCH
     - git remote add origin "$CI_REPOSITORY_URL"
     - |
       if [ -z "${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]; then
@@ -26,7 +40,16 @@
   before_script:
     - git init
     - git remote add local $env:LOCAL_REPO_PATH
-    - git fetch --depth 500 local
+    - |
+      $branchName = $env:CI_COMMIT_BRANCH
+      if ([string]::IsNullOrEmpty($branchName)) {
+          $branchName = $env:CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      }
+      $TARGET_BRANCH = git ls-remote local | Select-String -Pattern $branchName | Select-String -Pattern -NotMatch 'refs/tags/' | Select-Object -Last 1 | ForEach-Object { $_.ToString().Split()[1] -replace '^[^/]*/[^/]*/', '' }
+      if ([string]::IsNullOrEmpty($TARGET_BRANCH)) {
+          Write-Output "Target branch $TARGET_BRANCH is not yet in local repository. Stopping the pipeline."
+          exit 1
+      }
     - git remote add origin $env:CI_REPOSITORY_URL
     - |
       $branchName = $env:CI_COMMIT_BRANCH
