@@ -16,6 +16,23 @@ def assert_result(new_content, old_content, expect):
     )
 
 
+def assert_alternative(content, alternative_content, alternative_ids, expect):
+    if content is not None:
+        content = textwrap.dedent(content)
+    if alternative_content is not None:
+        alternative_content = textwrap.dedent(alternative_content)
+    if expect is not None:
+        expect = textwrap.dedent(expect)
+    assert expect == combine_files(
+        "test.dtd",
+        content,
+        alternative_content,
+        "ALTERNATIVE STRING",
+        alternative_ids,
+        ".alt",
+    )
+
+
 def test_combine_empty():
     assert_result(None, None, None)
 
@@ -321,5 +338,76 @@ def test_removed_string_with_comment():
         <!ENTITY removed.3 "Third removed">
         <!-- LOCALIZATION NOTE: REMOVED STRING -->
         <!ENTITY removed.4 "Fourth removed">
+        """,
+    )
+
+
+def test_alternatives():
+    assert_alternative(
+        """\
+        <!ENTITY string.1 "First string">
+        """,
+        """\
+        <!ENTITY string.1 "Alternative string">
+        """,
+        ["string.1"],
+        """\
+        <!ENTITY string.1 "First string">
+
+        <!-- LOCALIZATION NOTE: ALTERNATIVE STRING -->
+        <!ENTITY string.1.alt "Alternative string">
+        """,
+    )
+    assert_alternative(
+        """\
+        <!-- LOCALIZATION NOTE: Comment 1 -->
+        <!ENTITY string.1 "First string">
+        <!-- LOCALIZATION NOTE: Comment 2 -->
+        <!ENTITY string.2 "Second string">
+        <!ENTITY string.3 "Third string">
+        """,
+        """\
+        <!ENTITY string.1 "First string">
+        <!-- LOCALIZATION NOTE: Alt comment -->
+        <!ENTITY string.2 "Alternative string">
+        <!ENTITY string.3 "Third string different">
+        <!ENTITY string.4 "Other string">
+        """,
+        ["string.2"],
+        """\
+        <!-- LOCALIZATION NOTE: Comment 1 -->
+        <!ENTITY string.1 "First string">
+        <!-- LOCALIZATION NOTE: Comment 2 -->
+        <!ENTITY string.2 "Second string">
+        <!ENTITY string.3 "Third string">
+
+        <!-- LOCALIZATION NOTE: ALTERNATIVE STRING -->
+        <!-- LOCALIZATION NOTE: Alt comment -->
+        <!ENTITY string.2.alt "Alternative string">
+        """,
+    )
+    assert_alternative(
+        """\
+        <!ENTITY string.1 "First string">
+        <!ENTITY string.2 "Second string">
+        <!ENTITY string.3 "Third string">
+        """,
+        """\
+        <!ENTITY string.1 "Alternative string">
+        <!ENTITY string.3 "Third string">
+        <!-- LOCALIZATION NOTE: comment -->
+        <!ENTITY string.4 "Other string">
+        """,
+        ["string.1", "string.4"],
+        """\
+        <!ENTITY string.1 "First string">
+        <!ENTITY string.2 "Second string">
+        <!ENTITY string.3 "Third string">
+
+        <!-- LOCALIZATION NOTE: ALTERNATIVE STRING -->
+        <!ENTITY string.1.alt "Alternative string">
+        <!-- LOCALIZATION NOTE: ALTERNATIVE STRING -->
+        <!-- LOCALIZATION NOTE: comment -->
+        <!ENTITY string.4.alt "Other string">
         """,
     )

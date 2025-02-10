@@ -14,26 +14,32 @@ if TYPE_CHECKING:
 
 def combine_files(
     filename: str,
-    new_content: str | None,
-    old_content: str | None,
+    primary_content: str | None,
+    alternative_content: str | None,
     comment_prefix: str,
+    include_ids: list[str] | None = None,
+    alternative_suffix: str = "",
 ) -> str | None:
     """Combine two translation files into one to include all strings from both.
-    The new content is presented first, and any strings only found in the old
-    content are placed at the end with an additional comment.
+    The primary content is presented first, followed by the alternative content
+    at the end with an additional comment.
 
     :param filename: The filename for the file, determines the format.
-    :param new_content: The new content for the file, or None if it has been
-      deleted.
-    :param old_content: The old content for the file, or None if it did not
-      exist before.
-    :comment_prefix: A comment to include for any strings that are only found in
-      the old content. This will be placed before any other comments for the
-      string.
+    :param primary_content: The primary content for the file, or None if it does
+      not exist.
+    :param alternative_content: The alternative content for the file, or None if
+      it does not exist.
+    :param comment_prefix: A comment to include for any strings that are
+      appended to the content. This will be placed before any other comments for
+      the string.
+    :param include_ids: String IDs from `alternative_content` we want to
+      include. If this is `None` then we include all strings that do not already
+      have a matching ID in `primary_content`.
+    :param duplicate_suffix: The suffix to apply to the alternative IDs.
 
     :returns: The combined content, or None if both given contents are None.
     """
-    if new_content is None and old_content is None:
+    if primary_content is None and alternative_content is None:
         return None
 
     # getParser from compare_locale returns the same instance for the same file
@@ -41,7 +47,7 @@ def combine_files(
     parser = getParser(filename)
 
     is_android = filename.endswith(".xml")
-    if new_content is None:
+    if primary_content is None:
         if is_android:
             # File was deleted, add some document parts.
             content_start = (
@@ -54,7 +60,7 @@ def combine_files(
             content_end = ""
         existing_keys = []
     else:
-        parser.readUnicode(new_content)
+        parser.readUnicode(primary_content)
 
         # Start with the same content as the current file.
         # For android strings, we want to keep the final "</resources>" until after.
@@ -96,8 +102,8 @@ def combine_files(
 
     entry_iter: Iterable[Any] = ()
     # If the file does not exist in the old branch, don't make any additions.
-    if old_content is not None:
-        parser.readUnicode(old_content)
+    if alternative_content is not None:
+        parser.readUnicode(alternative_content)
         entry_iter = parser.walk(only_localizable=False)
     for entry in entry_iter:
         if isinstance(entry, Junk):
@@ -134,13 +140,19 @@ def combine_files(
         if not isinstance(entry, Entity):
             raise ValueError(f"Unexpected type: {entry.__class__.__name__}")
 
-        if entry.key in existing_keys:
-            # Already included this string in the new translation file.
+        if include_ids is None:
+            # We include the entry if it is not already included.
+            include_entry = entry.key not in existing_keys
+        else:
+            # We include the entry if it is in our list.
+            include_entry = entry.key in include_ids
+        if not include_entry:
             # Drop the gathered comments for this Entity.
             stacked_comments.clear()
             continue
 
         if isinstance(entry, FluentEntity):
+            id_regex = rf"^({re.escape(entry.key)})( *=)"
             if fluent_group_comment is not None:
                 # We have a found GroupComment which has not been included yet.
                 # All following Entity's will be under its scope, until the next
@@ -149,12 +161,15 @@ def combine_files(
                 # Added GroupComment, so don't need to add again.
                 fluent_group_comment = None
         elif isinstance(entry, DTDEntity):
+            id_regex = rf"^(\s*<!ENTITY\s*{re.escape(entry.key)})(\s)"
             # Include our additional comment before we print the rest for this
             # Entity.
             additions.append(f"<!-- LOCALIZATION NOTE: {comment_prefix} -->")
         elif isinstance(entry, PropertiesEntity):
+            id_regex = rf"^({re.escape(entry.key)})( *=)"
             additions.append(f"# {comment_prefix}")
         elif isinstance(entry, AndroidEntity):
+            id_regex = rf'^(\s*<string\s[^>]*name="{re.escape(entry.key)})(")'
             additions.append(f"<!-- {comment_prefix} -->")
         else:
             raise ValueError(f"Unexpected Entity type: {entry.__class__.__name__}")
@@ -162,7 +177,17 @@ def combine_files(
         # Add any other comment lines that came directly before this Entity.
         additions.extend(stacked_comments)
         stacked_comments.clear()
-        additions.append(entry.all)
+        entry_content = entry.all
+        if alternative_suffix:
+            # NOTE: compare_locales does not allow us to set the entry.key
+            # value. Instead we use a regular expression to append the suffix to
+            # the expected key.
+            entry_content, count = re.subn(
+                id_regex, rf"\1{alternative_suffix}\2", entry_content, flags=re.M
+            )
+            if count != 1:
+                raise ValueError(f"Failed to substitute the ID for {entry.key}")
+        additions.append(entry_content)
 
     content_middle = ""
 

@@ -24,6 +24,20 @@ def assert_result(new_content, old_content, expect):
     )
 
 
+def assert_alternative(content, alternative_content, alternative_ids, expect):
+    content = wrap_in_xml(content)
+    alternative_content = wrap_in_xml(alternative_content)
+    expect = wrap_in_xml(expect)
+    assert expect == combine_files(
+        "test_strings.xml",
+        content,
+        alternative_content,
+        "ALTERNATIVE STRING",
+        alternative_ids,
+        "_alt",
+    )
+
+
 def test_combine_empty():
     assert_result(None, None, None)
 
@@ -326,5 +340,76 @@ def test_removed_string_with_comment():
         <string name="removed_3">Third removed</string>
         <!-- REMOVED STRING -->
         <string name="removed_4">Fourth removed</string>
+        """,
+    )
+
+
+def test_alternatives():
+    assert_alternative(
+        """\
+        <string name="string_1">First string</string>
+        """,
+        """\
+        <string name="string_1">Alternative string</string>
+        """,
+        ["string_1"],
+        """\
+        <string name="string_1">First string</string>
+
+        <!-- ALTERNATIVE STRING -->
+        <string name="string_1_alt">Alternative string</string>
+        """,
+    )
+    assert_alternative(
+        """\
+        <!-- Comment 1 -->
+        <string name="string_1">First string</string>
+        <!-- Comment 2 -->
+        <string name="string_2">Second string</string>
+        <string name="string_3">Third string</string>
+        """,
+        """\
+        <string name="string_1">First string</string>
+        <!-- Alt comment -->
+        <string name="string_2">Alternative string</string>
+        <string name="string_3">Third string different</string>
+        <string name="string_4">Other string</string>
+        """,
+        ["string_2"],
+        """\
+        <!-- Comment 1 -->
+        <string name="string_1">First string</string>
+        <!-- Comment 2 -->
+        <string name="string_2">Second string</string>
+        <string name="string_3">Third string</string>
+
+        <!-- ALTERNATIVE STRING -->
+        <!-- Alt comment -->
+        <string name="string_2_alt">Alternative string</string>
+        """,
+    )
+    assert_alternative(
+        """\
+        <string name="string_1">First string</string>
+        <string name="string_2">Second string</string>
+        <string name="string_3">Third string</string>
+        """,
+        """\
+        <string name="string_1">Alternative string</string>
+        <string name="string_3">Third string</string>
+        <!-- comment -->
+        <string name="string_4">Other string</string>
+        """,
+        ["string_1", "string_4"],
+        """\
+        <string name="string_1">First string</string>
+        <string name="string_2">Second string</string>
+        <string name="string_3">Third string</string>
+
+        <!-- ALTERNATIVE STRING -->
+        <string name="string_1_alt">Alternative string</string>
+        <!-- ALTERNATIVE STRING -->
+        <!-- comment -->
+        <string name="string_4_alt">Other string</string>
         """,
     )

@@ -306,9 +306,34 @@ for file_dict in json.loads(args.files):
             f"{current_file.path} : {stable_file.path}"
         )
 
+    content = None if current_file is None else current_file.content
+
+    # If we have a branding file, we want to also include strings from the other
+    # branding directories that differ from the stable release.
+    # The strings that *differ* per release should be specified in
+    # file_dict["branding"]["ids"]. These strings will be copied from the other
+    # release's branding directory, with an addition suffix added to their ID,
+    # as specified in the version_dict["suffix"].
+    branding = file_dict.get("branding", None)
+    if branding:
+        include_ids = branding["ids"]
+        for version_dict in branding["versions"]:
+            branding_dirs = version_dict.get("where", None)
+            branding_file = current_branch.get_file(name, branding_dirs)
+            if branding_file is None:
+                raise Exception(f"{name} does not exist in {branding_dirs}")
+            content = combine_files(
+                name,
+                content,
+                branding_file.content,
+                f'{version_dict["name"]} Release.',
+                include_ids,
+                version_dict["suffix"],
+            )
+
     content = combine_files(
         name,
-        None if current_file is None else current_file.content,
+        content,
         None if stable_file is None else stable_file.content,
         f"Will be unused in {current_branch.browser_version_name}!",
     )

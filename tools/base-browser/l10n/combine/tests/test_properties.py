@@ -16,6 +16,23 @@ def assert_result(new_content, old_content, expect):
     )
 
 
+def assert_alternative(content, alternative_content, alternative_ids, expect):
+    if content is not None:
+        content = textwrap.dedent(content)
+    if alternative_content is not None:
+        alternative_content = textwrap.dedent(alternative_content)
+    if expect is not None:
+        expect = textwrap.dedent(expect)
+    assert expect == combine_files(
+        "test.properties",
+        content,
+        alternative_content,
+        "ALTERNATIVE STRING",
+        alternative_ids,
+        ".alt",
+    )
+
+
 def test_combine_empty():
     assert_result(None, None, None)
 
@@ -318,5 +335,76 @@ def test_removed_string_with_comment():
         removed.3 = Third removed
         # REMOVED STRING
         removed.4 = Fourth removed
+        """,
+    )
+
+
+def test_alternatives():
+    assert_alternative(
+        """\
+        string.1 = First string
+        """,
+        """\
+        string.1 = Alternative string
+        """,
+        ["string.1"],
+        """\
+        string.1 = First string
+
+        # ALTERNATIVE STRING
+        string.1.alt = Alternative string
+        """,
+    )
+    assert_alternative(
+        """\
+        # Comment 1
+        string.1 = First string
+        # Comment 2
+        string.2 = Second string
+        string.3 = Third string
+        """,
+        """\
+        string.1 = First string
+        # Alt comment
+        string.2 = Alternative string
+        string.3 = Third string different
+        string.4 = Other string
+        """,
+        ["string.2"],
+        """\
+        # Comment 1
+        string.1 = First string
+        # Comment 2
+        string.2 = Second string
+        string.3 = Third string
+
+        # ALTERNATIVE STRING
+        # Alt comment
+        string.2.alt = Alternative string
+        """,
+    )
+    assert_alternative(
+        """\
+        string.1 = First string
+        string.2 = Second string
+        string.3 = Third string
+        """,
+        """\
+        string.1 = Alternative string
+        string.3 = Third string
+        # comment
+        string.4 = Other string
+        """,
+        ["string.1", "string.4"],
+        """\
+        string.1 = First string
+        string.2 = Second string
+        string.3 = Third string
+
+        # ALTERNATIVE STRING
+        string.1.alt = Alternative string
+        # ALTERNATIVE STRING
+        # comment
+        string.4.alt = Other string
         """,
     )
