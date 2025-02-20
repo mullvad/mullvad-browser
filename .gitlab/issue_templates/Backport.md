@@ -10,7 +10,7 @@ This is an issue for tracking back-porting a patch-set (e.g. from Alpha to Stabl
 
 ### Book-keeping
 
-#### Issue(s)
+#### Gitlab Issue(s)
 - tor-browser#12345
 - mullvad-browser#123
 - https://bugzilla.mozilla.org/show_bug.cgi?id=1234567
