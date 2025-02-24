@@ -1,5 +1,21 @@
 [
   {
+    "aliases": ["mullvad-leta", "leta", "mullvad", "ml"],
+    "name": "Mullvad Leta",
+    "urls": {
+      "search": {
+        "base": "https://leta.mullvad.net/",
+        "params": [],
+        "searchTermParamName": "q"
+      }
+    },
+    "id": "ee88d691-6d7a-4adb-9fec-5a205565505a",
+    "identifier": "mullvad-leta",
+    "recordType": "engine",
+    "orderHint": 100,
+    "variants": []
+  },
+  {
     "aliases": ["duckduckgo", "ddg"],
     "name": "DuckDuckGo",
     "urls": {
@@ -12,7 +28,7 @@
     "id": "04e99a38-13ee-47d8-8aa4-64482b3dea99",
     "identifier": "ddg",
     "recordType": "engine",
-    "orderHint": 100,
+    "orderHint": 90,
     "variants": []
   },
   {
@@ -27,22 +43,6 @@
     },
     "id": "98d8c84b-7455-431d-98b9-890e7bcc0041",
     "identifier": "ddg-html",
-    "recordType": "engine",
-    "orderHint": 90,
-    "variants": []
-  },
-  {
-    "aliases": ["mullvad-leta", "leta", "mullvad", "ml"],
-    "name": "Mullvad Leta",
-    "urls": {
-      "search": {
-        "base": "https://leta.mullvad.net/",
-        "params": [],
-        "searchTermParamName": "q"
-      }
-    },
-    "id": "ee88d691-6d7a-4adb-9fec-5a205565505a",
-    "identifier": "mullvad-leta",
     "recordType": "engine",
     "orderHint": 80,
     "variants": []
