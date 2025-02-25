@@ -85,3 +85,5 @@
     ./tools/browser/sign-tag.mullvadbrowser stable build1
     ```
   - [ ] Push tag to `upstream`
+
+/label ~"Apps::Type::Rebase"
