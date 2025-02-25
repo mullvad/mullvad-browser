@@ -29,4 +29,4 @@
 ### Relevant logs and/or screenshots
 
 
-/label ~bug
+/label ~"Apps::Type::Bug"
