@@ -40,6 +40,18 @@ this.specialpowers = class extends ExtensionAPI {
         uri,
         resProto.ALLOW_CONTENT_ACCESS
       );
+    } else {
+      // This is a hack!
+      // For some reason, this specific substituion has an extra `/` in the path.
+      // This is a workaround to fix it.
+      //
+      // TODO (#43545): Remove this once we have a proper fix.
+      let uri = resProto.getSubstitution("testing-common");
+      resProto.setSubstitution(
+        "testing-common",
+        Services.io.newURI(uri.spec.replace("file:////", "file:///")),
+        resProto.ALLOW_CONTENT_ACCESS
+      );
     }
 
     SpecialPowersParent.registerActor();
