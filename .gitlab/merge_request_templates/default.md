@@ -48,8 +48,11 @@
 - [ ] **Localization**: typos and other localization changes that should be also in the release branch
 - [ ] **Other**: please explain
 
-### Uplifting
+### Upstream
 - [ ] Patchset is a candidate for uplift to Firefox
+- [ ] Patchset is a backport from Firefox
+  - Bugzilla link:
+  - Upstream commit:
 
 ### Issue Tracking
 - [ ] Link resolved issues with appropriate [Release Prep issue](https://gitlab.torproject.org/groups/tpo/applications/-/issues/?sort=updated_desc&state=opened&label_name%5B%5D=Apps%3A%3AType%3A%3AReleasePreparation&first_page_size=100) for changelog generation
