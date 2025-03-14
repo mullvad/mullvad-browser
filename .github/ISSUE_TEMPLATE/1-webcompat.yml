@@ -1,0 +1,169 @@
+name: Report a broken site
+description: File a bug report for a broken website
+labels: ['webcompat']
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Website information
+
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: Full URL where the issue occurs
+    validations:
+      required: true
+
+  - type: dropdown
+    id: login-required
+    attributes:
+      label: Login required?
+      options:
+        - 'No'
+        - 'Yes'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Issue description
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe what you expected to happen
+      value: |
+        I expected to see [expected behavior]
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what actually happens
+      value: |
+        I actually see [actual behavior]
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the steps to reproduce the issue
+      value: |
+        1. Open browser and navigate to [URL]
+        2. Click on [specific element]
+        3. Observe [issue]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Issue Reproducibility
+      options:
+        - 'Always reproducible'
+        - 'Intermittent/sometimes reproducible'
+        - 'Happened once, cannot reproduce'
+      description: How consistently can you reproduce this issue?
+    validations:
+      required: true
+
+  - type: input
+    id: regression-info
+    attributes:
+      label: When did this start?
+      description: If known, when did this issue first appear? Did it work in a previous version?
+      placeholder: 'Example: Started after updating to version 12.5, worked fine in 12.0'
+
+  - type: dropdown
+    id: firefox-status
+    attributes:
+      label: Does it work in latest Firefox?
+      options:
+        - "I don't know"
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: firefox-esr
+    attributes:
+      label: Does it work in latest Firefox ESR?
+      description: Firefox ESR is the long term support version which Mullvad Browser is based on, see mozilla.org/firefox/all/desktop-esr
+      options:
+        - "I don't know"
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Testing environment
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version
+      description: Specify your browser version
+    validations:
+      required: true
+
+  - type: dropdown
+    id: profile-test
+    attributes:
+      label: Profile Testing
+      options:
+        - 'I have not tested with a fresh profile'
+        - 'Issue occurs with a fresh browser profile'
+        - 'Issue only occurs with my existing profile'
+      description: Does this issue occur with a fresh browser profile?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: security-level
+    attributes:
+      label: Security level setting
+      options:
+        - 'Standard (Default)'
+        - 'Safer'
+        - 'Safest'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: network-info
+    attributes:
+      label: Network
+      options:
+        - Not using any VPN
+        - Using Mullvad VPN
+        - Using another VPN
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dns-info
+    attributes:
+      label: DNS
+      options:
+        - Mullvad DOH (Default)
+        - Another DNS provider
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional information
+      description: Include console errors, screenshots, screencasts or network issues

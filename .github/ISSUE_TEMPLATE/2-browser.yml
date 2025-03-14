@@ -1,0 +1,145 @@
+name: Report a problem with the browser
+description: File a bug report for a problem with the browser (including uBlock Origin and NoScript)
+labels: ['bug']
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Issue description
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe what you expected to happen
+      value: |
+        I expected to see [expected behavior]
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what actually happens
+      value: |
+        I actually see [actual behavior]
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the steps to reproduce the issue
+      value: |
+        1. Open browser
+        2. Click on [specific element]
+        3. Observe [issue]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Issue reproducibility
+      description: How consistently can you reproduce this issue?
+      options:
+        - 'Always reproducible'
+        - 'Intermittent/sometimes reproducible'
+        - 'Happened once, cannot reproduce'
+    validations:
+      required: true
+
+  - type: input
+    id: regression-info
+    attributes:
+      label: When did this start?
+      description: If known, when did this issue first appear? Did it work in a previous version?
+      placeholder: 'Example: Started after updating to version 12.5, worked fine in 12.0'
+
+  - type: dropdown
+    id: firefox-esr
+    attributes:
+      label: Does it work in latest Firefox ESR?
+      description: Firefox ESR is the long term support version which Mullvad Browser is based on, see mozilla.org/firefox/all/desktop-esr
+      options:
+        - "I don't know"
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Testing environment
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version
+      description: Specify your browser version
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation-mode
+    attributes:
+      label: Installation mode
+      options:
+        - 'System install (using an installer or a package manager)'
+        - 'Standalone (extracted from an archive in a single folder)'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Unsupported OS (please specify below)
+        - macOS (13 or later)
+        - Ubuntu (22.04 or later)
+        - Fedora (41 or later)
+        - Debian (12 or later)
+        - Windows (10 or later)
+    validations:
+      required: true
+
+  - type: input
+    id: other-os
+    attributes:
+      label: Other OS
+      description: Specify your operating system
+      placeholder: 'Example: Linux Mint 22.1, NixOS 24.11, ...'
+
+  - type: dropdown
+    id: profile-test
+    attributes:
+      label: Profile testing
+      description: Does this issue occur with a fresh browser profile?
+      options:
+        - 'Issue occurs with a fresh browser profile'
+        - 'Issue only occurs with my existing profile'
+        - 'I have not tested with a fresh profile'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: vpn-status
+    attributes:
+      label: VPN Status
+      options:
+        - 'Not using any VPN'
+        - 'Using Mullvad VPN'
+        - 'Using another VPN'
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Include console errors, screenshots, screencasts or network issues

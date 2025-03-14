@@ -1,0 +1,116 @@
+name: Report a broken third party extension
+description: File a bug report for an extension (excluding uBlock Origin and NoScript)
+labels: ['third-party-ext']
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Extension information
+
+  - type: input
+    id: extension-name
+    attributes:
+      label: Extension name
+      description: Name of the extension
+    validations:
+      required: true
+
+  - type: input
+    id: extension-url
+    attributes:
+      label: Extension page URL
+      description: URL of the extension page
+
+  - type: dropdown
+    id: login-required
+    attributes:
+      label: Login required?
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Issue description
+
+  - type: dropdown
+    id: firefox-status
+    attributes:
+      label: Works in latest Firefox?
+      options:
+        - "I don't know"
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe what you expected to happen
+      value: |
+        I expected to see [expected behavior]
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what actually happens
+      value: |
+        I actually see [actual behavior]
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the steps to reproduce the issue
+      value: |
+        1. Open browser
+        2. Click on the extension icon
+        3. Observe [issue]
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Testing environment
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version
+      description: Specify your browser version
+    validations:
+      required: true
+
+  - type: dropdown
+    id: vpn-status
+    attributes:
+      label: VPN Status
+      options:
+        - 'Not using any VPN'
+        - 'Using Mullvad VPN'
+        - 'Using another VPN'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Notes
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional information
+      description: Include console errors, screenshots, screencasts or network issues
