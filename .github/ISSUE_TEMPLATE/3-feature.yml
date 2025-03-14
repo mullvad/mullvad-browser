@@ -1,0 +1,49 @@
+name: Feature Request
+description: Suggest an idea for Mullvad Browser
+labels: ['feature-request']
+body:
+  - type: dropdown
+    id: exists-in-firefox
+    attributes:
+      label: Does this feature already exist in Firefox Stable?
+      description: Please indicate whether this feature is already available in the standard Firefox browser.
+      options:
+        - "I'm not sure"
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: firefox-esr
+    attributes:
+      label: Does this feature already exist in Firefox ESR?
+      description: Firefox ESR is the long term support version which Mullvad Browser is based on, see mozilla.org/firefox/all/desktop-esr
+      options:
+        - "I don't know"
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature description
+      description: A clear and concise description of what you want to happen, and why
+      placeholder: I would like to see...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe alternatives you've considered
+
+  - type: textarea
+    id: problem-related
+    attributes:
+      label: Is this related to a problem?
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: I'm always frustrated when...
