@@ -1,0 +1,134 @@
+name: Website Issue Report
+description: Report a problem with a specific website
+title: '[WEBSITE]: '
+labels: ['webcompat']
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Website Information
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: Full URL where the issue occurs
+    validations:
+      required: true
+  - type: dropdown
+    id: login-required
+    attributes:
+      label: Login Required?
+      options:
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+  - type: dropdown
+    id: firefox-status
+    attributes:
+      label: Works in latest Firefox?
+      options:
+        - 'Yes'
+        - 'No'
+        - 'I don''t know'
+  - type: dropdown
+    id: other-browser-status
+    attributes:
+      label: Works in another browser?
+      options:
+        - 'Yes'
+        - 'No'
+        - 'I don''t know'
+
+  - type: input
+    id: which-browser
+    attributes:
+      label: If so, which browser?
+      description: Specify which other browser works
+      placeholder: 'Example: Chrome, Safari, Edge, ...'
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: Describe what you expected to happen
+    validations:
+      required: true
+    value: |
+      I expected to see [expected behavior]
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: Describe what actually happens
+    validations:
+      required: true
+    value: |
+      I actually see [actual behavior]
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: List the steps to reproduce the issue
+      value: |
+        1. Open browser and navigate to [URL]
+        2. Click on [specific element]
+        3. Observe [issue]
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - macOS (13 or later)
+        - Ubuntu (22.04 or later)
+        - Fedora (41 or later)
+        - Debian (12 or later)
+        - Windows (10 or later)
+        - Unsupported operating system (please specify below)
+  - type: input
+    id: other-os
+    attributes:
+      label: Other OS
+      description: Specify your operating system
+      placeholder: 'Example: Linux Mint 22.1, NixOS 24.11, ...'
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser Version
+      description: Specify your browser version
+    validations:
+      required: true
+  - type: dropdown
+    id: installation-mode
+    attributes:
+      label: Installation Mode
+      options:
+        - 'System install (On Windows: default install, on Fedora/Ubuntu/Debian: through the repositories)'
+        - 'Standalone (extracted from an archive in a single folder)'
+    validations:
+      required: true
+    id: security-level
+  - type: dropdown
+    attributes:
+      label: Security Level Setting
+      options:
+        - 'Standard'
+        - 'Safer'
+        - 'Safest'
+  - type: textarea
+    id: extensions
+    attributes:
+      label: Relevant Extensions Enabled
+      description: List any extensions that might affect this website
+  - type: textarea
+    id: network-info
+    attributes:
+      label: Network Configuration
+      description: Are you using Mullvad VPN or another VPN? Any special network settings?
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Include console errors, screenshots, screencasts or network issues
