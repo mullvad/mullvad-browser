@@ -516,7 +516,7 @@ class _RFPHelper {
 
       log(`${logPrefix} roundDimensions(${aWidth}, ${aHeight})`);
 
-      if (!(isInitialSize || this.letterboxingEnabled)) {
+      if (!this.letterboxingEnabled) {
         // just round size to int
         return r(aWidth, aHeight);
       }
