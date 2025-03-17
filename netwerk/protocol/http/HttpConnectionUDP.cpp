@@ -88,6 +88,15 @@ nsresult HttpConnectionUDP::Init(nsHttpConnectionInfo* info,
     return rv;
   }
 
+  // We are disabling 0.0.0.0 for non-test purposes.
+  // See https://github.com/whatwg/fetch/pull/1763 for context.
+  if (peerAddr.IsIPAddrAny()) {
+    if (StaticPrefs::network_socket_ip_addr_any_disabled()) {
+      LOG(("Connection refused because of 0.0.0.0 IP address\n"));
+      return NS_ERROR_CONNECTION_REFUSED;
+    }
+  }
+
   mSocket = do_CreateInstance("@mozilla.org/network/udp-socket;1", &rv);
   if (NS_FAILED(rv)) {
     return rv;
