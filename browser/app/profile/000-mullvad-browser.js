@@ -40,9 +40,5 @@ pref("app.update.notifyDuringDownload", true);
 pref("app.update.url.manual", "https://mullvad.net/download/browser");
 pref("app.update.url.details", "https://mullvad.net/download/browser");
 pref("app.update.badgeWaitTime", 0);
-pref("app.releaseNotesURL", "https://github.com/mullvad/mullvad-browser/releases");
-// disables the 'What's New?' link in the about dialog, otherwise we need to
-// duplicate logic for generating the url to the github releases page
-pref("app.releaseNotesURL.aboutDialog", "about:blank");
 // point to our feedback url rather than Mozilla's
 pref("app.feedback.baseURL", "https://mullvad.net/help/tag/browser/");
