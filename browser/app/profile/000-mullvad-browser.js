@@ -15,9 +15,6 @@ pref("doh-rollout.provider-list", "[{\"UIName\":\"Mullvad\",\"autoDefault\":true
 // mullvad-browser#122: Audit DoH heuristics
 pref("doh-rollout.disable-heuristics", true);
 
-// mullvad-browser#37: Customization for the about dialog
-pref("app.releaseNotesURL.aboutDialog", "about:blank");
-
 // mullvad-browser#87: Windows and Linux need additional work to make the
 // default browser choice working.
 // We are shipping only the portable versions for the initial release anyway, so
