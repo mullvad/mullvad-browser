@@ -477,7 +477,6 @@
                           appmenu-data-l10n-id="appmenu-help-enter-troubleshoot-mode2"/>
                 <menuitem id="troubleShooting"
                           oncommand="openTroubleshootingPage()"
-                          hidden="true"
                           data-l10n-id="menu-help-more-troubleshooting-info"
                           appmenu-data-l10n-id="appmenu-help-more-troubleshooting-info"/>
                 <menuitem id="help_reportSiteIssue"
