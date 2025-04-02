@@ -437,6 +437,7 @@ split-view-footer,
     min-width: min(23em, 33%);
   }
 
+  &[type="letterboxingStatus"],
   &[type="overLink"] {
     transition:
       opacity 120ms ease-out,
@@ -447,12 +448,15 @@ split-view-footer,
     direction: ltr;
   }
 
+  .browserStack:not(.letterboxingStatus) &[type="letterboxingStatus"],
+  .exclude-letterboxing &[type="letterboxingStatus"],
   &[inactive],
   :root[inDOMFullscreen] &:not([type="overLink"]) {
     transition: none;
     opacity: 0;
     visibility: hidden;
 
+    &[previoustype="letterboxingStatus"],
     &[previoustype="overLink"] {
       transition:
         opacity 200ms ease-out,
@@ -515,6 +519,25 @@ split-view-footer {
       border-top-left-radius: 0.3em;
     }
     margin-left: 1em;
+  }
+}
+
+#statuspanel:is([type="letterboxingStatus"], [previoustype="letterboxingStatus"][inactive]) > #statuspanel-label {
+  background-image: url("chrome://browser/skin/window.svg");
+  background-size: var(--icon-size);
+  background-repeat: no-repeat;
+  background-position-y: center;
+  background-position-x: left var(--space-small);
+
+  &:-moz-locale-dir(rtl) {
+    background-position-x: right var(--space-small);
+  }
+
+  padding-inline-start: calc(var(--space-small) + var(--icon-size) + var(--space-small));
+  -moz-context-properties: fill;
+  fill: var(--color-accent-primary);
+  @media (forced-colors) {
+    fill: var(--icon-color);
   }
 }
 
