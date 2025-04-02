@@ -1054,6 +1054,12 @@ nsresult nsScriptSecurityManager::CheckLoadURIFlags(
           return NS_OK;
         }
       } else if (targetScheme.EqualsLiteral("chrome")) {
+        nsAutoCString path;
+        if (NS_SUCCEEDED(aTargetURI->GetPathQueryRef(path)) &&
+            StringBeginsWith(path, "/locale/"_ns)) {
+          return NS_ERROR_DOM_BAD_URI;
+        }
+
         // Allow the load only if the chrome package is allowlisted.
         nsCOMPtr<nsIXULChromeRegistry> reg(
             do_GetService(NS_CHROMEREGISTRY_CONTRACTID));
