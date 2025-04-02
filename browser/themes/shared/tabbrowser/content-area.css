@@ -115,6 +115,7 @@
     min-width: min(23em, 33%);
   }
 
+  &[type=letterboxingStatus],
   &[type=overLink] {
     transition: opacity 120ms ease-out, visibility 120ms;
   }
@@ -123,12 +124,14 @@
     direction: ltr;
   }
 
+  .exclude-letterboxing &[type=letterboxingStatus],
   &[inactive],
   :root[inDOMFullscreen] &:not([type=overLink]) {
     transition: none;
     opacity: 0;
     visibility: hidden;
 
+    &[previoustype=letterboxingStatus],
     &[previoustype=overLink] {
       transition: opacity 200ms ease-out, visibility 200ms;
     }
@@ -174,6 +177,21 @@
       border-top-left-radius: .3em;
     }
     margin-left: 1em;
+  }
+}
+
+#statuspanel[type=letterboxingStatus] > #statuspanel-label,
+#statuspanel[previoustype=letterboxingStatus][inactive] > #statuspanel-label {
+  background-image: url("chrome://browser/skin/window.svg");
+  background-size: 1em;
+  background-repeat: no-repeat;
+  background-position-x: .5em;
+  background-position-y: center;
+  padding-inline-start: 2em;
+  -moz-context-properties: fill;
+  fill: var(--color-accent-primary);
+  @media (forced-colors) {
+    fill: var(--icon-color);
   }
 }
 
