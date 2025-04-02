@@ -165,7 +165,7 @@ class _RFPHelper {
     switch (aMessage.type) {
       case "TabOpen": {
         let browser = aMessage.target.linkedBrowser;
-        this._roundOrResetContentSize(browser, /* isNewTab = */ true);
+        this._roundOrResetContentSize(browser, { isNewTab: true });
         browser.ownerGlobal._rfpResizeObserver.observe(browser.parentElement);
         break;
       }
@@ -429,7 +429,7 @@ class _RFPHelper {
     );
   }
 
-  _roundOrResetContentSize(aBrowser, isNewTab = false) {
+  _roundOrResetContentSize(aBrowser, context = {}) {
     // We won't do anything for lazy browsers.
     if (!aBrowser?.isConnected) {
       return;
@@ -438,7 +438,7 @@ class _RFPHelper {
       // this tab doesn't need letterboxing
       this._resetContentSize(aBrowser);
     } else {
-      this._roundContentSize(aBrowser, isNewTab);
+      this._roundContentSize(aBrowser, context);
     }
   }
 
@@ -464,7 +464,8 @@ class _RFPHelper {
   /**
    * The function will round the given browser size
    */
-  async _roundContentSize(aBrowser, isNewTab = false) {
+  async _roundContentSize(aBrowser, context) {
+    const { isResize, isNewTab } = context;
     let logPrefix = `_roundContentSize[${Math.random()}]`;
     log(logPrefix);
     let win = aBrowser.ownerGlobal;
@@ -636,6 +637,26 @@ class _RFPHelper {
           borderRadius === 0 ? "hidden" : "",
         "--letterboxing-border-radius": borderRadius,
       });
+
+      if (
+        isResize &&
+        this.letterboxingEnabled &&
+        (parentWidth > lastRoundedSize.width ||
+          parentHeight > lastRoundedSize.height)
+      ) {
+        const updateStatus = async args => {
+          win.XULBrowserWindow.letterboxingStatus = args
+            ? await win.document.l10n.formatValue(
+                "letterboxing-size-status",
+                args
+              )
+            : "";
+          win.StatusPanel.update();
+        };
+        updateStatus(lastRoundedSize);
+        win.clearTimeout(win._letterboxingStatusTimeout);
+        win._letterboxingStatusTimeout = win.setTimeout(updateStatus, 1000);
+      }
     }
 
     // If the size of the content is already quantized, we do nothing.
@@ -729,8 +750,12 @@ class _RFPHelper {
     aWindow.addEventListener("TabOpen", this);
     const resizeObserver = (aWindow._rfpResizeObserver =
       new aWindow.ResizeObserver(entries => {
+        const context = { isResize: true };
         for (let { target } of entries) {
-          this._roundOrResetContentSize(target.querySelector("browser"));
+          this._roundOrResetContentSize(
+            target.querySelector("browser"),
+            context
+          );
         }
       }));
     // observe resizing of each browser's parent (gets rid of RPC from content windows)
