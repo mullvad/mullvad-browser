@@ -1,3 +1,5 @@
+# ⤵️ Rebase Alpha
+
 **NOTE:** All examples in this template reference the rebase from 102.7.0esr to 102.8.0esr
 
 <details>
@@ -152,4 +154,10 @@
     - [ ] Update `firefox_platform_version`
     - [ ] Set `browser_build` to 1 (to prevent failures in alpha testbuilds)
 
+<!-- Do not edit beneath this line <3 -->
+
+---
+
+/label ~"Apps::Product::TorBrowser"
 /label ~"Apps::Type::Rebase"
+/label ~"Apps::Priority::Blocker"

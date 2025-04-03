@@ -1,3 +1,5 @@
+# ⤵️ Rebase Rapid
+
 - **NOTE**: All examples in this template reference the rebase from Firefox 129.0a1 to 130.0a1
 - **TODO**:
   - Documentation step for any difficulties or noteworthy things for each rapid rebase
@@ -289,4 +291,10 @@ gitGraph:
     ```
   - [ ] Push tag to `upstream`
 
+<!-- Do not edit beneath this line <3 -->
+
+---
+
+/label ~"Apps::Product::TorBrowser"
 /label ~"Apps::Type::Rebase"
+/label ~"Apps::Priority::High"

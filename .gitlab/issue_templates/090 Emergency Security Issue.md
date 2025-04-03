@@ -1,3 +1,5 @@
+# 🚨 Emergency Security Issue
+
 **NOTE** This is an issue template to standardise our process for responding to and fixing critical security and privacy vulnerabilities, exploits, etc.
 
 ## Information
@@ -31,9 +33,10 @@
   - [ ] **clairehurst** : Android, macOS
   - [ ] **dan** : Android, macOS
   - [ ] **henry** : accessibility, frontend, localisation
+  - [ ] **jwilde** : windows, firefox internals
   - [ ] **ma1** : firefox internals
   - [ ] **pierov** : updater, fonts, localisation, general
-  - [ ] **richard** : signing, release
+  - [ ] **morgan** : signing, release
   - [ ] **thorin** : fingerprinting
 - [ ] Other Engineering Teams
   - [ ] Networking (**ahf**, **dgoulet**)
@@ -80,11 +83,20 @@ Sometimes fixes have side-effects: users lose their data, roadmaps need to be ad
   - [ ] **(Optional)** **gazebook**
     - if there are consequences to the organisation or partners beyond a browser update, then a communication plan may be needed
 
+Godspeed! :pray:
+
+<!-- Do not edit beneath this line <3 -->
+
+---
+
 /cc @bella
 /cc @ma1
 /cc @micah
-/cc @richard
+/cc @morgan
 
 /confidential
 
-Godspeed! :pray:
+/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
+/label ~"Apps::Type::Bug"
+/label ~"Apps::Priority::Blocker"
