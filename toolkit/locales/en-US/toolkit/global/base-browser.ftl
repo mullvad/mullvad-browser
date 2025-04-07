@@ -17,6 +17,15 @@ basebrowser-rfp-maximize-warning-message = Maximizing the browser window can all
 basebrowser-rfp-restore-window-size-button-label = Restore
 basebrowser-rfp-restore-window-size-button-ak = R
 
+## Letterbox size indicator (appearing on the bottom of the viewport)
+
+# Shows the current tab's letterboxed vieport size when resizing.
+# "Letterbox(ing)" should be treated as a feature/product name, and likely not changed in other languages.
+# The "×" symbol is a unicode (U+00D7) symbol for multiply.
+# $width (Number) - The window width. The "NUMBER" function will format this number to the same locale, and the "useGrouping" option will remove grouping symbols, like thousand separators.
+# $height (Number) - The window height.
+letterboxing-size-status = Letterbox size: { NUMBER($width, useGrouping: "false") } × { NUMBER($height, useGrouping: "false") }
+
 ## Tooltip for the about:addons recommended badge
 
 basebrowser-addon-badge-recommended = Mozilla only recommends extensions that meet their standards for security and performance
