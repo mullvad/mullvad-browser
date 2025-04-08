@@ -1190,4 +1190,93 @@ export let ProfileDataUpgrader = {
     }
     Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
   },
+
+  /**
+   * Run the profile data migration for Tor Browser if needed.
+   *
+   * @param {boolean} isNewProfile When true, just set the migration version
+   * without actually changing anything.
+   * @param {number} [currentVersion] The version to migrating from. To be used
+   * only by tests.
+   */
+  async upgradeMB(isNewProfile, currentVersion) {
+    // Version 1: Mullvad Browser 14.5a6: Clear home page update url preference
+    //            (mullvad-browser#411).
+    // Version 2: Mullvad Browser 15.0a2: Remove legacy search addons
+    //            (tor-browser#43111).
+    // Version 3: Mullvad Browser 16.0a12: DoH migration (mullvad-browser#537).
+    const MB_MIGRATION_VERSION = 3;
+    const MIGRATION_PREF = "mullvadbrowser.migration.version";
+
+    if (isNewProfile) {
+      // Do not migrate fresh profiles
+      Services.prefs.setIntPref(MIGRATION_PREF, MB_MIGRATION_VERSION);
+      return;
+    } else if (isNewProfile === undefined) {
+      // If this happens, check if upstream updated their function and do not
+      // set this member anymore!
+      console.error("upgradeTB: isNewProfile is undefined.");
+    }
+
+    if (currentVersion === undefined) {
+      currentVersion = Services.prefs.getIntPref(MIGRATION_PREF, 0);
+    }
+
+    if (currentVersion < 1) {
+      Services.prefs.clearUserPref("mullvadbrowser.post_update.url");
+    }
+
+    const dropAddons = async list => {
+      for (const id of list) {
+        try {
+          const engine = await lazy.AddonManager.getAddonByID(id);
+          await engine?.uninstall();
+        } catch {}
+      }
+    };
+
+    if (currentVersion < 2) {
+      await dropAddons([
+        "brave@search.mozilla.org",
+        "ddg@search.mozilla.org",
+        "ddg-html@search.mozilla.org",
+        "metager@search.mozilla.org",
+        "mojeek@search.mozilla.org",
+        "mullvad-leta@search.mozilla.org",
+        "startpage@search.mozilla.org",
+      ]);
+    }
+
+    if (currentVersion < 3) {
+      this.upgradeDoH();
+    }
+
+    Services.prefs.setIntPref(MIGRATION_PREF, MB_MIGRATION_VERSION);
+  },
+
+  upgradeDoH() {
+    const DOH_NOTIFICATION_PREF =
+      "mullvadbrowser.migration.show_doh_notification";
+    const DOH_URI_PREF = "network.trr.uri";
+    const DOH_MODE_PREF = "network.trr.mode";
+    const MULLVAD_ADBLOCK_URL = "https://adblock.dns.mullvad.net/dns-query";
+
+    const dohMode = Services.prefs.getIntPref(DOH_MODE_PREF, -1);
+    const usesAdBlock =
+      Services.prefs.getStringPref(DOH_URI_PREF, "") === MULLVAD_ADBLOCK_URL;
+    const usesCustomUri =
+      Services.prefs.prefHasUserValue(DOH_URI_PREF) && !usesAdBlock;
+    if (
+      dohMode === Ci.nsIDNSService.MODE_TRROFF ||
+      (dohMode === Ci.nsIDNSService.MODE_TRRONLY && usesCustomUri)
+    ) {
+      return;
+    }
+
+    Services.prefs.setIntPref(DOH_MODE_PREF, Ci.nsIDNSService.MODE_TRRONLY);
+    if (usesAdBlock) {
+      Services.prefs.clearUserPref(DOH_URI_PREF);
+    }
+    Services.prefs.setBoolPref(DOH_NOTIFICATION_PREF, true);
+  },
 };

@@ -394,6 +394,7 @@ BrowserGlue.prototype = {
     // handle any UI migration
     this._migrateUI();
     lazy.ProfileDataUpgrader.upgradeBB(this._isNewProfile);
+    lazy.ProfileDataUpgrader.upgradeMB(this._isNewProfile);
 
     if (!Services.prefs.prefHasUserValue(PREF_PDFJS_ISDEFAULT_CACHE_STATE)) {
       lazy.PdfJs.checkIsDefault(this._isNewProfile);
