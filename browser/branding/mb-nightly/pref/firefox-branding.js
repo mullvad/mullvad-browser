@@ -4,7 +4,11 @@
 
 // This file contains branding-specific prefs.
 
-pref("startup.homepage_override_url", "");
+// startup.homepage_override_url is used in about:mullvad-browser after an
+// update because app.releaseNotesURL.aboutDialog is about:blank for mb-nightly.
+// I.e. we want the update to show in about:mullvad-browser, whilst it is not
+// shown in the about dialog. See mullvad-browser#411.
+pref("startup.homepage_override_url", "https://nightlies.tbb.torproject.org/");
 // app.update.url.manual: URL user can browse to manually if for some reason
 // all update installation attempts fail.
 // app.update.url.details: a default value for the "More information about this
