@@ -876,18 +876,19 @@ nsBrowserContentHandler.prototype = {
               "%OLD_BASE_BROWSER_VERSION%",
               old_forkVersion
             );
-            if (overridePage && AppConstants.BASE_BROWSER_UPDATE) {
+            if (AppConstants.BASE_BROWSER_UPDATE) {
+              // NOTE: We ignore any overridePage value, which can come from the
+              // openURL attribute within the updates.xml file.
               // Mullvad Browser, copied from tor-browser: Instead of opening
               // the post-update "override page" directly, we include a link in
               // about:mullvad-browser.
-              prefb.setCharPref("mullvadbrowser.post_update.url", overridePage);
               prefb.setBoolPref(
                 "mullvadbrowser.post_update.shouldNotify",
                 true
               );
-              // If the user's homepage is about:tor, we will inform them
-              // about the update on that page; otherwise, we arrange to
-              // open about:tor in a secondary tab.
+              // If the user's homepage is about:mullvad-browser, we will inform
+              // them about the update on that page; otherwise, we arrange to
+              // open about:mullvad-browser in a secondary tab.
               overridePage =
                 startPage === "about:mullvad-browser"
                   ? ""
