@@ -637,13 +637,7 @@ class _RFPHelper {
           borderRadius === 0 ? "hidden" : "",
         "--letterboxing-border-radius": borderRadius,
       });
-
-      if (
-        isResize &&
-        this.letterboxingEnabled &&
-        (parentWidth > lastRoundedSize.width ||
-          parentHeight > lastRoundedSize.height)
-      ) {
+      if (win.gBrowser.selectedBrowser == aBrowser) {
         const updateStatus = async args => {
           win.XULBrowserWindow.letterboxingStatus = args
             ? await win.document.l10n.formatValue(
@@ -653,9 +647,24 @@ class _RFPHelper {
             : "";
           win.StatusPanel.update();
         };
-        updateStatus(lastRoundedSize);
-        win.clearTimeout(win._letterboxingStatusTimeout);
-        win._letterboxingStatusTimeout = win.setTimeout(updateStatus, 1000);
+        if (
+          isResize &&
+          this.letterboxingEnabled &&
+          (parentWidth > lastRoundedSize.width ||
+            parentHeight > lastRoundedSize.height)
+        ) {
+          const clazz = "letterboxingStatus";
+          const currentParent = win.document.getElementsByClassName(clazz)[0];
+          if (currentParent != browserParent) {
+            currentParent?.classList.remove(clazz);
+            browserParent.classList.add(clazz);
+          }
+          updateStatus(lastRoundedSize);
+          win.clearTimeout(win._letterboxingStatusTimeout);
+          win._letterboxingStatusTimeout = win.setTimeout(updateStatus, 1000);
+        } else {
+          updateStatus("");
+        }
       }
     }
 
@@ -751,9 +760,23 @@ class _RFPHelper {
     const resizeObserver = (aWindow._rfpResizeObserver =
       new aWindow.ResizeObserver(entries => {
         const context = { isResize: true };
-        for (let { target } of entries) {
+        if (entries.length == 1) {
+          const { target } = entries[0];
+          if (!("_letterboxingNew" in target)) {
+            target._letterboxingNew = !entries[0].contentRect.width;
+            if (target._letterboxingNew) {
+              return;
+            }
+            context.isResize = false;
+          } else if (target._letterboxingNew) {
+            target._letterboxingNew = false;
+            context.isResize = false;
+          }
+        }
+
+        for (const { target } of entries) {
           this._roundOrResetContentSize(
-            target.querySelector("browser"),
+            target.getElementsByTagName("browser")[0],
             context
           );
         }
