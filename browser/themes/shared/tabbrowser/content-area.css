@@ -124,6 +124,7 @@
     direction: ltr;
   }
 
+  .browserStack:not(.letterboxingStatus) &[type=letterboxingStatus],
   .exclude-letterboxing &[type=letterboxingStatus],
   &[inactive],
   :root[inDOMFullscreen] &:not([type=overLink]) {
