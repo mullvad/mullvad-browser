@@ -26,6 +26,7 @@ guarantees?
 
 ### Security
 <!--
+TODO: Mullvad Browser's threat model is somehow less restrictive than Tor Browser's, but currently undefined
 Outline any security implications this feature would introduce. The browser's
 security requirements can be found in our threat model document here:
 - https://gitlab.torproject.org/tpo/applications/wiki/-/wikis/Design-Documents/Tor-Browser-Design-Doc#21-security-requirements
@@ -33,6 +34,7 @@ security requirements can be found in our threat model document here:
 
 ### Privacy
 <!--
+TODO: Mullvad Browser's threat model is somehow less restrictive than Tor Browser's, but currently undefined
 Outline any privacy implications this feature would introduce. The browser's
 privacy requirements can be found in our threat model document here:
 - https://gitlab.torproject.org/tpo/applications/wiki/-/wikis/Design-Documents/Tor-Browser-Design-Doc#22-privacy-requirements
@@ -66,5 +68,5 @@ are there for users?
 
 ---
 
-/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Proposal"

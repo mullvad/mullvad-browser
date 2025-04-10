@@ -5,13 +5,11 @@
 ## Information
 
 ### Related Issue
-- tor-browser#AAAAA
 - mullvad-browser#BBBBB
 - tor-browser-build#CCCCC
 
 #### Affected Platforms
 
-- [ ] Android
 - [ ] Desktop
   - [ ] Windows
   - [ ] macOS
@@ -39,16 +37,11 @@
   - [ ] **morgan** : signing, release
   - [ ] **thorin** : fingerprinting
 - [ ] Other Engineering Teams
-  - [ ] Networking (**ahf**, **dgoulet**)
-  - [ ] Anti-Censorship (**meskio**, **cohosh**)
   - [ ] UX (**donuts**)
   - [ ] TPA (**anarcat**, **lavamind**)
 - [ ] External Tor Partners
   - [ ] Mozilla
   - [ ] Mullvad
-  - [ ] Brave
-  - [ ] Guardian Project (Orbot, Onion Browser)
-  - [ ] Tails
   - [ ] Other (please list)
 
 ### Urgency: When do we need to act?
@@ -93,10 +86,10 @@ Godspeed! :pray:
 /cc @ma1
 /cc @micah
 /cc @morgan
+/cc @ruihildt
 
 /confidential
 
-/label ~"Apps::Product::TorBrowser"
 /label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Bug"
 /label ~"Apps::Priority::Blocker"

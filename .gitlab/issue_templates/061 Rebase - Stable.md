@@ -1,16 +1,13 @@
 # ⤵️ Rebase Stable
-
 **NOTE:** All examples in this template reference the rebase from 102.7.0esr to 102.8.0esr
 
 <details>
   <summary>Explanation of Variables</summary>
 
-- `$(ESR_VERSION)`: the Mozilla defined ESR version, used in various places for building tor-browser tags, labels, etc
+- `$(ESR_VERSION)`: the Mozilla defined ESR version, used in various places for building mullvad-browser tags, labels, etc
   - **Example**: `102.8.0`
 - `$(ESR_TAG)`: the Mozilla defined hg (Mercurial) tag associated with `$(ESR_VERSION)`
   - **Example**: `FIREFOX_102_8_0esr_RELEASE`
-- `$(ESR_TAG_PREV)`: the Mozilla defined hg (Mercurial) tag associated with the previous ESR version when rebasing (ie, the ESR version we are rebasing from)
-  - **Example**: `FIREFOX_102_7_0esr_BUILD1`
 - `$(BROWSER_MAJOR)`: the browser major version
   - **Example**: `12`
 - `$(BROWSER_MINOR)`: the browser minor version
@@ -19,11 +16,17 @@
   - **Example**: `base-browser-102.8.0esr-12.0-1`
 - `$(BASE_BROWSER_BRANCH_PREV)`: the full name of the previous `base-browser` branch
   - **Example**: `base-browser-102.7.0esr-12.0-1`
-- `$(TOR_BROWSER_BRANCH)`: the full name of the current `tor-browser` branch
-  - **Example**: `tor-browser-102.8.0esr-12.0-1`
-- `$(TOR_BROWSER_BRANCH_PREV)`: the full name of the previous `tor-browser` branch
-  - **Example**: `tor-browser-102.7.0esr-12.0-1`
+- `$(BASE_BROWSER_BRANCH_TAG)`: the `base-browser` build tag used as base commit for `mullvad-browser`
+  - **Example**: `base-browser-102.8.0esr-12.0-1-build1`
+- `$(BASE_BROWSER_BRANCH_PREV_TAG)`: the `base-browser` build tag used as base commit for the previous `mullvad-browser`
+  - **Example**: `base-browser-102.7.0esr-12.0-1-build1`
+- `$(MULLVAD_BROWSER_BRANCH)`: the full name of the current `mullvad-browser` branch
+  - **Example**: `mullvad-browser-102.8.0esr-12.0-1`
+- `$(MULLVAD_BROWSER_BRANCH_PREV)`: the full name of the previous `mullvad-browser` branch
+  - **Example**: `mullvad-browser-102.7.0esr-12.0-1`
 </details>
+
+**NOTE:** It is assumed that we've already rebased and tagged `base-browser` stable
 
 ### **Bookkeeping**
 
@@ -31,88 +34,56 @@
 
 ### Update Branch Protection Rules
 
-- [ ] In [Repository Settings](https://gitlab.torproject.org/tpo/applications/tor-browser/-/settings/repository):
-  - [ ] Remove previous stable `base-browser` and `tor-browser` branch protection rules (this will prevent pushing new changes to the branches being rebased)
-  - [ ] Create new `base-browser` and `tor-browser` branch protection rule:
-    - **Branch**: `*-$(ESR_VERSION)esr-$(BROWSER_MAJOR).$(BROWSER_MINOR)-1*`
-      - **Example**: `*-102.8.0esr-12.0-1*`
+- [ ] In [Repository Settings](https://gitlab.torproject.org/tpo/applications/mullvad-browser/-/settings/repository):
+  - [ ] Remove previous stable `mullvad-browser` branch protection rules (this will prevent pushing new changes to the branches being rebased)
+  - [ ] Create new `mullvad-browser` branch protection rule:
+    - **Branch**: `mullvad-browser-$(ESR_VERSION)esr-$(BROWSER_MAJOR).$(BROWSER_MINOR)-1*`
+      - **Example**: `mullvad-browser-102.8.0esr-12.0-1*`
     - **Allowed to merge**: `Maintainers`
     - **Allowed to push and merge**: `Maintainers`
     - **Allowed to force push**: `false`
 
-### **Identify the Firefox Tagged Commit and Create New Branches**
+### **Create and Push New Branch**
 
-- [ ] Find the Firefox mercurial tag here: https://hg.mozilla.org/releases/mozilla-esr102/tags
-   - **Example**: `FIREFOX_102_8_0esr_BUILD1`
-- [ ] Find the analogous `gecko-dev` commit: https://github.com/mozilla/gecko-dev
-  - **Tip**: Search for unique string (like the Differential Revision ID) found in the mercurial commit in the `gecko-dev/esr102` branch to find the equivalent commit
-  - **Example**: `3a3a96c9eedd02296d6652dd50314fccbc5c4845`
-- [ ] Sign and Tag `gecko-dev` commit
-  - Sign/Tag `gecko-dev` commit :
-    - **Tag**: `$(ESR_TAG)`
-    - **Message**: `Hg tag $(ESR_TAG)`
-- [ ] Create new stable `base-browser` branch from tag
-  - Branch name in the form: `base-browser-$(ESR_VERSION)esr-$(BROWSER_MAJOR).$(BROWSER_MINOR)-1`
-  - **Example**: `base-browser-102.8.0esr-12.0-1`
-- [ ] Create new stable `tor-browser` branch from
-  - Branch name in the form: `tor-browser-$(ESR_VERSION)esr-$(BROWSER_MAJOR).$(BROWSER_MINOR)-1`
-  - **Example**: `tor-browser-102.8.0esr-12.0-1`
-- [ ] Push new `base-browser` branch to `upstream`
-- [ ] Push new `tor-browser` branch to `upstream`
-- [ ] Push new `$(ESR_TAG)` to `upstream`
+- [ ] Create new stable `mullvad-browser` branch from this ESR's stable `base-browser` tag
+  - Branch name in the form: `mullvad-browser-$(ESR_VERSION)esr-$(BROWSER_MAJOR).$(BROWSER_MINOR)-1`
+  - **Example**: `git branch mullvad-browser-102.8.0esr-12.0-1 base-browser-102.8.0esr-12.0-1-build1`
+- [ ] Push new `mullvad-browser` branch to `upstream`
+- [ ] Push `base-browser` tag to `upstream`
+- [ ] Push `$(ESR_TAG)` to `upstream`
 
-### **Rebase tor-browser**
+### **Rebase mullvad-browser**
 
-- [ ] Checkout a new local branch for the `tor-browser` rebase
-  - **Example**: `git branch tor-browser-rebase FIREFOX_102_8_0esr_BUILD1`
-- [ ] **(Optional)** `base-browser` rebase
-  - **NOTE** This step may be skipped if the `HEAD` of the previous `base-browser` branch is a `-buildN` tag
-  - [ ] Cherry-pick the previous `base-browser` commits up to `base-browser`'s `buildN` tag onto new `base-browser` rebase branch
-    - **Example**: `git cherry-pick FIREFOX_102_7_0esr_BUILD1..base-browser-102.7.0esr-12.0-1-build1`
-  - [ ] Rebase and autosquash these cherry-picked commits
-    - **Example**: `git rebase --autosquash --interactive FIREFOX_102_8_0esr_BUILD1 HEAD`
-  - [ ] Cherry-pick remainder of patches after the `buildN` tag
-    - **Example**: `git cherry-pick base-browser-102.7.0esr-12.0-1-build1..upstream/base-browser-102.7.0esr-12.0-1`
-- [ ] `tor-browser` rebase
-  - [ ] Note the current git hash of `HEAD` for `tor-browser` rebase+autosquash step: `git rev-parse HEAD`
-  - [ ] Cherry-pick the appropriate previous `tor-browser` branch's commit range up to the last `tor-browser` `buildN` tag
-    - **Example**: `git cherry-pick base-browser-102.7.0esr-12.0-1-build1..tor-browser-102.7.0esr-12.0-1-build1`
-    - **Example (if separate base-browser rebase was skipped)**: `git cherry-pick FIREFOX_102_7_0esr_BUILD1..tor-browser-102.7.0esr-12.0-1-build1`
-  - [ ] Rebase and autosquash these newly cherry-picked commits: `git rebase --autosquash --interactive $(PREV_HEAD)`
-     - **Example**: `git rebase --autosquash --interactive FIREFOX_102_8_0esr_RELEASE`
-  - [ ] Cherry-pick remainder of patches after the last `tor-browser` `buildN` tag
-    - **Example**: `git cherry-pick tor-browser-102.7.0esr-12.0-1-build1..upstream/tor-browser-102.7.0esr-12.0-1`
+- [ ] Checkout a new local branch for the `mullvad-browser` rebase
+  - **Example**: `git branch mullvad-browser-rebase upstream/mullvad-browser-102.8.0esr-12.0-1`
+- [ ] `mullvad-browser` rebase
+  - [ ] Cherry-pick the previous `mullvad-browser` branch's commit range up to the last `mullvad-browser` `build1` tag
+    - **Example**: `git cherry-pick base-browser-102.7.0esr-12.0-1-build1..mullvad-browser-102.7.0esr-12.0-1-build1`
+  - [ ] Rebase and autosquash these newly cherry-picked commits
+     - **Example**: `git rebase --autosquash --interactive upstream/mullvad-browser-102.8.0esr-12.0-1`
+  - [ ] Cherry-pick remainder of patches after the last `mullvad-browser` `buildN` tag
+    - **Example**: `git cherry-pick mullvad-browser-102.7.0esr-12.0-1-build1..upstream/mullvad-browser-102.7.0esr-12.0-1`
   - [ ] Rebase and autosquash again, this time replacing all `fixup` and `squash` commands with `pick`. The goal here is to have all of the `fixup` and `squash` commits beside the commit which they modify, but kept un-squashed for easy debugging/bisecting.
-    - **Example**: `git rebase --autosquash --interactive FIREFOX_102_8_0esr_RELEASE`
+    - **Example**: `git rebase --autosquash --interactive upstream/mullvad-browser-102.8.0esr-12.0-1`
 - [ ] Compare patch sets to ensure nothing *weird* happened during conflict resolution:
   - [ ] diff of diffs:
     -  Do the diff between `current_patchset.diff` and `rebased_patchset.diff` with your preferred difftool and look at differences on lines that starts with + or -
-    - `git diff $(ESR_TAG_PREV)..$(BROWSER_BRANCH_PREV) > current_patchset.diff`
-    - `git diff $(ESR_TAG)..$(BROWSER_BRANCH) > rebased_patchset.diff`
+    - `git diff $(BASE_BROWSER_BRANCH_PREV_TAG)..$(MULLVAD_BROWSER_BRANCH_PREV) > current_patchset.diff`
+    - `git diff $(BASE_BROWSER_BRANCH_TAG)..HEAD > rebased_patchset.diff`
     - diff `current_patchset.diff` and `rebased_patchset.diff`
-      - If everything went correctly, the only lines which should differ should be the lines starting with `index abc123...def456` (unless the previous `base-browser` branch includes changes not included in the previous `tor-browser` branch)
-  - [ ] rangediff: `git range-diff $(ESR_TAG_PREV)..$(TOR_BROWSER_BRANCH_PREV) $(ESR_TAG)..HEAD`
-    - **Example**: `git range-dif FIREFOX_102_7_0esr_BUILD1..upstream/tor-browser-102.7.0esr-12.0-1 FIREFOX_102_8_0esr_BUILD1..HEAD`
-- [ ] Open MR for the `tor-browser` rebase
+      - If everything went correctly, the only lines which should differ should be the lines starting with `index abc123...def456` (unless the previous `base-browser` branch includes changes not included in the previous `mullvad-browser` branch)
+  - [ ] rangediff: `git range-diff $(BASE_BROWSER_BRANCH_PREV_TAG)..$(MULLVAD_BROWSER_BRANCH_PREV) $(BASE_BROWSER_BRANCH_TAG)..HEAD`
+    - **Example**: `git range-diff base-browser-102.7.0esr-12.0-1-build1..upstream/mullvad-browser-102.7.0esr-12.5-1 base-browser-102.8.0esr-12.5-1-build1..HEAD`
+- [ ] Open MR for the `mullvad-browser` rebase
 - [ ] Merge
-- Update and push `base-browser` branch
-  - [ ] Reset the new `base-browser` branch to the appropriate commit in this new `tor-browser` branch
-  - [ ] Push these commits to `upstream`
 
 ### **Sign and Tag**
 
-- [ ] Sign/Tag `HEAD` of the merged `tor-browser` branch:
-  - In **tor-browser.git**, checkout the new stable `tor-browser` branch
+- [ ] Sign/Tag `HEAD` of the merged `mullvad-browser` branch:
+  - In **mullvad-browser.git**, checkout the new stable `mullvad-browser` branch
   - In **tor-browser-build.git**, run signing script:
     ```bash
-    ./tools/browser/sign-tag.torbrowser stable build1
-    ```
-  - [ ] Push tag to `upstream`
-- [ ] Sign/Tag HEAD of the merged `base-browser` branch:
-  - In **tor-browser.git**, checkout the new stable `base-browser` branch
-  - In **tor-browser-build.git**, run signing script:
-    ```bash
-    ./tools/browser/sign-tag.basebrowser stable build1
+    ./tools/browser/sign-tag.mullvadbrowser stable build1
     ```
   - [ ] Push tag to `upstream`
 
@@ -120,6 +91,6 @@
 
 ---
 
-/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Rebase"
 /label ~"Apps::Priority::Blocker"
