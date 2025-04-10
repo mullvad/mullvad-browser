@@ -25,5 +25,5 @@ and the expected behaviour of each
 
 ---
 
-/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Test"

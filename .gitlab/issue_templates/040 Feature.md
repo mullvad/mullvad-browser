@@ -18,7 +18,7 @@ Provide an overview of the technical/implementation aspects of this feature
 
 ### Proposal
 <!-- Add links to associated proposal issues (or delete block) -->
-- tor-browser#12345
+- mullvad-browser#123
 
 ### Design
 <!-- Add links to associated design issues (or delete block) -->
@@ -28,5 +28,5 @@ Provide an overview of the technical/implementation aspects of this feature
 
 ---
 
-/label ~"Apps::Product::TorBrowser"
+/label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Feature"
