@@ -4,10 +4,9 @@
 // Use the OS locale by default (tor-browser#17400)
 pref("intl.locale.requested", "");
 
-// Home page and new tab is blank rather than Firefox Home (Activity Stream).
+// Home page is blank rather than Firefox Home (Activity Stream).
 // tor-browser#31575 and tor-browser#30662
 pref("browser.startup.homepage", "about:blank");
-pref("browser.newtabpage.enabled", false);
 
 // tor-browser#43164: Prevent search-bar from being auto-hidden when not used for awhile
 // This preference is locked so that the browser itself can never set an actual
