@@ -1,6 +1,7 @@
 .with-local-repo-bash:
   variables:
       GIT_STRATEGY: "none"
+      FETCH_TIMEOUT: 180 # 3 minutes
   before_script:
     - git init
     - git remote add local "$LOCAL_REPO_PATH"
@@ -19,18 +20,38 @@
           exit 1
       fi
     - git fetch --depth 500 local $TARGET_BRANCH
+    - git --no-pager log FETCH_HEAD --oneline -n 5
     - git remote add origin "$CI_REPOSITORY_URL"
     - |
       if [ -z "${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]; then
           echo "No branch specified. Stopping the pipeline."
           exit 1
       fi
-    - echo "Fetching from remote branch ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    - echo "Fetching from remote branch ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} with a ${FETCH_TIMEOUT}s timeout."
     - |
-      if ! git fetch origin "${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"; then
-            echo -e "\e[31mFetching failed for branch ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} from $CI_REPOSITORY_URL.\e[0m"
-            echo "Attempting to fetch the merge request branch, assuming this pipeline is not running in a fork."
-            git fetch origin "merge-requests/${CI_MERGE_REQUEST_IID}/head"
+      fetch_with_timeout() {
+        local remote=$1
+        local branch=$2
+
+        set +e
+        timeout ${FETCH_TIMEOUT} git fetch "$remote" "$branch"
+        local fetch_exit=$?
+        set -e
+
+        if [ "$fetch_exit" -eq 124 ]; then
+          echo "Fetching failed for branch ${remote}/${branch} due to a timeout. Try again later."
+          echo "Gitlab may be experiencing slowness or the local copy of the repository on the CI server may be oudated."
+          return 1
+        fi
+
+        return $fetch_exit
+      }
+
+      if ! fetch_with_timeout origin "${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"; then
+        echo "Fetching failed for branch ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}."
+        echo "Attempting to fetch the merge request branch, assuming this pipeline is not running in a fork."
+
+        fetch_with_timeout origin "merge-requests/${CI_MERGE_REQUEST_IID}/head" || exit 1
       fi
     - git checkout FETCH_HEAD
 
