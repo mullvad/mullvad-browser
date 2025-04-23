@@ -958,7 +958,8 @@ class _RFPHelper {
       if (x11Height < targetHeight) {
         targetHeight = x11Height + 2;
       }
-      aWindow.resizeTo(targetWidth, targetHeight);
+      // resizeTo truncates on X11, so we compensate.
+      aWindow.resizeTo(Math.ceil(targetWidth), Math.ceil(targetHeight));
     } else {
       aWindow.resizeBy(deltaWidth, deltaHeight);
     }
