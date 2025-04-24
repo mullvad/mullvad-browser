@@ -208,6 +208,11 @@ pref("datareporting.policy.dataSubmissionEnabled", false);
 pref("browser.urlbar.recentsearches.featureGate", false);
 pref("browser.urlbar.suggest.recentsearches", false);
 
+// Disable the UITour API
+// See tor-browser#41457 and
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1915280
+pref("browser.uitour.enabled", false);
+
 // Make sure Unified Telemetry is really disabled, see: #18738.
 pref("toolkit.telemetry.unified", false);
 // This needs to be locked, or nightly builds will automatically lock it to true
