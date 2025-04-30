@@ -1836,6 +1836,15 @@ BrowserGlue.prototype = {
     // Version 3: 14.0a7: Reset general.smoothScroll. tor-browser#42070.
     const MIGRATION_VERSION = 3;
     const MIGRATION_PREF = "basebrowser.migration.version";
+    if (this._isNewProfile) {
+      // Do not migrate fresh profiles
+      Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
+      return;
+    } else if (this._isNewProfile === undefined) {
+      // If this happens, check if upstream updated their function and do not
+      // set this member anymore!
+      console.error("_migrateUIBB: this._isNewProfile is undefined.");
+    }
     // We do not care whether this is a new or old profile, since in version 1
     // we just quickly clear a user preference, which should not do anything to
     // new profiles.
