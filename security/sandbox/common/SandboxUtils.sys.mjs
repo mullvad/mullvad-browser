@@ -37,7 +37,7 @@ export var SandboxUtils = {
 
       let buttons = [
         {
-          supportPage: "install-firefox-linux#w_security-features-warning",
+          supportPage: "install-firefox-linux",
           "l10n-id": "sandbox-unprivileged-namespaces-howtofix",
         },
         {
