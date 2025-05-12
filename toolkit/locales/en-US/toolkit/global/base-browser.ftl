@@ -128,10 +128,6 @@ security-level-toolbar-button-custom =
 
 # Uses sentence case in English (US).
 security-level-panel-heading = Security level
-
-security-level-panel-level-standard = Standard
-security-level-panel-level-safer = Safer
-security-level-panel-level-safest = Safest
 security-level-panel-learn-more-link = Learn more
 # Button to open security level settings.
 security-level-panel-open-settings-button = Settings…
@@ -141,12 +137,35 @@ security-level-panel-open-settings-button = Settings…
 security-level-preferences-heading = Security Level
 security-level-preferences-overview = Disable certain web features that can be used to attack your security and anonymity.
 security-level-preferences-learn-more-link = Learn more
+# Text for a badge that labels the currently active security level.
+# The text in between '<span>' and '</span>' should contain some kind of bracket, like '(' and ')', or other punctuation used in your language to separate out text from its surrounding context. This will not be visible, but will be use for screen readers to make it clear that the text is not part of the same sentence. For example, in US English this would be read as "(Current level)", and the full line of text would be read as "Safest (Current level)".
+security-level-preferences-current-badge = <span>(</span>Current level<span>)</span>
+security-level-preferences-change-button = Change…
+
+## Security level settings dialog.
+
+security-level-dialog-window =
+    .title = Change security level
+
+# '-brand-short-name' is the localized browser name, like "Tor Browser".
+security-level-dialog-restart-description = You will need to restart { -brand-short-name } to apply any changes. This will close all windows and tabs.
+
 security-level-preferences-level-standard =
     .label = Standard
 security-level-preferences-level-safer =
     .label = Safer
 security-level-preferences-level-safest =
     .label = Safest
+
+security-level-dialog-save-restart =
+    .label = Save and restart
+
+## Security level names shown in the security panel and settings.
+
+security-level-panel-level-standard = Standard
+security-level-panel-level-safer = Safer
+security-level-panel-level-safest = Safest
+security-level-panel-level-custom = Custom
 
 ## Security level summaries shown in security panel and settings.
 
@@ -166,16 +185,9 @@ security-level-preferences-bullet-limit-font-and-symbols-and-images = Some fonts
 ## Custom security level.
 ## Some custom preferences configuration has placed the user outside one of the standard three levels.
 
-# Shown in the security level panel as an orange badge next to the expected level.
-security-level-panel-custom-badge = Custom
-# Shown in the security level settings in a warning box.
-security-level-preferences-custom-heading = Custom security level configured
 # Description of custom state and recommended action.
 # Shown in the security level panel and settings.
 security-level-summary-custom = Your custom browser preferences have resulted in unusual security settings. For security and privacy reasons, we recommend you choose one of the default security levels.
-# Button to undo custom changes to the security level and place the user in one of the standard security levels.
-# Shown in the security level panel and settings.
-security-level-restore-defaults-button = Restore defaults
 
 ## Security level restart prompt.
 
