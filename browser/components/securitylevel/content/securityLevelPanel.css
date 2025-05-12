@@ -23,7 +23,7 @@
   background-position-x: right var(--background-inline-offset);
 }
 
-#securityLevel-background[level="standard"] {
+#securityLevel-background:is([level="standard"], [level="custom"]) {
   background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
 }
 
@@ -47,14 +47,6 @@
 #securityLevel-level {
   font-size: 1.25em;
   font-weight: 600;
-}
-
-#securityLevel-custom {
-  border-radius: 4px;
-  background-color: var(--warning-icon-bgcolor);
-  color: black;
-  padding: 0.4em 0.5em;
-  margin-inline-start: 1em;
 }
 
 #securityLevel-summary {

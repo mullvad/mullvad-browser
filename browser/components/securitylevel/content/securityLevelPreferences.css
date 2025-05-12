@@ -1,26 +1,166 @@
-#securityLevel-groupbox {
-  --section-highlight-background-color: color-mix(in srgb, var(--in-content-accent-color) 20%, transparent);
+.security-level-grid {
+  display: grid;
+  grid-template:
+    "icon name badge button" min-content
+    "icon summary summary button" auto
+    "icon extra extra ." auto
+    / max-content max-content 1fr max-content;
 }
 
-#securityLevel-customNotification {
-  /* Spacing similar to #fpiIncompatibilityWarning. */
-  margin-block: 16px;
+.security-level-icon {
+  grid-area: icon;
+  align-self: start;
+  width: 24px;
+  height: 24px;
+  -moz-context-properties: fill;
+  fill: var(--in-content-icon-color);
+  margin-block-start: var(--space-xsmall);
+  margin-inline-end: var(--space-large);
 }
 
-.info-icon.securityLevel-custom-warning-icon {
-  list-style-image: url("chrome://global/skin/icons/warning.svg");
+.security-level-current-badge {
+  grid-area: badge;
+  align-self: center;
+  justify-self: start;
+  white-space: nowrap;
+  background: var(--background-color-information);
+  color: inherit;
+  font-size: var(--font-size-small);
+  border-radius: var(--border-radius-circle);
+  margin-inline-start: var(--space-small);
+  padding-block: var(--space-xsmall);
+  padding-inline: var(--space-small);
 }
 
-#securityLevel-customHeading {
+.security-level-current-badge span {
+  /* Still accessible to screen reader, but not visual.
+   * Keep inline, but with no layout width. */
+  display: inline-block;
+  width: 1px;
+  margin-inline-end: -1px;
+  clip-path: inset(50%);
+}
+
+@media (prefers-contrast) and (not (forced-colors)) {
+  .security-level-current-badge {
+    /* Match the checkbox/radio colors. */
+    background: var(--color-accent-primary);
+    color: var(--button-text-color-primary);
+  }
+}
+
+@media (forced-colors) {
+  .security-level-current-badge {
+    /* Match the checkbox/radio/selected colors. */
+    background: SelectedItem;
+    color: SelectedItemText;
+  }
+}
+
+.security-level-name {
+  grid-area: name;
   font-weight: bold;
+  align-self: center;
+  white-space: nowrap;
 }
 
-#securityLevel-radiogroup[disabled] {
-  opacity: 0.5;
+.security-level-description {
+  display: grid;
+  grid-column: summary-start / extra-end;
+  grid-row: summary-start / extra-end;
+  grid-template-rows: subgrid;
+  grid-template-columns: subgrid;
+  margin-block-start: var(--space-small);
 }
 
-/* Overwrite the rule in common-shared.css so we don't get 0.25 opacity overall
- * on the radio text. */
-#securityLevel-radiogroup[disabled] radio[disabled] .radio-label-box {
-  opacity: 1.0;
+.security-level-summary {
+  grid-area: summary;
+}
+
+.security-level-description-extra {
+  grid-area: extra;
+  margin-block: var(--space-medium) 0;
+  margin-inline: var(--space-large) 0;
+  padding: 0;
+}
+
+.security-level-description-bullet:not(:last-child) {
+  margin-block-end: var(--space-medium);
+}
+
+/* Tweak current security level display. */
+
+#security-level-current {
+  margin-block-start: var(--space-large);
+  background: var(--in-content-box-background);
+  border: 1px solid var(--in-content-box-border-color);
+  border-radius: var(--border-radius-small);
+  padding: var(--space-medium);
+}
+
+#security-level-change {
+  grid-area: button;
+  align-self: center;
+  margin: 0;
+  margin-inline-start: var(--space-large);
+}
+
+/* Adjust which content is visible depending on the current security level. */
+
+#security-level-current:not([data-current-level="standard"]) .security-level-current-standard {
+  display: none;
+}
+
+#security-level-current:not([data-current-level="safer"]) .security-level-current-safer {
+  display: none;
+}
+
+#security-level-current:not([data-current-level="safest"]) .security-level-current-safest {
+  display: none;
+}
+
+#security-level-current:not([data-current-level="custom"]) .security-level-current-custom {
+  display: none;
+}
+
+#security-level-current[data-current-level="standard"] .security-level-icon {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
+}
+
+#security-level-current[data-current-level="safer"] .security-level-icon {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer");
+}
+
+#security-level-current[data-current-level="safest"] .security-level-icon {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
+}
+
+#security-level-current[data-current-level="custom"] .security-level-icon {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard_custom");
+}
+
+/* Tweak security level dialog. */
+
+#security-level-radiogroup {
+  margin-block: var(--space-large) var(--space-xlarge);
+}
+
+.security-level-radio-container {
+  padding-block: var(--space-large);
+}
+
+#security-level-radiogroup .security-level-radio {
+  margin: 0;
+}
+
+#security-level-radiogroup .radio-label-box {
+  /* .security-level-current-badge already has a margin. */
+  margin: 0;
+}
+
+#security-level-radiogroup .privacy-detailedoption.security-level-radio-container:not(.selected) .security-level-description-extra {
+  /* .privacy-detailedoption uses visibility: hidden, which does not work with
+   * our grid display (the margin is still reserved) so we use display: none
+   * instead. */
+  display: none;
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+
+<window
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  data-l10n-id="security-level-dialog-window"
+>
+  <dialog id="security-level-dialog" buttons="accept,cancel">
+    <linkset>
+      <html:link rel="stylesheet" href="chrome://global/skin/global.css" />
+      <!-- NOTE: We include common.css explicitly, rather than relying on
+         - the dialog's shadowroot importing it, which is late loaded in
+         - response to the dialog's "subdialog" attribute, which is set
+         - in response to DOMFrameContentLoaded.
+         - In particular, we need the .radio-check rule and font rules from
+         - common-shared.css to be in place when gSecurityLevelDialog.init is
+         - called, which will help ensure that the radio element has the correct
+         - size when we measure its bounding box. -->
+      <html:link
+        rel="stylesheet"
+        href="chrome://global/skin/in-content/common.css"
+      />
+      <html:link
+        rel="stylesheet"
+        href="chrome://browser/skin/preferences/preferences.css"
+      />
+      <html:link
+        rel="stylesheet"
+        href="chrome://browser/skin/preferences/privacy.css"
+      />
+      <html:link
+        rel="stylesheet"
+        href="chrome://browser/content/securitylevel/securityLevelPreferences.css"
+      />
+
+      <html:link rel="localization" href="branding/brand.ftl" />
+      <html:link rel="localization" href="toolkit/global/base-browser.ftl" />
+    </linkset>
+
+    <script src="chrome://browser/content/securitylevel/securityLevelDialog.js" />
+
+    <description data-l10n-id="security-level-dialog-restart-description" />
+
+    <radiogroup id="security-level-radiogroup" class="highlighting-group">
+      <html:div
+        class="security-level-radio-container security-level-grid privacy-detailedoption info-box-container"
+      >
+        <radio
+          class="security-level-radio security-level-name"
+          value="standard"
+          data-l10n-id="security-level-preferences-level-standard"
+        />
+        <html:div
+          class="security-level-current-badge"
+          data-l10n-id="security-level-preferences-current-badge"
+        ></html:div>
+      </html:div>
+      <html:div
+        class="security-level-radio-container security-level-grid privacy-detailedoption info-box-container"
+      >
+        <radio
+          class="security-level-radio security-level-name"
+          value="safer"
+          data-l10n-id="security-level-preferences-level-safer"
+        />
+        <html:div
+          class="security-level-current-badge"
+          data-l10n-id="security-level-preferences-current-badge"
+        ></html:div>
+      </html:div>
+      <html:div
+        class="security-level-radio-container security-level-grid privacy-detailedoption info-box-container"
+      >
+        <radio
+          class="security-level-radio security-level-name"
+          value="safest"
+          data-l10n-id="security-level-preferences-level-safest"
+        />
+        <html:div
+          class="security-level-current-badge"
+          data-l10n-id="security-level-preferences-current-badge"
+        ></html:div>
+      </html:div>
+    </radiogroup>
+  </dialog>
+</window>

@@ -1,9 +1,10 @@
 "use strict";
 
-/* global AppConstants, Services, openPreferences, XPCOMUtils */
+/* global AppConstants, Services, openPreferences, XPCOMUtils, gSubDialog */
 
 ChromeUtils.defineESModuleGetters(this, {
   SecurityLevelPrefs: "resource://gre/modules/SecurityLevel.sys.mjs",
+  SecurityLevelUIUtils: "resource:///modules/SecurityLevelUIUtils.sys.mjs",
 });
 
 /*
@@ -35,12 +36,8 @@ var SecurityLevelButton = {
   _anchorButton: null,
 
   _configUIFromPrefs() {
-    const level = SecurityLevelPrefs.securityLevel;
-    if (!level) {
-      return;
-    }
-    const custom = SecurityLevelPrefs.securityCustom;
-    this._button.setAttribute("level", custom ? `${level}_custom` : level);
+    const level = SecurityLevelPrefs.securityLevelSummary;
+    this._button.setAttribute("level", level);
 
     let l10nIdLevel;
     switch (level) {
@@ -53,14 +50,11 @@ var SecurityLevelButton = {
       case "safest":
         l10nIdLevel = "security-level-toolbar-button-safest";
         break;
+      case "custom":
+        l10nIdLevel = "security-level-toolbar-button-custom";
+        break;
       default:
         throw Error(`Unhandled level: ${level}`);
-    }
-    if (custom) {
-      // Don't distinguish between the different levels when in the custom
-      // state. We just want to emphasise that it is custom rather than any
-      // specific level.
-      l10nIdLevel = "security-level-toolbar-button-custom";
     }
     document.l10n.setAttributes(this._button, l10nIdLevel);
   },
@@ -164,12 +158,7 @@ var SecurityLevelPanel = {
       panel: document.getElementById("securityLevel-panel"),
       background: document.getElementById("securityLevel-background"),
       levelName: document.getElementById("securityLevel-level"),
-      customName: document.getElementById("securityLevel-custom"),
       summary: document.getElementById("securityLevel-summary"),
-      restoreDefaultsButton: document.getElementById(
-        "securityLevel-restoreDefaults"
-      ),
-      settingsButton: document.getElementById("securityLevel-settings"),
     };
 
     const learnMoreEl = document.getElementById("securityLevel-learnMore");
@@ -177,12 +166,11 @@ var SecurityLevelPanel = {
       this.hide();
     });
 
-    this._elements.restoreDefaultsButton.addEventListener("command", () => {
-      this.restoreDefaults();
-    });
-    this._elements.settingsButton.addEventListener("command", () => {
-      this.openSecuritySettings();
-    });
+    document
+      .getElementById("securityLevel-settings")
+      .addEventListener("command", () => {
+        this.openSecuritySettings();
+      });
 
     this._elements.panel.addEventListener("popupshown", () => {
       // Bring focus into the panel by focusing the default button.
@@ -199,19 +187,7 @@ var SecurityLevelPanel = {
     }
 
     // get security prefs
-    const level = SecurityLevelPrefs.securityLevel;
-    const custom = SecurityLevelPrefs.securityCustom;
-
-    // only visible when user is using custom settings
-    this._elements.customName.hidden = !custom;
-    this._elements.restoreDefaultsButton.hidden = !custom;
-    if (custom) {
-      this._elements.settingsButton.removeAttribute("default");
-      this._elements.restoreDefaultsButton.setAttribute("default", "true");
-    } else {
-      this._elements.settingsButton.setAttribute("default", "true");
-      this._elements.restoreDefaultsButton.removeAttribute("default");
-    }
+    const level = SecurityLevelPrefs.securityLevelSummary;
 
     // Descriptions change based on security level
     this._elements.background.setAttribute("level", level);
@@ -230,11 +206,12 @@ var SecurityLevelPanel = {
         l10nIdLevel = "security-level-panel-level-safest";
         l10nIdSummary = "security-level-summary-safest";
         break;
+      case "custom":
+        l10nIdLevel = "security-level-panel-level-custom";
+        l10nIdSummary = "security-level-summary-custom";
+        break;
       default:
         throw Error(`Unhandled level: ${level}`);
-    }
-    if (custom) {
-      l10nIdSummary = "security-level-summary-custom";
     }
 
     document.l10n.setAttributes(this._elements.levelName, l10nIdLevel);
@@ -269,13 +246,6 @@ var SecurityLevelPanel = {
     this._elements.panel.hidePopup();
   },
 
-  restoreDefaults() {
-    SecurityLevelPrefs.securityCustom = false;
-    // Move focus to the settings button since restore defaults button will
-    // become hidden.
-    this._elements.settingsButton.focus();
-  },
-
   openSecuritySettings() {
     openPreferences("privacy-securitylevel");
     this.hide();
@@ -301,59 +271,64 @@ var SecurityLevelPanel = {
 
 var SecurityLevelPreferences = {
   _securityPrefsBranch: null,
+
   /**
-   * The notification box shown when the user has a custom security setting.
+   * The element that shows the current security level.
    *
-   * @type {Element}
+   * @type {?Element}
    */
-  _customNotification: null,
-  /**
-   * The radiogroup for this preference.
-   *
-   * @type {Element}
-   */
-  _radiogroup: null,
-  /**
-   * A list of radio options and their containers.
-   *
-   * @type {Array<object>}
-   */
-  _radioOptions: null,
+  _currentEl: null,
 
   _populateXUL() {
-    this._customNotification = document.getElementById(
-      "securityLevel-customNotification"
-    );
-    document
-      .getElementById("securityLevel-restoreDefaults")
-      .addEventListener("command", () => {
-        SecurityLevelPrefs.securityCustom = false;
-      });
-
-    this._radiogroup = document.getElementById("securityLevel-radiogroup");
-
-    this._radioOptions = Array.from(
-      this._radiogroup.querySelectorAll(".securityLevel-radio-option"),
-      container => {
-        return { container, radio: container.querySelector("radio") };
-      }
+    this._currentEl = document.getElementById("security-level-current");
+    const changeButton = document.getElementById("security-level-change");
+    const badgeEl = this._currentEl.querySelector(
+      ".security-level-current-badge"
     );
 
-    this._radiogroup.addEventListener("select", () => {
-      SecurityLevelPrefs.securityLevel = this._radiogroup.value;
+    for (const { level, nameId } of [
+      { level: "standard", nameId: "security-level-panel-level-standard" },
+      { level: "safer", nameId: "security-level-panel-level-safer" },
+      { level: "safest", nameId: "security-level-panel-level-safest" },
+      { level: "custom", nameId: "security-level-panel-level-custom" },
+    ]) {
+      // Classes that control visibility:
+      // security-level-current-standard
+      // security-level-current-safer
+      // security-level-current-safest
+      // security-level-current-custom
+      const visibilityClass = `security-level-current-${level}`;
+      const nameEl = document.createElement("div");
+      nameEl.classList.add("security-level-name", visibilityClass);
+      document.l10n.setAttributes(nameEl, nameId);
+
+      const descriptionEl = SecurityLevelUIUtils.createDescriptionElement(
+        level,
+        document
+      );
+      descriptionEl.classList.add(visibilityClass);
+
+      this._currentEl.insertBefore(nameEl, badgeEl);
+      this._currentEl.insertBefore(descriptionEl, changeButton);
+    }
+
+    changeButton.addEventListener("click", () => {
+      this._openDialog();
     });
   },
 
+  _openDialog() {
+    gSubDialog.open(
+      "chrome://browser/content/securitylevel/securityLevelDialog.xhtml",
+      { features: "resizable=yes" }
+    );
+  },
+
   _configUIFromPrefs() {
-    this._radiogroup.value = SecurityLevelPrefs.securityLevel;
-    const isCustom = SecurityLevelPrefs.securityCustom;
-    this._radiogroup.disabled = isCustom;
-    this._customNotification.hidden = !isCustom;
-    // Have the container's selection CSS class match the selection state of the
-    // radio elements.
-    for (const { container, radio } of this._radioOptions) {
-      container.classList.toggle("selected", radio.selected);
-    }
+    // Set a data-current-level attribute for showing the current security
+    // level, and hiding the rest.
+    this._currentEl.dataset.currentLevel =
+      SecurityLevelPrefs.securityLevelSummary;
   },
 
   init() {

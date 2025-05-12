@@ -4,3 +4,5 @@ browser.jar:
     content/browser/securitylevel/securityLevelButton.css      (content/securityLevelButton.css)
     content/browser/securitylevel/securityLevelPreferences.css (content/securityLevelPreferences.css)
     content/browser/securitylevel/securityLevelIcon.svg        (content/securityLevelIcon.svg)
+    content/browser/securitylevel/securityLevelDialog.xhtml    (content/securityLevelDialog.xhtml)
+    content/browser/securitylevel/securityLevelDialog.js       (content/securityLevelDialog.js)

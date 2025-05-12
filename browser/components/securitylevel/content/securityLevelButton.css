@@ -7,12 +7,6 @@ toolbarbutton#security-level-button[level="safer"] {
 toolbarbutton#security-level-button[level="safest"] {
   list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
 }
-toolbarbutton#security-level-button[level="standard_custom"] {
+toolbarbutton#security-level-button[level="custom"] {
   list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard_custom");
-}
-toolbarbutton#security-level-button[level="safer_custom"] {
-  list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer_custom");
-}
-toolbarbutton#security-level-button[level="safest_custom"] {
-  list-style-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest_custom");
 }
