@@ -2345,6 +2345,7 @@ async function torSendExtensionMessage(extensionId, message) {
   const result = await ProxyMessenger.conduit.castRuntimeMessage("messenger", {
     extensionId,
     holder: new StructuredCloneHolder("torSendExtensionMessage", null, message),
+    query: true,
     firstResponse: true,
     sender: {
       id: extensionId,
