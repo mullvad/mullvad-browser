@@ -176,3 +176,10 @@ security-level-summary-custom = Your custom browser preferences have resulted in
 # Button to undo custom changes to the security level and place the user in one of the standard security levels.
 # Shown in the security level panel and settings.
 security-level-restore-defaults-button = Restore defaults
+
+## Security level restart prompt.
+
+security-level-restart-prompt-title = Your security level settings require a restart
+security-level-restart-prompt-body = You must restart { -brand-short-name } for your security level settings to be applied. This will close all your windows and tabs.
+security-level-restart-prompt-button-restart = Restart
+security-level-restart-prompt-button-ignore = Ignore
