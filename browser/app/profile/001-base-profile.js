@@ -536,6 +536,11 @@ pref("network.proxy.failover_direct", false, locked);
 // alters content load order in a page. See tor-browser#24686
 pref("network.http.tailing.enabled", true, locked);
 
+// Block 0.0.0.0
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1889130
+// tor-browser#43811
+pref("network.socket.ip_addr_any.disabled", true);
+
 // tor-browser#23044: Make sure we don't have any GIO supported protocols
 // (defense in depth measure).
 // As of Firefox 118 (Bug 1843763), upstream does not add any protocol by
