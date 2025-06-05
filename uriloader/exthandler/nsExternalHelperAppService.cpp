@@ -1607,8 +1607,7 @@ NS_IMETHODIMP nsExternalAppHandler::OnStartRequest(nsIRequest* request) {
     return NS_OK;
   }
 
-  mDownloadClassification =
-      nsContentSecurityUtils::ClassifyDownload(aChannel, MIMEType);
+  mDownloadClassification = nsContentSecurityUtils::ClassifyDownload(aChannel);
 
   if (mDownloadClassification == nsITransfer::DOWNLOAD_FORBIDDEN) {
     // If the download is rated as forbidden,
