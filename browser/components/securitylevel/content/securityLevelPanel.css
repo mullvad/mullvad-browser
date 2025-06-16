@@ -15,7 +15,7 @@
   background-size: 9em 9em;
   -moz-context-properties: fill, fill-opacity;
   fill-opacity: 1;
-  fill: var(--button-bgcolor);
+  fill: var(--border-color-card);
 }
 
 /* NOTE: Use ":dir" instead of ":-moz-locale-dir" when panel switches to HTML. */

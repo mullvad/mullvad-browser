@@ -13,7 +13,7 @@
   width: 24px;
   height: 24px;
   -moz-context-properties: fill;
-  fill: var(--in-content-icon-color);
+  fill: var(--icon-color);
   margin-block-start: var(--space-xsmall);
   margin-inline-end: var(--space-large);
 }
@@ -92,7 +92,7 @@
 
 #security-level-current {
   margin-block-start: var(--space-large);
-  background: var(--in-content-box-background);
+  background: var(--background-color-box);
   border: 1px solid var(--in-content-box-border-color);
   border-radius: var(--border-radius-small);
   padding: var(--space-medium);
