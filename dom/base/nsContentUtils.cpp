@@ -2844,7 +2844,7 @@ bool nsContentUtils::ShouldResistFingerprinting_dangerous(
   }
 
   // Web extension principals are also excluded
-  if (BasePrincipal::Cast(aPrincipal)->AddonPolicy()) {
+  if (NS_IsMainThread() && BasePrincipal::Cast(aPrincipal)->AddonPolicy()) {
     MOZ_LOG(nsContentUtils::ResistFingerprintingLog(), LogLevel::Debug,
             ("Inside ShouldResistFingerprinting(nsIPrincipal*)"
              " and AddonPolicy said false"));
