@@ -3819,7 +3819,7 @@ bool wasm::StartsCodeSection(const uint8_t* begin, const uint8_t* end,
     }
 
     if (id == uint8_t(SectionId::Code)) {
-      if (range.size > MaxCodeSectionBytes) {
+      if (range.size() > MaxCodeSectionBytes) {
         return false;
       }
 
@@ -3827,7 +3827,7 @@ bool wasm::StartsCodeSection(const uint8_t* begin, const uint8_t* end,
       return true;
     }
 
-    if (!d.readBytes(range.size)) {
+    if (!d.readBytes(range.size())) {
       return false;
     }
   }
@@ -3994,7 +3994,7 @@ bool wasm::DecodeModuleEnvironment(Decoder& d, CodeMetadata* codeMeta,
   }
 
   if (codeMeta->codeSectionRange &&
-      codeMeta->codeSectionRange->size > MaxCodeSectionBytes) {
+      codeMeta->codeSectionRange->size() > MaxCodeSectionBytes) {
     return d.fail("code section too big");
   }
 
@@ -4268,7 +4268,7 @@ static bool DecodeNameSection(Decoder& d, CodeMetadata* codeMeta,
     goto finish;
   }
 
-  while (d.currentOffset() < range->end()) {
+  while (d.currentOffset() < range->end) {
     if (!d.skipNameSubsection()) {
       goto finish;
     }
