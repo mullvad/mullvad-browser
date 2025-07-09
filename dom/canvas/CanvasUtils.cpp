@@ -71,7 +71,7 @@ class OffscreenCanvasPermissionRunnable final
     : public dom::WorkerMainThreadRunnable {
  public:
   OffscreenCanvasPermissionRunnable(dom::WorkerPrivate* aWorkerPrivate,
-                                    nsIPrincipal& aPrincipal)
+                                    nsIPrincipal* aPrincipal)
       : WorkerMainThreadRunnable(aWorkerPrivate,
                                  "OffscreenCanvasPermissionRunnable"_ns),
         mPrincipal(aPrincipal) {
@@ -82,14 +82,14 @@ class OffscreenCanvasPermissionRunnable final
   bool MainThreadRun() override {
     AssertIsOnMainThread();
 
-    mResult = GetCanvasExtractDataPermission(mPrincipal);
+    mResult = GetCanvasExtractDataPermission(*mPrincipal);
     return true;
   }
 
   uint32_t GetResult() const { return mResult; }
 
  private:
-  nsIPrincipal& mPrincipal;
+  nsCOMPtr<nsIPrincipal> mPrincipal;
   uint32_t mResult = nsIPermissionManager::UNKNOWN_ACTION;
 };
 
@@ -113,7 +113,7 @@ uint32_t GetCanvasExtractDataPermission(nsIPrincipal& aPrincipal) {
   }
   if (auto* workerPrivate = dom::GetCurrentThreadWorkerPrivate()) {
     RefPtr<OffscreenCanvasPermissionRunnable> runnable =
-        new OffscreenCanvasPermissionRunnable(workerPrivate, aPrincipal);
+        new OffscreenCanvasPermissionRunnable(workerPrivate, &aPrincipal);
     ErrorResult rv;
     runnable->Dispatch(workerPrivate, dom::WorkerStatus::Canceling, rv);
     if (rv.Failed()) {
@@ -414,9 +414,12 @@ bool IsImageExtractionAllowed(dom::OffscreenCanvas* aOffscreenCanvas,
     winId = Nothing();
   }
 
-  RefPtr<dom::WindowContext> win = dom::WindowGlobalParent::GetById(*winId);
-  if (!win) {
-    winId = Nothing();
+  RefPtr<dom::WindowContext> win;
+  if (winId.isSome()) {
+    win = dom::WindowGlobalParent::GetById(*winId);
+    if (!win) {
+      winId = Nothing();
+    }
   }
 
   auto getIsThirdPartyWindow = [&]() {
