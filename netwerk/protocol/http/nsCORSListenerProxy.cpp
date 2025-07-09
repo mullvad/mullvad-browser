@@ -213,6 +213,7 @@ struct CORSCacheEntry : public LinkedListElement<CORSCacheEntry>,
   nsCString mKey;  // serialized key
   const TimeStamp mCreationTime{TimeStamp::NowLoRes()};
   bool mDoomed{false};
+  bool mIsProxyUsed{false};
 
   nsTArray<nsPreflightCache::TokenTime> mMethods;
   nsTArray<nsPreflightCache::TokenTime> mHeaders;
@@ -339,6 +340,11 @@ void CORSCacheEntry::PurgeExpired(TimeStamp now) {
 }
 
 bool CORSCacheEntry::CheckDNSCache() {
+  // When proxy is used, the DNS lookup is done by proxy, so we skip this check.
+  if (mIsProxyUsed) {
+    return true;
+  }
+
   nsCOMPtr<nsIDNSService> dns;
   dns = mozilla::components::DNS::Service();
   if (!dns) {
@@ -1412,6 +1418,12 @@ void nsCORSPreflightListener::AddResultToCache(nsIRequest* aRequest) {
       uri, mReferrerPrincipal, mWithCredentials, attrs, true);
   if (!entry) {
     return;
+  }
+
+  nsCOMPtr<nsIHttpChannelInternal> httpChannelInternal(
+      do_QueryInterface(aRequest));
+  if (httpChannelInternal) {
+    Unused << httpChannelInternal->GetIsProxyUsed(&entry->mIsProxyUsed);
   }
 
   // The "Access-Control-Allow-Methods" header contains a comma separated
