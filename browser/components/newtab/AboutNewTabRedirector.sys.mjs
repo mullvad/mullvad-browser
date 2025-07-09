@@ -416,7 +416,20 @@ class BaseAboutNewTabRedirector {
    * the newtab page has no effect on the result of this function.
    */
   get defaultURL() {
-    return "about:blank";
+    // Generate the desired activity stream resource depending on state, e.g.,
+    // "resource://newtab/prerendered/activity-stream.html"
+    // "resource://newtab/prerendered/activity-stream-debug.html"
+    // "resource://newtab/prerendered/activity-stream-noscripts.html"
+    return [
+      "resource://newtab/prerendered/",
+      "activity-stream",
+      // Debug version loads dev scripts but noscripts separately loads scripts
+      this.activityStreamDebug && !this.privilegedAboutProcessEnabled
+        ? "-debug"
+        : "",
+      this.privilegedAboutProcessEnabled ? "-noscripts" : "",
+      ".html",
+    ].join("");
   }
 
   newChannel() {
