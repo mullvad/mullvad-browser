@@ -162,6 +162,8 @@ skip-if = ["inc_origin_init"]
 # a conditioned profile in the first place.
 run-if = ["!condprof"]
 
+["test_temporaryStorageRFP.js"]
+
 ["test_unaccessedOrigins.js"]
 
 ["test_unknownFiles.js"]

@@ -99,6 +99,8 @@ ITEM_VALUE(WebGPUIsFallbackAdapter,     65)
 ITEM_VALUE(WebGPUSubgroupSizes,         66)
 ITEM_VALUE(JSLocalePrompt,              67)
 ITEM_VALUE(ScreenAvailToResolution,     68)
+// ITEM_VALUE(UseHardcodedFontSubstitutes, 69) // Bug 1845105 isn't uplifted to ESR yet.
+ITEM_VALUE(DiskStorageLimit,            70)
 
 
 // !!! Don't forget to update kDefaultFingerprintingProtections in nsRFPService.cpp
