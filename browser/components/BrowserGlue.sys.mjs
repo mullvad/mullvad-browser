@@ -8,7 +8,7 @@ import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
-  AboutHomeStartupCache: "resource:///modules/AboutHomeStartupCache.sys.mjs",
+  // newtab component is disabled. tor-browser#43886
   AWToolbarButton: "resource:///modules/aboutwelcome/AWToolbarUtils.sys.mjs",
   ASRouter: "resource:///modules/asrouter/ASRouter.sys.mjs",
   AddonManager: "resource://gre/modules/AddonManager.sys.mjs",
@@ -558,10 +558,7 @@ BrowserGlue.prototype = {
 
   // cleanup (called on application shutdown)
   _dispose: function BG__dispose() {
-    // AboutHomeStartupCache might write to the cache during
-    // quit-application-granted, so we defer uninitialization
-    // until here.
-    lazy.AboutHomeStartupCache.uninit();
+    // newtab component is disabled. tor-browser#43886
 
     if (this._lateTasksIdleObserver) {
       this._userIdleService.removeIdleObserver(

@@ -16,7 +16,7 @@ category browser-before-ui-startup resource:///modules/BuiltInThemes.sys.mjs Bui
 category browser-before-ui-startup resource://normandy/Normandy.sys.mjs Normandy.init
 #endif
 category browser-before-ui-startup resource:///modules/ResetPBMPanel.sys.mjs ResetPBMPanel.init
-category browser-before-ui-startup resource:///modules/AboutHomeStartupCache.sys.mjs AboutHomeStartupCache.init
+# newtab component is disabled. tor-browser#43886
 category browser-before-ui-startup resource:///modules/AccountsGlue.sys.mjs AccountsGlue.init
 
 # Browser window lifecycle consumers
