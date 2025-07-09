@@ -31,6 +31,11 @@
 #include "mozilla/StaticPrefs_gfx.h"
 #include "mozilla/glean/GfxMetrics.h"
 
+#include "mozilla/dom/Document.h"
+#include "nsContentUtils.h"
+
+#include "StandardFonts-win10.inc"
+
 #include <usp10.h>
 
 using namespace mozilla;
@@ -47,6 +52,10 @@ using namespace mozilla::gfx;
   MOZ_LOG_TEST(gfxPlatform::GetLog(eGfxLog_cmapdata), LogLevel::Debug)
 
 static __inline void BuildKeyNameFromFontName(nsAString& aName) {
+  if (aName.Length() >= LF_FACESIZE) aName.Truncate(LF_FACESIZE - 1);
+  ToLowerCase(aName);
+}
+static __inline void BuildKeyNameFromFontName(nsACString& aName) {
   if (aName.Length() >= LF_FACESIZE) aName.Truncate(LF_FACESIZE - 1);
   ToLowerCase(aName);
 }
@@ -508,7 +517,8 @@ void GDIFontFamily::FindStyleVariationsLocked(FontInfoData* aFontInfoData) {
  *
  */
 
-gfxGDIFontList::gfxGDIFontList() : mFontSubstitutes(32) {
+gfxGDIFontList::gfxGDIFontList()
+    : mFontSubstitutes(32), mHardcodedSubstitutes(std::size(kFontSubstitutes)) {
 #ifdef MOZ_BUNDLED_FONTS
   if (StaticPrefs::gfx_bundled_fonts_activate_AtStartup() != 0) {
     auto timer = glean::fontlist::bundledfonts_activate.Measure();
@@ -530,6 +540,20 @@ nsresult gfxGDIFontList::GetFontSubstitutes() {
   DWORD i, rv, lenAlias, lenActual, valueType;
   WCHAR aliasName[MAX_VALUE_NAME];
   WCHAR actualName[MAX_VALUE_DATA];
+
+  for (const FontSubstitute& fs : kFontSubstitutes) {
+    nsAutoCString substituteName(fs.substituteName);
+    nsAutoCString actualFontName(fs.actualFontName);
+    BuildKeyNameFromFontName(substituteName);
+    BuildKeyNameFromFontName(actualFontName);
+    gfxFontFamily* ff;
+    if (!actualFontName.IsEmpty() &&
+        (ff = mFontFamilies.GetWeak(actualFontName))) {
+      mHardcodedSubstitutes.InsertOrUpdate(substituteName, RefPtr{ff});
+    } else {
+      mNonExistingFonts.AppendElement(substituteName);
+    }
+  }
 
   if (RegOpenKeyExW(
           HKEY_LOCAL_MACHINE,
@@ -595,6 +619,7 @@ nsresult gfxGDIFontList::InitFontListForPlatform() {
   auto timer = glean::fontlist::gdi_init_total.Measure();
 
   mFontSubstitutes.Clear();
+  mHardcodedSubstitutes.Clear();
   mNonExistingFonts.Clear();
 
   // iterate over available families
@@ -833,7 +858,14 @@ bool gfxGDIFontList::FindAndAddFamiliesLocked(
   BuildKeyNameFromFontName(key16);
   NS_ConvertUTF16toUTF8 keyName(key16);
 
-  gfxFontFamily* ff = mFontSubstitutes.GetWeak(keyName);
+  const bool useHardcodedList =
+      aPresContext ? aPresContext->Document()->ShouldResistFingerprinting(
+                         RFPTarget::UseHardcodedFontSubstitutes)
+                   : nsContentUtils::ShouldResistFingerprinting(
+                         "aPresContext is not available",
+                         RFPTarget::UseHardcodedFontSubstitutes);
+  gfxFontFamily* ff = useHardcodedList ? mHardcodedSubstitutes.GetWeak(keyName)
+                                       : mFontSubstitutes.GetWeak(keyName);
   FontVisibility level =
       aPresContext ? aPresContext->GetFontVisibility() : FontVisibility::User;
   if (ff && IsVisibleToCSS(*ff, level)) {
@@ -893,6 +925,8 @@ void gfxGDIFontList::AddSizeOfExcludingThis(MallocSizeOf aMallocSizeOf,
 
   aSizes->mFontListSize +=
       SizeOfFontFamilyTableExcludingThis(mFontSubstitutes, aMallocSizeOf);
+  aSizes->mFontListSize +=
+      SizeOfFontFamilyTableExcludingThis(mHardcodedSubstitutes, aMallocSizeOf);
   aSizes->mFontListSize +=
       mNonExistingFonts.ShallowSizeOfExcludingThis(aMallocSizeOf);
   for (uint32_t i = 0; i < mNonExistingFonts.Length(); ++i) {

@@ -353,6 +353,7 @@ class gfxGDIFontList final : public gfxPlatformFontList {
 #endif
 
   FontFamilyTable mFontSubstitutes;
+  FontFamilyTable mHardcodedSubstitutes;
   nsTArray<nsCString> mNonExistingFonts;
 };
 
