@@ -5,6 +5,10 @@ const gExampleComRoot = getRootDirectory(gTestPath).replace(
 const IFRAME_FILE = "file_contentAreaClick_subframe_javascript.html";
 
 add_task(async function () {
+  await SpecialPowers.pushPrefEnv({
+    set: [["browser.link.alternative_click.block_javascript", false]],
+  });
+
   await BrowserTestUtils.withNewTab(
     `data:text/html,<iframe src="${gExampleComRoot + IFRAME_FILE}"></iframe>`,
     async browser => {
