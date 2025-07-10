@@ -622,6 +622,7 @@ fails-if(Android) != mask-resource.html about:blank # The image the test uses is
 
 != bug-1562091.html bug-1562091-ref.html
 == 1570363-1.html 1570363-1-ref.html
+== 1976116.html 1976116-ref.html
 
 fuzzy(0-1,0-150) == mask-opacity-invalidation-1.html mask-opacity-invalidation-1-ref.html # clip-path mask/opacity optimization
 skip-if(Android) skip-if(cocoaWidget) skip-if(winWidget) == transform-animation-on-path.html transform-animation-on-path-ref.html #Bug 1638909
