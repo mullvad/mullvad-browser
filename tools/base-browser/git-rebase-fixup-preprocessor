@@ -28,7 +28,9 @@ class TodoLine:
     Represents a line in the git todo file.
     """
 
-    _PICK_REGEX = re.compile(r"^pick [a-f0-9]+ (?P<fixups>(fixup! )*)(?P<title>.*)")
+    # git 2.50 adds a '#' between the commit hash and the commit subject.
+    # Keep this '#' optional for previous git versions.
+    _PICK_REGEX = re.compile(r"^pick [a-f0-9]+ +(?:# +)?(?P<fixups>(fixup! )*)(?P<title>.*)")
 
     def __init__(self, line):
         """
