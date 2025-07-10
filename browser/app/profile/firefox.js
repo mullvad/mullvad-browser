@@ -880,6 +880,9 @@ pref("browser.link.open_newwindow.restriction", 2);
   pref("browser.link.open_newwindow.disabled_in_fullscreen", false);
 #endif
 
+// If true, opening javscript: URLs using middle-click, CTRL+click etc. are blocked.
+pref("browser.link.alternative_click.block_javascript", true);
+
 // Tabbed browser
 pref("browser.tabs.closeTabByDblclick", false);
 pref("browser.tabs.closeWindowWithLastTab", true);
