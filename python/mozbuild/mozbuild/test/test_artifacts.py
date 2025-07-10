@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import buildconfig
 import mozunit
@@ -21,11 +21,12 @@ class FakeArtifactJob(ArtifactJob):
 
 class TestArtifactJob(TestCase):
     def _assert_candidate_trees(self, version_display, expected_trees):
-        buildconfig.substs["MOZ_APP_VERSION_DISPLAY"] = version_display
-
-        job = FakeArtifactJob()
-        self.assertGreater(len(job.candidate_trees), 0)
-        self.assertEqual(job.candidate_trees, expected_trees)
+        with mock.patch.object(
+            buildconfig, "substs", {"MOZ_APP_VERSION_DISPLAY": version_display}
+        ):
+            job = FakeArtifactJob()
+            self.assertGreater(len(job.candidate_trees), 0)
+            self.assertEqual(job.candidate_trees, expected_trees)
 
     def test_candidate_trees_with_empty_file(self):
         self._assert_candidate_trees(
