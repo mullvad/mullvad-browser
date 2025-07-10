@@ -739,7 +739,7 @@
       #tabbrowser-tabs[orient="horizontal"] &:not([pinned]):not([crashed]),
       :root:not([sidebar-expand-on-hover]) #tabbrowser-tabs[orient="vertical"][expanded] &:not([pinned]):not([crashed]) {
         &:is([soundplaying], [muted], [activemedia-blocked]) {
-          display: block;
+          display: flex;
         }
 
         &[soundplaying]::part(button) {
