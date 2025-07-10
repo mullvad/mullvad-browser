@@ -152,24 +152,26 @@ def get_refs(ref_type, name_start):
     or "head") that starts with the given 'name_start'.
     """
     if ref_type == "tag":
-        # Instead of returning tag hash, return the commit hash it points to.
-        fstring = "%(*objectname)"
         ref_start = "refs/tags/"
     elif ref_type == "remote":
-        fstring = "%(objectname)"
         ref_start = "refs/remotes/"
     elif ref_type == "head":
-        fstring = "%(objectname)"
         ref_start = "refs/heads/"
     else:
         raise TypeError(f"Unknown type {ref_type}")
 
-    fstring = f"{fstring},%(refname)"
+    fstring = "%(*objectname),%(objectname),%(refname)"
     pattern = f"{ref_start}{name_start}**"
 
     def line_to_ref(line):
-        [commit, ref_name] = line.split(",", 1)
-        return Reference(ref_name.replace(ref_start, "", 1), commit)
+        [objectname_reference, objectname, ref_name] = line.split(",", 2)
+        # For annotated tags, the objectname_reference is non-empty and points
+        # to an actual commit.
+        # For remotes, heads and lightweight tags, the objectname_reference will
+        # be empty and objectname will point directly to the commit.
+        return Reference(
+            ref_name.replace(ref_start, "", 1), objectname_reference or objectname
+        )
 
     return [
         line_to_ref(line)
@@ -245,7 +247,7 @@ def file_contains(filename, regex):
     Return whether the file is a utf-8 text file containing the regular
     expression given by 'regex'.
     """
-    with open(filename, "r", encoding="utf-8") as file:
+    with open(filename, encoding="utf-8") as file:
         try:
             for line in file:
                 if regex.search(line):
