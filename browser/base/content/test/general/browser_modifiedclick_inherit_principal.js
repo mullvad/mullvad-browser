@@ -10,6 +10,10 @@ const kURL =
  * we use the correct principal, and we don't clear the URL bar.
  */
 add_task(async function () {
+  await SpecialPowers.pushPrefEnv({
+    set: [["browser.link.alternative_click.block_javascript", false]],
+  });
+
   await BrowserTestUtils.withNewTab(kURL, async function (browser) {
     let newTabPromise = BrowserTestUtils.waitForNewTab(gBrowser);
     await SpecialPowers.spawn(browser, [], async function () {
