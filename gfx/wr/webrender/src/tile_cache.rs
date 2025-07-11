@@ -29,7 +29,7 @@ use std::mem;
 // scrolling isn't occurring. Scrolling regions will be handled reasonably
 // efficiently by the dirty rect tracking (since it's likely that if the
 // page has so many slices there isn't a single major scroll region).
-const MAX_CACHE_SLICES: usize = 12;
+const MAX_CACHE_SLICES: usize = 16;
 
 struct SliceDescriptor {
     prim_list: PrimitiveList,
