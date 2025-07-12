@@ -603,7 +603,12 @@ already_AddRefed<WorkerNavigator> WorkerGlobalScope::Navigator() {
   AssertIsOnWorkerThread();
 
   if (!mNavigator) {
-    mNavigator = WorkerNavigator::Create(mWorkerPrivate->OnLine());
+    bool onLine = mWorkerPrivate->OnLine();
+    if (mWorkerPrivate->ShouldResistFingerprinting(
+            RFPTarget::NetworkConnection)) {
+      onLine = true;
+    }
+    mNavigator = WorkerNavigator::Create(onLine);
     MOZ_ASSERT(mNavigator);
   }
 

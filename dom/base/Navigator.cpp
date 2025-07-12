@@ -582,6 +582,11 @@ bool Navigator::CookieEnabled() {
 }
 
 bool Navigator::OnLine() {
+  if (nsContentUtils::ShouldResistFingerprinting(
+          GetDocShell(), RFPTarget::NetworkConnection)) {
+    return true;
+  }
+
   if (mWindow) {
     // Check if this tab is set to be offline.
     BrowsingContext* bc = mWindow->GetBrowsingContext();
