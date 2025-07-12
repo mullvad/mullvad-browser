@@ -717,7 +717,7 @@ nsString StoragePrincipalHelper::PartitionKeyForExpandedPrincipal(
 
     nsCOMPtr<nsIURI> uri;
     nsresult rv = BasePrincipal::Cast(principal)->GetURI(getter_AddRefs(uri));
-    if (NS_WARN_IF(NS_FAILED(rv))) {
+    if (NS_WARN_IF(NS_FAILED(rv)) || !uri) {
       continue;
     }
 
