@@ -41,7 +41,10 @@ const test = new SearchConfigTest({
         SearchUtils.MODIFIED_APP_CHANNEL == "esr"
           ? "client=firefox-b-1-e"
           : "client=firefox-b-1-d",
-      partnerCode: "firefox-b-1-d",
+      partnerCode:
+        SearchUtils.MODIFIED_APP_CHANNEL == "esr"
+          ? "firefox-b-1-e"
+          : "firefox-b-1-d",
     },
     {
       excluded: [{ regions: ["us", "by", "kz", "ru", "tr"] }],
@@ -53,7 +56,10 @@ const test = new SearchConfigTest({
         SearchUtils.MODIFIED_APP_CHANNEL == "esr"
           ? "client=firefox-b-e"
           : "client=firefox-b-d",
-      partnerCode: "firefox-b-d",
+      partnerCode:
+        SearchUtils.MODIFIED_APP_CHANNEL == "esr"
+          ? "firefox-b-e"
+          : "firefox-b-d",
     },
     {
       included: [{ regions: ["by", "kz", "ru", "tr"] }],
