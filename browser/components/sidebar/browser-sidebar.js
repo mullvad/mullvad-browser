@@ -380,7 +380,7 @@ var SidebarController = {
       this._handleLauncherResize(entry)
     );
 
-    if (this.sidebarRevampEnabled) {
+    if (this.sidebarRevampEnabled && !BrowserHandler.kiosk) {
       if (!customElements.get("sidebar-main")) {
         ChromeUtils.importESModule(
           "chrome://browser/content/sidebar/sidebar-main.mjs",
