@@ -356,8 +356,9 @@ constexpr int MAX_TEXEL_OFFSET = 8;
 
 // Fill texelFetchOffset outside the valid texture bounds with zeroes. The
 // stride will be set to 0 so that only one row of zeroes is needed.
-static const uint32_t
-    zeroFetchBuf[MAX_TEXEL_OFFSET * sizeof(Float) / sizeof(uint32_t)] = {0};
+ALIGNED_DECL(
+    16, static const uint32_t zeroFetchBuf[MAX_TEXEL_OFFSET * sizeof(Float) /
+                                           sizeof(uint32_t)]) = {0};
 
 struct FetchScalar {
   const uint32_t* buf;

@@ -88,6 +88,12 @@ WINBASEAPI BOOL WINAPI QueryPerformanceFrequency(LARGE_INTEGER* lpFrequency);
 #  define IMPLICIT
 #endif
 
+#if defined(_MSC_VER)
+#  define ALIGNED_DECL(_align, _type) __declspec(align(_align)) _type
+#else
+#  define ALIGNED_DECL(_align, _type) _type __attribute__((aligned(_align)))
+#endif
+
 #include "gl_defs.h"
 #include "glsl.h"
 #include "program.h"
