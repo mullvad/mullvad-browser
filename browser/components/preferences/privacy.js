@@ -1717,7 +1717,8 @@ var gPrivacyPane = {
       fppMenu.value = "never";
       fppCheckbox.checked = false;
     }
-    fppMenu.disabled = !fppCheckbox.checked;
+    fppMenu.disabled = !fppCheckbox.checked || enabledPref.locked;
+    fppCheckbox.disabled = enabledPref.locked;
   },
 
   /**
