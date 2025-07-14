@@ -66,6 +66,10 @@ static const char kHTMLMarkupPrefix[] =
 
 static const char kURIListMime[] = "text/uri-list";
 
+// MIME to exclude sensitive data (password) from the clipboard history on not
+// just KDE.
+static const char kKDEPasswordManagerHintMime[] = "x-kde-passwordManagerHint";
+
 ClipboardTargets nsRetrievalContext::sClipboardTargets;
 ClipboardTargets nsRetrievalContext::sPrimaryTargets;
 
@@ -320,6 +324,12 @@ nsClipboard::SetNativeClipboardData(nsITransferable* aTransferable,
     // Add this to our list of valid targets
     MOZ_CLIPBOARD_LOG("    adding OTHER target %s\n", flavorStr.get());
     GdkAtom atom = gdk_atom_intern(flavorStr.get(), FALSE);
+    gtk_target_list_add(list, atom, 0, 0);
+  }
+
+  // Try to exclude private data from clipboard history.
+  if (aTransferable->GetIsPrivateData()) {
+    GdkAtom atom = gdk_atom_intern(kKDEPasswordManagerHintMime, FALSE);
     gtk_target_list_add(list, atom, 0, 0);
   }
 
@@ -1310,6 +1320,22 @@ void nsClipboard::SelectionGetEvent(GtkClipboard* aClipboard,
     MOZ_CLIPBOARD_LOG("  Setting %zd bytes of data\n", uri.Length());
     gtk_selection_data_set(aSelectionData, selectionTarget, 8,
                            (const guchar*)uri.get(), uri.Length());
+    return;
+  }
+
+  if (selectionTarget == gdk_atom_intern(kKDEPasswordManagerHintMime, FALSE)) {
+    if (!trans->GetIsPrivateData()) {
+      MOZ_CLIPBOARD_LOG(
+          "  requested %s, but the data isn't actually private!\n",
+          kKDEPasswordManagerHintMime);
+      return;
+    }
+
+    static const char* kSecret = "secret";
+    MOZ_CLIPBOARD_LOG("  Setting data to '%s' for %s\n", kSecret,
+                      kKDEPasswordManagerHintMime);
+    gtk_selection_data_set(aSelectionData, selectionTarget, 8,
+                           (const guchar*)kSecret, strlen(kSecret));
     return;
   }
 
