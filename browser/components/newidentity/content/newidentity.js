@@ -501,34 +501,6 @@ ChromeUtils.defineLazyGetter(this, "NewIdentityButton", () => {
 
   let newIdentityInProgress = false;
   return {
-    topics,
-
-    init() {
-      // We first search in the DOM for the identity button. If it does not
-      // exist it may be in the toolbox palette. In the latter case we still
-      // need to initialize the button in case it is added back later through
-      // customization.
-      const button =
-        document.getElementById("new-identity-button") ||
-        window.gNavToolbox.palette.querySelector("#new-identity-button");
-      button?.addEventListener("command", () => {
-        this.onCommand();
-      });
-      document
-        .getElementById("appMenu-viewCache")
-        .content.querySelector("#appMenu-new-identity")
-        ?.addEventListener("command", () => {
-          this.onCommand();
-        });
-      document
-        .getElementById("menu_newIdentity")
-        ?.addEventListener("command", () => {
-          this.onCommand();
-        });
-    },
-
-    uninit() {},
-
     async onCommand() {
       try {
         // Ignore if there's a New Identity in progress to avoid race
