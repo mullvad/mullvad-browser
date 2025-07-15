@@ -654,7 +654,7 @@ function BuildConditionSandbox(aURL) {
   sandbox.wayland = mozinfo.display == "wayland";
 
   // data not using mozinfo
-  sandbox.xulRuntime = {};
+  sandbox.xulRuntime = Cu.cloneInto({}, sandbox);
 
   // Do we *not* have a dedicated gpu process.
   sandbox.nogpu =
