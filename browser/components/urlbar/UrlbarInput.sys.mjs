@@ -3875,11 +3875,17 @@ export class UrlbarInput {
     // do the work for the first time.
     let firstView = (!isSameDocument && !dueToTabSwitch) || !state.persist;
 
+    let cachedUriDidChange =
+      state.persist?.originalURI &&
+      !state.persist.originalURI.equals(
+        this.window.gBrowser.selectedBrowser.originalURI
+      );
+
     // Capture the shouldPersist property if it exists before
     // setPersistenceState potentially modifies it.
     let wasPersisting = state.persist?.shouldPersist ?? false;
 
-    if (firstView) {
+    if (firstView || cachedUriDidChange) {
       lazy.UrlbarSearchTermsPersistence.setPersistenceState(
         state,
         this.window.gBrowser.selectedBrowser.originalURI

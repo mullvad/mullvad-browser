@@ -224,17 +224,21 @@ class _UrlbarSearchTermsPersistence {
       return false;
     }
 
-    let origin;
+    let origin, pathname;
     try {
-      origin = URL.fromURI(uri)?.origin;
+      let url = URL.fromURI(uri);
+      origin = url.origin;
+      pathname = url.pathname;
     } catch (ex) {
       return false;
     }
 
     // Bug 1972464: Prevent search terms from persisting across different origin
-    // due to a possible race condition. This check prevents cross-origin
-    // persistence until the persistence logic is refactored.
-    if (origin !== state.persist.origin) {
+    // or pathnames. This should be refactored later to be simplified.
+    if (
+      origin !== state.persist.origin ||
+      pathname !== state.persist.pathname
+    ) {
       return false;
     }
 
@@ -247,12 +251,17 @@ class _UrlbarSearchTermsPersistence {
       // Whether the engine that loaded the URI is the default search engine.
       isDefaultEngine: null,
 
-      // Temporary until we resolve Bug 1972464: Cache origin for validation
-      // checks. This should be removed once the architecture is refactored.
+      // Temporary until we resolve Bug 1972464 - refactor the architecture.
       origin: null,
 
       // The name of the engine that was used to load the URI.
       originalEngineName: null,
+
+      // Temporary until we resolve Bug 1972464 - refactor the architecture.
+      originalURI: null,
+
+      // Temporary until we resolve Bug 1972464 - refactor the architecture.
+      path: null,
 
       // The search provider associated with the URI. If one exists, it means
       // we have custom rules for this search provider to determine whether or
@@ -266,21 +275,25 @@ class _UrlbarSearchTermsPersistence {
       shouldPersist: null,
     };
 
-    let origin;
+    let origin, pathname;
     try {
-      origin = URL.fromURI(uri)?.origin;
+      let url = URL.fromURI(uri);
+      origin = url.origin;
+      pathname = url.pathname;
     } catch (ex) {
       return;
     }
 
     let searchTerms = this.getSearchTerm(uri);
     // Avoid setting state if either are missing.
-    if (!searchTerms || !origin) {
+    if (!searchTerms || !origin || !pathname) {
       return;
     }
 
     state.persist.origin = origin;
     state.persist.searchTerms = searchTerms;
+    state.persist.pathname = pathname;
+    state.persist.originalURI = uri;
 
     let provider = this.#getProviderInfoForURL(uri?.spec);
     // If we have specific Remote Settings defined providers for the URL,
