@@ -78,12 +78,19 @@ class TestArtifactJob(TestCase):
 
 class TestThunderbirdMixin(TestCase):
     def _assert_candidate_trees(self, version_display, source_repo, expected_trees):
-        buildconfig.substs["MOZ_APP_VERSION_DISPLAY"] = version_display
-        buildconfig.substs["MOZ_SOURCE_REPO"] = source_repo
-
-        job = FakeArtifactJob(override_job_configuration=ThunderbirdJobConfiguration)
-        self.assertGreater(len(job.candidate_trees), 0)
-        self.assertEqual(job.candidate_trees, expected_trees)
+        with mock.patch.object(
+            buildconfig,
+            "substs",
+            {
+                "MOZ_APP_VERSION_DISPLAY": version_display,
+                "MOZ_SOURCE_REPO": source_repo,
+            },
+        ):
+            job = FakeArtifactJob(
+                override_job_configuration=ThunderbirdJobConfiguration
+            )
+            self.assertGreater(len(job.candidate_trees), 0)
+            self.assertEqual(job.candidate_trees, expected_trees)
 
     def test_candidate_trees_with_beta_version(self):
         self._assert_candidate_trees(
