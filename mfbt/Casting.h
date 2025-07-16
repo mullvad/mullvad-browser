@@ -83,12 +83,23 @@ constexpr uint64_t safe_integer_unsigned() {
 }
 
 template <typename T>
-const char* TypeToString();
+const char* TypeToStringFallback();
+
+template <typename T>
+inline constexpr const char* TypeToString() {
+  return TypeToStringFallback<T>();
+}
 
 #define T2S(type)                                     \
   template <>                                         \
   inline constexpr const char* TypeToString<type>() { \
     return #type;                                     \
+  }
+
+#define T2SF(type)                                            \
+  template <>                                                 \
+  inline constexpr const char* TypeToStringFallback<type>() { \
+    return #type;                                             \
   }
 
 T2S(uint8_t);
@@ -101,14 +112,15 @@ T2S(int32_t);
 T2S(int64_t);
 T2S(char16_t);
 T2S(char32_t);
-#if defined(XP_DARWIN) || defined(XP_WIN) || defined(__wasm__)
-T2S(long);
-T2S(unsigned long);
-#endif
+T2SF(int);
+T2SF(unsigned int);
+T2SF(long);
+T2SF(unsigned long);
 T2S(float);
 T2S(double);
 
 #undef T2S
+#undef T2SF
 
 template <typename In, typename Out>
 inline void DiagnosticMessage(In aIn, char aDiagnostic[1024]) {
