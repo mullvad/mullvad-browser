@@ -303,8 +303,11 @@ pref("browser.search.serpEventTelemetryCategorization.enabled", false);
 
 // tor-browser#42872, #42555: Disable translations.
 // Translation have a bad UX in 128 (and with our config). Maybe we will
-// re-enable after auditing and fixing the UX.
+// re-enable after auditing and fixing the UX (tor-browser#41837).
 pref("browser.translations.enable", false);
+
+// Disable third party AI chatbot. tor-browser#43989.
+pref("browser.ml.chat.enabled", false);
 
 // tor-browser#41945 - disable automatic cookie banners dismissal until
 // we're sure it does not causes fingerprinting risks or other issues.
