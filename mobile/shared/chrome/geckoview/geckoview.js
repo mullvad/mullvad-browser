@@ -929,7 +929,9 @@ function startup() {
       // submits the ping if it has data and has been about 24 hours since the
       // last submission.
       CaptchaDetectionPingUtils.init();
+    });
 
+    InitLater(() => {
       RemoteSettings.pollChanges({ trigger: "timer" });
     });
 
