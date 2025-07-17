@@ -3337,10 +3337,9 @@ void nsWindow::RecomputeBounds(MayChangeCsdMargin aMayChangeCsdMargin) {
   }
 
   // Sometimes the window manager gives us garbage sizes (way past the maximum
-  // texture size) causing crashes if we don't enforce size constraints again
-  // here.
+  // texture size) causing crashes if we don't enforce sane sizes here.
   auto unconstrainedBounds = mBounds;
-  ConstrainSize(&mBounds.width, &mBounds.height);
+  mBounds.SizeTo(GetSafeWindowSize(mBounds.Size()));
 
   LOG("bounds: %s -> %s (%s unconstrained)", ToString(oldBounds).c_str(),
       ToString(mBounds).c_str(), ToString(unconstrainedBounds).c_str());
