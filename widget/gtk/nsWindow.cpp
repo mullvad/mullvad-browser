@@ -5483,21 +5483,21 @@ void nsWindow::RefreshScale(bool aRefreshScreen) {
   LOG("nsWindow::RefreshScale() GdkWindow scale %d refresh %d",
       gdk_window_get_scale_factor(mGdkWindow), aRefreshScreen);
 
+  MOZ_DIAGNOSTIC_ASSERT(mIsMapped && mGdkWindow);
+  int ceiledScale = gdk_window_get_scale_factor(mGdkWindow);
+  const bool scaleChanged = GdkCeiledScaleFactor() != ceiledScale;
+
 #ifdef MOZ_WAYLAND
   if (GdkIsWaylandDisplay()) {
     WaylandSurfaceLock lock(mSurface);
-    mSurface->SetCeiledScaleLocked(lock,
-                                   gdk_window_get_scale_factor(mGdkWindow));
+    mSurface->SetCeiledScaleLocked(lock, ceiledScale);
   }
 #endif
+  mCeiledScaleFactor = ceiledScale;
 
-  MOZ_DIAGNOSTIC_ASSERT(mIsMapped && mGdkWindow);
-  int ceiledScale = gdk_window_get_scale_factor(mGdkWindow);
-  bool scaleChanged = (mCeiledScaleFactor != ceiledScale);
   if (!scaleChanged) {
     return;
   }
-  mCeiledScaleFactor = ceiledScale;
 
   NotifyAPZOfDPIChange();
 
