@@ -2026,13 +2026,13 @@ var gUnifiedExtensions = {
     // extension.hideUnifiedWhenEmpty, which can effect the visibility of the
     // unified-extensions-button.
     // See tor-browser#41581.
-    this._hideNoScriptObserver = () => this._updateVisibility();
+    this._hideNoScriptObserver = () => this._updateHideEmpty();
     Services.prefs.addObserver(HIDE_NO_SCRIPT_PREF, this._hideNoScriptObserver);
     Services.prefs.addObserver(
       HIDE_UNIFIED_WHEN_EMPTY_PREF,
       this._hideNoScriptObserver
     );
-    this._updateVisibility();
+    this._updateHideEmpty(); // Will trigger updateButtonVisibility;
 
     this._initialized = true;
   },
@@ -2071,10 +2071,14 @@ var gUnifiedExtensions = {
   },
 
   onAppMenuShowing() {
+    // Only show the extension menu item if the extension button is not pinned
+    // and the extension popup is not empty.
+    // NOTE: This condition is different than _shouldShowButton.
+    const hideExtensionItem = this.buttonAlwaysVisible || this._hideEmpty;
     document.getElementById("appMenu-extensions-themes-button").hidden =
-      !this.buttonAlwaysVisible;
+      !hideExtensionItem;
     document.getElementById("appMenu-unified-extensions-button").hidden =
-      this.buttonAlwaysVisible;
+      hideExtensionItem;
   },
 
   onLocationChange(browser, webProgress, _request, _uri, flags) {
@@ -2089,9 +2093,14 @@ var gUnifiedExtensions = {
   },
 
   updateButtonVisibility() {
+    if (this._hideEmpty === null) {
+      return;
+    }
     // TODO: Bug 1778684 - Auto-hide button when there is no active extension.
+    // Hide the extension button when it is empty. See tor-browser#41581.
+    // Likely will conflict with mozilla's Bug 1778684. See tor-browser#42635.
     let shouldShowButton =
-      this.buttonAlwaysVisible ||
+      this._shouldShowButton ||
       // If anything is anchored to the button, keep it visible.
       this._button.open ||
       // Button will be open soon - see ensureButtonShownBeforeAttachingPanel.
@@ -2117,7 +2126,7 @@ var gUnifiedExtensions = {
   },
 
   ensureButtonShownBeforeAttachingPanel(panel) {
-    if (!this.buttonAlwaysVisible && !this._button.open) {
+    if (!this._shouldShowButton && !this._button.open) {
       // When the panel is anchored to the button, its "open" attribute will be
       // set, which visually renders as a "button pressed". Until we get there,
       // we need to make sure that the button is visible so that it can serve
@@ -2131,7 +2140,7 @@ var gUnifiedExtensions = {
     if (this._button.open) {
       this._buttonShownBeforeButtonOpen = false;
     }
-    if (!this.buttonAlwaysVisible && !this._button.open) {
+    if (!this._shouldShowButton && !this._button.open) {
       this.updateButtonVisibility();
     }
   },
@@ -2261,18 +2270,35 @@ var gUnifiedExtensions = {
   },
 
   /**
-   * Potentially hide the unified-extensions-button if it would be empty.
+   * Whether the extension button should be hidden because it is empty. Or
+   * `null` when uninitialised.
+   *
+   * @type {?boolean}
    */
-  // See tor-browser#41581.
-  // The behaviour overlaps with a proposal in mozilla Bug 1778684, which has
-  // not yet been implemented as of June 2024 (start of ESR 128).
-  // See tor-browser#42635
-  _updateVisibility() {
-    this.button.classList.toggle(
-      "hide-empty",
+  _hideEmpty: null,
+
+  /**
+   * Update the _hideEmpty attribute when the preference or hasExtensionsInPanel
+   * value may have changed.
+   */
+  _updateHideEmpty() {
+    const prevHideEmpty = this._hideEmpty;
+    this._hideEmpty =
       Services.prefs.getBoolPref(HIDE_UNIFIED_WHEN_EMPTY_PREF, true) &&
-        !this.hasExtensionsInPanel()
-    );
+      !this.hasExtensionsInPanel();
+    if (this._hideEmpty !== prevHideEmpty) {
+      this.updateButtonVisibility();
+    }
+  },
+
+  /**
+   * Whether we should show the extension button, regardless of whether it is
+   * needed as a popup anchor, etc.
+   *
+   * @type {boolean}
+   */
+  get _shouldShowButton() {
+    return this.buttonAlwaysVisible && !this._hideEmpty;
   },
 
   /**
@@ -2860,15 +2886,18 @@ var gUnifiedExtensions = {
   },
 
   onWidgetRemoved() {
-    this._updateVisibility();
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
   },
 
   onWidgetDestroyed() {
-    this._updateVisibility();
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
   },
 
   onWidgetAdded(aWidgetId, aArea) {
-    this._updateVisibility();
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
 
     // When we pin a widget to the toolbar from a narrow window, the widget
     // will be overflowed directly. In this case, we do not want to change the
@@ -2885,7 +2914,8 @@ var gUnifiedExtensions = {
   },
 
   onWidgetOverflow(aNode) {
-    this._updateVisibility();
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
 
     // We register a CUI listener for each window so we make sure that we
     // handle the event for the right window here.
@@ -2897,7 +2927,8 @@ var gUnifiedExtensions = {
   },
 
   onWidgetUnderflow(aNode) {
-    this._updateVisibility();
+    // hasExtensionsInPanel may have changed.
+    this._updateHideEmpty();
 
     // We register a CUI listener for each window so we make sure that we
     // handle the event for the right window here.
