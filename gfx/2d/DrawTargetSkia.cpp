@@ -589,7 +589,9 @@ static void SetPaintPattern(SkPaint& aPaint, const Pattern& aPattern,
     case PatternType::SURFACE: {
       const SurfacePattern& pat = static_cast<const SurfacePattern&>(aPattern);
       Matrix offsetMatrix = pat.mMatrix;
-      offsetMatrix.PreTranslate(pat.mSurface->GetRect().TopLeft());
+      if (pat.mSurface) {
+        offsetMatrix.PreTranslate(pat.mSurface->GetRect().TopLeft());
+      }
       sk_sp<SkImage> image =
           GetSkImageForSurface(pat.mSurface, &aLock, aBounds, &offsetMatrix);
       if (!image) {
