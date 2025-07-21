@@ -1400,7 +1400,7 @@ richlistitem .text-link:hover {
 .web-appearance-choice {
   width: 100%;
   border: 1px solid var(--in-content-box-border-color);
-  background-color: var(--in-content-box-background-color);
+  background-color: var(--background-color-box);
   color: var(--in-content-text-color);
   border-radius: 4px;
   overflow: clip;
