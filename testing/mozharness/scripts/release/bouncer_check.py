@@ -166,6 +166,8 @@ class BouncerCheck(BaseScript):
                     "prev_version": prev_version,
                 }
                 for bouncer_platform in product["platforms"]:
+                    if bouncer_platform == "linux64-aarch64" and prev_version < "136":
+                        continue
                     for locale in self.config["locales"]:
                         url = BOUNCER_URL_PATTERN.format(
                             bouncer_prefix=self.config["bouncer_prefix"],
