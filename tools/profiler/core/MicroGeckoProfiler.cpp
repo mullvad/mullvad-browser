@@ -201,9 +201,10 @@ void uprofiler_simple_event_marker_internal(
   }
   MOZ_ASSERT(num_args <= TraceMarker::MAX_NUM_ARGS);
   TraceMarker::OptionsType tuple;
-  TraceOption* args[6] = {&std::get<0>(tuple), &std::get<1>(tuple),
-                          &std::get<2>(tuple), &std::get<3>(tuple),
-                          &std::get<4>(tuple), &std::get<5>(tuple)};
+  TraceOption* args[TraceMarker::MAX_NUM_ARGS] = {
+      &std::get<0>(tuple), &std::get<1>(tuple), &std::get<2>(tuple),
+      &std::get<3>(tuple), &std::get<4>(tuple), &std::get<5>(tuple)};
+  nsCString strValueContainers[TraceMarker::MAX_NUM_ARGS];
   for (int i = 0; i < std::min(num_args, TraceMarker::MAX_NUM_ARGS); ++i) {
     auto& arg = *args[i];
     arg.mPassed = true;
@@ -228,9 +229,10 @@ void uprofiler_simple_event_marker_internal(
                           ->as_double);
         break;
       case TRACE_VALUE_TYPE_POINTER:
-        arg.mValue = AsVariant(ProfilerString8View(nsPrintfCString(
+        strValueContainers[i] = nsPrintfCString(
             "%p", reinterpret_cast<const TraceValueUnion*>(&arg_values[i])
-                      ->as_pointer)));
+                      ->as_pointer);
+        arg.mValue = AsVariant(ProfilerString8View(strValueContainers[i]));
         break;
       case TRACE_VALUE_TYPE_STRING:
         arg.mValue = AsVariant(ProfilerString8View::WrapNullTerminatedString(
@@ -238,14 +240,15 @@ void uprofiler_simple_event_marker_internal(
                 ->as_string));
         break;
       case TRACE_VALUE_TYPE_COPY_STRING:
-        arg.mValue = AsVariant(ProfilerString8View(
-            nsCString(reinterpret_cast<const TraceValueUnion*>(&arg_values[i])
-                          ->as_string)));
+        strValueContainers[i] =
+            reinterpret_cast<const TraceValueUnion*>(&arg_values[i])->as_string;
+        arg.mValue = AsVariant(ProfilerString8View(strValueContainers[i]));
         break;
       default:
         MOZ_ASSERT_UNREACHABLE("Unexpected trace value type");
-        arg.mValue = AsVariant(ProfilerString8View(
-            nsPrintfCString("Unexpected type: %u", arg_types[i])));
+        strValueContainers[i] =
+            nsPrintfCString("Unexpected type: %u", arg_types[i]);
+        arg.mValue = AsVariant(ProfilerString8View(strValueContainers[i]));
         break;
     }
   }
