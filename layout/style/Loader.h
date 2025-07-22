@@ -567,7 +567,8 @@ class Loader final {
       CORSMode aCORSMode, const nsAString& aNonce, const nsAString& aIntegrity,
       uint64_t aEarlyHintPreloaderId, dom::FetchPriority aFetchPriority);
 
-  RefPtr<StyleSheet> LookupInlineSheetInCache(const nsAString&, nsIPrincipal*);
+  RefPtr<StyleSheet> LookupInlineSheetInCache(const nsAString&, nsIPrincipal*,
+                                              nsIURI* aBaseURI);
 
   // Synchronously notify of a cached load data.
   void NotifyOfCachedLoad(RefPtr<SheetLoadData>);

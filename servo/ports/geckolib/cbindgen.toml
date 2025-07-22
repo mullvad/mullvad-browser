@@ -175,6 +175,7 @@ include = [
   "Overflow",
   "LengthPercentage",
   "LetterSpacing",
+  "LikelyBaseUriDependency",
   "NonNegativeLengthPercentage",
   "LengthPercentageOrAuto",
   "LineHeight",

@@ -1254,6 +1254,20 @@ void StyleSheet::FinishAsyncParse(
   UnblockParsePromise();
 }
 
+StyleLikelyBaseUriDependency StyleSheet::OriginalContentsBaseUriDependency()
+    const {
+  const auto* counters = UseCounters();
+  if (Servo_IsCustomUseCounterRecorded(
+          counters, StyleCustomUseCounter::MaybeHasFullBaseUriDependency)) {
+    return StyleLikelyBaseUriDependency::Full;
+  }
+  if (Servo_IsCustomUseCounterRecorded(
+          counters, StyleCustomUseCounter::MaybeHasPathBaseUriDependency)) {
+    return StyleLikelyBaseUriDependency::Path;
+  }
+  return StyleLikelyBaseUriDependency::No;
+}
+
 const StyleUseCounters* StyleSheet::UseCounters() const {
   return Servo_StyleSheet_UseCounters(RawContents());
 }

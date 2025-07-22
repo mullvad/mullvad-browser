@@ -59,6 +59,52 @@ impl PartialEq for CssUrlData {
     }
 }
 
+/// How an URI might depend on our base URI.
+///
+/// TODO(emilio): See if necko can provide this, but for our case local refs or empty URIs are
+/// totally fine even though they wouldn't be in general...
+#[repr(u8)]
+pub enum LikelyBaseUriDependency {
+    /// No dependency on the base URI (either absolute uri, or relative URI).
+    No,
+    /// We might depend on our path depth. E.g. `https://example.com/foo` and
+    /// `https://example.com/bar` both resolve a relative URI like `baz.css` as
+    /// `https://example.com/baz.css`.
+    Path,
+    /// We might depend on our full URI. This is the case for query strings (and, in the general
+    /// case, local refs and empty URIs, but that's not the case for CSS as described below.
+    Full,
+}
+
+fn likely_base_uri_dependency(specified: &str) -> LikelyBaseUriDependency {
+    if specified.is_empty() {
+        // In CSS the empty URL is special / invalid.
+        // https://drafts.csswg.org/css-values-4/#url-empty
+        return LikelyBaseUriDependency::No;
+    }
+    if specified.starts_with('#') || specified.starts_with('/') {
+        // Local refs and absolute paths are fair game.
+        return LikelyBaseUriDependency::No;
+    }
+    const COMMON_PROTOCOLS: [&str; 3] = [
+        "http:",
+        "https:",
+        "data:",
+    ];
+    for protocol in COMMON_PROTOCOLS {
+        if specified.starts_with(protocol) {
+            // Common absolute URIs.
+            return LikelyBaseUriDependency::No;
+        }
+    }
+    if specified.starts_with('?') {
+        // Query string resolves differently for any two different base URIs
+        return LikelyBaseUriDependency::Full;
+    }
+    // Might be a relative URI, play it safe.
+    LikelyBaseUriDependency::Path
+}
+
 impl CssUrl {
     /// Parse a URL with a particular CORS mode.
     pub fn parse_with_cors_mode<'i, 't>(
@@ -76,6 +122,21 @@ impl CssUrl {
 
     /// Parse a URL from a string value that is a valid CSS token for a URL.
     pub fn parse_from_string(url: String, context: &ParserContext, cors_mode: CorsMode) -> Self {
+        use crate::use_counters::CustomUseCounter;
+        if let Some(counters) = context.use_counters {
+            if !counters.custom.recorded(CustomUseCounter::MaybeHasFullBaseUriDependency) {
+                match likely_base_uri_dependency(&url) {
+                    LikelyBaseUriDependency::No => {},
+                    LikelyBaseUriDependency::Path => {
+                        counters.custom.record(CustomUseCounter::MaybeHasPathBaseUriDependency);
+                    },
+                    LikelyBaseUriDependency::Full => {
+                        counters.custom.record(CustomUseCounter::MaybeHasPathBaseUriDependency);
+                        counters.custom.record(CustomUseCounter::MaybeHasFullBaseUriDependency);
+                    },
+                }
+            }
+        }
         CssUrl(Arc::new(CssUrlData {
             serialization: url.into(),
             extra_data: context.url_data.clone(),

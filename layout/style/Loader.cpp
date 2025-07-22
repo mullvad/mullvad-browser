@@ -1648,21 +1648,70 @@ void Loader::MarkLoadTreeFailed(SheetLoadData& aLoadData,
   } while (data);
 }
 
+static bool URIsEqual(nsIURI* aA, nsIURI* aB) {
+  if (aA == aB) {
+    return true;
+  }
+  if (!aA || !aB) {
+    return false;
+  }
+  bool equal = false;
+  return NS_SUCCEEDED(aA->Equals(aB, &equal)) && equal;
+}
+
+// The intention is that this would return true for inputs like
+//   (https://example.com/a, https://example.com/b)
+// but not for:
+//   (https://example.com/a, https://example.com/b/c)
+// where "regular" relative URIs would resolve differently.
+static bool BaseURIsArePathCompatible(nsIURI* aA, nsIURI* aB) {
+  if (!aA || !aB) {
+    return false;
+  }
+  constexpr auto kDummyPath = "foo.css"_ns;
+  nsAutoCString resultA;
+  nsAutoCString resultB;
+  aA->Resolve(kDummyPath, resultA);
+  aB->Resolve(kDummyPath, resultB);
+  return resultA == resultB;
+}
+
+static bool CanReuseInlineSheet(StyleSheet* aSheet, nsIURI* aNewBaseURI) {
+  nsIURI* oldBase = aSheet->GetBaseURI();
+  if (URIsEqual(oldBase, aNewBaseURI)) {
+    return true;
+  }
+  switch (aSheet->OriginalContentsBaseUriDependency()) {
+    case StyleLikelyBaseUriDependency::No:
+      break;
+    case StyleLikelyBaseUriDependency::Path:
+      if (BaseURIsArePathCompatible(oldBase, aNewBaseURI)) {
+        break;
+      }
+    [[fallthrough]];
+    case StyleLikelyBaseUriDependency::Full:
+      LOG(("  Can't reuse due to base URI dependency"));
+      return false;
+  }
+  return true;
+}
+
 RefPtr<StyleSheet> Loader::LookupInlineSheetInCache(
-    const nsAString& aBuffer, nsIPrincipal* aSheetPrincipal) {
+    const nsAString& aBuffer, nsIPrincipal* aSheetPrincipal, nsIURI* aBaseURI) {
   MOZ_ASSERT(mSheets, "Document associated loader should have sheet cache");
   auto result = mSheets->LookupInline(LoaderPrincipal(), aBuffer);
   if (!result) {
     return nullptr;
   }
-
   StyleSheet* sheet = result.Data();
   MOZ_ASSERT(!sheet->HasModifiedRules(),
              "How did we end up with a dirty sheet?");
-
   if (NS_WARN_IF(!sheet->Principal()->Equals(aSheetPrincipal))) {
     // If the sheet is going to have different access rights, don't return it
     // from the cache. XXX can this happen now that we eagerly clone?
+    return nullptr;
+  }
+  if (!CanReuseInlineSheet(sheet, aBaseURI)) {
     return nullptr;
   }
   return sheet->Clone(nullptr, nullptr);
@@ -1732,7 +1781,8 @@ Result<Loader::LoadSheetResult, nsresult> Loader::LoadInlineStyle(
     return LoaderPrincipal();
   }();
 
-  RefPtr<StyleSheet> sheet = LookupInlineSheetInCache(aBuffer, sheetPrincipal);
+  RefPtr<StyleSheet> sheet =
+      LookupInlineSheetInCache(aBuffer, sheetPrincipal, baseURI);
   const bool isSheetFromCache = !!sheet;
   if (!isSheetFromCache) {
     sheet = MakeRefPtr<StyleSheet>(eAuthorSheetFeatures, aInfo.mCORSMode,
