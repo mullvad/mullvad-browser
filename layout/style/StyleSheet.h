@@ -137,8 +137,7 @@ class StyleSheet final : public nsICSSLoaderObserver, public nsWrapperCache {
 
   // Common code that needs to be called after servo finishes parsing. This is
   // shared between the parallel and sequential paths.
-  void FinishAsyncParse(already_AddRefed<StyleStylesheetContents>,
-                        UniquePtr<StyleUseCounters>);
+  void FinishAsyncParse(already_AddRefed<StyleStylesheetContents>);
 
   // Similar to `ParseSheet`, but guarantees that
   // parsing will be performed synchronously.
@@ -157,9 +156,8 @@ class StyleSheet final : public nsICSSLoaderObserver, public nsWrapperCache {
     return Inner().mContents;
   }
 
-  const StyleUseCounters* GetStyleUseCounters() const {
-    return Inner().mUseCounters.get();
-  }
+  const StyleUseCounters* UseCounters() const;
+  void PropagateUseCountersTo(dom::Document*) const;
 
   URLExtraData* URLData() const { return Inner().mURLData; }
 

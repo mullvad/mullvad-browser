@@ -14,14 +14,14 @@ const BITS_PER_ENTRY: usize = 64;
 const BITS_PER_ENTRY: usize = 32;
 
 /// One bit per each non-custom CSS property.
-#[derive(Default)]
+#[derive(Debug, Default, Clone)]
 pub struct CountedUnknownPropertyUseCounters {
     storage:
         [Cell<usize>; (property_counts::COUNTED_UNKNOWN - 1 + BITS_PER_ENTRY) / BITS_PER_ENTRY],
 }
 
 /// One bit per each non-custom CSS property.
-#[derive(Default)]
+#[derive(Debug, Default, Clone)]
 pub struct NonCustomPropertyUseCounters {
     storage: [Cell<usize>; (property_counts::NON_CUSTOM - 1 + BITS_PER_ENTRY) / BITS_PER_ENTRY],
 }
@@ -73,7 +73,7 @@ impl NonCustomPropertyUseCounters {
 }
 
 /// The use-counter data related to a given document we want to store.
-#[derive(Default)]
+#[derive(Debug, Default, Clone)]
 pub struct UseCounters {
     /// The counters for non-custom properties that have been parsed in the
     /// document's stylesheets.

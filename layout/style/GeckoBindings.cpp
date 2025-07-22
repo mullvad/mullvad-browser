@@ -1338,21 +1338,18 @@ NS_IMPL_THREADSAFE_FFI_REFCOUNTING(SheetLoadDataHolder, SheetLoadDataHolder);
 
 void Gecko_StyleSheet_FinishAsyncParse(
     SheetLoadDataHolder* aData,
-    StyleStrong<StyleStylesheetContents> aSheetContents,
-    StyleUseCounters* aUseCounters) {
-  UniquePtr<StyleUseCounters> useCounters(aUseCounters);
+    StyleStrong<StyleStylesheetContents> aSheetContents) {
   RefPtr<SheetLoadDataHolder> loadData = aData;
   RefPtr<StyleStylesheetContents> sheetContents = aSheetContents.Consume();
   NS_DispatchToMainThreadQueue(
-      NS_NewRunnableFunction(
-          __func__,
-          [d = std::move(loadData), contents = std::move(sheetContents),
-           counters = std::move(useCounters)]() mutable {
-            MOZ_ASSERT(NS_IsMainThread());
-            SheetLoadData* data = d->get();
-            data->mSheet->FinishAsyncParse(contents.forget(),
-                                           std::move(counters));
-          }),
+      NS_NewRunnableFunction(__func__,
+                             [d = std::move(loadData),
+                              contents = std::move(sheetContents)]() mutable {
+                               MOZ_ASSERT(NS_IsMainThread());
+                               SheetLoadData* data = d->get();
+                               data->mSheet->FinishAsyncParse(
+                                   contents.forget());
+                             }),
       EventQueuePriority::RenderBlocking);
 }
 

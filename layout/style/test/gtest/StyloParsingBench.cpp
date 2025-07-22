@@ -9,7 +9,6 @@
 #include "nsString.h"
 #include "ExampleStylesheet.h"
 #include "ServoBindings.h"
-#include "mozilla/dom/DOMString.h"
 #include "mozilla/Encoding.h"
 #include "mozilla/Utf8.h"
 #include "mozilla/NullPrincipal.h"
@@ -30,7 +29,7 @@ using namespace mozilla::net;
 #  define SETPROPERTY_REPETITIONS (1000 * 1000)
 #  define GETPROPERTY_REPETITIONS (1000 * 1000)
 
-static void ServoParsingBench(const StyleUseCounters* aCounters) {
+static void ServoParsingBench() {
   auto css = AsBytes(MakeStringSpan(EXAMPLE_STYLESHEET));
   nsCString cssStr;
   cssStr.Append(css);
@@ -45,8 +44,8 @@ static void ServoParsingBench(const StyleUseCounters* aCounters) {
     RefPtr<StyleStylesheetContents> stylesheet =
         Servo_StyleSheet_FromUTF8Bytes(
             nullptr, nullptr, nullptr, &cssStr, eAuthorSheetFeatures, data,
-            eCompatibility_FullStandards, nullptr, aCounters,
-            StyleAllowImportRules::Yes, StyleSanitizationKind::None, nullptr)
+            eCompatibility_FullStandards, nullptr, StyleAllowImportRules::Yes,
+            StyleSanitizationKind::None, nullptr)
             .Consume();
   }
 }
@@ -96,12 +95,7 @@ static void ServoGetPropertyValueById() {
 }
 
 MOZ_GTEST_BENCH(Stylo, Servo_StyleSheet_FromUTF8Bytes_Bench,
-                [] { ServoParsingBench(nullptr); });
-
-MOZ_GTEST_BENCH(Stylo, Servo_StyleSheet_FromUTF8Bytes_Bench_UseCounters, [] {
-  UniquePtr<StyleUseCounters> counters(Servo_UseCounters_Create());
-  ServoParsingBench(counters.get());
-});
+                [] { ServoParsingBench(); });
 
 MOZ_GTEST_BENCH(Stylo, Servo_DeclarationBlock_SetPropertyById_Bench,
                 [] { ServoSetPropertyByIdBench("10px"_ns); });
