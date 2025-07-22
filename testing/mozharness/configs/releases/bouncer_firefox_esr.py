@@ -104,6 +104,7 @@ config = {
             "platforms": [
                 "win",
                 "win64",
+                "win64-aarch64",
             ],
         },
         "msix-latest": {
@@ -111,6 +112,7 @@ config = {
             "platforms": [
                 "win",
                 "win64",
+                "win64-aarch64",
             ],
         },
         "msix-next-latest": {
@@ -118,6 +120,7 @@ config = {
             "platforms": [
                 "win",
                 "win64",
+                "win64-aarch64",
             ],
         },
         "pkg": {
