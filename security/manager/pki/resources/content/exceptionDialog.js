@@ -33,7 +33,7 @@ function initExceptionDialog() {
     .addEventListener("input", () => handleTextChange());
   document
     .getElementById("viewCertButton")
-    .addEventListener("input", () => viewCertButtonClick());
+    .addEventListener("click", () => viewCertButtonClick());
 
   var args = window.arguments;
   if (args && args[0]) {
