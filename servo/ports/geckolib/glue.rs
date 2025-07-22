@@ -143,7 +143,7 @@ use style::thread_state;
 use style::traversal::resolve_style;
 use style::traversal::DomTraversal;
 use style::traversal_flags::{self, TraversalFlags};
-use style::use_counters::UseCounters;
+use style::use_counters::{CustomUseCounter, UseCounters};
 use style::values::animated::{Animate, Procedure, ToAnimatedZero};
 use style::values::computed::easing::ComputedTimingFunction;
 use style::values::computed::effects::Filter;
@@ -8869,6 +8869,11 @@ pub unsafe extern "C" fn Servo_IsUnknownPropertyRecordedInUseCounter(
     p: CountedUnknownProperty,
 ) -> bool {
     use_counters.counted_unknown_properties.recorded(p)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn Servo_IsCustomUseCounterRecorded(use_counters: &UseCounters, c: CustomUseCounter) -> bool {
+    use_counters.custom.recorded(c)
 }
 
 #[no_mangle]
