@@ -10,7 +10,6 @@
 #
 # Additional HTTPS-First tests can be found at: dom/security/test/https-first
 
-
 from marionette_driver import By, Keys, Wait
 from marionette_driver.errors import JavascriptException
 from marionette_harness import MarionetteTestCase, WindowManagerMixin
@@ -26,7 +25,6 @@ class TestHTTPSFirst(WindowManagerMixin, MarionetteTestCase):
         self.schemeless_url = "example.org"
 
         self.http_only_url = "http://http.badssl.com/"
-        self.bad_ssl_certificate = "http://expired.badssl.com/"
 
     def tearDown(self):
         with self.marionette.using_context("chrome"):
@@ -34,10 +32,10 @@ class TestHTTPSFirst(WindowManagerMixin, MarionetteTestCase):
 
         super(TestHTTPSFirst, self).tearDown()
 
-    def test_upgrade_with_schemeless_url(self):
-        self.navigate_in_urlbar(self.schemeless_url)
+    def test_no_upgrade_with_http_only_site(self):
+        self.navigate_in_urlbar(self.http_only_url)
         self.wait_for_page_navigated(
-            self.https_url, f"Expected HTTPS-First upgrade to {self.https_url}"
+            self.http_only_url, "Expected no HTTPS-First upgrade for HTTP-only site"
         )
 
     def test_no_upgrade_with_http_scheme(self):
@@ -46,10 +44,10 @@ class TestHTTPSFirst(WindowManagerMixin, MarionetteTestCase):
             self.http_url, f"Expected no HTTPS-First upgrade for {self.http_url}"
         )
 
-    def test_no_upgrade_with_http_only_site(self):
-        self.navigate_in_urlbar(self.http_only_url)
+    def test_upgrade_with_schemeless_url(self):
+        self.navigate_in_urlbar(self.schemeless_url)
         self.wait_for_page_navigated(
-            self.http_only_url, "Expected no HTTPS-First upgrade for HTTP-only site"
+            self.https_url, f"Expected HTTPS-First upgrade to {self.https_url}"
         )
 
     def navigate_in_urlbar(self, url):
@@ -60,24 +58,18 @@ class TestHTTPSFirst(WindowManagerMixin, MarionetteTestCase):
 
     def wait_for_page_navigated(self, target_url, message):
         def navigated(m):
-            return self.marionette.execute_async_script(
+            return self.marionette.execute_script(
                 """
-                const [url, resolve] = arguments;
+                const [url] = arguments;
 
-                if (
-                  ["interactive", "complete"].includes(document.readyState) &&
-                  window.location.href == url
-                ) {
-                  resolve(window.location.href);
-                } else {
-                  window.addEventListener("DOMContentLoaded", () => {
-                    resolve(window.location.href)
-                  }, { once: true });
-                }
+                return ["interactive", "complete"].includes(document.readyState) &&
+                  window.location.href == url;
             """,
                 script_args=[target_url],
             )
 
-        Wait(self.marionette, ignored_exceptions=[JavascriptException]).until(
-            navigated, message=message
-        )
+        Wait(
+            self.marionette,
+            ignored_exceptions=[JavascriptException],
+            timeout=self.marionette.session_capabilities["timeouts"]["pageLoad"],
+        ).until(navigated, message=message)
