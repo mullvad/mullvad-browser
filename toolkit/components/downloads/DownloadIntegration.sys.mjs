@@ -455,7 +455,7 @@ export var DownloadIntegration = {
 
     let redirects = download.saver.getRedirects();
     if (redirects) {
-      for (let redirect of redirects) {
+      for (let redirect of redirects.enumerate()) {
         resources.push({
           url: redirect.referrerURI,
           type: Ci.nsIClientDownloadResource.DOWNLOAD_REDIRECT,
