@@ -42,11 +42,13 @@ export const SecurityLevelRestartNotification = {
       await lazy.NotificationStrings.formatValues([
         { id: "security-level-restart-prompt-title" },
         { id: "security-level-restart-prompt-body" },
-        { id: "security-level-restart-prompt-button-restart" },
+        { id: "restart-warning-dialog-restart-button" },
         { id: "security-level-restart-prompt-button-ignore" },
       ]);
     const buttonFlags =
       Services.prompt.BUTTON_TITLE_IS_STRING * Services.prompt.BUTTON_POS_0 +
+      Services.prompt.BUTTON_POS_0_DEFAULT +
+      Services.prompt.BUTTON_DEFAULT_IS_DESTRUCTIVE +
       Services.prompt.BUTTON_TITLE_IS_STRING * Services.prompt.BUTTON_POS_1;
 
     const propBag = await Services.prompt.asyncConfirmEx(
