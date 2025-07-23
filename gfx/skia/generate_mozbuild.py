@@ -28,8 +28,6 @@ if CONFIG['MOZ_OPTIMIZE']:
         skia_opt_flags += ['-O2']
     elif CONFIG['CC_TYPE'] in ('clang', 'gcc'):
         skia_opt_flags += ['-O3']
-if CONFIG['TARGET_CPU'] == 'loongarch64':
-    skia_opt_flags += ['-mlasx']
 
 """
 
@@ -123,6 +121,13 @@ if CONFIG['TARGET_CPU'] == 'loongarch64':
     else:
         # gcc, clang8 for loongarch64.
         CXXFLAGS += ['-flax-vector-conversions']
+
+    SOURCES += ['skia/src/opts/SkOpts_lasx.cpp']
+    SOURCES['skia/src/opts/SkOpts_lasx.cpp'].flags += skia_opt_flags
+    SOURCES['skia/src/core/SkBitmapProcState_opts_lasx.cpp'].flags += ['-mlasx']
+    SOURCES['skia/src/core/SkBlitRow_opts_lasx.cpp'].flags += ['-mlasx']
+    SOURCES['skia/src/core/SkSwizzler_opts_lasx.cpp'].flags += ['-mlasx']
+    SOURCES['skia/src/opts/SkOpts_lasx.cpp'].flags += ['-mlasx']
 """
 
 import json
