@@ -522,7 +522,7 @@ void StyleSheet::DropStyleSet(ServoStyleSet* aStyleSet) {
   do {                                                                    \
     StyleSheet* current = this;                                           \
     do {                                                                  \
-      for (ServoStyleSet* set : current->mStyleSets) {                    \
+      for (ServoStyleSet * set : current->mStyleSets) {                   \
         set->function_ args_;                                             \
       }                                                                   \
       if (auto* docOrShadow = current->mDocumentOrShadowRoot) {           \
