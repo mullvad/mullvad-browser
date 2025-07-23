@@ -36,26 +36,29 @@ async function createTargetFileAndDownload() {
 /**
  * Waits for a download to finish.
  *
+ * @param {DownloadList} aList
+ *        The DownloadList that contains the download.
  * @param {Download} aDownload
  *        The Download object to wait upon.
  *
  * @returns {Promise}
  */
-function promiseDownloadFinished(aDownload) {
-  return new Promise(resolve => {
-    // Wait for the download to finish.
-    let onchange = function () {
-      if (aDownload.succeeded || aDownload.error) {
-        aDownload.onchange = null;
-        resolve();
+function promiseDownloadFinished(aList, aDownload) {
+  let promiseAndResolvers = Promise.withResolvers();
+  let view = {
+    onDownloadChanged() {
+      if (aDownload.succeeded || aDownload.error || aDownload.canceled) {
+        aList.removeView(view);
+        promiseAndResolvers.resolve();
       }
-    };
+    },
+  };
+  aList.addView(view);
+  // Register for the notification, but also call the function directly in
+  // case the download already reached the expected progress.
+  view.onDownloadChanged(aDownload);
 
-    // Register for the notification, but also call the function directly in
-    // case the download already reached the expected progress.
-    aDownload.onchange = onchange;
-    onchange();
-  });
+  return promiseAndResolvers.promise;
 }
 
 function assertContentAnalysisDownloadRequest(request, expectedFilePath) {
@@ -97,8 +100,10 @@ add_task(async function test_download_content_analysis_allows() {
   });
 
   const download = await createTargetFileAndDownload();
+  let list = await Downloads.getList(Downloads.PUBLIC);
+  await list.add(download);
   await download.start();
-  await promiseDownloadFinished(download);
+  await promiseDownloadFinished(list, download);
   // Make sure the download succeeded.
   ok(download.succeeded, "Download should succeed");
   is(mockCA.calls.length, 1, "Content analysis should be called once");
@@ -137,12 +142,64 @@ add_task(async function test_download_content_analysis_blocks() {
   await SpecialPowers.popPrefEnv();
 });
 
+add_task(async function test_download_content_analysis_user_cancels() {
+  // Make the mock CA service wait for event so the test can
+  // cancel the download before the scan finishes.
+  mockCA.setupForTest(true, /* waitForEvent */ true);
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      ["browser.contentanalysis.interception_point.download.enabled", true],
+    ],
+  });
+
+  let scanStartedPromise = new Promise(res => {
+    mockCA.eventTarget.addEventListener("inAnalyzeContentRequest", res, {
+      once: true,
+    });
+  });
+  const download = await createTargetFileAndDownload();
+
+  info(`path is ${download.target.path}`);
+  let list = await Downloads.getList(Downloads.PUBLIC);
+  await list.add(download);
+  download.start();
+  // Make sure the scan has started before cancelling.
+  await scanStartedPromise;
+  download.cancel();
+  await promiseDownloadFinished(list, download);
+  // Wait for the scan to be cancelled to avoid a race between cancelling
+  // and the scan finishing.
+  await TestUtils.waitForCondition(() => {
+    return mockCA.cancelledUserActions.length == 1;
+  }, "Wait for the scan to be cancelled");
+
+  // Tell the scan to finish, but this should be ignored since the user
+  // already cancelled.
+  mockCA.eventTarget.dispatchEvent(
+    new CustomEvent("returnContentAnalysisResponse")
+  );
+  // Make sure the download finished.
+  ok(download.canceled, "Download should be cancelled");
+  is(mockCA.calls.length, 1, "Content analysis should be called once");
+  is(mockCA.cancelledUserActions.length, 1, "One user action cancelled");
+
+  try {
+    await IOUtils.remove(download.target.path);
+  } catch (ex) {
+    // OK if this fails; we don't have everything set up so the file
+    // may or may not exist on disk.
+  }
+  await SpecialPowers.popPrefEnv();
+});
+
 add_task(async function test_download_content_analysis_pref_defaults_to_off() {
   mockCA.setupForTest(false);
   // do not set pref, so content analysis should not be consulted
   const download = await createTargetFileAndDownload();
+  let list = await Downloads.getList(Downloads.PUBLIC);
+  await list.add(download);
   await download.start();
-  await promiseDownloadFinished(download);
+  await promiseDownloadFinished(list, download);
   // Make sure the download succeeded.
   ok(download.succeeded, "Download should succeed");
   is(mockCA.calls.length, 0, "Content analysis should not be called");
