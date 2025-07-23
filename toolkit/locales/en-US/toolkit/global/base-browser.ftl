@@ -177,6 +177,13 @@ security-level-preferences-bullet-limit-media = Audio and video (HTML5 media), a
 security-level-preferences-bullet-disabled-javascript = JavaScript is disabled by default on all sites.
 security-level-preferences-bullet-limit-font-and-symbols-and-images = Some fonts, icons, math symbols, and images are disabled.
 
+## Security level dialog warning the user about a restart.
+
+# '-brand-short-name' is the localized browser name, like "Tor Browser".
+security-level-restart-warning-dialog-title = Restart { -brand-short-name } to apply changes?
+# '-brand-short-name' is the localized browser name, like "Tor Browser".
+security-level-restart-warning-dialog-body = { -brand-short-name } needs to restart to apply your changes. This will close all your windows and tabs.
+
 ## Custom security level.
 ## Some custom preferences configuration has placed the user outside one of the standard three levels.
 
@@ -188,5 +195,12 @@ security-level-summary-custom = Your custom browser preferences have resulted in
 
 security-level-restart-prompt-title = Your security level settings require a restart
 security-level-restart-prompt-body = You must restart { -brand-short-name } for your security level settings to be applied. This will close all your windows and tabs.
-security-level-restart-prompt-button-restart = Restart
 security-level-restart-prompt-button-ignore = Ignore
+
+## Part of the restart dialogs for security level and new identity.
+
+# Checkbox to never show the restart warning dialog again.
+restart-warning-dialog-do-not-warn-checkbox = Don’t show this warning again
+# Button to restart the browser.
+# '-brand-short-name' is the localized browser name, like "Tor Browser".
+restart-warning-dialog-restart-button = Restart { -brand-short-name }
