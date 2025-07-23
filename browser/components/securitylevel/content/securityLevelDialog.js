@@ -39,8 +39,8 @@ const gSecurityLevelDialog = {
   async init() {
     const dialog = document.getElementById("security-level-dialog");
     dialog.addEventListener("dialogaccept", event => {
+      event.preventDefault();
       if (this._acceptButton.disabled) {
-        event.preventDefault();
         return;
       }
       this._commitChange();
@@ -158,7 +158,41 @@ const gSecurityLevelDialog = {
   /**
    * Commit the change in security level and restart the browser.
    */
-  _commitChange() {
+  async _commitChange() {
+    const doNotWarnPref = "browser.security_level.disable_warn_before_restart";
+    if (!Services.prefs.getBoolPref(doNotWarnPref, false)) {
+      const [titleString, bodyString, checkboxString, restartString] =
+        await document.l10n.formatValues([
+          { id: "security-level-restart-warning-dialog-title" },
+          { id: "security-level-restart-warning-dialog-body" },
+          { id: "restart-warning-dialog-do-not-warn-checkbox" },
+          { id: "restart-warning-dialog-restart-button" },
+        ]);
+      const flags =
+        Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING +
+        Services.prompt.BUTTON_POS_0_DEFAULT +
+        Services.prompt.BUTTON_DEFAULT_IS_DESTRUCTIVE +
+        Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL;
+      const propBag = await Services.prompt.asyncConfirmEx(
+        window.browsingContext.top,
+        Services.prompt.MODAL_TYPE_CONTENT,
+        titleString,
+        bodyString,
+        flags,
+        restartString,
+        null,
+        null,
+        checkboxString,
+        false,
+        { useTitle: true, noIcon: true }
+      );
+      if (propBag.get("buttonNumClicked") !== 0) {
+        return;
+      }
+      if (propBag.get("checked")) {
+        Services.prefs.setBoolPref(doNotWarnPref, true);
+      }
+    }
     SecurityLevelPrefs.setSecurityLevelBeforeRestart(this._selectedLevel);
     Services.startup.quit(
       Services.startup.eAttemptQuit | Services.startup.eRestart
