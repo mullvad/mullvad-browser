@@ -298,6 +298,72 @@ tests.push({
     hasTelemetryId(engines, "Google", "google-com-nocodes"),
 });
 
+tests.push({
+  region: "US",
+  distribution: "dt-002",
+  application: "firefox-android",
+  test: engines =>
+    hasParams(engines, "Google", "client=firefox-b-1-dt") &&
+    hasDefault(engines, "Google") &&
+    hasEnginesFirst(engines, ["Google"]) &&
+    hasTelemetryId(engines, "Google", "google-b-1-dt"),
+});
+
+tests.push({
+  region: "CA", // Testing for "rest of world" (excluding US, RU, TR, BY, KZ)
+  distribution: "dt-002",
+  application: "firefox-android",
+  test: engines =>
+    hasParams(engines, "Google", "client=firefox-b-dt") &&
+    hasDefault(engines, "Google") &&
+    hasEnginesFirst(engines, ["Google"]) &&
+    hasTelemetryId(engines, "Google", "google-b-dt"),
+});
+
+tests.push({
+  region: "US",
+  distribution: "dt-003",
+  application: "firefox-android",
+  test: engines =>
+    hasParams(engines, "Google", "client=firefox-b-1-dt") &&
+    hasDefault(engines, "Google") &&
+    hasEnginesFirst(engines, ["Google"]) &&
+    hasTelemetryId(engines, "Google", "google-b-1-dt"),
+});
+
+tests.push({
+  region: "CA", // Testing for "rest of world" (excluding US, RU, TR, BY, KZ)
+  distribution: "dt-003",
+  application: "firefox-android",
+  test: engines =>
+    hasParams(engines, "Google", "client=firefox-b-dt") &&
+    hasDefault(engines, "Google") &&
+    hasEnginesFirst(engines, ["Google"]) &&
+    hasTelemetryId(engines, "Google", "google-b-dt"),
+});
+
+tests.push({
+  region: "US",
+  distribution: "aura-001",
+  application: "firefox-android",
+  test: engines =>
+    hasParams(engines, "Google", "client=firefox-b-1-ar") &&
+    hasDefault(engines, "Google") &&
+    hasEnginesFirst(engines, ["Google"]) &&
+    hasTelemetryId(engines, "Google", "google-b-1-ar"),
+});
+
+tests.push({
+  region: "CA", // Testing for "rest of world" (excluding US, RU, TR, BY, KZ)
+  distribution: "aura-001",
+  application: "firefox-android",
+  test: engines =>
+    hasParams(engines, "Google", "client=firefox-b-ar") &&
+    hasDefault(engines, "Google") &&
+    hasEnginesFirst(engines, ["Google"]) &&
+    hasTelemetryId(engines, "Google", "google-b-ar"),
+});
+
 function hasURLs(engines, engineName, url, suggestURL) {
   let engine = engines.find(e => e.name === engineName);
   Assert.ok(engine, `Should be able to find ${engineName}`);
