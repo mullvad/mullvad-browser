@@ -826,9 +826,7 @@ static nsresult CacheFavicon(
   nsCOMPtr<nsIRunnable> event = new AsyncEncodeAndWriteIcon(
       path, std::move(data), stride, size.width, size.height,
       aRunnable.forget(), std::move(aPromiseHolder));
-  aIOThread->Dispatch(event, NS_DISPATCH_NORMAL);
-
-  return NS_OK;
+  return aIOThread->Dispatch(event, NS_DISPATCH_NORMAL);
 }
 #endif
 
@@ -895,7 +893,11 @@ NS_IMETHODIMP AsyncEncodeAndWriteIcon::Run() {
   return rv;
 }
 
-AsyncEncodeAndWriteIcon::~AsyncEncodeAndWriteIcon() {}
+AsyncEncodeAndWriteIcon::~AsyncEncodeAndWriteIcon() {
+  if (mPromiseHolder) {
+    mPromiseHolder->RejectIfExists(NS_ERROR_FAILURE, __func__);
+  }
+}
 
 AsyncDeleteAllFaviconsFromDisk::AsyncDeleteAllFaviconsFromDisk(
     bool aIgnoreRecent)
