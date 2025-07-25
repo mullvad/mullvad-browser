@@ -106,15 +106,12 @@ class MOZ_RAII AutoSetInServoTraversal {
 };
 
 // Sets up for one or more calls to Servo_TraverseSubtree.
-class MOZ_RAII AutoPrepareTraversal {
+class MOZ_RAII AutoPrepareTraversal : public AutoSetInServoTraversal {
  public:
   explicit AutoPrepareTraversal(ServoStyleSet* aSet)
-      : mSetInServoTraversal(aSet) {
+      : AutoSetInServoTraversal(aSet) {
     MOZ_ASSERT(!aSet->StylistNeedsUpdate());
   }
-
- private:
-  AutoSetInServoTraversal mSetInServoTraversal;
 };
 
 ServoStyleSet::ServoStyleSet(Document& aDocument) : mDocument(&aDocument) {
@@ -864,6 +861,7 @@ bool ServoStyleSet::StyleDocument(ServoTraversalFlags aFlags) {
   if (GetPresContext()->EffectCompositor()->PreTraverse(aFlags)) {
     DocumentStyleRootIterator iter(mDocument->GetServoRestyleRoot());
     while (Element* root = iter.GetNextStyleRoot()) {
+      AutoPrepareTraversal guard(this);
       postTraversalRequired |=
           Servo_TraverseSubtree(root, mRawData.get(), &snapshots, aFlags) ||
           root->HasAnyOfFlags(Element::kAllServoDescendantBits |
