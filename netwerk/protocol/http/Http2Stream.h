@@ -13,7 +13,7 @@ namespace mozilla::net {
 
 class Http2Stream : public Http2StreamBase {
  public:
-  NS_INLINE_DECL_THREADSAFE_REFCOUNTING(Http2Stream, override)
+  NS_INLINE_DECL_REFCOUNTING_INHERITED(Http2Stream, Http2StreamBase)
 
   Http2Stream(nsAHttpTransaction* httpTransaction, Http2Session* session,
               int32_t priority, uint64_t bcId);

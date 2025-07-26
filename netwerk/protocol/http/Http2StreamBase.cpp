@@ -21,6 +21,7 @@
 #include "Http2Stream.h"
 
 #include "mozilla/BasePrincipal.h"
+#include "mozilla/Components.h"
 #include "mozilla/StaticPrefs_network.h"
 #include "mozilla/glean/NetwerkProtocolHttpMetrics.h"
 #include "nsHttp.h"
@@ -31,6 +32,51 @@
 
 namespace mozilla::net {
 
+NS_IMPL_ADDREF(Http2StreamBase)
+NS_IMETHODIMP_(MozExternalRefCountType)
+Http2StreamBase::Release() {
+  nsrefcnt count;
+  MOZ_ASSERT(0 != mRefCnt, "dup release");
+  count = --mRefCnt;
+  NS_LOG_RELEASE(this, count, "Http2StreamBase");
+  if (0 == count) {
+    mRefCnt = 1; /* stablize */
+    // it is essential that the stream be destroyed on the socket thread.
+    DeleteSelfOnSocketThread();
+    return 0;
+  }
+  return count;
+}
+
+NS_IMPL_QUERY_INTERFACE0(Http2StreamBase)
+
+class DeleteHttp2StreamBase : public Runnable {
+ public:
+  explicit DeleteHttp2StreamBase(Http2StreamBase* aStream)
+      : Runnable("net::DeleteHttp2StreamBase"), mStream(aStream) {}
+
+  NS_IMETHOD Run() override {
+    delete mStream;
+    return NS_OK;
+  }
+
+ private:
+  Http2StreamBase* mStream;
+};
+
+void Http2StreamBase::DeleteSelfOnSocketThread() {
+  if (OnSocketThread()) {
+    delete this;
+    return;
+  }
+
+  nsCOMPtr<nsIEventTarget> sts =
+      mozilla::components::SocketTransport::Service();
+  nsCOMPtr<nsIRunnable> event = new DeleteHttp2StreamBase(this);
+  Unused << NS_WARN_IF(
+      NS_FAILED(sts->Dispatch(event.forget(), NS_DISPATCH_NORMAL)));
+}
+
 Http2StreamBase::Http2StreamBase(uint64_t aTransactionBrowserId,
                                  Http2Session* session, int32_t priority,
                                  uint64_t currentBrowserId)
@@ -40,6 +86,8 @@ Http2StreamBase::Http2StreamBase(uint64_t aTransactionBrowserId,
       mOpenGenerated(0),
       mAllHeadersReceived(0),
       mQueued(0),
+      mInWriteQueue(0),
+      mInReadQueue(0),
       mSocketTransport(session->SocketTransport()),
       mCurrentBrowserId(currentBrowserId),
       mTransactionBrowserId(aTransactionBrowserId),
