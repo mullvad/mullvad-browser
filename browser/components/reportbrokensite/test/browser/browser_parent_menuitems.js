@@ -80,4 +80,17 @@ add_task(async function testMenus() {
       );
     }
   });
+
+  ensureReportBrokenSitePreffedOn();
+  ensureReportBrokenSiteDisabledByPolicy();
+
+  await BrowserTestUtils.withNewTab(REPORTABLE_PAGE_URL, async function () {
+    await forceMenuItemStateUpdate();
+    for (const { menuDescription, reportBrokenSite } of menus) {
+      isMenuItemHidden(
+        reportBrokenSite,
+        `${menuDescription} option hidden when disabled by DisableFeedbackCommands enterprise policy`
+      );
+    }
+  });
 });
