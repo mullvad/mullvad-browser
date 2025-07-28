@@ -39,7 +39,7 @@ function commonDialogOnLoad() {
     ["promptUserAndPass", "promptPassword"].includes(args.promptType) ||
     args.headerIconCSSValue;
   let root = document.documentElement;
-  if (needIconifiedHeader) {
+  if (needIconifiedHeader && !args.noIcon) {
     root.setAttribute("neediconheader", "true");
   }
   let title = { raw: args.title };
@@ -105,6 +105,10 @@ function commonDialogOnLoad() {
 
   if (args.isExtra1Secondary) {
     dialog.setAttribute("extra1-is-secondary", true);
+  }
+
+  if (args.isDefaultDestructive) {
+    dialog.setAttribute("default-is-destructive", true);
   }
 
   Dialog = new CommonDialog(args, ui);
