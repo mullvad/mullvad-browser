@@ -66,6 +66,8 @@ class txXPathNode {
   bool operator!=(const txXPathNode& aNode) const { return !(*this == aNode); }
   ~txXPathNode() { MOZ_COUNT_DTOR(txXPathNode); }
 
+  mozilla::dom::Document* OwnerDoc() const { return mNode->OwnerDoc(); }
+
  private:
   friend class txXPathNativeNode;
   friend class txXPathNodeUtils;
