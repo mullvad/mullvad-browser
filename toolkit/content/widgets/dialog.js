@@ -21,7 +21,8 @@
     static get observedAttributes() {
       return super.observedAttributes.concat(
         "subdialog",
-        "extra1-is-secondary"
+        "extra1-is-secondary",
+        "default-is-destructive"
       );
     }
 
@@ -39,6 +40,12 @@
       // Only move the button on UNIX, since it's already in the correct spot on Windows
       if (name === "extra1-is-secondary" && AppConstants.XP_UNIX) {
         this.getButton("cancel").after(this.getButton("extra1"));
+      }
+      if (name === "default-is-destructive") {
+        this.#setButtonIsDestructive(
+          this.getButton(this.defaultButton),
+          this.hasAttribute("default-is-destructive")
+        );
       }
       super.attributeChangedCallback(name, oldValue, newValue);
     }
@@ -491,12 +498,17 @@
       var oldDefaultButton = this.getButton(this.defaultButton);
       if (oldDefaultButton) {
         oldDefaultButton.removeAttribute("default");
+        this.#setButtonIsDestructive(oldDefaultButton, false);
       }
 
       var newDefaultButton = this.getButton(aNewDefault);
       if (newDefaultButton) {
         this.setAttribute("defaultButton", aNewDefault);
         newDefaultButton.setAttribute("default", "true");
+        this.#setButtonIsDestructive(
+          newDefaultButton,
+          this.hasAttribute("default-is-destructive")
+        );
       } else {
         this.setAttribute("defaultButton", "none");
         if (aNewDefault != "none") {
@@ -505,6 +517,16 @@
           );
         }
       }
+    }
+
+    /**
+     * Mark or un-mark a button as a destructive action.
+     *
+     * @param {?Element} button - The button to mark.
+     * @param {boolean} isDestructive - Whether the button is destructive.
+     */
+    #setButtonIsDestructive(button, isDestructive) {
+      button?.classList.toggle("danger-button", isDestructive);
     }
 
     _handleButtonCommand(aEvent) {
