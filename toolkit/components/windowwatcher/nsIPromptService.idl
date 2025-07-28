@@ -287,6 +287,8 @@ interface nsIPromptService : nsISupports
    */
   const unsigned long BUTTON_POS_1_IS_SECONDARY  = 1 << 29;
 
+  const unsigned long BUTTON_DEFAULT_IS_DESTRUCTIVE = 1 << 30;
+
   /**
    * Selects the standard set of OK/Cancel buttons.
    */
