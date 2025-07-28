@@ -295,6 +295,13 @@ add_task(async function test_tabInteractionsCloseViaAnotherTabContext() {
   );
   await assertMetricFoundFor("close_tab_other", 4);
 
+  // Dismiss the confirmation panel that appears after closing duplicate tabs.
+  EventUtils.synthesizeMouseAtCenter(document.documentElement, {});
+  await BrowserTestUtils.waitForCondition(
+    () => !window.ConfirmationHint._panel.getAttribute("animating"),
+    "Ensure the confirmation panel is closed"
+  );
+
   window.gBrowser.removeAllTabsBut(initialTab);
   await resetTelemetry();
 });

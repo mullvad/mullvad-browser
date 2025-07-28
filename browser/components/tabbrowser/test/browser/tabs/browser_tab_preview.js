@@ -42,14 +42,52 @@ async function closePreviews(win = window) {
   return previewHidden;
 }
 
+function getOpenPanels() {
+  return document.querySelectorAll(
+    "panel[panelopen=true],panel[animating=true],menupopup[open=true]"
+  );
+}
+
+async function resetState() {
+  for (let panel of getOpenPanels()) {
+    let hiddenEvent = BrowserTestUtils.waitForPopupEvent(panel, "hidden");
+    panel.hidePopup();
+    await hiddenEvent;
+  }
+
+  let openPanels = getOpenPanels();
+  Assert.ok(!openPanels.length, `sanity check: no panels open`);
+
+  // Ensure the mouse is not hovering over the tab strip.
+  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
+    type: "mouseover",
+  });
+}
+
+function createFakePanel(win = window) {
+  let panel = win.document.createXULElement("panel");
+  // Necessary to get the panel open, animating, etc. elements to appear.
+  panel.setAttribute("type", "arrow");
+  win.document.documentElement.appendChild(panel);
+
+  return panel;
+}
+
 add_setup(async function () {
   await SpecialPowers.pushPrefEnv({
     set: [
       ["browser.tabs.hoverPreview.enabled", true],
       ["browser.tabs.hoverPreview.showThumbnails", false],
       ["browser.tabs.tooltipsShowPidAndActiveness", false],
+      ["sidebar.revamp", false],
+      ["sidebar.verticalTabs", false],
       ["ui.tooltip.delay_ms", 0],
     ],
+  });
+
+  await resetState();
+  registerCleanupFunction(async function () {
+    await resetState();
   });
 });
 
@@ -88,10 +126,7 @@ add_task(async function hoverTests() {
   BrowserTestUtils.removeTab(tab1);
   BrowserTestUtils.removeTab(tab2);
 
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 // Bug 1897475 - don't show tab previews in background windows
@@ -140,11 +175,8 @@ add_task(async function noTabPreviewInBackgroundWindowTests() {
 
   BrowserTestUtils.removeTab(bgTab);
 
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
   sinon.restore();
+  await resetState();
 });
 
 /**
@@ -179,10 +211,7 @@ add_task(async function focusTests() {
   BrowserTestUtils.removeTab(tab1);
   BrowserTestUtils.removeTab(tab2);
 
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 /**
@@ -208,13 +237,8 @@ add_task(async function pidAndActivenessHiddenByDefaultTests() {
   );
 
   await closePreviews();
-
   BrowserTestUtils.removeTab(tab1);
-
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 add_task(async function pidAndActivenessTests() {
@@ -271,11 +295,7 @@ add_task(async function pidAndActivenessTests() {
   BrowserTestUtils.removeTab(tab1);
   BrowserTestUtils.removeTab(tab2);
   await SpecialPowers.popPrefEnv();
-
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 /**
@@ -334,11 +354,7 @@ add_task(async function thumbnailTests() {
 
   // Removing the tab should close the preview.
   await previewHidden;
-
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 /**
@@ -396,11 +412,7 @@ add_task(async function wireframeTests() {
 
   // Removing the tab should close the preview.
   await previewHidden;
-
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 /**
@@ -447,6 +459,7 @@ add_task(async function delayTests() {
   BrowserTestUtils.removeTab(tab1);
   BrowserTestUtils.removeTab(tab2);
   sinon.restore();
+  await resetState();
 });
 
 /**
@@ -474,7 +487,7 @@ add_task(async function dragTests() {
   EventUtils.synthesizePlainDragAndDrop({
     srcElement: tab1,
     destElement: null,
-    stepX: 100,
+    stepX: 5,
     stepY: 0,
   });
 
@@ -489,12 +502,8 @@ add_task(async function dragTests() {
   BrowserTestUtils.removeTab(tab1);
   sinon.restore();
 
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
-
   await SpecialPowers.popPrefEnv();
+  await resetState();
 });
 
 /**
@@ -537,11 +546,7 @@ add_task(async function panelSuppressionOnContextMenuTests() {
   contentAreaContextMenu.hidePopup();
   BrowserTestUtils.removeTab(tab);
   sinon.restore();
-
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 /**
@@ -559,11 +564,13 @@ add_task(async function panelSuppressionOnPanelTests() {
   const previewComponent = gBrowser.tabContainer.previewPanel;
   sinon.spy(previewComponent, "activate");
 
-  // The `openPopup` API appears to not be working for this panel,
-  // but it can be triggered by firing a click event on the associated button.
-  const appMenuButton = document.getElementById("PanelUI-menu-button");
-  const appMenuPopup = document.getElementById("appMenu-popup");
-  appMenuButton.click();
+  let fakePanel = createFakePanel();
+  const popupShownEvent = BrowserTestUtils.waitForPopupEvent(
+    fakePanel,
+    "shown"
+  );
+  fakePanel.openPopup();
+  await popupShownEvent;
 
   EventUtils.synthesizeMouseAtCenter(tab, { type: "mouseover" }, window);
 
@@ -584,12 +591,12 @@ add_task(async function panelSuppressionOnPanelTests() {
     window
   );
 
-  const popupHidingEvent = BrowserTestUtils.waitForEvent(
-    appMenuPopup,
-    "popuphiding"
+  const popupHiddenEvent = BrowserTestUtils.waitForPopupEvent(
+    fakePanel,
+    "hidden"
   );
-  appMenuPopup.hidePopup();
-  await popupHidingEvent;
+  fakePanel.hidePopup();
+  await popupHiddenEvent;
 
   // Attempt to open the tab preview immediately after the popup hiding event
   await openPreview(tab);
@@ -597,11 +604,8 @@ add_task(async function panelSuppressionOnPanelTests() {
 
   BrowserTestUtils.removeTab(tab);
   sinon.restore();
-
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  fakePanel.remove();
+  await resetState();
 });
 
 /**
@@ -614,11 +618,13 @@ add_task(async function panelSuppressionOnPanelLazyLoadTests() {
   let fgWindow = await BrowserTestUtils.openNewBrowserWindow();
   let fgTab = fgWindow.gBrowser.tabs[0];
 
-  // The `openPopup` API appears to not be working for this panel,
-  // but it can be triggered by firing a click event on the associated button.
-  const appMenuButton = fgWindow.document.getElementById("PanelUI-menu-button");
-  const appMenuPopup = fgWindow.document.getElementById("appMenu-popup");
-  appMenuButton.click();
+  let fakePanel = createFakePanel(fgWindow);
+  const popupShownEvent = BrowserTestUtils.waitForPopupEvent(
+    fakePanel,
+    "shown"
+  );
+  fakePanel.openPopup();
+  await popupShownEvent;
 
   EventUtils.synthesizeMouseAtCenter(fgTab, { type: "mouseover" }, fgWindow);
 
@@ -626,8 +632,8 @@ add_task(async function panelSuppressionOnPanelLazyLoadTests() {
     // Sometimes the tests run slower than the test browser -- it's not always possible
     // to catch the panel in its opening state, so we have to check for both states.
     return (
-      (appMenuPopup.getAttribute("animating") === "true" ||
-        appMenuPopup.getAttribute("panelopen") === "true") &&
+      (fakePanel.getAttribute("animating") === "true" ||
+        fakePanel.getAttribute("panelopen") === "true") &&
       fgWindow.gBrowser.tabContainer.previewPanel !== null
     );
   });
@@ -635,7 +641,7 @@ add_task(async function panelSuppressionOnPanelLazyLoadTests() {
 
   // We can't spy on the previewComponent and check for calls to `activate` like in other tests,
   // since we can't guarantee that the spy will be set up before the call is made.
-  // Therefore the only realiable way to test that the popup isn't open is to reach in and check
+  // Therefore the only reliable way to test that the popup isn't open is to reach in and check
   // that it is in a disabled state.
   Assert.equal(previewComponent._isDisabled(), true, "");
 
@@ -651,20 +657,17 @@ add_task(async function panelSuppressionOnPanelLazyLoadTests() {
     fgWindow
   );
 
-  const popupHidingEvent = BrowserTestUtils.waitForEvent(
-    appMenuPopup,
-    "popuphiding"
+  const popupHiddenEvent = BrowserTestUtils.waitForPopupEvent(
+    fakePanel,
+    "hidden"
   );
-  appMenuPopup.hidePopup();
-  await popupHidingEvent;
+  fakePanel.hidePopup();
+  await popupHiddenEvent;
 
   BrowserTestUtils.removeTab(fgTab);
-
-  // Move the mouse outside of the tab strip.
+  fakePanel.remove();
   await BrowserTestUtils.closeWindow(fgWindow);
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 /**
@@ -712,12 +715,13 @@ add_task(async function otherPanelOpenTests() {
 
   Assert.ok(previewComponent._panelOpener._timer, "Timer is set");
 
-  // Open the popup before the timer finishes...
-  const appMenuButton = document.getElementById("PanelUI-menu-button");
-  const appMenuPopup = document.getElementById("appMenu-popup");
-  appMenuButton.click();
-
-  await BrowserTestUtils.waitForEvent(appMenuPopup, "popupshown");
+  let fakePanel = createFakePanel();
+  const popupShownEvent = BrowserTestUtils.waitForPopupEvent(
+    fakePanel,
+    "shown"
+  );
+  fakePanel.openPopup();
+  await popupShownEvent;
 
   // Wait for timer to finish...
   await BrowserTestUtils.waitForCondition(
@@ -738,16 +742,17 @@ add_task(async function otherPanelOpenTests() {
     type: "mouseout",
   });
 
-  const popupHidingEvent = BrowserTestUtils.waitForEvent(
-    appMenuPopup,
-    "popuphiding"
+  const popupHiddenEvent = BrowserTestUtils.waitForPopupEvent(
+    fakePanel,
+    "hidden"
   );
-  appMenuPopup.hidePopup();
-  await popupHidingEvent;
+  fakePanel.hidePopup();
+  await popupHiddenEvent;
 
+  fakePanel.remove();
   sinon.restore();
-
   await SpecialPowers.popPrefEnv();
+  await resetState();
 });
 
 /**
@@ -782,6 +787,7 @@ add_task(async function urlBarInputTests() {
   Assert.equal(previewElement.state, "closed", "Preview is closed");
 
   BrowserTestUtils.removeTab(tab1);
+  await resetState();
 });
 
 /**
@@ -812,8 +818,8 @@ add_task(async function zeroDelayTests() {
 
   await closePreviews();
   BrowserTestUtils.removeTab(tab);
-
   await SpecialPowers.popPrefEnv();
+  await resetState();
 });
 
 /**
@@ -852,11 +858,7 @@ add_task(async function wheelTests() {
   while (gBrowser.tabs.length > 1) {
     BrowserTestUtils.removeTab(gBrowser.tabs[0]);
   }
-
-  // Move the mouse outside of the tab strip.
-  EventUtils.synthesizeMouseAtCenter(document.documentElement, {
-    type: "mouseover",
-  });
+  await resetState();
 });
 
 add_task(async function appearsAsTooltipToAccessibilityToolsTests() {
@@ -903,6 +905,7 @@ add_task(async function tabContentChangeTests() {
 
   await closePreviews();
   BrowserTestUtils.removeTab(tab);
+  await resetState();
 });
 
 /**
@@ -934,4 +937,5 @@ add_task(async function tabPreview_verticalTabsPositioning() {
 
   await closePreviews();
   BrowserTestUtils.removeTab(tab);
+  await resetState();
 });
