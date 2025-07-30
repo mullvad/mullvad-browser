@@ -156,7 +156,6 @@ var SecurityLevelPanel = {
   _populateXUL() {
     this._elements = {
       panel: document.getElementById("securityLevel-panel"),
-      background: document.getElementById("securityLevel-background"),
       levelName: document.getElementById("securityLevel-level"),
       summary: document.getElementById("securityLevel-summary"),
     };
@@ -190,7 +189,7 @@ var SecurityLevelPanel = {
     const level = SecurityLevelPrefs.securityLevelSummary;
 
     // Descriptions change based on security level
-    this._elements.background.setAttribute("level", level);
+    this._elements.panel.setAttribute("level", level);
     let l10nIdLevel;
     let l10nIdSummary;
     switch (level) {

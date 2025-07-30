@@ -1,7 +1,7 @@
 <panel id="securityLevel-panel"
        role="dialog"
        aria-labelledby="securityLevel-header"
-       aria-describedby="securityLevel-subheading securityLevel-summary"
+       aria-describedby="securityLevel-level securityLevel-summary"
        type="arrow"
        orient="vertical"
        class="cui-widget-panel panel-no-padding">
@@ -13,9 +13,7 @@
   </box>
   <toolbarseparator id="securityLevel-separator"></toolbarseparator>
   <vbox id="securityLevel-background" class="panel-subview-body">
-    <html:p id="securityLevel-subheading">
-      <html:span id="securityLevel-level"></html:span>
-    </html:p>
+    <html:p id="securityLevel-level"></html:p>
     <html:p id="securityLevel-summary"></html:p>
     <html:a
       is="moz-support-link"
@@ -23,6 +21,7 @@
       tor-manual-page="security-settings"
       data-l10n-id="security-level-panel-learn-more-link"
     ></html:a>
+    <html:img id="securityLevel-background-image" alt="" />
   </vbox>
   <html:moz-button-group class="panel-footer">
     <button

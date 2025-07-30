@@ -18,6 +18,10 @@
   margin-inline-end: var(--space-large);
 }
 
+:-moz-locale-dir(rtl) .security-level-icon {
+  transform: scaleX(-1);
+}
+
 .security-level-current-badge {
   grid-area: badge;
   align-self: center;

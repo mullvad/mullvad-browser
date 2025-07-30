@@ -3,40 +3,54 @@
 #securityLevel-background {
   min-height: 10em;
   padding-inline: 16px;
-  padding-block: 16px 8px;
-  gap: 16px;
-  background-repeat: no-repeat;
-  background-position-y: top 0.4em;
-  /* Icon center should be in-line with end padding.
-   * We set the right-to-left position here, and the left-to-right position
-   * below. */
-  --background-inline-offset: calc(16px - 4.5em);
-  background-position-x: left var(--background-inline-offset);
-  background-size: 9em 9em;
+  column-gap: 0.5em;
+  display: grid;
+  grid-template:
+    "top-pad icon" 16px
+    "title icon" auto
+    "body icon" auto
+    "learn-more icon" auto
+    "bottom-pad icon" minmax(8px, 1fr)
+    / auto auto;
+}
+
+#securityLevel-background-image {
+  grid-area: icon;
+  --security-level-icon-size: 9em;
+  width: var(--security-level-icon-size);
+  height: var(--security-level-icon-size);
+  margin-block: 0.4em;
+  /* Middle of shield aligns with the panel padding: */
+  margin-inline-end: calc(-0.5 * var(--security-level-icon-size));
+  align-self: start;
+  justify-self: end;
+  /* This icon is meant to act as background, so disable dragging or interfering
+   * with clicks. */
+  pointer-events: none;
   -moz-context-properties: fill, fill-opacity;
   fill-opacity: 1;
   fill: var(--border-color-card);
 }
 
 /* NOTE: Use ":dir" instead of ":-moz-locale-dir" when panel switches to HTML. */
-#securityLevel-background:-moz-locale-dir(ltr) {
-  background-position-x: right var(--background-inline-offset);
+#securityLevel-background-image:-moz-locale-dir(rtl) {
+  transform: scaleX(-1);
 }
 
-#securityLevel-background:is([level="standard"], [level="custom"]) {
-  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
+#securityLevel-panel:is([level="standard"], [level="custom"]) #securityLevel-background-image {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#standard");
 }
 
-#securityLevel-background[level="safer"] {
-  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer");
+#securityLevel-panel[level="safer"] #securityLevel-background-image {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safer");
 }
 
-#securityLevel-background[level="safest"] {
-  background-image: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
+#securityLevel-panel[level="safest"] #securityLevel-background-image {
+  content: url("chrome://browser/content/securitylevel/securityLevelIcon.svg#safest");
 }
 
 #securityLevel-background p {
-  margin: 0;
+  margin-block: 0 16px;
 }
 
 /* Override margin in panelUI-shared.css */
@@ -47,13 +61,15 @@
 #securityLevel-level {
   font-size: 1.25em;
   font-weight: 600;
+  grid-area: title;
 }
 
 #securityLevel-summary {
-  padding-inline-end: 5em;
   max-width: 20em;
+  grid-area: body;
 }
 
 #securityLevel-learnMore {
   align-self: start;
+  grid-area: learn-more;
 }
