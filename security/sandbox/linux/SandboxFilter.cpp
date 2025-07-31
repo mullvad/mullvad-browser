@@ -800,20 +800,63 @@ class SandboxPolicyCommon : public SandboxPolicyBase {
         .Default(InvalidSyscall());
   }
 
+  virtual BoolExpr MsgFlagsAllowed(const Arg<int>& aFlags) const {
+    // MSG_DONTWAIT: used by IPC
+    // MSG_NOSIGNAL: used by the sandbox (broker, reporter)
+    // MSG_CMSG_CLOEXEC: should be used by anything that's passed fds
+    static constexpr int kNeeded =
+        MSG_DONTWAIT | MSG_NOSIGNAL | MSG_CMSG_CLOEXEC;
+
+    // These don't appear to be used in our code at the moment, but
+    // they seem low-risk enough to allow to avoid the possibility of
+    // breakage.  (Necko might use MSG_PEEK, but the socket process
+    // overrides this method.)
+    static constexpr int kHarmless = MSG_PEEK | MSG_WAITALL | MSG_TRUNC;
+
+    static constexpr int kAllowed = kNeeded | kHarmless;
+    return (aFlags & ~kAllowed) == 0;
+  }
+
+  static ResultExpr UnpackSocketcallOrAllow() {
+    // See bug 1066750.
+    if (HasSeparateSocketCalls()) {
+      // If this is a socketcall(2) platform, but the kernel also
+      // supports separate syscalls (>= 4.3.0), we can unpack the
+      // arguments and filter them.
+      return Trap(SocketcallUnpackTrap, nullptr);
+    }
+    // Otherwise, we can't filter the args if the platform passes
+    // them by pointer.
+    return Allow();
+  }
+
   Maybe<ResultExpr> EvaluateSocketCall(int aCall,
                                        bool aHasArgs) const override {
     switch (aCall) {
       case SYS_RECVMSG:
       case SYS_SENDMSG:
-        // These next four aren't needed for IPC or other core
-        // functionality at the time of this writing, but they're
-        // subsets of recvmsg/sendmsg so there's nothing gained by not
-        // allowing them here (and simplifying subclasses).
+        if (aHasArgs) {
+          Arg<int> flags(2);
+          return Some(
+              If(MsgFlagsAllowed(flags), Allow()).Else(InvalidSyscall()));
+        }
+        return Some(UnpackSocketcallOrAllow());
+
+        // These next four weren't needed for IPC or other core
+        // functionality when they were added, but they're subsets of
+        // recvmsg/sendmsg so there's nothing gained by not allowing
+        // them here (and simplifying subclasses).  Also, there may be
+        // unknown dependencies on them now.
       case SYS_RECVFROM:
       case SYS_SENDTO:
       case SYS_RECV:
       case SYS_SEND:
-        return Some(Allow());
+        if (aHasArgs) {
+          Arg<int> flags(3);
+          return Some(
+              If(MsgFlagsAllowed(flags), Allow()).Else(InvalidSyscall()));
+        }
+        return Some(UnpackSocketcallOrAllow());
 
       case SYS_SOCKETPAIR: {
         // We try to allow "safe" (always connected) socketpairs when using the
@@ -822,17 +865,8 @@ class SandboxPolicyCommon : public SandboxPolicyBase {
         if (!mBroker && !mAllowUnsafeSocketPair) {
           return Nothing();
         }
-        // See bug 1066750.
         if (!aHasArgs) {
-          // If this is a socketcall(2) platform, but the kernel also
-          // supports separate syscalls (>= 4.2.0), we can unpack the
-          // arguments and filter them.
-          if (HasSeparateSocketCalls()) {
-            return Some(Trap(SocketcallUnpackTrap, nullptr));
-          }
-          // Otherwise, we can't filter the args if the platform passes
-          // them by pointer.
-          return Some(Allow());
+          return Some(UnpackSocketcallOrAllow());
         }
         Arg<int> domain(0), type(1);
         return Some(
@@ -2126,6 +2160,13 @@ class SocketProcessSandboxPolicy final : public SandboxPolicyCommon {
     }
   }
 
+  BoolExpr MsgFlagsAllowed(const Arg<int>& aFlags) const override {
+    // Allow everything for Necko, for now; this can be restricted
+    // later (and the socket process sandbox is already relatively
+    // permissive).
+    return BoolConst(true);
+  }
+
   Maybe<ResultExpr> EvaluateSocketCall(int aCall,
                                        bool aHasArgs) const override {
     switch (aCall) {
@@ -2137,11 +2178,14 @@ class SocketProcessSandboxPolicy final : public SandboxPolicyCommon {
       // sendmsg and recvmmsg needed for HTTP3/QUIC UDP IO. Note sendmsg is
       // allowed in SandboxPolicyCommon.
       case SYS_RECVMMSG:
-        return Some(Allow());
-
       // Required for the DNS Resolver thread.
       case SYS_SENDMMSG:
-        return Some(Allow());
+        if (aHasArgs) {
+          Arg<int> flags(3);
+          return Some(
+              If(MsgFlagsAllowed(flags), Allow()).Else(InvalidSyscall()));
+        }
+        return Some(UnpackSocketcallOrAllow());
 
       case SYS_GETSOCKOPT:
       case SYS_SETSOCKOPT:
