@@ -627,12 +627,20 @@ impl Drop for ThreadSpecificHandles {
         let identity = self.identity.take();
         let key = self.key.take();
         let thread = self.thread.clone();
-        let task = moz_task::spawn_onto("drop", &thread, async move {
+        // It is possible that we're already on the appropriate thread (e.g. if an error was
+        // encountered in `find_objects` and these handles are being released shortly after being
+        // created).
+        if moz_task::is_on_current_thread(&thread) {
             // `key` is obtained from `identity`, so drop it first, out of an abundance of caution.
             drop(key);
             drop(identity);
-        });
-        futures_executor::block_on(task)
+        } else {
+            let task = moz_task::spawn_onto("drop", &thread, async move {
+                drop(key);
+                drop(identity);
+            });
+            futures_executor::block_on(task)
+        }
     }
 }
 
