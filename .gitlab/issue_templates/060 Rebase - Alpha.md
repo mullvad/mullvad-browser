@@ -43,6 +43,7 @@
     - **Allowed to merge**: `Maintainers`
     - **Allowed to push and merge**: `Maintainers`
     - **Allowed to force push**: `false`
+    - If you copied and pasted from old rules, double check you didn't add spaces at the end, as GitLab will not trim them!
 
 ### **Create and Push New Branch**
 
