@@ -514,6 +514,7 @@ void WebGLContext::Resize(uvec2 requestedSize) {
   // Kill our current default fb(s), for later lazy allocation.
   mRequestedSize = requestedSize;
   mDefaultFB = nullptr;
+  mResolvedDefaultFB = nullptr;
   mResetLayer = true;  // New size means new Layer.
 }
 
