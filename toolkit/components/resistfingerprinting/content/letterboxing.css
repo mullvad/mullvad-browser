@@ -42,7 +42,12 @@
 
 :root:not([inDOMFullscreen]) .letterboxing.letterboxing-ready .browserContainer:not(.responsive-mode)
   > .browserStack:not(.exclude-letterboxing) {
+
   place-content: start center;
+
+  & > .dialogStack {
+    position: fixed;
+  }
 }
 
 .browserDecorator {
