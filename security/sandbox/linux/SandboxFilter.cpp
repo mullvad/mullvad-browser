@@ -2161,10 +2161,14 @@ class SocketProcessSandboxPolicy final : public SandboxPolicyCommon {
   }
 
   BoolExpr MsgFlagsAllowed(const Arg<int>& aFlags) const override {
-    // Allow everything for Necko, for now; this can be restricted
-    // later (and the socket process sandbox is already relatively
-    // permissive).
-    return BoolConst(true);
+    // Necko might use advanced networking features, and the sandbox
+    // is relatively permissive compared to content, so this is a
+    // default-allow policy.
+    //
+    // However, `MSG_OOB` has historically been buggy, and the way it
+    // maps to TCP is notoriously broken (see RFC 6093), so it should
+    // be safe to block.
+    return (aFlags & MSG_OOB) == 0;
   }
 
   Maybe<ResultExpr> EvaluateSocketCall(int aCall,

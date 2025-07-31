@@ -728,6 +728,11 @@ void RunTestsSocket(SandboxTestingChild* child) {
     return 0;
   });
 
+  child->ErrnoValueTest("send_with_flag"_ns, ENOSYS, [] {
+    char c = 0;
+    return send(0, &c, 1, MSG_OOB);
+  });
+
   child->ErrnoValueTest("ioctl_dma_buf"_ns, ENOSYS, [] {
     // Attempt an arbitrary non-tty ioctl, on the wrong type of fd; if
     // allowed it would fail with ENOTTY (see the RDD tests) but in
