@@ -138,15 +138,8 @@ gitGraph:
 
 ### **Create New Branches**
 
-- [ ] Find the Firefox mercurial tag `$(NIGHTLY_TAG)`
-  - Go to https://hg.mozilla.org/mozilla-central/tags
-  - Find and inspect the commit tagged with `$(NIGHTLY_TAG)`
-    - Tags are in yellow in the Mercurial web UI
-  - Find the equivalent commit in https://github.com/mozilla/gecko-dev/commits/master
-    - **Notice**: GitHub sorts commits by time, you might want to use `git log gecko-dev/master` locally, instead
-    - Using the differential revision link is useful to quickly find the git commit
-  - Sign/Tag the `gecko-dev` commit: `git tag -as $(NIGHTLY_TAG) $(GIT_HASH) -m "Hg tag $(NIGHTLY_TAG)"`
-- [ ] Create two new rapid `tor-browser` branches from Firefox mercurial tag
+- [ ] Fetch Mozilla's firefox repo and identify this release's ${NIGHTLY_TAG}
+- [ ] Create two new rapid `tor-browser` branches from Firefox ${NIGHTLY_TAG}
   - Branch name in the form: `tor-browser-$(NIGHTLY_VERSION)-$(BROWSER_VERSION)-${BRANCH_NUM}`
   - **Example**: `tor-browser-130.0a1-15.0-1` and `tor-browser-130.0a1-15.0-2`
 - [ ] Push new `tor-browser` branches and the `firefox` tag to `upstream`

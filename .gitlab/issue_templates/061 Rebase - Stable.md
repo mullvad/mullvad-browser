@@ -42,15 +42,7 @@
 
 ### **Identify the Firefox Tagged Commit and Create New Branches**
 
-- [ ] Find the Firefox mercurial tag here: https://hg.mozilla.org/releases/mozilla-esr102/tags
-   - **Example**: `FIREFOX_102_8_0esr_BUILD1`
-- [ ] Find the analogous `gecko-dev` commit: https://github.com/mozilla/gecko-dev
-  - **Tip**: Search for unique string (like the Differential Revision ID) found in the mercurial commit in the `gecko-dev/esr102` branch to find the equivalent commit
-  - **Example**: `3a3a96c9eedd02296d6652dd50314fccbc5c4845`
-- [ ] Sign and Tag `gecko-dev` commit
-  - Sign/Tag `gecko-dev` commit :
-    - **Tag**: `$(ESR_TAG)`
-    - **Message**: `Hg tag $(ESR_TAG)`
+- [ ] Fetch Mozilla's firefox repo and identify this release's ${ESR_TAG}
 - [ ] Create new stable `base-browser` branch from tag
   - Branch name in the form: `base-browser-$(ESR_VERSION)esr-$(BROWSER_MAJOR).$(BROWSER_MINOR)-1`
   - **Example**: `base-browser-102.8.0esr-12.0-1`
