@@ -221,6 +221,9 @@ xul|tab {
 
   &:where(:hover) {
     border-bottom-color: var(--in-content-border-color);
+    @media (forced-colors) {
+      border-bottom-color: currentColor;
+    }
     background-color: var(--in-content-button-background-hover);
     color: var(--in-content-button-text-color-hover);
   }
@@ -233,25 +236,6 @@ xul|tab {
   &[selected] {
     color: var(--color-accent-primary);
     border-bottom-color: currentColor;
-    &:hover {
-      background-color: var(--in-content-button-background-hover);
-    }
-    &:hover:active {
-      background-color: var(--in-content-button-background-active);
-    }
-  }
-
-  @media (forced-colors) {
-    &:hover,
-    &:hover:active {
-      border-bottom-color: currentColor;
-    }
-    &[selected]:hover {
-      color: var(--in-content-button-text-color-hover);
-    }
-    &[selected]:hover:active {
-      color: var(--in-content-button-text-color-active);
-    }
   }
 }
 
