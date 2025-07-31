@@ -539,23 +539,65 @@ class SandboxPolicyCommon : public SandboxPolicyBase {
     return ConvertError(socketpair(AF_UNIX, SOCK_SEQPACKET, 0, fds));
   }
 
-  static intptr_t SocketpairUnpackTrap(ArgsRef aArgs, void* aux) {
-#ifdef __NR_socketpair
-    auto argsPtr = reinterpret_cast<unsigned long*>(aArgs.args[1]);
-    return DoSyscall(__NR_socketpair, argsPtr[0], argsPtr[1], argsPtr[2],
-                     argsPtr[3]);
-#else
-    MOZ_CRASH("unreachable?");
-    return -ENOSYS;
-#endif
-  }
+  static intptr_t SocketcallUnpackTrap(ArgsRef aArgs, void* aux) {
+#ifdef __NR_socketcall
+    auto argsPtr = reinterpret_cast<const unsigned long*>(aArgs.args[1]);
+    int sysno = -1;
 
-  static intptr_t GetSockOptUnpackTrap(ArgsRef aArgs, void* aux) {
-#ifdef __NR_getsockopt
-    auto argsPtr = reinterpret_cast<unsigned long*>(aArgs.args[1]);
-    return DoSyscall(__NR_getsockopt, argsPtr[0], argsPtr[1], argsPtr[2],
-                     argsPtr[3], argsPtr[4]);
-#else
+    // When Linux added separate syscalls for socket operations on the
+    // old socketcall platforms, they had long since stopped adding
+    // send and recv syscalls, because they can be trivially mapped
+    // onto sendto and recvfrom (see also open vs. openat).
+    //
+    // But, socketcall itself *does* have separate calls for those.
+    // So, we need to remap them; since send(to) and recv(from)
+    // have basically the same types except for const, the code is
+    // factored out here.
+    unsigned long altArgs[6];
+    auto legacySendRecvWorkaround = [&] {
+      MOZ_ASSERT(argsPtr != altArgs);
+      memcpy(altArgs, argsPtr, sizeof(unsigned long[4]));
+      altArgs[4] = altArgs[5] = 0;
+      argsPtr = altArgs;
+    };
+
+    switch (aArgs.args[0]) {
+      // See also the other socketcall table in SandboxFilterUtil.cpp
+#  define DISPATCH_SOCKETCALL(this_sysno, this_call) \
+    case this_call:                                  \
+      sysno = this_sysno;                            \
+      break
+
+      DISPATCH_SOCKETCALL(__NR_socketpair, SYS_SOCKETPAIR);
+      DISPATCH_SOCKETCALL(__NR_getsockopt, SYS_GETSOCKOPT);
+      DISPATCH_SOCKETCALL(__NR_sendmsg, SYS_SENDMSG);
+      DISPATCH_SOCKETCALL(__NR_recvmsg, SYS_RECVMSG);
+      DISPATCH_SOCKETCALL(__NR_sendto, SYS_SENDTO);
+      DISPATCH_SOCKETCALL(__NR_recvfrom, SYS_RECVFROM);
+      DISPATCH_SOCKETCALL(__NR_sendmmsg, SYS_SENDMMSG);
+      DISPATCH_SOCKETCALL(__NR_recvmmsg, SYS_RECVMMSG);
+      // __NR_recvmmsg_time64 is not available as a socketcall; a
+      // Y2K38-ready userland would call it directly.
+#  undef DISPATCH_SOCKETCALL
+
+      case SYS_SEND:
+        sysno = __NR_sendto;
+        legacySendRecvWorkaround();
+        break;
+      case SYS_RECV:
+        sysno = __NR_recvfrom;
+        legacySendRecvWorkaround();
+        break;
+    }
+
+    // This assert will fail if someone tries to map a socketcall to
+    // this trap without adding it to the switch statement above.
+    MOZ_RELEASE_ASSERT(sysno >= 0);
+
+    return DoSyscall(sysno, argsPtr[0], argsPtr[1], argsPtr[2], argsPtr[3],
+                     argsPtr[4], argsPtr[5]);
+
+#else  // no socketcall
     MOZ_CRASH("unreachable?");
     return -ENOSYS;
 #endif
@@ -786,7 +828,7 @@ class SandboxPolicyCommon : public SandboxPolicyBase {
           // supports separate syscalls (>= 4.2.0), we can unpack the
           // arguments and filter them.
           if (HasSeparateSocketCalls()) {
-            return Some(Trap(SocketpairUnpackTrap, nullptr));
+            return Some(Trap(SocketcallUnpackTrap, nullptr));
           }
           // Otherwise, we can't filter the args if the platform passes
           // them by pointer.
@@ -810,7 +852,7 @@ class SandboxPolicyCommon : public SandboxPolicyBase {
         // Best-effort argument filtering as for socketpair(2), above.
         if (!aHasArgs) {
           if (HasSeparateSocketCalls()) {
-            return Some(Trap(GetSockOptUnpackTrap, nullptr));
+            return Some(Trap(SocketcallUnpackTrap, nullptr));
           }
           return Some(Allow());
         }
