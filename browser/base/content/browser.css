@@ -120,7 +120,12 @@ browser:fullscreen {
 
 :root:not([inDOMFullscreen]) .letterboxing.letterboxing-ready .browserContainer:not(.responsive-mode)
   > .browserStack:not(.exclude-letterboxing) {
+
   place-content: var(--letterboxing-vertical-alignment) center;
+  & > .dialogStack {
+    position: fixed;
+  }
+
 }
 
 panelmultiview {
