@@ -5,8 +5,10 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "mozilla/Assertions.h"
+#include "mozilla/Atomics.h"
 #include "mozilla/BitSet.h"
 
+using mozilla::Atomic;
 using mozilla::BitSet;
 
 template <typename Storage>
@@ -14,9 +16,11 @@ class BitSetSuite {
   template <size_t N>
   using TestBitSet = BitSet<N, Storage>;
 
+  using Word = typename TestBitSet<1>::Word;
+
   static constexpr size_t kBitsPerWord = sizeof(Storage) * 8;
 
-  static constexpr Storage kAllBitsSet = ~Storage{0};
+  static constexpr Word kAllBitsSet = ~Word{0};
 
  public:
   void testLength() {
@@ -28,7 +32,7 @@ class BitSetSuite {
     MOZ_RELEASE_ASSERT(TestBitSet<kBitsPerWord + 1>().Storage().Length() == 2);
   }
 
-  void testConstruct() {
+  void testConstructAndAssign() {
     MOZ_RELEASE_ASSERT(TestBitSet<1>().Storage()[0] == 0);
     MOZ_RELEASE_ASSERT(TestBitSet<kBitsPerWord>().Storage()[0] == 0);
     MOZ_RELEASE_ASSERT(TestBitSet<kBitsPerWord + 1>().Storage()[0] == 0);
@@ -63,6 +67,18 @@ class BitSetSuite {
         kAllBitsSet);
     MOZ_RELEASE_ASSERT(
         TestBitSet<kBitsPerWord + 1>(bitsetW1.Storage()).Storage()[1] == 1);
+
+    TestBitSet<1> bitset1Copy;
+    bitset1Copy = bitset1;
+    TestBitSet<kBitsPerWord> bitsetWCopy;
+    bitsetWCopy = bitsetW;
+    TestBitSet<kBitsPerWord + 1> bitsetW1Copy;
+    bitsetW1Copy = bitsetW1;
+
+    MOZ_RELEASE_ASSERT(bitset1Copy.Storage()[0] == 1);
+    MOZ_RELEASE_ASSERT(bitsetWCopy.Storage()[0] == kAllBitsSet);
+    MOZ_RELEASE_ASSERT(bitsetW1Copy.Storage()[0] == kAllBitsSet);
+    MOZ_RELEASE_ASSERT(bitsetW1Copy.Storage()[1] == 1);
   }
 
   void testSetBit() {
@@ -164,7 +180,7 @@ class BitSetSuite {
 
   void runTests() {
     testLength();
-    testConstruct();
+    testConstructAndAssign();
     testSetBit();
     testFindBits();
   }
@@ -174,6 +190,8 @@ int main() {
   BitSetSuite<uint8_t>().runTests();
   BitSetSuite<uint32_t>().runTests();
   BitSetSuite<uint64_t>().runTests();
+  BitSetSuite<Atomic<uint32_t>>().runTests();
+  BitSetSuite<Atomic<uint64_t>>().runTests();
 
   return 0;
 }
