@@ -45,17 +45,8 @@
 
 ### **Create New Branches**
 
-- [ ] Find the Firefox mercurial tag `$(ESR_TAG)`
-  - If `$(BROWSER_MINOR)` is 5, the tag should already exist from the stable release
-  - Otherwise:
-    - [ ] Go to `https://hg.mozilla.org/releases/mozilla-esr$(ESR_MAJOR)/tags`
-    - [ ] Find and inspect the commit tagged with `$(ESR_TAG)`
-      - Tags are in yellow in the Mercurial web UI
-    - [ ] Find the equivalent commit in `https://github.com/mozilla/gecko-dev/commits/esr$(ESR_MAJOR)`
-      - The tag should be very close to `HEAD` (usually the second, before a `No bug - Tagging $(HG_HASH) with $(ESR_TAG)`)
-      - **Notice**: GitHub sorts commits by time, you might want to use `git log gecko-dev/esr$(ESR_MAJOR)` locally, instead
-    - [ ] Sign/Tag the `gecko-dev` commit: `git tag -as $(ESR_TAG) $(GIT_HASH) -m "Hg tag $(ESR_TAG)"`
-- [ ] Create new alpha `base-browser` branch from Firefox mercurial tag
+- [ ] Fetch Mozilla's firefox repo and identify this release's ${ESR_TAG}
+- [ ] Create new alpha `base-browser` branch from Firefox ${ESR_TAG}
   - Branch name in the form: `base-browser-$(ESR_VERSION)esr-$(BROWSER_MAJOR).$(BROWSER_MINOR)-1`
   - **Example**: `base-browser-102.8.0esr-12.5-1`
 - [ ] Create new alpha `tor-browser` branch from Firefox mercurial tag
