@@ -31,7 +31,7 @@ tab {
     background-color: color-mix(in srgb, currentColor 15%, transparent);
   }
 
-  &:where(:hover:active, [visuallyselected]) {
+  &:where(:hover:active) {
     background-color: color-mix(in srgb, currentColor 30%, transparent);
   }
 
