@@ -13,3 +13,16 @@ add_task(async function test_enabletrackingprotection_strict() {
     }
   );
 });
+
+add_task(async function test_enabletrackingprotection_strict_preferences() {
+  is(
+    Services.prefs.prefIsLocked("privacy.trackingprotection.enabled"),
+    true,
+    "Preference should be locked"
+  );
+  is(
+    Services.prefs.getBoolPref("privacy.trackingprotection.enabled"),
+    true,
+    "Preference should be true"
+  );
+});
