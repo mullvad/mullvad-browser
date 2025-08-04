@@ -413,6 +413,15 @@ export class SearchModeSwitcher {
       if (!lazy.UrlbarPrefs.get(pref)) {
         continue;
       }
+      if (
+        source === lazy.UrlbarUtils.RESULT_SOURCE.HISTORY &&
+        lazy.PrivateBrowsingUtils.permanentPrivateBrowsing
+      ) {
+        // Do not show the search history option in PBM. tor-browser#43864.
+        // Although, it can still be triggered with "^" restrict keyword or
+        // through an app menu item. See also mozilla bug 1980928.
+        continue;
+      }
       let name = lazy.UrlbarUtils.getResultSourceName(source);
       let { icon } = await this.#getDisplayedEngineDetails({
         source,
