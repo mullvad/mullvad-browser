@@ -13,6 +13,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ScreenshotsUtils: "resource:///modules/ScreenshotsUtils.sys.mjs",
   ActionsProviderQuickActions:
     "resource:///modules/ActionsProviderQuickActions.sys.mjs",
+  PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
 });
 
 import { AppConstants } from "resource://gre/modules/AppConstants.sys.mjs";
@@ -78,6 +79,9 @@ const DEFAULT_ACTIONS = {
     icon: "chrome://mozapps/skin/extensions/category-extensions.svg",
     label: "quickactions-addons",
     onPick: openAddonsUrl("addons://discover/"),
+    // Hide in base-browser, since we don't want to open extensions
+    // "recommendations" tab. tor-browser#43864.
+    disabled: () => true,
   },
   bookmarks: {
     l10nCommands: ["quickactions-cmd-bookmarks", "quickactions-bookmarks2"],
@@ -100,6 +104,12 @@ const DEFAULT_ACTIONS = {
         .document.getElementById("Tools:Sanitize")
         .doCommand();
     },
+    // Disable in permanent private browsing. tor-browser#43864.
+    // NOTE: This should also be disabled in private windows, but we don't have
+    // access to a Window element to check. See mozilla bug 1980912.
+    disabled: () => {
+      return lazy.PrivateBrowsingUtils.permanentPrivateBrowsing;
+    },
   },
   downloads: {
     l10nCommands: ["quickactions-cmd-downloads"],
@@ -112,13 +122,18 @@ const DEFAULT_ACTIONS = {
     icon: "chrome://mozapps/skin/extensions/category-extensions.svg",
     label: "quickactions-extensions",
     onPick: openAddonsUrl("addons://list/extension"),
+    // Hide in base-browser since we do not want to encourage users to change
+    // their extensions/addons. tor-browser#43864.
+    disabled: () => true,
   },
   help: {
     l10nCommands: ["quickactions-cmd-help"],
     icon: "chrome://global/skin/icons/help.svg",
     label: "quickactions-help",
+    // Open the base-browser support/help page, rather than Firefox's.
+    // tor-browser#43864.
     onPick: openUrlFun(
-      "https://support.mozilla.org/products/firefox?as=u&utm_source=inproduct"
+      Services.prefs.getStringPref("browser.base-browser-support-url", "")
     ),
   },
   firefoxview: {
@@ -128,6 +143,9 @@ const DEFAULT_ACTIONS = {
     onPick: () => {
       lazy.BrowserWindowTracker.getTopWindow().FirefoxViewHandler.openTab();
     },
+    // Hide in base-browser since firefoxview is disabled.
+    // tor-browser#43864 and tor-browser#42037.
+    disabled: () => true,
   },
   inspect: {
     l10nCommands: ["quickactions-cmd-inspector2"],
@@ -311,6 +329,9 @@ export class QuickActionsLoaderDefault {
     let keys = Object.keys(DEFAULT_ACTIONS);
     for (const key of keys) {
       let actionData = DEFAULT_ACTIONS[key];
+      if (actionData.disabled?.()) {
+        continue;
+      }
       let messages = await lazy.gFluentStrings.formatMessages(
         actionData.l10nCommands.map(id => ({ id }))
       );
