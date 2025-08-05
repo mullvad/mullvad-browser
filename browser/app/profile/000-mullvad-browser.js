@@ -1,5 +1,8 @@
 // Preferences specific to Mullvad Browser
 
+// General browser support url. tor-browser#43864 and mullvad-browser#244.
+pref("browser.base-browser-support-url", "https://mullvad.net/en/help/");
+
 // Do not show the bookmark panel for now, because it makes the initial browser
 // window (about:home) bigger, and regular pages will show letterbox margins as
 // a result.
