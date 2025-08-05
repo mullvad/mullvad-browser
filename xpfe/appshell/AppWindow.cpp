@@ -547,6 +547,19 @@ NS_IMETHODIMP AppWindow::Destroy() {
   if (mWindow) mWindow->Show(false);
 #endif
 
+  // Raise and focus our parent explicitly on Windows, if visible. Apparently
+  // Windows gets the z-order and focus wrong otherwise for nested modal
+  // windows, see bug 1977581.
+#ifdef XP_WIN
+  if (nsCOMPtr<nsIBaseWindow> parent = do_QueryReferent(mParentWindow)) {
+    nsCOMPtr<nsIWidget> parentWidget;
+    parent->GetMainWidget(getter_AddRefs(parentWidget));
+    if (parentWidget && parentWidget->IsVisible()) {
+      parentWidget->SetFocus(nsIWidget::Raise::Yes, dom::CallerType::System);
+    }
+  }
+#endif
+
   RemoveTooltipSupport();
 
   mDOMWindow = nullptr;
