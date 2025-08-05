@@ -1474,8 +1474,8 @@ var gPrivacyPane = {
           defaults.getBoolPref(
             "privacy.trackingprotection.cryptomining.enabled"
           )
-            ? "cm"
-            : "-cm"
+            ? "cryptoTP"
+            : "-cryptoTP"
         );
         rulesArray.push(
           defaults.getBoolPref(
@@ -1549,11 +1549,11 @@ var gPrivacyPane = {
               selector + " .fingerprinters-option"
             ).hidden = true;
             break;
-          case "cm":
+          case "cryptoTP":
             document.querySelector(selector + " .cryptominers-option").hidden =
               false;
             break;
-          case "-cm":
+          case "-cryptoTP":
             document.querySelector(selector + " .cryptominers-option").hidden =
               true;
             break;
