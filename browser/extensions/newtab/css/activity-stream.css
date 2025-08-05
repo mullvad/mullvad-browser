@@ -924,6 +924,9 @@ main section {
 .darkWallpaper .top-site-outer:not(:hover, :active, .active) {
   color-scheme: dark;
 }
+.top-site-outer .tile {
+  color-scheme: initial;
+}
 .top-site-outer.active .context-menu-button {
   opacity: 1;
   background-color: var(--newtab-button-active-background);

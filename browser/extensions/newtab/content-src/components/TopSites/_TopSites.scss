@@ -194,6 +194,10 @@ $calculated-max-width-twice-widest: $break-point-widest + 2 * $card-width;
     @include wallpaper-contrast-fix;
   }
 
+  .tile {
+    color-scheme: initial;
+  }
+
   // Necessary for when navigating by a keyboard, having the context
   // menu open should display the "…" button. This style is a clone
   // of the `:active` state for `.context-menu-button`
