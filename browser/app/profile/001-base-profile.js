@@ -222,6 +222,11 @@ pref("toolkit.telemetry.firstShutdownPing.enabled", false); // Added in tor-brow
 pref("toolkit.telemetry.updatePing.enabled", false); // Make sure updater telemetry is disabled; see #25909.
 pref("toolkit.telemetry.bhrPing.enabled", false);
 pref("toolkit.telemetry.coverage.opt-out", true);
+// Force all telemtry identifier to their canary values tor-browser#43750
+pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0", locked);
+pref("toolkit.telemetry.cachedProfileGroupID", "decafdec-afde-cafd-ecaf-decafdecafde", locked);
+pref("datareporting.dau.cachedUsageProfileID", "beefbeef-beef-beef-beef-beeefbeefbee", locked);
+pref("datareporting.dau.cachedUsageProfileGroupID", "b0bacafe-b0ba-cafe-b0ba-cafeb0bacafe", locked);
 pref("toolkit.coverage.opt-out", true);
 pref("toolkit.coverage.endpoint.base", "");
 pref("browser.tabs.crashReporting.sendReport", false);
