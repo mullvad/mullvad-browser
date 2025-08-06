@@ -12,7 +12,8 @@ MOZ_SRC_FILES += [
     "GroupsList.sys.mjs",
     "NewTabPagePreloading.sys.mjs",
     "OpenInTabsUtils.sys.mjs",
-    "SmartTabGrouping.sys.mjs",
+    # SmartTabGrouping.sys.mjs is excluded because it requires the missing "ml"
+    # component. tor-browser#44045.
     "TabMetrics.sys.mjs",
     "TabsList.sys.mjs",
     "TabUnloader.sys.mjs",

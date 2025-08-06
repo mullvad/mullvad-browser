@@ -70,6 +70,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "chrome://global/content/translations/TranslationsTelemetry.sys.mjs",
   TranslationsUtils:
     "chrome://global/content/translations/TranslationsUtils.mjs",
+  // "EngineProcess.sys.mjs" is missing. Should be unused since
+  // browser.translations.enable is set to "false". tor-browser#44045.
   EngineProcess: "chrome://global/content/ml/EngineProcess.sys.mjs",
 });
 

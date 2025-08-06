@@ -16,6 +16,7 @@ ChromeUtils.defineESModuleGetters(this, {
     "chrome://browser/content/translations/TranslationsPanelShared.sys.mjs",
   TranslationsUtils:
     "chrome://global/content/translations/TranslationsUtils.mjs",
+  // NOTE: Translator.mjs is missing but should be unused. tor-browser#44045.
   Translator: "chrome://global/content/translations/Translator.mjs",
 });
 

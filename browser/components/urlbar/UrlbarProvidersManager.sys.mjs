@@ -76,8 +76,7 @@ var localProviderModules = {
     "resource:///modules/UrlbarProviderSearchTips.sys.mjs",
   UrlbarProviderSearchSuggestions:
     "resource:///modules/UrlbarProviderSearchSuggestions.sys.mjs",
-  UrlbarProviderSemanticHistorySearch:
-    "resource:///modules/UrlbarProviderSemanticHistorySearch.sys.mjs",
+  // UrlbarProviderSemanticHistorySearch.sys.mjs is missing. tor-browser#44045.
   UrlbarProviderTabToSearch:
     "resource:///modules/UrlbarProviderTabToSearch.sys.mjs",
   UrlbarProviderTokenAliasEngines:

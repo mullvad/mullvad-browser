@@ -4,6 +4,9 @@
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+  // translations-document.sys.mjs is missing. tor-browser#44045.
+  // NOTE: We don't expect these missing modules to be called since
+  // browser.translations.enable is false.
   TranslationsDocument:
     "chrome://global/content/translations/translations-document.sys.mjs",
   LRUCache:

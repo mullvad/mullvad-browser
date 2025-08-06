@@ -11,7 +11,7 @@
 ChromeUtils.defineESModuleGetters(this, {
   BackgroundUpdate: "resource://gre/modules/BackgroundUpdate.sys.mjs",
   UpdateListener: "resource://gre/modules/UpdateListener.sys.mjs",
-  LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
+  // LinkPreview.sys.mjs is missing. tor-browser#44045.
   MigrationUtils: "resource:///modules/MigrationUtils.sys.mjs",
   SelectableProfileService:
     "resource:///modules/profiles/SelectableProfileService.sys.mjs",
@@ -271,12 +271,12 @@ Preferences.addSetting({
 Preferences.addSetting({
   id: "linkPreviewEnabled",
   pref: "browser.ml.linkPreview.enabled",
-  visible: () => LinkPreview.canShowPreferences,
+  visible: () => false, // LinkPreview is missing. tor-browser#44045.
 });
 Preferences.addSetting({
   id: "linkPreviewKeyPoints",
   pref: "browser.ml.linkPreview.optin",
-  visible: () => LinkPreview.canShowKeyPoints,
+  visible: () => false, // LinkPreview is missing. tor-browser#44045.
 });
 Preferences.addSetting({
   id: "linkPreviewShift",
@@ -285,7 +285,7 @@ Preferences.addSetting({
 Preferences.addSetting({
   id: "linkPreviewShiftAlt",
   pref: "browser.ml.linkPreview.shiftAlt",
-  visible: () => LinkPreview.canShowLegacy,
+  visible: () => false, // LinkPreview is missing. tor-browser#44045.
 });
 Preferences.addSetting({
   id: "linkPreviewLongPress",
@@ -389,29 +389,30 @@ let SETTINGS_CONFIG = {
         supportPage: "extensionrecommendations",
         subcategory: "cfrfeatures",
       },
-      {
-        id: "linkPreviewEnabled",
-        l10nId: "link-preview-settings-enable",
-        subcategory: "link-preview",
-        items: [
-          {
-            id: "linkPreviewKeyPoints",
-            l10nId: "link-preview-settings-key-points",
-          },
-          {
-            id: "linkPreviewShift",
-            l10nId: "link-preview-settings-shift",
-          },
-          {
-            id: "linkPreviewShiftAlt",
-            l10nId: "link-preview-settings-shift-alt",
-          },
-          {
-            id: "linkPreviewLongPress",
-            l10nId: "link-preview-settings-long-press",
-          },
-        ],
-      },
+      // Hide link preview settings. tor-browser#44045.
+      // {
+      //   id: "linkPreviewEnabled",
+      //   l10nId: "link-preview-settings-enable",
+      //   subcategory: "link-preview",
+      //   items: [
+      //     {
+      //       id: "linkPreviewKeyPoints",
+      //       l10nId: "link-preview-settings-key-points",
+      //     },
+      //     {
+      //       id: "linkPreviewShift",
+      //       l10nId: "link-preview-settings-shift",
+      //     },
+      //     {
+      //       id: "linkPreviewShiftAlt",
+      //       l10nId: "link-preview-settings-shift-alt",
+      //     },
+      //     {
+      //       id: "linkPreviewLongPress",
+      //       l10nId: "link-preview-settings-long-press",
+      //     },
+      //   ],
+      // },
     ],
   },
 };
