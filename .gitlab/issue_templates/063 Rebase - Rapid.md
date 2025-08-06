@@ -290,4 +290,4 @@ gitGraph:
 
 /label ~"Apps::Product::TorBrowser"
 /label ~"Apps::Type::Rebase"
-/label ~"Apps::Priority::High"
+/label ~"Priority::High"

@@ -101,5 +101,5 @@ Godspeed! :pray:
 /label ~"Apps::Product::TorBrowser"
 /label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Bug"
-/label ~"Apps::Priority::Blocker"
+/label ~"Priority::Blocker"
 /label ~"Emergency"
