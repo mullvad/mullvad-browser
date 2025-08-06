@@ -181,12 +181,7 @@ var localProviderModules = [
       "moz-src:///browser/components/urlbar/UrlbarProviderSearchSuggestions.sys.mjs",
     supportedSAPs: ["searchbar", "smartbar", "urlbar"],
   },
-  {
-    name: "UrlbarProviderSemanticHistorySearch",
-    module:
-      "moz-src:///browser/components/urlbar/UrlbarProviderSemanticHistorySearch.sys.mjs",
-    supportedSAPs: ["smartbar", "urlbar"],
-  },
+  // UrlbarProviderSemanticHistorySearch.sys.mjs is missing. tor-browser#44045.
   {
     name: "UrlbarProviderTabToSearch",
     module:
