@@ -8,6 +8,8 @@ import { MozLitElement } from "chrome://global/content/lit-utils.mjs";
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   DownloadUtils: "resource://gre/modules/DownloadUtils.sys.mjs",
+  // ml/Utils.sys.mjs is missing but should be unused since addons with type
+  // "mlmodel" should be excluded. tor-browser#44045.
   featureEngineIdToFluentId: "chrome://global/content/ml/Utils.sys.mjs",
   recordModelCardLinkTelemetry: "chrome://global/content/ml/Utils.sys.mjs",
 });

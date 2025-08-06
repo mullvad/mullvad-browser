@@ -23,6 +23,10 @@ ChromeUtils.defineESModuleGetters(this, {
   ExtensionParent: "resource://gre/modules/ExtensionParent.sys.mjs",
   ExtensionPermissions: "resource://gre/modules/ExtensionPermissions.sys.mjs",
   PrivateBrowsingUtils: "resource://gre/modules/PrivateBrowsingUtils.sys.mjs",
+  // ml/Utils.sys.mjs is missing. This should be unused since only addons with
+  // type "mlmodel" would use these methods. Such addons are probably excluded
+  // since ModelHubProvider.sys.mjs defines the "mlmodel" type, but is excluded
+  // from the build. tor-browser#44045.
   recordListViewTelemetry: "chrome://global/content/ml/Utils.sys.mjs",
   recordDetailsViewTelemetry: "chrome://global/content/ml/Utils.sys.mjs",
   recordRemoveInitiatedTelemetry: "chrome://global/content/ml/Utils.sys.mjs",

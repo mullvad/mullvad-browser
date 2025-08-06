@@ -21,9 +21,13 @@ const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
   clearTimeout: "resource://gre/modules/Timer.sys.mjs",
+  // EngineProcess.sys.mjs is missing but should be unused since
+  // pdfjs.enableGuessAltText is "false". tor-browser#44045.
   createEngine: "chrome://global/content/ml/EngineProcess.sys.mjs",
   EngineProcess: "chrome://global/content/ml/EngineProcess.sys.mjs",
   IndexedDB: "resource://gre/modules/IndexedDB.sys.mjs",
+  // ModelHub.sys.mjs and ml/Utils.sys.mjs are missing but should be unused
+  // since pdfjs.enableGuessAltText is "false". tor-browser#44045.
   ModelHub: "chrome://global/content/ml/ModelHub.sys.mjs",
   MultiProgressAggregator: "chrome://global/content/ml/Utils.sys.mjs",
   Progress: "chrome://global/content/ml/Utils.sys.mjs",
@@ -239,6 +243,11 @@ export class PdfjsParent extends JSWindowActorParent {
   }
 
   #checkPreferences() {
+    // No-op this method since it will set browser.ml.enable and
+    // pdfjs.enableAltText to user values "true" when the module loads.
+    // See mozilla bug 1943456 comment 9. tor-browser#44045.
+    return;
+    // eslint-disable-next-line no-unreachable
     if (Services.prefs.getBoolPref("pdfjs.enableAltTextForEnglish", true)) {
       return;
     }

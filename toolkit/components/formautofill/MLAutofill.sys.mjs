@@ -23,6 +23,9 @@ export class MLAutofill {
   static modelRevision = null;
 
   static async initialize() {
+    // NOTE: This module should be disabled since the isMLExperimentEnabled
+    // should be false. tor-browser#44045.
+    // Moreover, this component should be removed after mozilla bug 1977600.
     if (
       !lazy.FormAutofill.isMLExperimentEnabled ||
       (Cu.isInAutomation && !lazy.runInAutomation)

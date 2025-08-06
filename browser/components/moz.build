@@ -39,7 +39,7 @@ DIRS += [
     "downloads",
     "enterprisepolicies",
     "extensions",
-    "genai",
+    # Exclude "genai" component. tor-browser#44045.
     "messagepreview",
     "migration",
     "newidentity",

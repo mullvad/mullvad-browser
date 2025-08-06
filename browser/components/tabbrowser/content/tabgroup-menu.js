@@ -14,12 +14,12 @@
     "resource:///modules/sessionstore/TabStateFlusher.sys.mjs"
   );
 
-  ChromeUtils.importESModule(
-    "chrome://browser/content/genai/content/model-optin.mjs",
-    {
-      global: "current",
-    }
-  );
+  // genai/content/model-optin.mjs is missing. tor-browser#44045.
+  // NOTE: model-optin.mjs defines the <model-optin> custom element.
+  // At the time of implementation, model-optin is only created lazily if
+  // SmartTabGrouping is enabled via preferences
+  // browser.tabs.groups.smart.enabled and
+  // browser.tabs.groups.smart.userEnabled.
 
   class MozTabbrowserTabGroupMenu extends MozXULElement {
     static COLORS = [
@@ -590,6 +590,9 @@
       if (!this.smartTabGroupsEnabled || this.#smartTabGroupsInitiated) {
         return;
       }
+      // NOTE: In base-browser we rely on smartTabGroupsEnabled being false, so
+      // that the missing SmartTabGrouping.sys.mjs is not loaded.
+      // tor-browser#44045.
       const { SmartTabGroupingManager } = ChromeUtils.importESModule(
         "moz-src:///browser/components/tabbrowser/SmartTabGrouping.sys.mjs"
       );
