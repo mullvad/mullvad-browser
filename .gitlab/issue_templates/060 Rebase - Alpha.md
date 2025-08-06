@@ -151,4 +151,4 @@
 
 /label ~"Apps::Product::TorBrowser"
 /label ~"Apps::Type::Rebase"
-/label ~"Apps::Priority::Blocker"
+/label ~"Priority::Blocker"
