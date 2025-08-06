@@ -1572,8 +1572,13 @@ function doFrameHistoryTests()
           resolve({ location: content.location.href, persisted });
         }, { once: true });
       });
-      // make sure that loading a new page and then going back maintains the focus
-      content.location = "data:text/html,<script>window.onload=function() {setTimeout(function () { history.back() }, 0);}</script>";
+      // Make sure that loading a new page and then going back maintains the focus,
+      // but try to stabilize the page first so that it can enter bfcache.
+      content.requestAnimationFrame(() => {
+        content.requestAnimationFrame(() => {
+          content.location = "data:text/html,<script>window.onload=function() {setTimeout(function () { history.back() }, 0);}</script>";
+        });
+      });
       return goneBack;
     });
   }).then(({ location, persisted }) => {
