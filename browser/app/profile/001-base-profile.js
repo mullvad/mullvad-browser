@@ -309,13 +309,46 @@ pref("browser.newtabpage.activity-stream.asrouter.useRemoteL10n", false);
 // tor-browser#42054: make sure search result telemetry is disabled.
 pref("browser.search.serpEventTelemetryCategorization.enabled", false);
 
-// tor-browser#42872, #42555: Disable translations.
-// Translation have a bad UX in 128 (and with our config). Maybe we will
-// re-enable after auditing and fixing the UX (tor-browser#41837).
-pref("browser.translations.enable", false);
 
+
+// ML components that we want to hide from the user. See tor-browser#44045.
+// Many of these preferences are locked because the component is entirely
+// removed, so they could not be functionally enabled.
+
+// tor-browser#42872, #42555, #44045: Disable ML translations.
+// Maybe re-enable after auditing and fixing the UX (tor-browser#41837).
+// NOTE: whilst the "translations" component is still included in the build, we
+// lock the preference because the engine is excluded and the
+// "translations-models" RemoteSettings needed for the engine is empty.
+pref("browser.translations.enable", false, locked);
+// Disables many (but not all) ML engines. Note, this does not have overall
+// control over exposure to ML features. tor-browser#44045.
+pref("browser.ml.enable", false, locked);
 // Disable third party AI chatbot. tor-browser#43989.
-pref("browser.ml.chat.enabled", false);
+pref("browser.ml.chat.enabled", false, locked);
+// Disable LinkPreview. tor-browser#44045 and tor-browser#43867.
+pref("browser.ml.linkPreview.enabled", false, locked);
+// Disable Smart Tab Groups. tor-browser#44045.
+pref("browser.tabs.groups.smart.enabled", false, locked);
+pref("browser.tabs.groups.smart.userEnabled", false, locked);
+// Don't expose ModelHub API for extensions. tor-browser#44045.
+pref("extensions.ml.enabled", false, locked);
+// Don't enable ML generated alt text. tor-browser#44045.
+// pdfjs.enableAltText controls whether MLManager is created,
+// pdfjs.enableGuessAltText controls whether the MLManager can create an ML
+// engine. pdfs.enableAltText controls whether the latter preference can be
+// changed by the user in the UI, but also has the side effect of hiding the
+// UI controls for the non-ML preference pdfjs.enableNewAltTextWhenAddingImage.
+// See bugzilla bug 1943456 comment 12.
+pref("pdfjs.enableAltText", false, locked);
+pref("pdfjs.enableAltTextForEnglish", false, locked);
+pref("pdfjs.enableGuessAltText", false, locked);
+pref("pdfjs.enableAltTextModelDownload", false, locked);
+// Disable SuggestBackendMl. tor-browser#44045.
+pref("browser.urlbar.quicksuggest.mlEnabled", false, locked);
+// Disable SemanticHistory search. tor-browser#44045.
+pref("places.semanticHistory.featureGate", false, locked);
+
 
 // tor-browser#41945 - disable automatic cookie banners dismissal until
 // we're sure it does not causes fingerprinting risks or other issues.
