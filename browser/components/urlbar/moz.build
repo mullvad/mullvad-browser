@@ -48,7 +48,8 @@ EXTRA_JS_MODULES += [
     "UrlbarProviderRestrictKeywordsAutofill.sys.mjs",
     "UrlbarProviderSearchSuggestions.sys.mjs",
     "UrlbarProviderSearchTips.sys.mjs",
-    "UrlbarProviderSemanticHistorySearch.sys.mjs",
+    # Exclude UrlbarProviderSemanticHistorySearch.sys.mjs because it requires
+    # the missing "ml" component. tor-browser#44045.
     "UrlbarProvidersManager.sys.mjs",
     "UrlbarProviderTabToSearch.sys.mjs",
     "UrlbarProviderTokenAliasEngines.sys.mjs",
@@ -72,10 +73,12 @@ EXTRA_JS_MODULES["urlbar/private"] += [
     "private/GeolocationUtils.sys.mjs",
     "private/ImpressionCaps.sys.mjs",
     "private/MDNSuggestions.sys.mjs",
-    "private/MLSuggest.sys.mjs",
+    # Exclude MLSuggest.sys.mjs because it requires the missing "ml" component.
+    # tor-browser#44045.
     "private/OfflineWikipediaSuggestions.sys.mjs",
     "private/SuggestBackendMerino.sys.mjs",
-    "private/SuggestBackendMl.sys.mjs",
+    # Exclude SuggestBackendMl.sys.mjs because it requires the missing "ml"
+    # component. tor-browser#44045.
     "private/SuggestBackendRust.sys.mjs",
     "private/SuggestFeature.sys.mjs",
     "private/WeatherSuggestions.sys.mjs",

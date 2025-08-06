@@ -54,7 +54,7 @@ DIRS += [
     "kvstore",
     "media",
     "mediasniffer",
-    "ml",
+    # Exclude the "ml" component. tor-browser#44045.
     "mozintl",
     "mozprotocol",
     "parentalcontrols",
@@ -148,8 +148,7 @@ if CONFIG["MOZ_BACKGROUNDTASKS"]:
 if CONFIG["MOZ_UNIFFI_FIXTURES"]:
     DIRS += ["uniffi-bindgen-gecko-js/fixtures"]
 
-if CONFIG["NIGHTLY_BUILD"]:
-    DIRS += ["aboutinference"]
+# Exclude aboutinference (about:inference). tor-browser#44045.
 
 UNIFIED_SOURCES += [
     "/toolkit/components/antitracking/ContentBlockingAllowList.cpp",

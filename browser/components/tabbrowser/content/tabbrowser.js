@@ -106,8 +106,8 @@
         AsyncTabSwitcher:
           "moz-src:///browser/components/tabbrowser/AsyncTabSwitcher.sys.mjs",
         PictureInPicture: "resource://gre/modules/PictureInPicture.sys.mjs",
-        SmartTabGroupingManager:
-          "moz-src:///browser/components/tabbrowser/SmartTabGrouping.sys.mjs",
+        // SmartTabGrouping.sys.mjs is missing. tor-browser#44045.
+        // Unused in this context. See mozilla bug 1981785.
         TabMetrics:
           "moz-src:///browser/components/tabbrowser/TabMetrics.sys.mjs",
         TabStateFlusher:

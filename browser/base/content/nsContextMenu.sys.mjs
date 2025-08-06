@@ -13,8 +13,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "resource://gre/modules/ContextualIdentityService.sys.mjs",
   DevToolsShim: "chrome://devtools-startup/content/DevToolsShim.sys.mjs",
   E10SUtils: "resource://gre/modules/E10SUtils.sys.mjs",
-  GenAI: "resource:///modules/GenAI.sys.mjs",
-  LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
+  // GenAI.sys.mjs and LinkPreview.sys.mjs are missing. tor-browser#44045.
   LoginHelper: "resource://gre/modules/LoginHelper.sys.mjs",
   LoginManagerContextMenu:
     "resource://gre/modules/LoginManagerContextMenu.sys.mjs",
@@ -565,10 +564,8 @@ export class nsContextMenu {
       shouldShow && !isWindowPrivate && showContainers
     );
     this.showItem("context-openlinkincurrent", this.onPlainTextLink);
-    this.showItem(
-      "context-previewlink",
-      lazy.LinkPreview.shouldShowContextMenu(this)
-    );
+    // LinkPreview.sys.mjs is missing. tor-browser#44045.
+    this.showItem("context-previewlink", false);
   }
 
   initNavigationItems() {
@@ -932,10 +929,10 @@ export class nsContextMenu {
 
     this.showAndFormatSearchContextItem();
     this.showTranslateSelectionItem();
-    lazy.GenAI.buildAskChatMenu(
-      document.getElementById("context-ask-chat"),
-      this
-    );
+    // GenAI.sys.mjs is missing. tor-browser#44045.
+    // Need to remove the element from the DOM since otherwise it will cause an
+    // error due to `.menupopup === null`.
+    document.getElementById("context-ask-chat")?.remove();
 
     // srcdoc cannot be opened separately due to concerns about web
     // content with about:srcdoc in location bar masquerading as trusted
@@ -2313,10 +2310,9 @@ export class nsContextMenu {
     );
   }
 
-  previewLink(url = this.linkURL) {
-    // If we're in a view-source tab, remove the view-source: prefix
-    url = url.replace(/^view-source:/, "");
-    lazy.LinkPreview.handleContextMenuClick(url, this);
+  previewLink(_url = this.linkURL) {
+    // LinkPreview.sys.mjs is missing. Unexpected to reach here since
+    // #context-previewlink is hidden. tor-browser#44045.
   }
 
   /**
