@@ -93,4 +93,4 @@
 
 /label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Rebase"
-/label ~"Apps::Priority::Blocker"
+/label ~"Priority::Blocker"

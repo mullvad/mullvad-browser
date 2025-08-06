@@ -90,4 +90,4 @@
 
 /label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Rebase"
-/label ~"Apps::Priority::High"
+/label ~"Priority::High"
