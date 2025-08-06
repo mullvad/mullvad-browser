@@ -19,7 +19,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   ASRouter: "resource:///modules/asrouter/ASRouter.sys.mjs",
   ShortcutUtils: "resource://gre/modules/ShortcutUtils.sys.mjs",
-  GenAI: "resource:///modules/GenAI.sys.mjs",
+  // GenAI.sys.mjs is missing. tor-browser#44045.
 });
 
 /**
@@ -355,17 +355,7 @@ export default class SidebarMain extends MozLitElement {
       .querySelectorAll("[customized-tool='true']")
       .forEach(node => node.remove());
 
-    const menuBuilders = {
-      aichat: async () => {
-        if (Services.prefs.getBoolPref("browser.ml.chat.page")) {
-          await lazy.GenAI.buildAskChatMenu(this._contextMenu, {
-            browser: window.gBrowser.selectedBrowser,
-            selectionInfo: null,
-            source: "tool",
-          });
-        }
-      },
-    };
+    const menuBuilders = {};
 
     const builder = menuBuilders[toolId];
     if (typeof builder === "function") {
@@ -674,11 +664,8 @@ export default class SidebarMain extends MozLitElement {
   getEntrypointValues(action) {
     let providerInfo;
     if (action.view === "viewGenaiChatSidebar") {
-      providerInfo = lazy.GenAI.currentChatProviderInfo;
-      action.iconUrl = providerInfo.iconUrl;
-      // Sets the tooltip text for the action based on the chatbot provider's name.
-      // This tooltip text is also used to set the action label
-      action.tooltiptext = providerInfo.name;
+      // GenAI.sys.mjs is missing. tor-browser#44045.
+      return null;
     }
 
     if (action.disabled || action.hidden) {

@@ -73,8 +73,9 @@ if CONFIG["MOZ_PLACES"]:
         "PlacesFrecencyRecalculator.sys.mjs",
         "PlacesPreviews.sys.mjs",
         "PlacesQuery.sys.mjs",
-        "PlacesSemanticHistoryDatabase.sys.mjs",
-        "PlacesSemanticHistoryManager.sys.mjs",
+        # PlacesSemanticHistoryDatabase.sys.mjs and
+        # PlacesSemanticHistoryManager.sys.mjs modules are excluded because they
+        # require the missing "ml" component. tor-browser#44045.
         "PlacesSyncUtils.sys.mjs",
         "PlacesTransactions.sys.mjs",
         "PlacesUtils.sys.mjs",

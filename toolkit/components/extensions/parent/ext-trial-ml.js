@@ -4,6 +4,8 @@
 
 "use strict";
 
+// This script should be excluded from `ext-toolkit.json` since "ml" is
+// missing. tor-browser#44045.
 ChromeUtils.defineESModuleGetters(this, {
   createEngine: "chrome://global/content/ml/EngineProcess.sys.mjs",
   PipelineOptions: "chrome://global/content/ml/EngineProcess.sys.mjs",

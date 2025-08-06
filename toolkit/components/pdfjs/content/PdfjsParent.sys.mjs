@@ -21,8 +21,12 @@ const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
   clearTimeout: "resource://gre/modules/Timer.sys.mjs",
+  // EngineProcess.sys.mjs is missing but should be unused since
+  // pdfjs.enableGuessAltText is "false". tor-browser#44045.
   createEngine: "chrome://global/content/ml/EngineProcess.sys.mjs",
   IndexedDB: "resource://gre/modules/IndexedDB.sys.mjs",
+  // ml/Utils.sys.mjs is missing but should be unused since
+  // pdfjs.enableGuessAltText is "false". tor-browser#44045.
   MLUninstallService: "chrome://global/content/ml/Utils.sys.mjs",
   MultiProgressAggregator: "chrome://global/content/ml/Utils.sys.mjs",
   PdfJsGuessAltTextFeature: "resource://pdf.js/PdfJsAIFeature.sys.mjs",

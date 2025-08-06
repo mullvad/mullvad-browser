@@ -6,11 +6,7 @@ toolkit.jar:
     content/global/translations/about-translations.html       (content/about-translations.html)
     content/global/translations/about-translations.css        (content/about-translations.css)
     content/global/translations/about-translations.mjs        (content/about-translations.mjs)
-    content/global/translations/bergamot-translator.js        (bergamot-translator/bergamot-translator.js)
-    content/global/translations/translations-document.sys.mjs (content/translations-document.sys.mjs)
-    content/global/translations/translations-engine.sys.mjs   (content/translations-engine.sys.mjs)
-    content/global/translations/translations-engine.worker.js (content/translations-engine.worker.js)
-    content/global/translations/Translator.mjs                (content/Translator.mjs)
+    # Exclude translations engine-related content scripts. tor-browser#44045.
     content/global/translations/TranslationsTelemetry.sys.mjs (TranslationsTelemetry.sys.mjs)
     content/global/translations/TranslationsFeature.sys.mjs   (TranslationsFeature.sys.mjs)
     content/global/translations/TranslationsUtils.mjs         (TranslationsUtils.mjs)
