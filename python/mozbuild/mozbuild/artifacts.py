@@ -131,6 +131,7 @@ class ThunderbirdJobConfiguration:
     esr_candidate_trees = [
         "releases/comm-esr115",
         "releases/comm-esr128",
+        "releases/comm-esr140",
     ]
     try_tree = "try-comm-central"
 
