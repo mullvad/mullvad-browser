@@ -15,4 +15,7 @@ if CONFIG["COMPILE_ENVIRONMENT"]:
 if CONFIG["OS_ARCH"] == "Darwin":
     LDFLAGS += ["-Wl,-rpath,@executable_path"]
 
-USE_LIBS += ["nss"]
+if CONFIG["MOZ_SYSTEM_NSS"]:
+    LDFLAGS += CONFIG["NSS_LIBS"]
+else:
+    USE_LIBS += ["nss"]
