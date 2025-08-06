@@ -13,7 +13,7 @@ const lazy = XPCOMUtils.declareLazy({
   AppConstants: "resource://gre/modules/AppConstants.sys.mjs",
   ContextualIdentityService:
     "resource://gre/modules/ContextualIdentityService.sys.mjs",
-  LinkPreview: "moz-src:///browser/components/genai/LinkPreview.sys.mjs",
+  // LinkPreview.sys.mjs is missing. tor-browser#44045.
   ShortcutUtils: "resource://gre/modules/ShortcutUtils.sys.mjs",
   TransientPrefs: "resource:///modules/TransientPrefs.sys.mjs",
 });
@@ -438,21 +438,14 @@ Preferences.addSetting({
 Preferences.addSetting({
   id: "linkPreviewEnabled",
   pref: "browser.ml.linkPreview.enabled",
-  deps: ["aiControlDefault", "aiControlLinkPreviews"],
-  visible: ({ aiControlDefault, aiControlLinkPreviews }) => {
-    return (
-      window.canShowAiFeature(aiControlLinkPreviews, aiControlDefault) &&
-      // @ts-ignore bug 1996860
-      lazy.LinkPreview.canShowPreferences
-    );
-  },
+  visible: () => false, // LinkPreview is missing. tor-browser#44045.
 });
 Preferences.addSetting({
   id: "linkPreviewKeyPoints",
   pref: "browser.ml.linkPreview.optin",
   // LinkPreview.canShowKeyPoints depends on the global genai pref.
   // @ts-ignore bug 1996860
-  visible: () => lazy.LinkPreview.canShowKeyPoints,
+  visible: () => false, // LinkPreview is missing. tor-browser#44045.
 });
 Preferences.addSetting({
   id: "linkPreviewLongPress",

@@ -59,7 +59,7 @@ category browser-window-load moz-src:///browser/components/customkeys/CustomKeys
 
 category browser-window-delayed-startup moz-src:///browser/components/contentanalysis/content/ContentAnalysis.sys.mjs ContentAnalysis.initialize
 category browser-window-delayed-startup resource:///modules/HomePage.sys.mjs HomePage.delayedStartup
-category browser-window-delayed-startup moz-src:///browser/components/genai/LinkPreview.sys.mjs LinkPreview.init
+# LinkPreview.sys.mjs is missing. tor-browser#44045.
 category browser-window-delayed-startup moz-src:///browser/components/reportbrokensite/ReportBrokenSite.sys.mjs ReportBrokenSite.init
 category browser-window-delayed-startup moz-src:///browser/components/search/SearchUIUtils.sys.mjs SearchUIUtils.init
 category browser-window-delayed-startup resource:///modules/taskbartabs/TaskbarTabsPageAction.sys.mjs TaskbarTabsPageAction.init
@@ -127,7 +127,7 @@ category browser-idle-startup resource://gre/modules/RFPHelper.sys.mjs RFPHelper
 category browser-idle-startup resource://gre/modules/Blocklist.sys.mjs Blocklist.loadBlocklistAsync
 category browser-idle-startup resource://gre/modules/psm/RemoteSecuritySettings.sys.mjs RemoteSecuritySettings.init
 category browser-idle-startup moz-src:///browser/components/tabbrowser/TabUnloader.sys.mjs TabUnloader.init
-category browser-idle-startup resource:///modules/GenAI.sys.mjs GenAI.init
+# GenAI.sys.mjs is missing. tor-browser#44045.
 category browser-idle-startup moz-src:///browser/components/urlbar/QuickSuggest.sys.mjs QuickSuggest.init
 category browser-idle-startup moz-src:///browser/components/urlbar/UrlbarSearchTermsPersistence.sys.mjs UrlbarSearchTermsPersistence.init
 category browser-idle-startup moz-src:///browser/components/search/SERPCategorization.sys.mjs SERPCategorization.init

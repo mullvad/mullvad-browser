@@ -10,7 +10,6 @@
  * - Rendering prompts from files
  */
 
-import { createEngine } from "chrome://global/content/ml/EngineProcess.sys.mjs";
 import {
   OAUTH_CLIENT_ID,
   SCOPE_PROFILE_UID,
@@ -41,6 +40,10 @@ const DEFAULT_ENDPOINT =
  * Default engine ID used for all AI Window features
  */
 export const DEFAULT_ENGINE_ID = "smart-openai";
+
+function createEngine() {
+  return null;
+}
 
 /**
  * Observer for model preference changes.

@@ -46,7 +46,8 @@ MOZ_SRC_FILES += [
     "UrlbarProviderRestrictKeywordsAutofill.sys.mjs",
     "UrlbarProviderSearchSuggestions.sys.mjs",
     "UrlbarProviderSearchTips.sys.mjs",
-    "UrlbarProviderSemanticHistorySearch.sys.mjs",
+    # Exclude UrlbarProviderSemanticHistorySearch.sys.mjs because it requires
+    # the missing "ml" component. tor-browser#44045.
     "UrlbarProvidersManager.sys.mjs",
     "UrlbarProviderTabToSearch.sys.mjs",
     "UrlbarProviderTokenAliasEngines.sys.mjs",
@@ -70,11 +71,13 @@ MOZ_SRC_FILES += [
     "private/ImpressionCaps.sys.mjs",
     "private/MarketSuggestions.sys.mjs",
     "private/MDNSuggestions.sys.mjs",
-    "private/MLSuggest.sys.mjs",
+    # Exclude MLSuggest.sys.mjs because it requires the missing "ml" component.
+    # tor-browser#44045.
     "private/RealtimeSuggestProvider.sys.mjs",
     "private/SportsSuggestions.sys.mjs",
     "private/SuggestBackendMerino.sys.mjs",
-    "private/SuggestBackendMl.sys.mjs",
+    # Exclude SuggestBackendMl.sys.mjs because it requires the missing "ml"
+    # component. tor-browser#44045.
     "private/SuggestBackendRust.sys.mjs",
     "private/SuggestFeature.sys.mjs",
     "private/WeatherSuggestions.sys.mjs",

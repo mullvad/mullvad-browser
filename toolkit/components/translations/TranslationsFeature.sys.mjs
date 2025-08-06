@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { AIFeature } from "chrome://global/content/ml/AIFeature.sys.mjs";
+// AIFeature.sys.mjs is not available. tor-browser#44780.
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 
 /**
@@ -47,7 +47,10 @@ XPCOMUtils.defineLazyPreferenceGetter(
 /**
  * AIFeature implementation for translations.
  */
-export class TranslationsFeature extends AIFeature {
+// NOTE: The AIFeature class is not available.
+// At the time of implementation, TranslationsFeature overwrites the entire
+// AIFeature class so we can drop the `extends AIFeature`. tor-browser#44780.
+export class TranslationsFeature {
   /**
    * Feature identifier for translations.
    *

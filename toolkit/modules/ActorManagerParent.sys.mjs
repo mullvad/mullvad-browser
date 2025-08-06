@@ -48,17 +48,8 @@ let JSPROCESSACTORS = {
     },
   },
 
-  // A single process (shared with translations) that manages machine learning engines.
-  MLEngine: {
-    remoteTypes: ["inference"],
-    parent: {
-      esModuleURI: "resource://gre/actors/MLEngineParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource://gre/actors/MLEngineChild.sys.mjs",
-    },
-    enablePreference: "browser.ml.enable",
-  },
+  // MLEngineParent.sys.mjs and MLEngineChild.sys.mjs are missing.
+  // tor-browser#44045.
 
   ProcessConduits: {
     // "parent" remoteTypes is currently needed to support MV3 background service workers
@@ -76,17 +67,8 @@ let JSPROCESSACTORS = {
     enablePreference: "extensions.backgroundServiceWorker.enabled",
   },
 
-  // A single process (shared with MLEngine) that controls all of the translations.
-  TranslationsEngine: {
-    remoteTypes: ["inference"],
-    parent: {
-      esModuleURI: "resource://gre/actors/TranslationsEngineParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource://gre/actors/TranslationsEngineChild.sys.mjs",
-    },
-    enablePreference: "browser.translations.enable",
-  },
+  // TranslationsEngineParent.sys.mjs and TranslationsEngineChild.sys.mjs are
+  // missing. tor-browser#44045.
 };
 
 /**
@@ -807,21 +789,8 @@ if (AppConstants.platform != "android") {
     remoteTypes: ["privilegedabout"],
   };
 
-  JSWINDOWACTORS.AboutTranslations = {
-    parent: {
-      esModuleURI: "resource://gre/actors/AboutTranslationsParent.sys.mjs",
-    },
-    child: {
-      esModuleURI: "resource://gre/actors/AboutTranslationsChild.sys.mjs",
-      events: {
-        // Run the actor before any content of the page appears to inject functions.
-        DOMDocElementInserted: {},
-        DOMContentLoaded: {},
-      },
-    },
-    matches: ["about:translations"],
-    remoteTypes: ["privilegedabout"],
-  };
+  // AboutTranslationsParent.sys.mjs and AboutTranslationsChild.sys.mjs are
+  // missing. tor-browser#44045.
 
   JSWINDOWACTORS.ColorPicker = {
     parent: {

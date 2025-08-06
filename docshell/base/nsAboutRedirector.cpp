@@ -134,7 +134,8 @@ static const RedirEntry kRedirMap[] = {
      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
          nsIAboutModule::URI_CAN_LOAD_IN_CHILD | nsIAboutModule::ALLOW_SCRIPT |
          nsIAboutModule::HIDE_FROM_ABOUTABOUT},
-#if defined(NIGHTLY_BUILD)
+#if defined(NIGHTLY_BUILD) && !defined(BASE_BROWSER_VERSION)
+    // Do not include about:inference since "ml" is excluded. tor-browser#44045.
     {"inference", "chrome://global/content/aboutInference.html",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::IS_SECURE_CHROME_UI},
 #endif
@@ -221,7 +222,9 @@ static const RedirEntry kRedirMap[] = {
 #endif
     {"telemetry", "chrome://global/content/aboutTelemetry.xhtml",
      nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::IS_SECURE_CHROME_UI},
-#ifndef MOZ_WIDGET_ANDROID
+#ifndef BASE_BROWSER_VERSION
+    // Remove about:translations since translations are disabled.
+    // See tor-browser#44045 and tor-browser#42872.
     {"translations",
      "chrome://global/content/translations/about-translations.html",
      nsIAboutModule::ALLOW_SCRIPT |
