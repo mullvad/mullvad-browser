@@ -1884,10 +1884,12 @@ BrowserGlue.prototype = {
   // Use this method for any MB migration that can be run just before showing
   // the UI.
   // Anything that critically needs to be migrated earlier should not use this.
-  _migrateUIMB() {
+  async _migrateUIMB() {
     // Version 1: Mullvad Browser 14.5a6: Clear home page update url preference
     //            (mullvad-browser#411).
-    const MB_MIGRATION_VERSION = 1;
+    // Version 2: Mullvad Browser 15.0a2: Remove legacy search addons
+    //            (tor-browser#43111).
+    const MB_MIGRATION_VERSION = 2;
     const MIGRATION_PREF = "mullvadbrowser.migration.version";
 
     // If we decide to force updating users to pass through any version
@@ -1907,6 +1909,25 @@ BrowserGlue.prototype = {
 
     if (currentVersion < 1) {
       Services.prefs.clearUserPref("mullvadbrowser.post_update.url");
+    }
+    const dropAddons = async list => {
+      for (const id of list) {
+        try {
+          const engine = await lazy.AddonManager.getAddonByID(id);
+          await engine?.uninstall();
+        } catch {}
+      }
+    };
+    if (currentVersion < 2) {
+      await dropAddons([
+        "brave@search.mozilla.org",
+        "ddg@search.mozilla.org",
+        "ddg-html@search.mozilla.org",
+        "metager@search.mozilla.org",
+        "mojeek@search.mozilla.org",
+        "mullvad-leta@search.mozilla.org",
+        "startpage@search.mozilla.org",
+      ]);
     }
 
     Services.prefs.setIntPref(MIGRATION_PREF, MB_MIGRATION_VERSION);
