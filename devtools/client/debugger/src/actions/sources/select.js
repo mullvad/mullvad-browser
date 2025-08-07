@@ -103,7 +103,7 @@ export function selectMayBePrettyPrintedLocation(location) {
     if (prettySource) {
       location = createLocation({ source: prettySource });
     }
-    await dispatch(selectLocation(location));
+    await dispatch(selectSpecificLocation(location));
   };
 }
 

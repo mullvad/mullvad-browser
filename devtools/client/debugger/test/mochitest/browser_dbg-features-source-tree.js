@@ -377,6 +377,12 @@ add_task(async function testSourceTreeOnTheIntegrationTestPage() {
   await resume(dbg);
   await onResumed;
 
+  info("Select an original source while bundle should be opened by default");
+  // The setting should be ignored when selecting a source from the source tree
+  await dbg.actions.setDefaultSelectedLocation(false);
+  await selectSourceFromSourceTree(dbg, "original.js");
+  assertTextContentOnLine(dbg, 1, `window.bar = function bar() {`);
+
   info("Verify blackbox source icon");
   await selectSourceFromSourceTree(dbg, "script.js");
   await clickElement(dbg, "blackbox");
