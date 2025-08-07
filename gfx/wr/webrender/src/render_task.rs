@@ -1968,6 +1968,7 @@ impl RenderTask {
             //
             // Also look up the child tasks while we are here.
             let mut used_subregion = LayoutRect::zero();
+            let mut combined_input_subregion = LayoutRect::zero();
             let node_inputs: Vec<(FilterGraphPictureReference, RenderTaskId)> = node.inputs.iter().map(|input| {
                 let (subregion, task) =
                     match input.buffer_id {
@@ -2005,6 +2006,7 @@ impl RenderTask {
                         ),
                     );
                 used_subregion = used_subregion.union(&target_subregion);
+                combined_input_subregion = combined_input_subregion.union(&subregion);
                 (FilterGraphPictureReference{
                     buffer_id: input.buffer_id,
                     // Apply offset to the placement of the input subregion.
@@ -2218,7 +2220,7 @@ impl RenderTask {
                         std_deviation_y.ceil() * BLUR_SAMPLE_SCALE)
                 }
                 _ => used_subregion,
-            };
+            }.union(&combined_input_subregion);
             while
                 padded_subregion.scale(device_to_render_scale, device_to_render_scale).round().width() + node_inflate as f32 * 2.0 > MAX_SURFACE_SIZE as f32 ||
                 padded_subregion.scale(device_to_render_scale, device_to_render_scale).round().height() + node_inflate as f32 * 2.0 > MAX_SURFACE_SIZE as f32 {
