@@ -199,8 +199,6 @@ pref("browser.safebrowsing.provider.google4.updateURL", "");
 pref("browser.safebrowsing.provider.google4.gethashURL", "");
 pref("browser.safebrowsing.provider.mozilla.updateURL", "");
 pref("browser.safebrowsing.provider.mozilla.gethashURL", "");
-pref("datareporting.healthreport.uploadEnabled", false);
-pref("datareporting.policy.dataSubmissionEnabled", false);
 // tor-browser#42735: Disable recent search suggestions
 pref("browser.urlbar.recentsearches.featureGate", false);
 pref("browser.urlbar.suggest.recentsearches", false);
@@ -222,6 +220,8 @@ pref("toolkit.telemetry.firstShutdownPing.enabled", false); // Added in tor-brow
 pref("toolkit.telemetry.updatePing.enabled", false); // Make sure updater telemetry is disabled; see #25909.
 pref("toolkit.telemetry.bhrPing.enabled", false);
 pref("toolkit.telemetry.coverage.opt-out", true);
+pref("datareporting.healthreport.uploadEnabled", false);
+pref("datareporting.policy.dataSubmissionEnabled", false);
 // Force all telemtry identifier to their canary values tor-browser#43750
 pref("toolkit.telemetry.cachedClientID", "c0ffeec0-ffee-c0ff-eec0-ffeec0ffeec0", locked);
 pref("toolkit.telemetry.cachedProfileGroupID", "decafdec-afde-cafd-ecaf-decafdecafde", locked);
@@ -233,6 +233,9 @@ pref("browser.tabs.crashReporting.sendReport", false);
 pref("browser.crashReports.unsubmittedCheck.autoSubmit2", false);
 // Added in tor-browser#41496 even though false by default
 pref("browser.crashReports.unsubmittedCheck.enabled", false);
+// tor-browser#44026: Disable the modal that shows upstream terms of usage,
+// since we opt out of their telemetry and data collection.
+pref("browser.preonboarding.enabled", false);
 // Disable checkbox in about:neterror that controls
 // security.xfocsp.errorReporting.automatic. See tor-browser#42653.
 pref("security.xfocsp.errorReporting.enabled", false);
