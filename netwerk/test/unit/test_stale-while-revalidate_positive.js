@@ -29,6 +29,7 @@ const { HttpServer } = ChromeUtils.importESModule(
 
 let max_age;
 let version;
+let expectCookies = false;
 let generate_response = ver => `response version=${ver}`;
 
 function test_handler(metadata, response) {
@@ -41,6 +42,22 @@ function test_handler(metadata, response) {
     response.setStatusLine(metadata.httpVersion, 400, "OK");
     return;
   }
+
+  // Check if the request has a cookie
+  if (expectCookies) {
+    let cookies = metadata.getHeader("Cookie");
+    if (cookies !== "Custom=CustomValue") {
+      response.setStatusLine(metadata.httpVersion, 400, "Cookies dont match");
+      return;
+    }
+  }
+
+  // Set the cookie in the response
+  response.setHeader(
+    "Set-Cookie",
+    "Custom=CustomValue; HttpOnly; Path=/",
+    true
+  );
 
   const originalBody = generate_response(version);
   response.setHeader("Content-Type", "text/html", false);
@@ -97,6 +114,11 @@ async function background_reval_promise() {
 }
 
 add_task(async function () {
+  Services.prefs.setIntPref("network.cookie.cookieBehavior", 0);
+  Services.prefs.setBoolPref(
+    "network.cookieJarSettings.unblocked_for_testing",
+    true
+  );
   let httpserver = new HttpServer();
   httpserver.registerPathHandler("/testdir", test_handler);
   httpserver.start(-1);
@@ -109,7 +131,7 @@ add_task(async function () {
   max_age = 1;
   response = await get_response(make_channel(URI), false);
   Assert.equal(response, generate_response(1), "got response ver 1");
-
+  expectCookies = true;
   await sleep(max_age + 1);
 
   // must specifically wait for the internal channel to finish the reval to make

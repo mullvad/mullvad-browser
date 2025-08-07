@@ -465,7 +465,14 @@ nsresult nsHttpChannel::PrepareToConnect() {
   // notify "http-on-modify-request-before-cookies" observers
   gHttpHandler->OnModifyRequestBeforeCookies(this);
 
-  AddCookiesToRequest();
+  if (mStaleRevalidation) {
+    // This is a revalidating channel.
+    // The cookies (user set cookies + cookies from the cookeservice) are
+    // already copied to the request headers when opening this channel in
+    // PerformBackgroundCacheRevalidationNow().
+  } else {
+    AddCookiesToRequest();
+  }
 
 #if defined(XP_WIN) || defined(XP_MACOSX)
 
@@ -6749,6 +6756,8 @@ nsHttpChannel::AsyncOpen(nsIStreamListener* aListener) {
   // Remember the cookie header that was set, if any
   nsAutoCString cookieHeader;
   if (NS_SUCCEEDED(mRequestHead.GetHeader(nsHttp::Cookie, cookieHeader))) {
+    // if this is a cache revalidaing channel (mIsStaleRevalidation), then this
+    // represents both user cookies and cookies from cookieService
     mUserSetCookieHeader = cookieHeader;
   }
 
