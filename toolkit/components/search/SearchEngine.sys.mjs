@@ -359,18 +359,20 @@ export class EngineURL {
       lazy.SecurityLevelPrefs?.securityLevel === "safest" &&
       this.type === lazy.SearchUtils.URL_TYPE.SEARCH
     ) {
-      let host = this.templateHost;
+      let host = templateURI.host;
       try {
         host = Services.eTLD.getBaseDomainFromHost(host);
       } catch (ex) {
         lazy.logConsole.warn("Failed to get a FPD", ex, host);
       }
-      if (
-        host === "duckduckgo.com" ||
+      if (host === "duckduckgo.com") {
+        templateURI.host = "html.duckduckgo.com";
+        templateURI.pathname = "/html";
+      } else if (
         host ===
-          "duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion"
+        "duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion"
       ) {
-        query += "html";
+        templateURI.pathname = "/html";
       }
     }
 
