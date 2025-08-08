@@ -7,8 +7,9 @@
 
 #include <algorithm>
 #include <bitset>
+#include <cctype>
+#include <iterator>
 #include <queue>
-#include <regex>
 
 #include "AccessCheck.h"
 #include "CompositableHost.h"
@@ -2204,30 +2205,59 @@ Maybe<std::string> WebGLContext::GetString(const GLenum pname) const {
 // ---------------------------------
 
 Maybe<webgl::IndexedName> webgl::ParseIndexed(const std::string& str) {
-  static const std::regex kRegex("(.*)\\[([0-9]+)\\]");
+  // Check if the string ends with a close bracket
+  if (str.size() < 2 || str.back() != ']') {
+    return {};
+  }
+  // Search for the open bracket, only allow digits between brackets
+  const size_t closeBracket = str.size() - 1;
+  size_t openBracket = closeBracket;
+  for (;;) {
+    char c = str[--openBracket];
+    if (isdigit(c)) {
+      if (openBracket <= 0) {
+        // At the beginning of string without an open bracket
+        return {};
+      }
+    } else if (c == '[') {
+      // Found the open bracket
+      break;
+    } else {
+      // Found a non-digit
+      return {};
+    }
+  }
 
-  std::smatch match;
-  if (!std::regex_match(str, match, kRegex)) return {};
-
-  const auto index = std::stoull(match[2]);
-  return Some(webgl::IndexedName{match[1], index});
+  // Ensure non-empty digit sequence
+  size_t firstDigit = openBracket + 1;
+  if (firstDigit >= closeBracket) {
+    return {};
+  }
+  const auto index =
+      std::stoull(str.substr(firstDigit, closeBracket - firstDigit));
+  std::string name = str.substr(0, openBracket);
+  return Some(webgl::IndexedName{name, index});
 }
 
 // ExplodeName("foo.bar[3].x") -> ["foo", ".", "bar", "[", "3", "]", ".", "x"]
 static std::vector<std::string> ExplodeName(const std::string& str) {
   std::vector<std::string> ret;
-
-  static const std::regex kSep("[.[\\]]");
-
-  auto itr = std::regex_token_iterator<decltype(str.begin())>(
-      str.begin(), str.end(), kSep, {-1, 0});
-  const auto end = decltype(itr)();
-
-  for (; itr != end; ++itr) {
-    const auto& part = itr->str();
-    if (part.size()) {
-      ret.push_back(part);
+  size_t curPos = 0;
+  while (curPos < str.size()) {
+    // Find the next separator
+    size_t nextPos = str.find_first_of(".[]", curPos);
+    if (nextPos == std::string::npos) {
+      // If no separator found, add remaining substring
+      ret.push_back(str.substr(curPos));
+      break;
     }
+    // Add string between separators, if not empty
+    if (curPos < nextPos) {
+      ret.push_back(str.substr(curPos, nextPos - curPos));
+    }
+    // Add the separator
+    ret.push_back(str.substr(nextPos, 1));
+    curPos = nextPos + 1;
   }
   return ret;
 }
