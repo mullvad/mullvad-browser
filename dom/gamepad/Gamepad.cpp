@@ -81,7 +81,12 @@ void Gamepad::SetConnected(bool aConnected) { mConnected = aConnected; }
 
 void Gamepad::SetButton(uint32_t aButton, bool aPressed, bool aTouched,
                         double aValue) {
-  MOZ_ASSERT(aButton < mButtons.Length());
+  // Until we fix the synchronization errors in Bug 1682554, this can be
+  // called with a stale index that might overflow. In such a case, we silently
+  // ignore it.
+  if (aButton >= mButtons.Length()) {
+    return;
+  }
   mButtons[aButton]->SetPressed(aPressed);
   mButtons[aButton]->SetTouched(aTouched);
   mButtons[aButton]->SetValue(aValue);
@@ -89,7 +94,13 @@ void Gamepad::SetButton(uint32_t aButton, bool aPressed, bool aTouched,
 }
 
 void Gamepad::SetAxis(uint32_t aAxis, double aValue) {
-  MOZ_ASSERT(aAxis < mAxes.Length());
+  // Until we fix the synchronization errors in Bug 1682554, this can be
+  // called with a stale index that might overflow. In such a case, we silently
+  // ignore it.
+  if (aAxis >= mAxes.Length()) {
+    return;
+  }
+
   if (mAxes[aAxis] != aValue) {
     mAxes[aAxis] = aValue;
     Gamepad_Binding::ClearCachedAxesValue(this);
@@ -104,14 +115,23 @@ void Gamepad::SetPose(const GamepadPoseState& aPose) {
 
 void Gamepad::SetLightIndicatorType(uint32_t aLightIndex,
                                     GamepadLightIndicatorType aType) {
+  // Until we fix the synchronization errors in Bug 1682554, this can be
+  // called with a stale index that might overflow. In such a case, we silently
+  // ignore it.
+  if (aLightIndex >= mLightIndicators.Length()) {
+    return;
+  }
+
   mLightIndicators[aLightIndex]->SetType(aType);
   UpdateTimestamp();
 }
 
 void Gamepad::SetTouchEvent(uint32_t aTouchIndex,
                             const GamepadTouchState& aTouch) {
+  // Until we fix the synchronization errors in Bug 1682554, this can be
+  // called with a stale index that might overflow. In such a case, we silently
+  // ignore it.
   if (aTouchIndex >= mTouchEvents.Length()) {
-    MOZ_CRASH("Touch index exceeds the event array.");
     return;
   }
 
