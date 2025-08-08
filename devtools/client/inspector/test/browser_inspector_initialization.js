@@ -100,6 +100,14 @@ async function testContextMenuInitialization(tab) {
   ok(true, "Highlighter was displayed for #salutation element");
 
   info("Checking inspector state.");
+  const inspector = getActiveInspector();
+  const markup = inspector.markup;
+  const rootContainer = markup.getContainer(markup._rootNode);
+  is(
+    inspector.markup.doc.activeElement,
+    rootContainer.elt,
+    "Keyboard focus must be on the markup tree container."
+  );
   await testMarkupView("#salutation");
   await testBreadcrumbs("#salutation");
 }
