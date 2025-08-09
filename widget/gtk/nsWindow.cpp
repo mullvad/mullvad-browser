@@ -220,10 +220,9 @@ static gboolean leave_notify_event_cb(GtkWidget* widget,
                                       GdkEventCrossing* event);
 static gboolean motion_notify_event_cb(GtkWidget* widget,
                                        GdkEventMotion* event);
-MOZ_CAN_RUN_SCRIPT static gboolean button_press_event_cb(GtkWidget* widget,
-                                                         GdkEventButton* event);
-static gboolean button_release_event_cb(GtkWidget* widget,
-                                        GdkEventButton* event);
+static gboolean button_press_event_cb(GtkWidget* widget, GdkEventButton* event);
+MOZ_CAN_RUN_SCRIPT static gboolean button_release_event_cb(
+    GtkWidget* widget, GdkEventButton* event);
 static gboolean focus_in_event_cb(GtkWidget* widget, GdkEventFocus* event);
 static gboolean focus_out_event_cb(GtkWidget* widget, GdkEventFocus* event);
 static gboolean key_press_event_cb(GtkWidget* widget, GdkEventKey* event);
@@ -7389,11 +7388,9 @@ bool nsWindow::DragInProgress() {
 // info about finished D&D operations and cancel it on our own.
 MOZ_CAN_RUN_SCRIPT static void WaylandDragWorkaround(nsWindow* aWindow,
                                                      GdkEventButton* aEvent) {
-  static int buttonPressCountWithDrag = 0;
-
   // We track only left button state as Firefox performs D&D on left
   // button only.
-  if (aEvent->button != 1 || aEvent->type != GDK_BUTTON_PRESS) {
+  if (aEvent->button != 1 || aEvent->type != GDK_BUTTON_RELEASE) {
     return;
   }
 
@@ -7404,25 +7401,16 @@ MOZ_CAN_RUN_SCRIPT static void WaylandDragWorkaround(nsWindow* aWindow,
   }
   nsCOMPtr<nsIDragSession> currentDragSession =
       dragService->GetCurrentSession(aWindow);
-
-  if (!currentDragSession) {
-    buttonPressCountWithDrag = 0;
+  if (!currentDragSession ||
+      static_cast<nsDragSession*>(currentDragSession.get())->IsActive()) {
     return;
   }
 
-  buttonPressCountWithDrag++;
-  if (buttonPressCountWithDrag > 1) {
-    LOGDRAG(
-        "WaylandDragWorkaround applied [buttonPressCountWithDrag %d], quit D&D "
-        "session",
-        buttonPressCountWithDrag);
-
-    NS_WARNING(
-        "Quit unfinished Wayland Drag and Drop operation. Buggy Wayland "
-        "compositor?");
-    buttonPressCountWithDrag = 0;
-    currentDragSession->EndDragSession(true, 0);
-  }
+  LOGDRAG("WaylandDragWorkaround applied, quit D&D session");
+  NS_WARNING(
+      "Quit unfinished Wayland Drag and Drop operation. Buggy Wayland "
+      "compositor?");
+  currentDragSession->EndDragSession(true, 0);
 }
 
 static nsWindow* get_window_for_gtk_widget(GtkWidget* widget) {
@@ -8050,10 +8038,6 @@ static gboolean button_press_event_cb(GtkWidget* widget,
 
   window->OnButtonPressEvent(event);
 
-  if (GdkIsWaylandDisplay()) {
-    WaylandDragWorkaround(window, event);
-  }
-
   return TRUE;
 }
 
@@ -8071,6 +8055,10 @@ static gboolean button_release_event_cb(GtkWidget* widget,
   }
 
   window->OnButtonReleaseEvent(event);
+
+  if (GdkIsWaylandDisplay()) {
+    WaylandDragWorkaround(window, event);
+  }
 
   return TRUE;
 }
@@ -8393,6 +8381,8 @@ gboolean WindowDragMotionHandler(GtkWidget* aWidget,
         static_cast<nsDragSession*>(dragService->StartDragSession(widget));
   }
   NS_ENSURE_TRUE(dragSession, FALSE);
+
+  dragSession->MarkAsActive();
 
   nsDragSession::AutoEventLoop loop(dragSession);
   if (!dragSession->ScheduleMotionEvent(
@@ -9762,6 +9752,7 @@ void nsWindow::OnUnmap() {
       static auto sGtkDragCancel =
           (void (*)(GdkDragContext*))dlsym(RTLD_DEFAULT, "gtk_drag_cancel");
       if (sGtkDragCancel) {
+        LOGDRAG("nsWindow::OnUnmap() Drag cancel");
         sGtkDragCancel(mSourceDragContext);
         mSourceDragContext = nullptr;
       }

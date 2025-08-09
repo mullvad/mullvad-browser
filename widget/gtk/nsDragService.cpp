@@ -563,6 +563,9 @@ nsDragSession::nsDragSession() {
 
   // set up our logging module
   mTempFileTimerID = 0;
+#ifdef MOZ_X11
+  mActive = widget::GdkIsX11Display();
+#endif
 
   static std::once_flag onceFlag;
   std::call_once(onceFlag, [] {
