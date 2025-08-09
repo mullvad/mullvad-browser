@@ -683,7 +683,7 @@ nsresult ModuleLoaderBase::OnFetchComplete(ModuleLoadRequest* aRequest,
   MOZ_ASSERT(NS_SUCCEEDED(rv) == bool(aRequest->mModuleScript));
   SetModuleFetchFinishedAndResumeWaitingRequests(aRequest, rv);
 
-  if (!aRequest->IsErrored()) {
+  if (!aRequest->IsErrored() && !aRequest->IsCanceled()) {
     StartFetchingModuleDependencies(aRequest);
   }
 
@@ -1178,6 +1178,20 @@ ModuleLoaderBase::~ModuleLoaderBase() {
   mDynamicImportRequests.CancelRequestsAndClear();
 
   LOG(("ModuleLoaderBase::~ModuleLoaderBase %p", this));
+}
+
+void ModuleLoaderBase::CancelFetchingModules() {
+  for (const auto& entry : mFetchingModules) {
+    RefPtr<LoadingRequest> loadingRequest = entry.GetData();
+    loadingRequest->mRequest->Cancel();
+
+    for (const auto& request : loadingRequest->mWaiting) {
+      request->Cancel();
+    }
+  }
+
+  // We don't clear mFetchingModules here, as the fetching requests might arrive
+  // after the global is still shutting down.
 }
 
 void ModuleLoaderBase::Shutdown() {

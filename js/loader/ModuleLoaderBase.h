@@ -290,6 +290,8 @@ class ModuleLoaderBase : public nsISupports {
   explicit ModuleLoaderBase(ScriptLoaderInterface* aLoader,
                             nsIGlobalObject* aGlobalObject);
 
+  void CancelFetchingModules();
+
   // Called to break cycles during shutdown to prevent memory leaks.
   void Shutdown();
 
