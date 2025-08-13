@@ -1834,7 +1834,8 @@ BrowserGlue.prototype = {
     //            Also, reset security.xfocsp.errorReporting.automatic since we
     //            hid its neterror checkbox. tor-browser#42653.
     // Version 3: 14.0a7: Reset general.smoothScroll. tor-browser#42070.
-    const MIGRATION_VERSION = 3;
+    // Version 4: 15.0a2: Drop ML components. tor-browser#44045.
+    const MIGRATION_VERSION = 4;
     const MIGRATION_PREF = "basebrowser.migration.version";
     if (this._isNewProfile) {
       // Do not migrate fresh profiles
@@ -1873,6 +1874,28 @@ BrowserGlue.prototype = {
     }
     if (currentVersion < 3) {
       Services.prefs.clearUserPref("general.smoothScroll");
+    }
+    if (currentVersion < 4) {
+      for (const prefName of [
+        "browser.translations.enable",
+        "browser.ml.enable",
+        "browser.ml.chat.enabled",
+        "browser.ml.linkPreview.enabled",
+        "browser.tabs.groups.smart.enabled",
+        "browser.tabs.groups.smart.userEnabled",
+        "extensions.ml.enabled",
+        "pdfjs.enableAltText",
+        "pdfjs.enableAltTextForEnglish",
+        "pdfjs.enableGuessAltText",
+        "pdfjs.enableAltTextModelDownload",
+        "browser.urlbar.quicksuggest.mlEnabled",
+        "places.semanticHistory.featureGate",
+      ]) {
+        // Preferences are locked. Do not want user values to linger in the
+        // user's profile and become active if these preferences become unlocked
+        // in the future.
+        Services.prefs.clearUserPref(prefName);
+      }
     }
     Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
   },
