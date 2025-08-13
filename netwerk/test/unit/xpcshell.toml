@@ -543,6 +543,7 @@ skip-if = ["os == 'android' && android_version == '24' && processor == 'x86_64' 
 ["test_cors_preflight_dns_cache.js"]
 run-sequentially = "node server exceptions dont replay well"
 run-if = ["!socketprocess_networking"] # can't read DNS cache syncly from socket process
+prefs = ["content.cors.use_triggering_principal=true"] # See bug 1982916.
 
 ["test_data_protocol.js"]
 

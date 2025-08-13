@@ -46,6 +46,7 @@
 #include "mozilla/Logging.h"
 #include "mozilla/Maybe.h"
 #include "mozilla/Preferences.h"
+#include "mozilla/StaticPrefs_content.h"
 #include "mozilla/StaticPrefs_dom.h"
 #include "mozilla/StaticPrefs_security.h"
 #include "xpcpublic.h"
@@ -357,10 +358,17 @@ static nsresult DoCORSChecks(nsIChannel* aChannel, nsILoadInfo* aLoadInfo,
     return NS_OK;
   }
 
-  // We use the triggering principal here, rather than the loading principal
-  // to ensure that anonymous CORS content in the browser resources and in
-  // WebExtensions is allowed to load.
-  nsIPrincipal* principal = aLoadInfo->TriggeringPrincipal();
+  nsIPrincipal* principal = aLoadInfo->GetLoadingPrincipal();
+  if (StaticPrefs::content_cors_use_triggering_principal()) {
+    // We use the triggering principal here, rather than the loading principal,
+    // to ensure that WebExtensions can reuse their own resources from content
+    // that they inject into a page.
+    //
+    // TODO(dholbert): Is there actually a legitimate reason that WebExtensions
+    // might need this (as opposed to exposing their resources for use in
+    // web-content via the 'web_accessible_resources' manifest field)?
+    principal = aLoadInfo->TriggeringPrincipal();
+  }
   RefPtr<nsCORSListenerProxy> corsListener = new nsCORSListenerProxy(
       aInAndOutListener, principal,
       aLoadInfo->GetCookiePolicy() == nsILoadInfo::SEC_COOKIES_INCLUDE);

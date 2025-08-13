@@ -2188,6 +2188,14 @@
   value: false
   mirror: always
 
+# If true, we'll use the triggering principal rather than the loading principal
+# when doing CORS checks.  This might be needed for WebExtensions to load their
+# own resources from content that they inject into sites.
+- name: content.cors.use_triggering_principal
+  type: bool
+  value: false
+  mirror: always
+
 # Back off timer notification after count.
 # -1 means never.
 - name: content.notify.backoffcount
