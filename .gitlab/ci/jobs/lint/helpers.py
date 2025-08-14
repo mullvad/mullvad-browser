@@ -84,6 +84,10 @@ def get_list_of_changed_files():
     if os.getenv("CI_PIPELINE_SOURCE") == "merge_request_event":
         # For merge requests, the base_reference is the common ancestor between the MR and the target branch
         base_reference = os.getenv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
+        if not base_reference:
+            # Probably because there has been no overall change.
+            # See gitlab.com/gitlab-org/gitlab/-/issues/375047#note_2648459916
+            return []
     else:
         # When not in merge requests, the base reference is the Firefox tag
         base_reference = get_firefox_tag(os.getenv("CI_COMMIT_BRANCH"))
@@ -118,6 +122,8 @@ if __name__ == "__main__":
     if args.get_firefox_tag:
         print(get_firefox_tag(args.get_firefox_tag))
     elif args.get_changed_files:
-        print("\n".join(get_list_of_changed_files()))
+        # Separate the file names with a 0 byte to be parsed by xargs -0. Also
+        # drop the trailing '\n'.
+        print("\0".join(get_list_of_changed_files()), end="")
     else:
         print("No valid option provided.")

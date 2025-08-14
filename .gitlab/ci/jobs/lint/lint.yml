@@ -18,7 +18,7 @@ lint-all:
     - firefox
   script:
     - ./mach configure --without-wasm-sandboxed-libraries --with-base-browser-version=0.0.0
-    - .gitlab/ci/jobs/lint/helpers.py --get-changed-files | xargs -d '\n' ./mach lint -v
+    - .gitlab/ci/jobs/lint/helpers.py --get-changed-files | xargs -0 --no-run-if-empty ./mach lint -v
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     # Run job whenever a commit is merged to a protected branch
