@@ -72,6 +72,12 @@ pref("browser.helperApps.deleteTempFileOnExit", true);
 // Prevent download stuffing / DOS (tor-browser#41764)
 pref("browser.download.enable_spam_prevention", true);
 
+// tor-browser#41131: This is normally gated on
+// privacy.sanitize.sanitizeOnShutdown, which is false by default. But in case
+// users enable it, make sure background tasks are not used for this, since we
+// disable them as well (but at compile time).
+pref("network.cache.shutdown_purge_in_background_task", false);
+
 // Misc privacy: Disk
 pref("signon.rememberSignons", false, locked);
 pref("browser.formfill.enable", false, locked);
