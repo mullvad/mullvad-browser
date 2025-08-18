@@ -2568,8 +2568,8 @@
                 "value": "firefox"
               },
               {
-                "experimentConfig": "search_rich_suggestions",
-                "name": "channel"
+                "name": "channel",
+                "value": "fen"
               }
             ],
             "searchTermParamName": "q"
@@ -2588,14 +2588,35 @@
               }
             ],
             "searchTermParamName": "q"
+          },
+          "visualSearch": {
+            "acceptedContentTypes": [
+              "image/jpeg",
+              "image/gif",
+              "image/png",
+              "image/webp"
+            ],
+            "base": "https://lens.google.com/upload",
+            "displayNameMap": {
+              "default": "Google Lens"
+            },
+            "excludePartnerCodeFromTelemetry": true,
+            "isNewUntil": "2025-10-14",
+            "params": [
+              {
+                "name": "ep",
+                "value": "fcm"
+              }
+            ],
+            "searchTermParamName": "url"
           }
         }
       },
       "id": "7ace4aa1-e762-4f4b-87b9-b23b3c3a930b",
       "identifier": "google",
-      "last_modified": 1753192235006,
+      "last_modified": 1754960960048,
       "recordType": "engine",
-      "schema": 1753191541223,
+      "schema": 1754878540880,
       "variants": [
         {
           "environment": {
@@ -8400,5 +8421,5 @@
       "schema": 1707824831520
     }
   ],
-  "timestamp": 1753710379308
+  "timestamp": 1754960960048
 }

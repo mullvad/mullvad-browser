@@ -1,6 +1,21 @@
 {
   "data": [
     {
+      "schema": 1754878541828,
+      "details": {
+        "bug": "https://bugzilla.mozilla.org/show_bug.cgi?id=1976286",
+        "who": "",
+        "why": "",
+        "name": "",
+        "created": ""
+      },
+      "enabled": true,
+      "subject": "MEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQ=",
+      "pubKeyHash": "RGObk+I5lXFq77dZEeDHMb4KmhyXECijs4uez6wlLyM=",
+      "id": "60fc03da-7c76-4483-976c-707036a4b1a2",
+      "last_modified": 1754943595531
+    },
+    {
       "schema": 1752253362735,
       "details": {
         "bug": "https://bugzilla.mozilla.org/show_bug.cgi?id=1976939",
@@ -25424,5 +25439,5 @@
       "last_modified": 1480349158647
     }
   ],
-  "timestamp": 1752529408928
+  "timestamp": 1754943595531
 }
