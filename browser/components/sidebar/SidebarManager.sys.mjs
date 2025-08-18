@@ -15,7 +15,11 @@ const PINNED_PROMO_PREF = "sidebar.verticalTabs.dragToPinPromo.dismissed";
 // New panels that are ready to be introduced to new sidebar users should be added to this list;
 // ensure your feature flag is enabled at the same time you do this and that its the same value as
 // what you added to .
-const DEFAULT_LAUNCHER_TOOLS = "aichat,syncedtabs,history,bookmarks,opentabs";
+// By default, we only include "bookmarks". Most options are non-functional in
+// Tor Browser. For "history", by default the user will not have any history nor
+// will they accumulate any in permanent private browsing. Though, a user may
+// still customize the sidebar to add "history" back. tor-browser#45169.
+const DEFAULT_LAUNCHER_TOOLS = "bookmarks";
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   BrowserWindowTracker: "resource:///modules/BrowserWindowTracker.sys.mjs",
