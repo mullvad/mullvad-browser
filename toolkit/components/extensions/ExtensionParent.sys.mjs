@@ -1872,14 +1872,17 @@ const DebugUtils = {
  * was received by the message manager. The promise is rejected if the message
  * manager was closed before a message was received.
  *
+ * Accepts an AbortSignal to allow early unregistration of the listeners.
+ *
  * @param {MessageListenerManager} messageManager
  *        The message manager on which to listen for messages.
  * @param {string} messageName
  *        The message to listen for.
+ * @param {AbortSignal} abortSignal
  * @returns {Promise<*>}
  */
-function promiseMessageFromChild(messageManager, messageName) {
-  return new Promise((resolve, reject) => {
+function promiseMessageFromChild(messageManager, messageName, abortSignal) {
+  const promise = new Promise((resolve, reject) => {
     let unregister;
     function listener(message) {
       unregister();
@@ -1897,19 +1900,88 @@ function promiseMessageFromChild(messageManager, messageName) {
     }
     unregister = () => {
       Services.obs.removeObserver(observer, "message-manager-close");
+      abortSignal.removeEventListener("abort", unregister);
       messageManager.removeMessageListener(messageName, listener);
+      messageManager = null;
     };
     messageManager.addMessageListener(messageName, listener);
     Services.obs.addObserver(observer, "message-manager-close");
+    abortSignal.addEventListener("abort", unregister);
   });
+  return promise;
+}
+
+/**
+ * Returns a Promise which rejects if the load in the browser is aborted.
+ * Accepts an AbortSignal to allow early unregistration of the listeners.
+ *
+ * @param {XULBrowserElement} browser
+ * @param {AbortSignal} abortSignal
+ * @returns {Promise<void>} A promise that never resolves, but only rejects.
+ */
+function promiseBrowserStopped(browser, abortSignal) {
+  const { promise, reject } = Promise.withResolvers();
+  let unregister;
+  let listener = {
+    QueryInterface: ChromeUtils.generateQI([
+      "nsIWebProgressListener",
+      "nsISupportsWeakReference",
+    ]),
+
+    onStateChange(webProgress, request, stateFlags, status) {
+      if (
+        webProgress.isTopLevel &&
+        stateFlags & Ci.nsIWebProgressListener.STATE_STOP &&
+        !Components.isSuccessCode(status) &&
+        // Ignore state change triggered by navigating away from about:blank.
+        status !== Cr.NS_BINDING_ABORTED
+      ) {
+        unregister();
+        // Known failures (and test coverage):
+        // - NS_ERROR_ILLEGAL_DURING_SHUTDOWN (test_ext_background_early_quit.js)
+        // - NS_ERROR_FILE_NOT_FOUND (test_ext_background_file_invalid.js)
+        reject(
+          new Error(
+            `Browser load failed: ${ChromeUtils.getXPCOMErrorName(status)}`
+          )
+        );
+      }
+    },
+  };
+
+  unregister = () => {
+    // browser.removeProgressListener throws if browser.webProgress is null.
+    if (browser?.webProgress) {
+      browser.removeProgressListener(listener);
+    }
+    abortSignal.removeEventListener("abort", unregister);
+    listener = null;
+    browser = null;
+  };
+  browser.addProgressListener(listener, Ci.nsIWebProgress.NOTIFY_STATE_WINDOW);
+  abortSignal.addEventListener("abort", unregister);
+  return promise;
 }
 
 // This should be called before browser.loadURI is invoked.
 async function promiseBackgroundViewLoaded(browser) {
-  let { childId } = await promiseMessageFromChild(
+  const abortController = new AbortController();
+  const messagePromise = promiseMessageFromChild(
     browser.messageManager,
-    "Extension:BackgroundViewLoaded"
+    "Extension:BackgroundViewLoaded",
+    abortController.signal
   );
+  const stopPromise = promiseBrowserStopped(browser, abortController.signal);
+
+  let childId;
+  try {
+    // stopPromise only rejects, so a non-rejection is from messagePromise.
+    let message = await Promise.race([messagePromise, stopPromise]);
+    childId = message.childId;
+  } finally {
+    abortController.abort();
+  }
+
   if (childId) {
     return ParentAPIManager.getContextById(childId);
   }

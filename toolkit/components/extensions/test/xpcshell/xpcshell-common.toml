@@ -42,9 +42,13 @@ skip-if = ["os == 'android'"] # Bug 1545439
 
 ["test_ext_background_api_injection.js"]
 
+["test_ext_background_early_quit.js"]
+
 ["test_ext_background_early_shutdown.js"]
 
 ["test_ext_background_empty.js"]
+
+["test_ext_background_file_invalid.js"]
 
 ["test_ext_background_generated_load_events.js"]
 
