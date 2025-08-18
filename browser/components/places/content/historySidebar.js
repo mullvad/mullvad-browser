@@ -90,6 +90,33 @@ window.addEventListener("load", () => {
     bhTooltip.removeAttribute("position")
   );
 
+  // Add a button to close the history sidebar. This should only be visible when
+  // this document is used for the revamped sidebar. See tor-browser#44108.
+  document
+    .getElementById("sidebar-panel-close")
+    .addEventListener("click", () => {
+      window.browsingContext.embedderWindowGlobal.browsingContext.window.SidebarController.toggle(
+        "viewHistorySidebar"
+      );
+    });
+  // Hack to convert the sidebar-menu-history Fluent string's label attribute
+  // into text content.
+  const headingEl = document.getElementById("sidebar-panel-header-history");
+  const updateHeadingText = () => {
+    const label = headingEl.getAttribute("label");
+    if (!label) {
+      return;
+    }
+    headingEl.textContent = label;
+    headingEl.removeAttribute("label");
+  };
+  const headingElObserver = new MutationObserver(updateHeadingText);
+  headingElObserver.observe(headingEl, {
+    attributes: true,
+    attributeFilter: ["label"],
+  });
+  updateHeadingText();
+
   searchHistory("");
 });
 

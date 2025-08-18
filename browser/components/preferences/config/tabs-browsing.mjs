@@ -594,7 +594,9 @@ SettingGroupManager.registerGroups({
       },
       {
         id: "browserLayoutShowSidebar",
-        l10nId: "browser-layout-show-sidebar2",
+        // Update the sidebar description to remove mentioning features that we
+        // don't have in Base Browser. See tor-browser#44159.
+        l10nId: "browser-layout-show-sidebar-limited",
       },
     ],
   },

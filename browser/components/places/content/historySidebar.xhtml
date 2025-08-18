@@ -42,6 +42,9 @@
 
     <html:link rel="localization" href="toolkit/global/textActions.ftl"/>
     <html:link rel="localization" href="browser/places.ftl"/>
+    <!-- Need sidebar-menu-history and sidebar-close-button.
+       - tor-browser#44108 -->
+    <html:link rel="localization" href="browser/sidebarMenu.ftl"/>
   </linkset>
 
 #include placesCommands.inc.xhtml
@@ -55,6 +58,26 @@
 
 #include placesContextMenu.inc.xhtml
 #include bookmarksHistoryTooltip.inc.xhtml
+  <!-- For ESR 140, we want to use this old history sidebar for the revamped
+     - sidebar as well because it does not require the "firefoxview" component.
+     - So we need an internal heading element for this page to be used with the
+     - new sidebar only. We copy this from bookmarksSidebar.xhtml.
+     - See tor-browser#44108. -->
+  <box id="sidebar-panel-header" align="center">
+    <!-- (Mis)use the sidebar-menu-history string, which will set a "label"
+       - attribute, which we will convert to text content in javascript. -->
+    <html:h4
+      id="sidebar-panel-header-history"
+      data-l10n-id="sidebar-menu-history"
+      data-l10n-attrs="label"
+    ></html:h4>
+    <html:moz-button
+        id="sidebar-panel-close"
+        type="icon ghost"
+        iconsrc="chrome://global/skin/icons/close.svg"
+        data-l10n-id="sidebar-close-button">
+    </html:moz-button>
+  </box>
 
   <hbox id="sidebar-search-container">
     <html:moz-input-search id="search-box"
