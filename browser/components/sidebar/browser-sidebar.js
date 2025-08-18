@@ -113,6 +113,9 @@ var SidebarController = {
           gleanEvent: Glean.history.sidebarToggle,
           gleanClickEvent: Glean.sidebar.historyIconClick,
           recordSidebarVersion: true,
+          // In permanent private browsing, the history panel can be opened, but
+          // we hide the sidebar button to control this. tor-browser#43902.
+          visible: !PrivateBrowsingUtils.permanentPrivateBrowsing,
         }),
       ],
       [
@@ -131,6 +134,15 @@ var SidebarController = {
             ? "sidebar-synced-tabs-context-menu"
             : undefined,
           gleanClickEvent: Glean.sidebar.syncedTabsIconClick,
+          // firefoxview is disabled. tor-browser#42037 and tor-browser#43902.
+          // See bugzilla bug 1983505.
+          // NOTE: The menuId and elementId menu items (sidebar switchers)
+          // should be hidden via the `sync-ui-item` class, which will *one*
+          // time hide the menu items via gSync.init.
+          // #sidebar-switcher-tabs is already in the initial browser DOM,
+          // and #menu_tabsSidebar is created during SidebarController.init,
+          // which seems to run prior to gSync.init.
+          visible: false,
         }),
       ],
       [
