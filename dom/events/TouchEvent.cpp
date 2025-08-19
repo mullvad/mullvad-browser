@@ -228,30 +228,35 @@ bool TouchEvent::PrefEnabled(nsIDocShell* aDocShell) {
   } else {
     const int32_t prefValue = StaticPrefs::dom_w3c_touch_events_enabled();
     if (prefValue == 2) {
-      enabled = PlatformSupportsTouch();
+      if (nsContentUtils::ShouldResistFingerprinting(
+              aDocShell, RFPTarget::PointerEvents)) {
+        enabled = SPOOFED_MAX_TOUCH_POINTS != 0;
+      } else {
+        enabled = PlatformSupportsTouch();
 
-      static bool firstTime = true;
-      // The touch screen data seems to be inaccurate in the parent process,
-      // and we really need the crash annotation in child processes.
-      if (firstTime && !XRE_IsParentProcess()) {
-        CrashReporter::RecordAnnotationBool(
-            CrashReporter::Annotation::HasDeviceTouchScreen, enabled);
-        firstTime = false;
-      }
+        static bool firstTime = true;
+        // The touch screen data seems to be inaccurate in the parent process,
+        // and we really need the crash annotation in child processes.
+        if (firstTime && !XRE_IsParentProcess()) {
+          CrashReporter::RecordAnnotationBool(
+              CrashReporter::Annotation::HasDeviceTouchScreen, enabled);
+          firstTime = false;
+        }
 
 #if defined(XP_WIN) || defined(MOZ_WIDGET_GTK)
-      if (enabled && aDocShell) {
-        // APZ might be disabled on this particular widget, in which case
-        // TouchEvent support will also be disabled. Try to detect that.
-        RefPtr<nsPresContext> pc = aDocShell->GetPresContext();
-        if (pc) {
-          nsCOMPtr<nsIWidget> widget = pc->GetRootWidget();
-          if (widget) {
-            enabled &= widget->AsyncPanZoomEnabled();
+        if (enabled && aDocShell) {
+          // APZ might be disabled on this particular widget, in which case
+          // TouchEvent support will also be disabled. Try to detect that.
+          RefPtr<nsPresContext> pc = aDocShell->GetPresContext();
+          if (pc) {
+            nsCOMPtr<nsIWidget> widget = pc->GetRootWidget();
+            if (widget) {
+              enabled &= widget->AsyncPanZoomEnabled();
+            }
           }
         }
-      }
 #endif
+      }
     } else {
       enabled = !!prefValue;
     }
