@@ -248,6 +248,9 @@ pref("security.xfocsp.errorReporting.enabled", false);
 // Added in tor-browser#41496 even though it shuld be already always disabled
 // since we disable MOZ_CRASHREPORTER.
 pref("breakpad.reportURL", "data:");
+// tor-browser#43985: Disable captcha detector code that is just used upstream
+// for identifying captchas with the purpose of sending telemetry about it.
+pref("captchadetection.actor.enabled", false);
 #ifdef XP_WIN
 // Defense-in-depth: ensure that the Windows default browser agent will
 // not ping Mozilla if it is somehow present (we omit it at build time).
