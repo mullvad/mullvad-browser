@@ -155,10 +155,11 @@ export const CheckRecipeResult = {
     };
   },
 
-  UnsupportedFeatures() {
+  UnsupportedFeatures(featureIds) {
     return {
       ok: false,
       reason: lazy.NimbusTelemetry.ValidationFailureReason.UNSUPPORTED_FEATURES,
+      featureIds,
     };
   },
 };
@@ -795,7 +796,7 @@ export class EnrollmentsContext {
       // the background updater encounters a recipe with features it does not
       // support, which will happen with most recipes. Reporting these errors
       // results in an inordinate amount of telemetry being submitted.
-      return CheckRecipeResult.UnsupportedFeatures();
+      return CheckRecipeResult.UnsupportedFeatures(unsupportedFeatureIds);
     }
 
     if (recipe.isEnrollmentPaused) {

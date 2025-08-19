@@ -686,6 +686,7 @@ add_task(async function test_updateRecipes_appId() {
     manager.onRecipe.calledOnceWith(recipe, "rs-loader", {
       ok: false,
       reason: "unsupported-feature",
+      featureIds: ["backgroundTaskMessage"],
     }),
     "Should call onRecipe with unsupported-feature"
   );
