@@ -88,126 +88,74 @@ add_task(async function test_searchConfig_google() {
   await test.run();
 });
 
-add_task(async function test_searchConfig_google_with_pref_param() {
-  // Test a couple of configurations with a preference parameter set up.
-  const TEST_DATA = [
-    {
-      locale: "en-US",
-      region: "US",
-      pref: "google_channel_us",
-      // On ESR, the channel parameter is always `entpr`
-      expected:
-        SearchUtils.MODIFIED_APP_CHANNEL == "esr" ? "entpr" : "us_param",
-    },
-    {
-      locale: "en-US",
-      region: "GB",
-      pref: "google_channel_row",
-      // On ESR, the channel parameter is always `entpr`
-      expected:
-        SearchUtils.MODIFIED_APP_CHANNEL == "esr" ? "entpr" : "row_param",
-    },
-  ];
+// We skip this test on ESR as on the ESR channel, we don't set up nimbus
+// because we are not using any experiments there - the channel pref is used
+// for enterprise, rather than the google_channel_* experiment options.
+add_task(
+  { skip_if: () => SearchUtils.MODIFIED_APP_CHANNEL == "esr" },
+  async function test_searchConfig_google_with_nimbus() {
+    let sandbox = sinon.createSandbox();
+    // Test a couple of configurations with a preference parameter set up.
+    const TEST_DATA = [
+      {
+        locale: "en-US",
+        region: "US",
+        expected: "nimbus_us_param",
+      },
+      {
+        locale: "en-US",
+        region: "GB",
+        expected: "nimbus_row_param",
+      },
+    ];
 
-  const defaultBranch = Services.prefs.getDefaultBranch(
-    SearchUtils.BROWSER_SEARCH_PREF
-  );
-  for (const testData of TEST_DATA) {
-    defaultBranch.setCharPref("param." + testData.pref, testData.expected);
+    Assert.ok(
+      NimbusFeatures.searchConfiguration.onUpdate.called,
+      "Should register an update listener for Nimbus experiments"
+    );
+    // Stub getVariable to populate the cache with our expected data
+    sandbox.stub(NimbusFeatures.searchConfiguration, "getVariable").returns([
+      { key: "google_channel_us", value: "nimbus_us_param" },
+      { key: "google_channel_row", value: "nimbus_row_param" },
+    ]);
+    // Set the pref cache with Nimbus values
+    NimbusFeatures.searchConfiguration.onUpdate.firstCall.args[0]();
+
+    for (const testData of TEST_DATA) {
+      info(`Checking region ${testData.region}, locale ${testData.locale}`);
+      const { engines } = await test._getEngines(
+        testData.region,
+        testData.locale
+      );
+
+      Assert.ok(
+        engines[0].identifier.startsWith("google"),
+        "Should have the correct engine"
+      );
+
+      const submission = engines[0].getSubmission("test", URLTYPE_SEARCH_HTML);
+      Assert.ok(
+        NimbusFeatures.searchConfiguration.ready.called,
+        "Should wait for Nimbus to get ready"
+      );
+      Assert.ok(
+        NimbusFeatures.searchConfiguration.getVariable,
+        "Should call NimbusFeatures.searchConfiguration.getVariable to populate the cache"
+      );
+      Assert.ok(
+        submission.uri.query
+          .split("&")
+          .includes("channel=" + testData.expected),
+        "Should be including the correct preference parameter for the engine"
+      );
+    }
+
+    sandbox.restore();
   }
+);
 
-  for (const testData of TEST_DATA) {
-    info(`Checking region ${testData.region}, locale ${testData.locale}`);
-    const { engines } = await test._getEngines(
-      testData.region,
-      testData.locale
-    );
-
-    Assert.ok(
-      engines[0].identifier.startsWith("google"),
-      "Should have the correct engine"
-    );
-    console.log(engines[0]);
-
-    const submission = engines[0].getSubmission("test", URLTYPE_SEARCH_HTML);
-    Assert.ok(
-      submission.uri.query.split("&").includes("channel=" + testData.expected),
-      "Should be including the correct preference parameter for the engine"
-    );
-  }
-
-  // Reset the pref values for next tests
-  for (const testData of TEST_DATA) {
-    defaultBranch.setCharPref("param." + testData.pref, "");
-  }
-});
-
-add_task(async function test_searchConfig_google_with_nimbus() {
-  let sandbox = sinon.createSandbox();
-  // Test a couple of configurations with a preference parameter set up.
-  const TEST_DATA = [
-    {
-      locale: "en-US",
-      region: "US",
-      // On ESR, the channel parameter is always `entpr`
-      expected:
-        SearchUtils.MODIFIED_APP_CHANNEL == "esr" ? "entpr" : "nimbus_us_param",
-    },
-    {
-      locale: "en-US",
-      region: "GB",
-      // On ESR, the channel parameter is always `entpr`
-      expected:
-        SearchUtils.MODIFIED_APP_CHANNEL == "esr"
-          ? "entpr"
-          : "nimbus_row_param",
-    },
-  ];
-
-  Assert.ok(
-    NimbusFeatures.searchConfiguration.onUpdate.called,
-    "Should register an update listener for Nimbus experiments"
-  );
-  // Stub getVariable to populate the cache with our expected data
-  sandbox.stub(NimbusFeatures.searchConfiguration, "getVariable").returns([
-    { key: "google_channel_us", value: "nimbus_us_param" },
-    { key: "google_channel_row", value: "nimbus_row_param" },
-  ]);
-  // Set the pref cache with Nimbus values
-  NimbusFeatures.searchConfiguration.onUpdate.firstCall.args[0]();
-
-  for (const testData of TEST_DATA) {
-    info(`Checking region ${testData.region}, locale ${testData.locale}`);
-    const { engines } = await test._getEngines(
-      testData.region,
-      testData.locale
-    );
-
-    Assert.ok(
-      engines[0].identifier.startsWith("google"),
-      "Should have the correct engine"
-    );
-    console.log(engines[0]);
-
-    const submission = engines[0].getSubmission("test", URLTYPE_SEARCH_HTML);
-    Assert.ok(
-      NimbusFeatures.searchConfiguration.ready.called,
-      "Should wait for Nimbus to get ready"
-    );
-    Assert.ok(
-      NimbusFeatures.searchConfiguration.getVariable,
-      "Should call NimbusFeatures.searchConfiguration.getVariable to populate the cache"
-    );
-    Assert.ok(
-      submission.uri.query.split("&").includes("channel=" + testData.expected),
-      "Should be including the correct preference parameter for the engine"
-    );
-  }
-
-  sandbox.restore();
-});
-
-add_task(async function test_searchConfig_google_enterprise() {
+async function assertEnterpriseParameter(useEmptyPolicy) {
+  // Test a couple of configurations.
   const TEST_DATA = [
     {
       locale: "en-US",
@@ -220,11 +168,15 @@ add_task(async function test_searchConfig_google_enterprise() {
   ];
 
   Services.search.wrappedJSObject.reset();
-  await EnterprisePolicyTesting.setupPolicyEngineWithJson({
-    policies: {
-      BlockAboutSupport: true,
-    },
-  });
+  await EnterprisePolicyTesting.setupPolicyEngineWithJson(
+    useEmptyPolicy
+      ? {}
+      : {
+          policies: {
+            BlockAboutSupport: true,
+          },
+        }
+  );
   await Services.search.init();
 
   for (const testData of TEST_DATA) {
@@ -233,15 +185,31 @@ add_task(async function test_searchConfig_google_enterprise() {
       testData.region,
       testData.locale
     );
+
     Assert.ok(
       engines[0].identifier.startsWith("google"),
       "Should have the correct engine"
     );
+
     const submission = engines[0].getSubmission("test", URLTYPE_SEARCH_HTML);
-    info(submission.uri.query);
     Assert.ok(
       submission.uri.query.split("&").includes("channel=entpr"),
-      "Should be including the enterprise parameter for the engine"
+      "Should be including the correct preference parameter for the engine"
     );
   }
+}
+
+// On ESR the channel parameter should always be `entpr`, regardless of if
+// enterprise policies are set up or not.
+add_task(
+  { skip_if: () => SearchUtils.MODIFIED_APP_CHANNEL != "esr" },
+  async function test_searchConfig_google_enterprise_on_esr() {
+    await assertEnterpriseParameter(true);
+  }
+);
+
+// If there's a policy set, we should also have the channel=entpr parameter
+// set.
+add_task(async function test_searchConfig_google_enterprise_policy() {
+  await assertEnterpriseParameter(false);
 });
