@@ -4441,9 +4441,8 @@ with only_when(~artifact_builds):
 
     @depends("--with-onnx-runtime")
     def need_boostrap_onnxruntime(with_onnx_runtime):
-        return (with_onnx_runtime and len(with_onnx_runtime) == 0) or (
-            with_onnx_runtime.origin == "default"
-        )
+        # tor-browser#44412: Prevent ONNX from ever getting bootstrapped.
+        return False
 
     @depends(
         "--with-onnx-runtime",
