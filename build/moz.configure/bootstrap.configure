@@ -3,6 +3,29 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 option(
+    "--with-tor-browser-build-out",
+    env="TOR_BROWSER_BUILD_OUT",
+    nargs=1,
+    default="https://tb-build-06.torproject.org/~tb-builder/tor-browser-build/out",
+    help="URL pointing to a Tor Browser Build out folder, served over HTTP[S].",
+)
+
+
+@depends("--with-tor-browser-build-out")
+def tor_browser_build_out(value):
+    if value:
+        return value[0]
+
+
+option(
+    "--enable-tor-browser-build-only-bootstrap",
+    env="TBB_ONLY_BOOTSTRAP",
+    default=False,
+    help="Flag that disables bootstrapping any artifact from Mozilla's Taskcluster. Will only bootstrap artifacts from tor-browser-build.",
+)
+
+
+option(
     env="MOZ_FETCHES_DIR",
     nargs=1,
     when=moz_automation,
@@ -121,9 +144,10 @@ def bootstrap_toolchain_tasks(host):
 def bootstrap_path(path, **kwargs):
     when = kwargs.pop("when", None)
     allow_failure = kwargs.pop("allow_failure", None)
+    no_unpack = kwargs.pop("no_unpack", False)
     if kwargs:
         configure_error(
-            "bootstrap_path only takes `when` and `allow_failure` as a keyword argument"
+            "bootstrap_path only takes `when`, `allow_failure` and `no_unpack` as keyword arguments"
         )
 
     @depends(
@@ -135,11 +159,17 @@ def bootstrap_path(path, **kwargs):
         build_environment,
         dependable(path),
         dependable(allow_failure),
+        dependable(no_unpack),
+        tor_browser_build_out,
+        "--enable-tor-browser-build-only-bootstrap",
+        target,
         when=when,
     )
     @imports("os")
+    @imports("re")
     @imports("subprocess")
     @imports("sys")
+    @imports("mozbuild.tbbutils")
     @imports(_from="mozbuild.dirutils", _import="ensureParentDir")
     @imports(_from="importlib", _import="import_module")
     @imports(_from="shutil", _import="rmtree")
@@ -154,6 +184,10 @@ def bootstrap_path(path, **kwargs):
         build_env,
         path,
         allow_failure,
+        no_unpack,
+        tor_browser_build_out,
+        tbb_only_bootstrap,
+        target,
     ):
         if not path:
             return
@@ -163,6 +197,79 @@ def bootstrap_path(path, **kwargs):
         # weird location.
         if path_parts[0] == "clang-tools":
             path_prefix = path_parts.pop(0)
+
+        # Small hack because extensions are inside the browser folder.
+        if path_parts[0] in ("noscript",):
+            path_prefix = "browser"
+
+        def try_tbb_bootstrap(exists):
+            if not tor_browser_build_out:
+                return False
+
+            # Tor browser build doesn't have artifacts for all targets supported
+            # by the Firefox build system. When this is empty it means we are
+            # building for a platform which tbb doesn't support.
+            if not target.tor_browser_build_alias:
+                return False
+
+            artifact = mozbuild.tbbutils.get_artifact_name(path_parts[0], tasks.prefix)
+            if not artifact:
+                log.info("%s is not mapped to a tbb artifact", path_parts[0])
+                return False
+
+            artifact_path = mozbuild.tbbutils.get_artifact_path(
+                tor_browser_build_out,
+                artifact,
+                target,
+                prefix=path_prefix,
+                log=log.warning,
+            )
+            if not artifact_path:
+                log.info("no path found in tbb/out for %s", artifact)
+                return False
+
+            artifact_index = mozbuild.tbbutils.get_artifact_index(artifact_path)
+            index_file = os.path.join(toolchains_base_dir, "indices", artifact)
+            try:
+                with open(index_file) as fh:
+                    index = fh.read().strip()
+            except Exception:
+                index = None
+            if index == artifact_index and exists:
+                log.debug("%s is up-to-date", artifact)
+                return True
+
+            command = ["artifact", "toolchain", "--from-url", artifact_path]
+
+            if no_unpack:
+                command.append("--no-unpack")
+
+            # Note to rebasers:
+            # From here on, it's a slightly modified copy/paste
+            # from the end of the try_bootstrap function
+            log.info(
+                "%s bootstrapped toolchain from TBB in %s",
+                "Updating" if exists else "Installing",
+                os.path.join(toolchains_base_dir, path_prefix, artifact),
+            )
+            os.makedirs(os.path.join(toolchains_base_dir, path_prefix), exist_ok=True)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    os.path.join(build_env.topsrcdir, "mach"),
+                    "--log-no-times",
+                ]
+                + command,
+                cwd=os.path.join(toolchains_base_dir, path_prefix),
+                check=not allow_failure,
+            )
+            if proc.returncode != 0 and allow_failure:
+                return False
+            ensureParentDir(index_file)
+            with open(index_file, "w") as fh:
+                fh.write(artifact_index)
+
+            return True
 
         def try_bootstrap(exists):
             if not tasks:
@@ -247,6 +354,23 @@ def bootstrap_path(path, **kwargs):
                     + command["arguments"]
                     + [path_parts[0]]
                 )
+
+                # BIG HACK: Replace the Apple CDN link with our mirror,
+                # otherwise bootstrapping will fail whenever a new MacOS SDK
+                # is released, since Apple seems to retire the previous link everytime.
+                # Our mirror serves an _unmodified_ version of the file.
+                macosx_sdk_match = re.match(r"^MacOSX(.*)\.sdk$", path_parts[0])
+                if macosx_sdk_match:
+                    version = macosx_sdk_match.group(1)
+                    command = [
+                        re.sub(
+                            r"https://swcdn\.apple\.com/.*/CLTools_macOSNMOS_SDK\.pkg",
+                            f"https://build-sources.tbb.torproject.org/CLTools_macOSNMOS_SDK-{version}.pkg",
+                            c,
+                        )
+                        for c in command
+                    ]
+
                 # Clean up anything that was bootstrapped previously before going
                 # forward. In other cases, that's taken care of by mach artifact toolchain.
                 rmtree(
@@ -287,9 +411,10 @@ def bootstrap_path(path, **kwargs):
             try:
                 # With --enable-bootstrap=no-update, we don't `try_bootstrap`, except
                 # when the toolchain can't be found.
-                if (
-                    "no-update" not in enable_bootstrap or not exists
-                ) and not try_bootstrap(exists):
+                if ("no-update" not in enable_bootstrap or not exists) and not (
+                    try_tbb_bootstrap(exists)
+                    or (not tbb_only_bootstrap and try_bootstrap(exists))
+                ):
                     # If there aren't toolchain artifacts to use for this build,
                     # don't return a path.
                     return None
