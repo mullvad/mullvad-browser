@@ -123,6 +123,9 @@ subsuite = "mozbuild"
 
 ["test_site_dependency_extractor.py"]
 
+["test_tbbutils.py"]
+subsuite = "base-browser"
+
 ["test_telemetry.py"]
 
 ["test_telemetry_settings.py"]
