@@ -229,6 +229,7 @@ check_prog("WGET", ("wget",), allow_missing=True)
 
 
 include("build/moz.configure/toolchain.configure", when="--enable-compile-environment")
+include("build/moz.configure/basebrowser-resources.configure")
 
 include("build/moz.configure/pkg.configure")
 include("build/moz.configure/memory.configure", when="--enable-compile-environment")

@@ -2,11 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import errno
 import itertools
+import logging
 import os
 import time
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
+from pathlib import Path
 
 import mozpack.path as mozpath
 from mach.mixin.logging import LoggingMixin
@@ -239,6 +242,72 @@ class BuildBackend(LoggingMixin):
             with open(mozpath.join(dir, ".purgecaches"), "w") as f:
                 f.write("\n")
 
+    def _setup_tor_browser_environment(self, config):
+        app = config.substs["MOZ_BUILD_APP"]
+
+        noscript_target_filename = "{73a6fe31-595d-460b-a920-fcc0f8843232}.xpi"
+        noscript_location = Path(config.substs["NOSCRIPT"])
+
+        def _infallible_symlink(src, dst):
+            try:
+                os.symlink(src, dst)
+            except OSError as e:
+                if e.errno == errno.EEXIST:
+                    # If the symlink already exists, remove it and try again.
+                    os.remove(dst)
+                    os.symlink(src, dst)
+                else:
+                    return
+
+        if app == "browser":
+            tbdir = Path(config.topobjdir) / "dist" / "bin"
+
+            if config.substs.get("OS_TARGET") == "Darwin":
+                tbdir = next(tbdir.glob("*.app"))
+                paths = {
+                    "docs": tbdir / "Contents/Resources/TorBrowser/Docs",
+                    "exts": tbdir / "Contents/Resources/distribution/extensions",
+                    "fonts": tbdir / "Resources/fonts",
+                }
+            else:
+                paths = {
+                    "docs": tbdir / "TorBrowser/Docs",
+                    "exts": tbdir / "distribution/extensions",
+                    "fonts": tbdir / "fonts",
+                }
+
+            fonts_location = Path(config.substs["TOR_BROWSER_FONTS"])
+            if fonts_location.is_dir():
+                self.log(
+                    logging.INFO,
+                    "_setup_tor_browser_environment",
+                    {
+                        "fonts_location": str(fonts_location),
+                        "fonts_target": str(paths["fonts"]),
+                    },
+                    "Creating symlink for fonts files from {fonts_location} to {fonts_target}",
+                )
+
+                for file in fonts_location.iterdir():
+                    target = paths["fonts"] / file.name
+                    _infallible_symlink(file, target)
+
+            # Set up NoScript extension
+            if noscript_location.is_file():
+                noscript_target = paths["exts"] / noscript_target_filename
+                self.log(
+                    logging.INFO,
+                    "_setup_tor_browser_environment",
+                    {
+                        "noscript_location": str(noscript_location),
+                        "noscript_target": str(noscript_target),
+                    },
+                    "Creating symlink for NoScript from {noscript_location} to {noscript_target}",
+                )
+
+                paths["exts"].mkdir(parents=True, exist_ok=True)
+                _infallible_symlink(noscript_location, noscript_target)
+
     def post_build(self, config, output, jobs, verbose, status):
         """Called late during 'mach build' execution, after `build(...)` has finished.
 
@@ -256,6 +325,9 @@ class BuildBackend(LoggingMixin):
         non-zero exit code.
         """
         self._write_purgecaches(config)
+
+        if status == 0:
+            self._setup_tor_browser_environment(config)
 
         return status
 

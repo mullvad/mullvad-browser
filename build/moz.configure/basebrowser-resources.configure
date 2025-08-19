@@ -1,0 +1,88 @@
+# Helpers
+# -------------------------------------------------
+
+
+@depends(build_project)
+def is_desktop_build(build_project):
+    return build_project == "browser"
+
+
+# Bootstrap resources
+# -------------------------------------------------
+
+
+option(
+    "--with-noscript",
+    env="NOSCRIPT",
+    nargs=1,
+    default=None,
+    help="Path to noscript .xpi extension archive.",
+)
+
+
+@depends(
+    "--with-noscript",
+    mozbuild_state_path,
+    bootstrap_path(
+        "noscript", no_unpack=True, when=depends("--with-noscript")(lambda x: not x)
+    ),
+)
+@checking("for noscript")
+@imports(_from="pathlib", _import="Path")
+def noscript(value, mozbuild_state_path, _bootstrapped):
+    if value:
+        path = Path(value[0])
+        if path.is_file() and path.suffix == ".xpi":
+            return value[0]
+        else:
+            die("--with-noscript must be an existing .xpi file")
+
+    bootstrapped_location = Path(mozbuild_state_path) / "browser"
+    for file in bootstrapped_location.glob(f"*.xpi"):
+        if "noscript" in file.name:
+            return str(bootstrapped_location / file)
+
+    # noscript is not required for building.
+    return None
+
+
+set_config("NOSCRIPT", noscript)
+
+
+option(
+    "--with-tor-browser-fonts",
+    env="TOR_BROWSER_FONTS",
+    nargs=1,
+    default=None,
+    help="Path to location of fonts directory.",
+)
+
+
+@depends(
+    "--with-tor-browser-fonts",
+    mozbuild_state_path,
+    bootstrap_path(
+        "fonts",
+        when=depends("--with-tor-browser-fonts")(lambda x: not x) & is_desktop_build,
+    ),
+)
+@checking("for tor-browser fonts directory")
+@imports(_from="pathlib", _import="Path")
+def tor_browser_fonts(value, mozbuild_state_path, _bootstrapped):
+    if value:
+        path = Path(value[0])
+        # TODO: Do a more thorough check on the directory.
+        if path.is_dir():
+            return value[0]
+        else:
+            die("--with-tor-browser-fonts must point to a real directory.")
+
+    bootstrapped_location = Path(mozbuild_state_path) / "fonts"
+    if bootstrapped_location.is_dir():
+        return str(bootstrapped_location)
+
+    # tor browser fonts directory is not required for building.
+    return None
+
+
+set_config("TOR_BROWSER_FONTS", tor_browser_fonts)

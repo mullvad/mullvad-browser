@@ -245,6 +245,12 @@ def artifact_clear_cache(command_context, tree=None, job=None, verbose=False):
     help="Download toolchain artifact from a given task.",
 )
 @CommandArgument(
+    "--from-url",
+    metavar="URL",
+    nargs="+",
+    help="Download toolchain artifact from an arbitrary address.",
+)
+@CommandArgument(
     "--tooltool-manifest",
     metavar="MANIFEST",
     help="Explicit tooltool manifest to process",
@@ -273,6 +279,7 @@ def artifact_toolchain(
     skip_cache=False,
     from_build=(),
     from_task=(),
+    from_url=[],
     tooltool_manifest=None,
     no_unpack=False,
     retry=0,
@@ -503,6 +510,13 @@ def artifact_toolchain(
             return 1
         record = ArtifactRecord(task_id, name)
         records[record.filename] = record
+
+    if from_url:
+        for file in from_url:
+            record = DownloadRecord(
+                file, file.rsplit("/", 1)[-1], None, None, None, True
+            )
+            records[record.filename] = record
 
     for record in records.values():
         command_context.log(

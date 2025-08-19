@@ -1029,14 +1029,29 @@ def unpack_file(filename):
     """Untar `filename`, assuming it is uncompressed or compressed with bzip2,
     xz, gzip, zst, or unzip a zip file. The file is assumed to contain a single
     directory with a name matching the base of the given filename.
-    Xz support is handled by shelling out to 'tar'."""
+    Xz support is handled by shelling out to 'tar'.
+
+    tor-browser#41564 - For supporting tor-browser-build artifacts that contain
+    multiple directories, the archive is extracted into a directory with the
+    same name as the base of the filename. This modification is only applied to
+    tar archives, because that is all that was necessary.
+    """
     if os.path.isfile(filename) and tarfile.is_tarfile(filename):
         tar_file, zip_ext = os.path.splitext(filename)
         base_file, tar_ext = os.path.splitext(tar_file)
         clean_path(base_file)
         log.info('untarring "%s"' % filename)
         with TarFile.open(filename) as tar:
-            safe_extract(tar)
+            top_level_directories = set()
+            for name in tar.getnames():
+                dir = name.split("/", 1)[0]
+                top_level_directories.add(dir)
+            if len(top_level_directories) == 1:
+                safe_extract(tar)
+            else:
+                safe_extract(
+                    tar, path=os.path.join(os.path.dirname(filename), base_file)
+                )
     elif os.path.isfile(filename) and filename.endswith(".tar.zst"):
         import zstandard
 
