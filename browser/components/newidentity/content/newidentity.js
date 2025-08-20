@@ -513,17 +513,36 @@ ChromeUtils.defineLazyGetter(this, "NewIdentityButton", () => {
         const prefConfirm = "browser.new_identity.confirm_newnym";
         const shouldConfirm = Services.prefs.getBoolPref(prefConfirm, true);
         if (shouldConfirm) {
-          const params = {
-            confirmed: false,
-            neverAskAgain: false,
-          };
-          await window.gDialogBox.open(
-            "chrome://browser/content/newIdentityDialog.xhtml",
-            params
+          const [titleString, bodyString, checkboxString, restartString] =
+            await document.l10n.formatValues([
+              { id: "new-identity-dialog-title" },
+              { id: "new-identity-dialog-description" },
+              { id: "restart-warning-dialog-do-not-warn-checkbox" },
+              { id: "restart-warning-dialog-restart-button" },
+            ]);
+          const flags =
+            Services.prompt.BUTTON_POS_0 *
+              Services.prompt.BUTTON_TITLE_IS_STRING +
+            Services.prompt.BUTTON_POS_0_DEFAULT +
+            Services.prompt.BUTTON_DEFAULT_IS_DESTRUCTIVE +
+            Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL;
+          const propBag = await Services.prompt.asyncConfirmEx(
+            window.browsingContext,
+            Services.prompt.MODAL_TYPE_INTERNAL_WINDOW,
+            titleString,
+            bodyString,
+            flags,
+            restartString,
+            null,
+            null,
+            checkboxString,
+            false
           );
-          Services.prefs.setBoolPref(prefConfirm, !params.neverAskAgain);
-          if (!params.confirmed) {
+          if (propBag.get("buttonNumClicked") !== 0) {
             return;
+          }
+          if (propBag.get("checked")) {
+            Services.prefs.setBoolPref(prefConfirm, false);
           }
         }
 
