@@ -418,21 +418,20 @@ ChromeUtils.defineLazyGetter(this, "NewIdentityButton", () => {
             tbl.onLocationChange = (...args) => {
               tbl.onLocationChange = onLocationChange;
               tbl.onLocationChange(...args);
-              let displayAddress;
-              try {
-                const url = new URL(homeURL);
-                displayAddress = url.hostname;
-                if (!displayAddress) {
-                  // no host, use full address and truncate if too long
-                  const MAX_LEN = 32;
-                  displayAddress = url.href;
-                  if (displayAddress.length > MAX_LEN) {
-                    displayAddress = `${displayAddress.substring(0, MAX_LEN)}…`;
-                  }
-                }
-              } catch (e) {
+              const url = URL.parse(homeURL);
+              if (!url) {
                 // malformed URL, bail out
                 return;
+              }
+
+              let displayAddress = url.hostname;
+              if (!displayAddress) {
+                // no host, use full address and truncate if too long
+                const MAX_LEN = 32;
+                displayAddress = url.href;
+                if (displayAddress.length > MAX_LEN) {
+                  displayAddress = `${displayAddress.substring(0, MAX_LEN)}…`;
+                }
               }
               const callback = () => {
                 Services.prefs.setStringPref(trustedHomePref, homeURL);
