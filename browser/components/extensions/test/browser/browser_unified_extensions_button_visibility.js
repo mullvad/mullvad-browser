@@ -102,24 +102,43 @@ add_task(async function test_delay_hide_button_while_mouse_is_on_toolbar() {
   const win = await BrowserTestUtils.openNewBrowserWindow();
 
   resetExtensionsButtonTelemetry();
-
-  const navbar = win.document.getElementById("nav-bar");
-  navbar.dispatchEvent(new win.CustomEvent("mouseenter"));
-
-  // The (user) intent of the following is to hide the button, but we shall
-  // override that intent temporarily while we detect the mouse as being on
-  // the toolbar, to prevent the interface from shifting.
   hideButtonWithPref();
 
-  info("Extensions button should immediately be hidden in another window");
+  const navbar = win.document.getElementById("nav-bar");
+  navbar.dispatchEvent(new win.MouseEvent("mouseover"));
+  win.gUnifiedExtensions.updateButtonVisibility();
+
+  info("Mouse on navbar does not show the button");
+  win.gUnifiedExtensions.updateButtonVisibility();
+  assertExtensionsButtonHidden(win);
+
+  info("Simulate button being visible while the mouse is on the toolbar");
+  // Here we artificially show the button because updateButtonVisibility()
+  // only looks at the mouseover state if the button is visible. Although the
+  // user intent is for the button to be hidden (due to hideButtonWithPref), we
+  // override that intent temporarily while we detect the mouse as being on
+  // the toolbar, to prevent the interface from shifting.
+  win.gUnifiedExtensions.button.hidden = false;
+  win.gUnifiedExtensions.updateButtonVisibility();
+  // Note: the assertExtensionsButtonVisible call below checks more than just
+  // the button.hidden flag, so if the above is too artificial and does not
+  // change the button, then assertExtensionsButtonVisible(win) will fail.
+
+  info("Extensions button should still be hidden in another window");
   assertExtensionsButtonHidden(window);
 
   info("Extensions button should still be shown while mouse is on toolbar");
   assertExtensionsButtonVisible(win);
 
-  navbar.dispatchEvent(new win.CustomEvent("mouseleave"));
+  info("Extensions button should still be shown when mouse moves over toolbar");
+  // Some other random element on the toolbar, still within navbar.
+  const relatedTarget = navbar.querySelector("#urlbar");
+  ok(relatedTarget, "Sanity check: Has other element within navbar");
+  navbar.dispatchEvent(new win.MouseEvent("mouseout", { relatedTarget }));
+  assertExtensionsButtonVisible(win);
 
   info("Extensions button should hide after the mouse goes off the toolbar");
+  navbar.dispatchEvent(new win.MouseEvent("mouseout"));
   assertExtensionsButtonHidden(win);
 
   // Prolonging the button visibility state by mouse hovering does not count
