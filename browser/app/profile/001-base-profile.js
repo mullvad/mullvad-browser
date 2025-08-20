@@ -279,6 +279,8 @@ pref("privacy.trackingprotection.annotate_channels", false);
 pref("privacy.trackingprotection.cryptomining.enabled", false);
 pref("privacy.trackingprotection.fingerprinting.enabled", false);
 pref("privacy.trackingprotection.socialtracking.enabled", false);
+// tor-browser#43986: Explicitly disable bounce tracking protection
+pref("privacy.bounceTrackingProtection.mode", 0);
 pref("privacy.socialtracking.block_cookies.enabled", false);
 pref("privacy.annotate_channels.strict_list.enabled", false);
 // tor-browser#43178: for defense-in-depth, avoid remote overrides to FPP.
