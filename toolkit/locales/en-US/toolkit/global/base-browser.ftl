@@ -63,10 +63,6 @@ toolbar-new-identity =
 
 new-identity-dialog-title = Reset your identity?
 new-identity-dialog-description = { -brand-short-name } will close all windows and tabs. All website sessions will be lost.
-new-identity-dialog-never-ask-checkbox =
-    .label = Never ask me again
-new-identity-dialog-confirm =
-    .label = Restart { -brand-short-name }
 
 ## New identity: blocked home page notification.
 
