@@ -76,9 +76,9 @@ def support_vcs_checkout(config, job, taskdesc):
         geckodir = f"{checkoutdir}/src"
         if "aarch64" in job["worker-type"] or "a64" in job["worker-type"]:
             # arm64 instances on azure don't support local ssds
-            hgstore = "c:/hg-shared"
+            hgstore = f"{checkoutdir}/hg-store"
         else:
-            hgstore = "d:/hg-shared"
+            hgstore = "y:/hg-shared"
     elif is_docker:
         checkoutdir = "{workdir}/checkouts".format(**job["run"])
         geckodir = f"{checkoutdir}/gecko"
