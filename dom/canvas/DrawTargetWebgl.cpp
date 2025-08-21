@@ -2322,12 +2322,15 @@ bool SharedContextWebgl::DrawRectAccel(
     rectXform.PreMultiply(*aRectXform);
   }
 
-  if (aOptions.mCompositionOp == CompositionOp::OP_SOURCE && aTransformed &&
-      aClipped &&
-      (HasClipMask() || !rectXform.PreservesAxisAlignedRectangles() ||
-       !rectXform.TransformBounds(aRect).Contains(Rect(mClipAARect)) ||
+  if (aOptions.mCompositionOp == CompositionOp::OP_SOURCE && aClipped &&
+      (aVertexRange ||
+       !(aTransformed
+             ? rectXform.PreservesAxisAlignedRectangles() &&
+                   rectXform.TransformBounds(aRect).Contains(mClipAARect)
+             : aRect.IsEqualEdges(Rect(mClipRect)) ||
+                   aRect.Contains(mClipAARect)) ||
        (aPattern.GetType() == PatternType::SURFACE &&
-        !IsAlignedRect(aTransformed, rectXform, aRect)))) {
+        (HasClipMask() || !IsAlignedRect(false, Matrix(), mClipAARect))))) {
     // Clear outside the mask region for masks that are not bounded by clip.
     return DrawRectAccel(Rect(mClipRect), ColorPattern(DeviceColor(0, 0, 0, 0)),
                          DrawOptions(1.0f, CompositionOp::OP_SOURCE,
