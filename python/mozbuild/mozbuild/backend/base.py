@@ -246,7 +246,7 @@ class BuildBackend(LoggingMixin):
         app = config.substs["MOZ_BUILD_APP"]
 
         noscript_target_filename = "{73a6fe31-595d-460b-a920-fcc0f8843232}.xpi"
-        noscript_location = Path(config.substs["NOSCRIPT"])
+        noscript_location = config.substs.get("NOSCRIPT")
 
         def _infallible_symlink(src, dst):
             try:
@@ -276,30 +276,30 @@ class BuildBackend(LoggingMixin):
                     "fonts": tbdir / "fonts",
                 }
 
-            fonts_location = Path(config.substs["TOR_BROWSER_FONTS"])
-            if fonts_location.is_dir():
+            fonts_location = config.substs.get("TOR_BROWSER_FONTS")
+            if fonts_location:
                 self.log(
                     logging.INFO,
                     "_setup_tor_browser_environment",
                     {
-                        "fonts_location": str(fonts_location),
+                        "fonts_location": fonts_location,
                         "fonts_target": str(paths["fonts"]),
                     },
                     "Creating symlink for fonts files from {fonts_location} to {fonts_target}",
                 )
 
-                for file in fonts_location.iterdir():
+                for file in Path(fonts_location).iterdir():
                     target = paths["fonts"] / file.name
                     _infallible_symlink(file, target)
 
             # Set up NoScript extension
-            if noscript_location.is_file():
+            if noscript_location:
                 noscript_target = paths["exts"] / noscript_target_filename
                 self.log(
                     logging.INFO,
                     "_setup_tor_browser_environment",
                     {
-                        "noscript_location": str(noscript_location),
+                        "noscript_location": noscript_location,
                         "noscript_target": str(noscript_target),
                     },
                     "Creating symlink for NoScript from {noscript_location} to {noscript_target}",
