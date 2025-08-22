@@ -53,7 +53,6 @@ export const Heuristics = {
       zscalerCanary: zscaler,
       canary,
       browserParent: await parentalControls(),
-      thirdPartyRoots: await thirdPartyRoots(),
       policy: await enterprisePolicy(),
       vpn: platformChecks.vpn,
       proxy: platformChecks.proxy,
@@ -89,8 +88,6 @@ export const Heuristics = {
       modifiedRoots: Ci.nsITRRSkipReason.TRR_HEURISTIC_TRIPPED_MODIFIED_ROOTS,
       browserParent:
         Ci.nsITRRSkipReason.TRR_HEURISTIC_TRIPPED_PARENTAL_CONTROLS,
-      thirdPartyRoots:
-        Ci.nsITRRSkipReason.TRR_HEURISTIC_TRIPPED_THIRD_PARTY_ROOTS,
       policy: Ci.nsITRRSkipReason.TRR_HEURISTIC_TRIPPED_ENTERPRISE_POLICY,
       vpn: Ci.nsITRRSkipReason.TRR_HEURISTIC_TRIPPED_VPN,
       proxy: Ci.nsITRRSkipReason.TRR_HEURISTIC_TRIPPED_PROXY,
@@ -284,26 +281,6 @@ export async function globalCanary() {
 
 export async function parentalControls() {
   if (lazy.gParentalControlsService.parentalControlsEnabled) {
-    return "disable_doh";
-  }
-
-  return "enable_doh";
-}
-
-async function thirdPartyRoots() {
-  if (Cu.isInAutomation) {
-    return "enable_doh";
-  }
-
-  let certdb = Cc["@mozilla.org/security/x509certdb;1"].getService(
-    Ci.nsIX509CertDB
-  );
-
-  let hasThirdPartyRoots = await new Promise(resolve => {
-    certdb.asyncHasThirdPartyRoots(resolve);
-  });
-
-  if (hasThirdPartyRoots) {
     return "disable_doh";
   }
 
