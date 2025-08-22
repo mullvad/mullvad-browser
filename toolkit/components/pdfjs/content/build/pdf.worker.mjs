@@ -54628,6 +54628,10 @@ class XRef {
         throw new FormatError(`invalid object offset in the ObjStm stream: ${offset}`);
       }
       nums[i] = num;
+      const entry = this.getEntry(num);
+      if (entry?.offset === tableOffset && entry.gen !== i) {
+        entry.gen = i;
+      }
       offsets[i] = offset;
     }
     const start = (stream.start || 0) + first;
