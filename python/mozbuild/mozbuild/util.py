@@ -12,6 +12,7 @@ import difflib
 import functools
 import hashlib
 import itertools
+import logging
 import os
 import re
 import subprocess
@@ -1311,6 +1312,13 @@ def macos_performance_cores():
 
 
 def ensure_l10n_central(command_context):
+    command_context.log(
+        logging.INFO,
+        "ensure_l10n_central",
+        {},
+        "Ensuring that the l10n-central repository exists and is up to date.",
+    )
+
     # For nightly builds, we automatically check out missing localizations
     # from firefox-l10n.  We never automatically check out in automation:
     # automation builds check out revisions that have been signed-off by
@@ -1321,6 +1329,13 @@ def ensure_l10n_central(command_context):
         if not l10n_base_dir.exists():
             raise MissingL10nError(
                 f"Automation requires l10n repositories to be checked out: {l10n_base_dir}"
+            )
+        else:
+            command_context.log(
+                logging.INFO,
+                "ensure_l10n_central",
+                {"l10n_base_dir": str(l10n_base_dir)},
+                f"Detected existing l10n-central checkout at {l10n_base_dir}",
             )
 
     nightly_build = command_context.substs.get("NIGHTLY_BUILD")
@@ -1339,10 +1354,35 @@ def ensure_l10n_central(command_context):
                 ],
                 check=True,
             )
+            command_context.log(
+                logging.INFO,
+                "ensure_l10n_central",
+                {"l10n_base_dir": str(l10n_base_dir)},
+                f"Successfully cloned firefox-l10n into {l10n_base_dir}",
+            )
+        elif not moz_automation:
+            command_context.log(
+                logging.INFO,
+                "ensure_l10n_central",
+                {"l10n_base_dir": str(l10n_base_dir)},
+                f"Detected existing l10n-central checkout at {l10n_base_dir}",
+            )
         if not moz_automation:
             if (l10n_base_dir / ".git").exists():
+                command_context.log(
+                    logging.INFO,
+                    "ensure_l10n_central",
+                    {"l10n_base_dir": str(l10n_base_dir)},
+                    f"Pulling latest l10n-central updates in {l10n_base_dir}",
+                )
                 subprocess.run(
                     [git, "-C", str(l10n_base_dir), "pull", "--quiet"], check=True
+                )
+                command_context.log(
+                    logging.INFO,
+                    "ensure_l10n_central",
+                    {"l10n_base_dir": str(l10n_base_dir)},
+                    f"Successfully pulled latest updates in {l10n_base_dir}",
                 )
             else:
                 raise NotAGitRepositoryError(
