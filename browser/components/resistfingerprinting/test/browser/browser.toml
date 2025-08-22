@@ -58,7 +58,7 @@ support-files = [
 
 ["browser_block_mozAddonManager.js"]
 
-["browser_bug1369357_site_specific_zoom_level.js"]
+["browser_bug1975753_site_specific_zoom_level.js"]
 https_first_disabled = true
 
 ["browser_canvas_iframes.js"]
