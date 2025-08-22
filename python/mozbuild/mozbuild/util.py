@@ -36,6 +36,18 @@ else:
     system_encoding = "utf-8"
 
 
+class MissingL10nError(Exception):
+    """Raised when the l10n repositories haven’t been checked out."""
+
+    pass
+
+
+class NotAGitRepositoryError(Exception):
+    """Raised when the directory isn’t a git repository."""
+
+    pass
+
+
 def _open(path, mode):
     if "b" in mode:
         return open(path, mode)
@@ -1296,3 +1308,43 @@ def macos_performance_cores():
     if proc.returncode != 0:
         return -1
     return int(proc.stdout.decode("ascii", "replace").strip())
+
+
+def ensure_l10n_central(command_context):
+    # For nightly builds, we automatically check out missing localizations
+    # from firefox-l10n.  We never automatically check out in automation:
+    # automation builds check out revisions that have been signed-off by
+    # l10n drivers prior to use.
+    l10n_base_dir = Path(command_context.substs["L10NBASEDIR"])
+    moz_automation = os.environ.get("MOZ_AUTOMATION")
+    if moz_automation:
+        if not l10n_base_dir.exists():
+            raise MissingL10nError(
+                f"Automation requires l10n repositories to be checked out: {l10n_base_dir}"
+            )
+
+    nightly_build = command_context.substs.get("NIGHTLY_BUILD")
+    if nightly_build:
+        git = os.environ.get("GIT", "git")
+        if not l10n_base_dir.exists():
+            l10n_base_dir.mkdir(parents=True)
+            subprocess.run(
+                [
+                    git,
+                    "clone",
+                    "https://github.com/mozilla-l10n/firefox-l10n.git",
+                    str(l10n_base_dir),
+                    "--depth",
+                    "1",
+                ],
+                check=True,
+            )
+        if not moz_automation:
+            if (l10n_base_dir / ".git").exists():
+                subprocess.run(
+                    [git, "-C", str(l10n_base_dir), "pull", "--quiet"], check=True
+                )
+            else:
+                raise NotAGitRepositoryError(
+                    f"Directory is not a git repository: {l10n_base_dir}"
+                )
