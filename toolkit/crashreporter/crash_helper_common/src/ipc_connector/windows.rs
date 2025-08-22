@@ -213,6 +213,37 @@ impl IPCConnector {
         }
     }
 
+    /// Like into_ancillary, but the IPCConnector retains ownership of the file descriptor (so be
+    /// sure to use the result during the lifetime of the IPCConnector).
+    pub fn as_ancillary(
+        &self,
+        dst_process: &Option<ProcessHandle>,
+    ) -> Result<AncillaryData, IPCError> {
+        let mut dst_handle: HANDLE = INVALID_ANCILLARY_DATA;
+
+        if let Some(dst_process) = dst_process.as_ref() {
+            let res = unsafe {
+                DuplicateHandle(
+                    GetCurrentProcess(),
+                    self.handle.as_raw_handle() as HANDLE,
+                    dst_process.as_raw_handle() as HANDLE,
+                    &mut dst_handle,
+                    /* dwDesiredAccess */ 0,
+                    /* bInheritHandle */ FALSE,
+                    DUPLICATE_SAME_ACCESS,
+                )
+            };
+
+            if res > 0 {
+                Ok(dst_handle)
+            } else {
+                Err(IPCError::System(get_last_error()))
+            }
+        } else {
+            Ok(self.handle.as_raw_handle() as HANDLE)
+        }
+    }
+
     pub fn send_message(&self, message: &dyn Message) -> Result<(), IPCError> {
         // Send the message header
         self.send(&message.header(), None)?;

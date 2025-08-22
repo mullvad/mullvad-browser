@@ -120,6 +120,15 @@ impl IPCConnector {
         Ok(self.socket.into_raw_fd())
     }
 
+    /// Like into_ancillary, but the IPCConnector retains ownership of the file descriptor (so be
+    /// sure to use the result during the lifetime of the IPCConnector).
+    pub fn as_ancillary(
+        &self,
+        _dst_process: &Option<ProcessHandle>,
+    ) -> Result<AncillaryData, IPCError> {
+        Ok(self.raw_fd())
+    }
+
     pub fn as_raw_ref(&self) -> BorrowedFd {
         self.socket.as_fd()
     }

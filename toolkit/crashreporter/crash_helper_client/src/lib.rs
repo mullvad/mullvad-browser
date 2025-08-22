@@ -64,12 +64,17 @@ impl CrashHelperClient {
             bail!("The crash helper process is not available");
         };
 
-        let Ok(ancillary_data) = server_endpoint.into_ancillary(&self.helper_process) else {
+        // The endpoint will be sent to the crash helper process (and essentially dup'd on unix),
+        // so we have to retain ownership of the server_endpoint using `as_ancillary()` until the
+        // message is sent.
+        let Ok(ancillary_data) = server_endpoint.as_ancillary(&self.helper_process) else {
             bail!("Could not convert the server IPC endpoint");
         };
 
         let message = messages::RegisterChildProcess::new(ancillary_data);
         self.connector.send_message(&message)?;
+        // We use `into_ancillary()` because the returned fd will stay in this process (so we don't
+        // want to close it).
         let Ok(ancillary_data) = client_endpoint.into_ancillary(/* dst_process */ &None) else {
             bail!("Could not convert the local IPC endpoint");
         };
