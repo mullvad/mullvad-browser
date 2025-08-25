@@ -38,9 +38,13 @@ libc_bitflags! {
     /// Additional parameters for [`mmap`].
     pub struct MapFlags: c_int {
         /// Compatibility flag. Ignored.
+        #[cfg(not(any(target_os = "solaris", target_os = "redox")))]
         MAP_FILE;
         /// Share this mapping. Mutually exclusive with `MAP_PRIVATE`.
         MAP_SHARED;
+        /// Force mmap to check and fail on unknown flags. This also enables `MAP_SYNC`.
+        #[cfg(target_os = "linux")]
+        MAP_SHARED_VALIDATE;
         /// Create a private copy-on-write mapping. Mutually exclusive with `MAP_SHARED`.
         MAP_PRIVATE;
         /// Place the mapping at exactly the address specified in `addr`.
@@ -60,6 +64,7 @@ libc_bitflags! {
         #[cfg(any(all(linux_android,
                       any(target_arch = "x86", target_arch = "x86_64")),
                   all(target_os = "linux", target_env = "musl", any(target_arch = "x86", target_arch = "x86_64")),
+                  all(target_os = "linux", target_env = "ohos", target_arch = "x86_64"),
                   all(target_os = "freebsd", target_pointer_width = "64")))]
         MAP_32BIT;
         /// Used for stacks; indicates to the kernel that the mapping should extend downward in memory.
@@ -77,7 +82,7 @@ libc_bitflags! {
         /// Do not reserve swap space for this mapping.
         ///
         /// This was removed in FreeBSD 11 and is unused in DragonFlyBSD.
-        #[cfg(not(any(freebsdlike, target_os = "aix", target_os = "hurd")))]
+        #[cfg(not(any(freebsdlike, target_os = "aix", target_os = "hurd", target_os = "redox")))]
         MAP_NORESERVE;
         /// Populate page tables for a mapping.
         #[cfg(linux_android)]
@@ -140,8 +145,12 @@ libc_bitflags! {
         #[cfg(any(freebsdlike, netbsdlike))]
         MAP_HASSEMAPHORE;
         /// Region grows down, like a stack.
-        #[cfg(any(linux_android, freebsdlike, target_os = "openbsd"))]
+        #[cfg(any(linux_android, freebsdlike, netbsdlike))]
         MAP_STACK;
+        /// Do not write through the page caches, write directly to the file. Used for Direct Access (DAX) enabled file systems.
+        // Available on Linux glibc and musl, MIPS* target excluded.
+        #[cfg(all(target_os = "linux", not(any(target_arch = "mips", target_arch = "mips64", target_arch = "mips32r6", target_arch = "mips64r6")), not(target_env = "uclibc")))]
+        MAP_SYNC;
         /// Pages in this mapping are not retained in the kernel's memory cache.
         #[cfg(apple_targets)]
         MAP_NOCACHE;
@@ -197,6 +206,10 @@ libc_bitflags! {
         /// Place the mapping at exactly the address specified in `new_address`.
         #[cfg(target_os = "linux")]
         MREMAP_FIXED;
+        /// Works in conjunction with `MREMAP_MAYMOVE` but does not unmap `old_address`.
+        /// Note that, in this case, `old_size` and `new_size` must be the same.
+        #[cfg(target_os = "linux")]
+        MREMAP_DONTUNMAP;
         /// Place the mapping at exactly the address specified in `new_address`.
         #[cfg(target_os = "netbsd")]
         MAP_FIXED;
@@ -268,7 +281,7 @@ libc_enum! {
         #[cfg(linux_android)]
         MADV_DODUMP,
         /// Specify that the application no longer needs the pages in the given range.
-        #[cfg(not(any(target_os = "aix", target_os = "hurd")))]
+        #[cfg(not(any(target_os = "aix", target_os = "hurd", target_os = "cygwin", target_os = "redox")))]
         MADV_FREE,
         /// Request that the system not flush the current range to disk unless it needs to.
         #[cfg(freebsdlike)]
@@ -304,6 +317,25 @@ libc_enum! {
         #[cfg(apple_targets)]
         #[allow(missing_docs)]
         MADV_CAN_REUSE,
+        /// Reclaim the address range when applicable.
+        #[cfg(linux_android)]
+        MADV_PAGEOUT,
+        /// Deactivate the address range when applicable.
+        #[cfg(linux_android)]
+        MADV_COLD,
+        /// After fork, the adress range is zero filled.
+        #[cfg(linux_android)]
+        MADV_WIPEONFORK,
+        /// Undo `MADV_WIPEONFORK` when it applied.
+        #[cfg(linux_android)]
+        MADV_KEEPONFORK,
+        /// Pre-load the address range for reading to reduce page-fault latency.
+        #[cfg(linux_android)]
+        MADV_POPULATE_READ,
+        /// Pre-fault the address range for writing to reduce page-fault
+        /// latency on subsequent writes.
+        #[cfg(linux_android)]
+        MADV_POPULATE_WRITE,
     }
 }
 
@@ -325,7 +357,7 @@ libc_bitflags! {
     }
 }
 
-#[cfg(not(target_os = "haiku"))]
+#[cfg(not(any(target_os = "haiku", target_os = "cygwin", target_os = "redox")))]
 libc_bitflags! {
     /// Flags for [`mlockall`].
     pub struct MlockAllFlags: c_int {
@@ -368,7 +400,7 @@ pub unsafe fn munlock(addr: NonNull<c_void>, length: size_t) -> Result<()> {
 /// Locked pages never move to the swap area. For more information, see [`mlockall(2)`].
 ///
 /// [`mlockall(2)`]: https://man7.org/linux/man-pages/man2/mlockall.2.html
-#[cfg(not(target_os = "haiku"))]
+#[cfg(not(any(target_os = "haiku", target_os = "cygwin", target_os = "redox")))]
 pub fn mlockall(flags: MlockAllFlags) -> Result<()> {
     unsafe { Errno::result(libc::mlockall(flags.bits())) }.map(drop)
 }
@@ -378,7 +410,7 @@ pub fn mlockall(flags: MlockAllFlags) -> Result<()> {
 /// For more information, see [`munlockall(2)`].
 ///
 /// [`munlockall(2)`]: https://man7.org/linux/man-pages/man2/munlockall.2.html
-#[cfg(not(target_os = "haiku"))]
+#[cfg(not(any(target_os = "haiku", target_os = "cygwin", target_os = "redox")))]
 pub fn munlockall() -> Result<()> {
     unsafe { Errno::result(libc::munlockall()) }.map(drop)
 }
@@ -407,7 +439,7 @@ pub unsafe fn mmap<F: AsFd>(
         libc::mmap(ptr, length.into(), prot.bits(), flags.bits(), fd, offset)
     };
 
-    if ret == libc::MAP_FAILED {
+    if std::ptr::eq(ret, libc::MAP_FAILED) {
         Err(Errno::last())
     } else {
         // SAFETY: `libc::mmap` returns a valid non-null pointer or `libc::MAP_FAILED`, thus `ret`
@@ -439,7 +471,7 @@ pub unsafe fn mmap_anonymous(
         libc::mmap(ptr, length.into(), prot.bits(), flags.bits(), -1, 0)
     };
 
-    if ret == libc::MAP_FAILED {
+    if std::ptr::eq(ret, libc::MAP_FAILED) {
         Err(Errno::last())
     } else {
         // SAFETY: `libc::mmap` returns a valid non-null pointer or `libc::MAP_FAILED`, thus `ret`
@@ -488,7 +520,7 @@ pub unsafe fn mremap(
         )
     };
 
-    if ret == libc::MAP_FAILED {
+    if std::ptr::eq(ret, libc::MAP_FAILED) {
         Err(Errno::last())
     } else {
         // SAFETY: `libc::mremap` returns a valid non-null pointer or `libc::MAP_FAILED`, thus `ret`

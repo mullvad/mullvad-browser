@@ -1,7 +1,7 @@
 //! Feature tests for OS functionality
 pub use self::os::*;
 
-#[cfg(linux_android)]
+#[cfg(any(linux_android, target_os = "emscripten"))]
 mod os {
     use crate::sys::utsname::uname;
     use crate::Result;
@@ -92,7 +92,7 @@ mod os {
     }
 
     #[test]
-    pub fn test_parsing_kernel_version() {
+    fn test_parsing_kernel_version() {
         assert!(kernel_version().unwrap() > 0);
     }
 }
@@ -103,6 +103,7 @@ mod os {
         target_os = "hurd",         // Since glibc 2.28
         target_os = "illumos",      // Since ???
         target_os = "redox",        // Since 1-july-2020
+        target_os = "cygwin",
 ))]
 mod os {
     /// Check if the OS supports atomic close-on-exec for sockets

@@ -1,6 +1,3 @@
-// Portions of this file are Copyright 2014 The Rust Project Developers.
-// See https://www.rust-lang.org/policies/licenses.
-
 //! Operating system signals.
 
 use crate::errno::Errno;
@@ -10,8 +7,6 @@ use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::BitOr;
-#[cfg(freebsdlike)]
-use std::os::unix::io::RawFd;
 use std::ptr;
 use std::str::FromStr;
 
@@ -72,6 +67,7 @@ libc_enum! {
                           target_arch = "mips32r6",
                           target_arch = "mips64",
                           target_arch = "mips64r6",
+                          target_arch = "sparc",
                           target_arch = "sparc64"))))]
         SIGSTKFLT,
         /// To parent on child stop or exit
@@ -114,7 +110,8 @@ libc_enum! {
         SIGEMT,
         #[cfg(not(any(linux_android, target_os = "emscripten",
                       target_os = "fuchsia", target_os = "redox",
-                      target_os = "haiku", target_os = "aix")))]
+                      target_os = "haiku", target_os = "aix",
+                      target_os = "solaris", target_os = "cygwin")))]
         /// Information request
         SIGINFO,
     }
@@ -152,6 +149,7 @@ impl FromStr for Signal {
                     target_arch = "mips32r6",
                     target_arch = "mips64",
                     target_arch = "mips64r6",
+                    target_arch = "sparc",
                     target_arch = "sparc64"
                 ))
             ))]
@@ -191,7 +189,9 @@ impl FromStr for Signal {
                 target_os = "fuchsia",
                 target_os = "redox",
                 target_os = "aix",
-                target_os = "haiku"
+                target_os = "haiku",
+                target_os = "solaris",
+                target_os = "cygwin"
             )))]
             "SIGINFO" => Signal::SIGINFO,
             _ => return Err(Errno::EINVAL),
@@ -234,6 +234,7 @@ impl Signal {
                     target_arch = "mips32r6",
                     target_arch = "mips64",
                     target_arch = "mips64r6",
+                    target_arch = "sparc",
                     target_arch = "sparc64"
                 ))
             ))]
@@ -274,7 +275,9 @@ impl Signal {
                 target_os = "fuchsia",
                 target_os = "redox",
                 target_os = "aix",
-                target_os = "haiku"
+                target_os = "haiku",
+                target_os = "solaris",
+                target_os = "cygwin"
             )))]
             Signal::SIGINFO => "SIGINFO",
         }
@@ -321,6 +324,7 @@ const SIGNALS: [Signal; 28] = [
         target_arch = "mips32r6",
         target_arch = "mips64",
         target_arch = "mips64r6",
+        target_arch = "sparc",
         target_arch = "sparc64"
     ))
 ))]
@@ -338,6 +342,7 @@ const SIGNALS: [Signal; 31] = [
         target_arch = "mips32r6",
         target_arch = "mips64",
         target_arch = "mips64r6",
+        target_arch = "sparc",
         target_arch = "sparc64"
     )
 ))]
@@ -356,13 +361,23 @@ const SIGNALS: [Signal; 30] = [
     SIGURG, SIGPOLL, SIGIO, SIGSTOP, SIGTSTP, SIGCONT, SIGTTIN, SIGTTOU,
     SIGVTALRM, SIGPROF, SIGXCPU, SIGXFSZ, SIGTRAP,
 ];
+#[cfg(any(target_os = "solaris", target_os = "cygwin"))]
+#[cfg(feature = "signal")]
+const SIGNALS: [Signal; 30] = [
+    SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGBUS, SIGFPE, SIGKILL,
+    SIGUSR1, SIGSEGV, SIGUSR2, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGCONT,
+    SIGSTOP, SIGTSTP, SIGTTIN, SIGTTOU, SIGURG, SIGXCPU, SIGXFSZ, SIGVTALRM,
+    SIGPROF, SIGWINCH, SIGIO, SIGSYS, SIGEMT,
+];
 #[cfg(not(any(
     linux_android,
     target_os = "fuchsia",
     target_os = "emscripten",
     target_os = "aix",
     target_os = "redox",
-    target_os = "haiku"
+    target_os = "haiku",
+    target_os = "solaris",
+    target_os = "cygwin"
 )))]
 #[cfg(feature = "signal")]
 const SIGNALS: [Signal; 31] = [
@@ -745,11 +760,11 @@ pub enum SigHandler {
     /// Request that the signal be ignored.
     SigIgn,
     /// Use the given signal-catching function, which takes in the signal.
-    Handler(extern fn(libc::c_int)),
+    Handler(extern "C" fn(libc::c_int)),
     /// Use the given signal-catching function, which takes in the signal, information about how
     /// the signal was generated, and a pointer to the threads `ucontext_t`.
     #[cfg(not(target_os = "redox"))]
-    SigAction(extern fn(libc::c_int, *mut libc::siginfo_t, *mut libc::c_void))
+    SigAction(extern "C" fn(libc::c_int, *mut libc::siginfo_t, *mut libc::c_void))
 }
 
 /// Action to take on receipt of a signal. Corresponds to `sigaction`.
@@ -772,27 +787,14 @@ impl SigAction {
     /// is the `SigAction` variant). `mask` specifies other signals to block during execution of
     /// the signal-catching function.
     pub fn new(handler: SigHandler, flags: SaFlags, mask: SigSet) -> SigAction {
-        #[cfg(not(target_os = "aix"))]
         unsafe fn install_sig(p: *mut libc::sigaction, handler: SigHandler) {
             unsafe {
                  (*p).sa_sigaction = match handler {
                     SigHandler::SigDfl => libc::SIG_DFL,
                     SigHandler::SigIgn => libc::SIG_IGN,
-                    SigHandler::Handler(f) => f as *const extern fn(libc::c_int) as usize,
+                    SigHandler::Handler(f) => f as *const extern "C" fn(libc::c_int) as usize,
                     #[cfg(not(target_os = "redox"))]
-                    SigHandler::SigAction(f) => f as *const extern fn(libc::c_int, *mut libc::siginfo_t, *mut libc::c_void) as usize,
-                };
-            }
-        }
-
-        #[cfg(target_os = "aix")]
-        unsafe fn install_sig(p: *mut libc::sigaction, handler: SigHandler) {
-            unsafe {
-                (*p).sa_union.__su_sigaction = match handler {
-                    SigHandler::SigDfl => unsafe { mem::transmute::<usize, extern "C" fn(libc::c_int, *mut libc::siginfo_t, *mut libc::c_void)>(libc::SIG_DFL) },
-                    SigHandler::SigIgn => unsafe { mem::transmute::<usize, extern "C" fn(libc::c_int, *mut libc::siginfo_t, *mut libc::c_void)>(libc::SIG_IGN) },
-                    SigHandler::Handler(f) => unsafe { mem::transmute::<extern "C" fn(i32), extern "C" fn(i32, *mut libc::siginfo_t, *mut libc::c_void)>(f) },
-                    SigHandler::SigAction(f) => f,
+                    SigHandler::SigAction(f) => f as *const extern "C" fn(libc::c_int, *mut libc::siginfo_t, *mut libc::c_void) as usize,
                 };
             }
         }
@@ -824,7 +826,6 @@ impl SigAction {
     }
 
     /// Returns the action's handler.
-    #[cfg(not(target_os = "aix"))]
     pub fn handler(&self) -> SigHandler {
         match self.sigaction.sa_sigaction {
             libc::SIG_DFL => SigHandler::SigDfl,
@@ -840,9 +841,9 @@ impl SigAction {
                 //   ensured that it is correctly initialized.
                 unsafe{
                     *(&p as *const usize
-                         as *const extern fn(_, _, _))
+                         as *const extern "C" fn(_, _, _))
                 }
-                as extern fn(_, _, _)),
+                as extern "C" fn(_, _, _)),
             p => SigHandler::Handler(
                 // Safe for one of two reasons:
                 // * The SigHandler was created by SigHandler::new, in which
@@ -852,29 +853,9 @@ impl SigAction {
                 //   ensured that it is correctly initialized.
                 unsafe{
                     *(&p as *const usize
-                         as *const extern fn(libc::c_int))
+                         as *const extern "C" fn(libc::c_int))
                 }
-                as extern fn(libc::c_int)),
-        }
-    }
-
-    /// Returns the action's handler.
-    #[cfg(target_os = "aix")]
-    pub fn handler(&self) -> SigHandler {
-        unsafe {
-        match self.sigaction.sa_union.__su_sigaction as usize {
-            libc::SIG_DFL => SigHandler::SigDfl,
-            libc::SIG_IGN => SigHandler::SigIgn,
-            p if self.flags().contains(SaFlags::SA_SIGINFO) =>
-                SigHandler::SigAction(
-                    *(&p as *const usize
-                         as *const extern fn(_, _, _))
-                as extern fn(_, _, _)),
-            p => SigHandler::Handler(
-                    *(&p as *const usize
-                         as *const extern fn(libc::c_int))
-                as extern fn(libc::c_int)),
-        }
+                as extern "C" fn(libc::c_int)),
         }
     }
 }
@@ -935,7 +916,7 @@ pub unsafe fn sigaction(signal: Signal, sigaction: &SigAction) -> Result<SigActi
 /// # use nix::sys::signal::{self, Signal, SigHandler};
 /// static SIGNALED: AtomicBool = AtomicBool::new(false);
 ///
-/// extern fn handle_sigint(signal: libc::c_int) {
+/// extern "C" fn handle_sigint(signal: libc::c_int) {
 ///     let signal = Signal::try_from(signal).unwrap();
 ///     SIGNALED.store(signal == Signal::SIGINT, Ordering::Relaxed);
 /// }
@@ -972,7 +953,7 @@ pub unsafe fn signal(signal: Signal, handler: SigHandler) -> Result<SigHandler> 
             libc::SIG_DFL => SigHandler::SigDfl,
             libc::SIG_IGN => SigHandler::SigIgn,
             p => SigHandler::Handler(
-                unsafe { *(&p as *const usize as *const extern fn(libc::c_int)) } as extern fn(libc::c_int)),
+                unsafe { *(&p as *const usize as *const extern "C" fn(libc::c_int)) } as extern "C" fn(libc::c_int)),
         }
     })
 }
@@ -1114,8 +1095,8 @@ pub type type_of_thread_id = libc::pid_t;
 // as a pointer, because neither libc nor the kernel ever dereference it.  nix
 // therefore presents it as an intptr_t, which is how kevent uses it.
 #[cfg(not(any(target_os = "fuchsia", target_os = "hurd", target_os = "openbsd", target_os = "redox")))]
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum SigevNotify {
+#[derive(Clone, Copy, Debug)]
+pub enum SigevNotify<'fd> {
     /// No notification will be delivered
     SigevNone,
     /// Notify by delivering a signal to the process.
@@ -1131,7 +1112,7 @@ pub enum SigevNotify {
     #[cfg(freebsdlike)]
     SigevKevent {
         /// File descriptor of the kqueue to notify.
-        kq: RawFd,
+        kq: std::os::fd::BorrowedFd<'fd>,
         /// Will be contained in the kevent's `udata` field.
         udata: libc::intptr_t
     },
@@ -1140,11 +1121,11 @@ pub enum SigevNotify {
     #[cfg(feature = "event")]
     SigevKeventFlags {
         /// File descriptor of the kqueue to notify.
-        kq: RawFd,
+        kq: std::os::fd::BorrowedFd<'fd>,
         /// Will be contained in the kevent's `udata` field.
         udata: libc::intptr_t,
         /// Flags that will be set on the delivered event.  See `kevent(2)`.
-        flags: crate::sys::event::EventFlag
+        flags: crate::sys::event::EvFlags
     },
     /// Notify by delivering a signal to a thread.
     #[cfg(any(
@@ -1161,6 +1142,14 @@ pub enum SigevNotify {
         /// structure of the queued signal.
         si_value: libc::intptr_t
     },
+    /// A helper variant to resolve the unused parameter (`'fd`) problem on
+    /// platforms other than FreeBSD and DragonFlyBSD.
+    ///
+    /// This variant can never be constructed due to the usage of an enum with 0
+    /// variants.
+    #[doc(hidden)]
+    #[cfg(not(freebsdlike))]
+    _Unreachable(&'fd std::convert::Infallible),
 }
 }
 
@@ -1337,15 +1326,19 @@ mod sigevent {
                 },
                 #[cfg(freebsdlike)]
                 SigevNotify::SigevKevent{kq, udata} => {
+                    use std::os::fd::AsRawFd;
+
                     sev.sigev_notify = libc::SIGEV_KEVENT;
-                    sev.sigev_signo = kq;
+                    sev.sigev_signo = kq.as_raw_fd();
                     sev.sigev_value.sival_ptr = udata as *mut libc::c_void;
                 },
                 #[cfg(target_os = "freebsd")]
                 #[cfg(feature = "event")]
                 SigevNotify::SigevKeventFlags{kq, udata, flags} => {
+                    use std::os::fd::AsRawFd;
+
                     sev.sigev_notify = libc::SIGEV_KEVENT;
-                    sev.sigev_signo = kq;
+                    sev.sigev_signo = kq.as_raw_fd();
                     sev.sigev_value.sival_ptr = udata as *mut libc::c_void;
                     sev._sigev_un._kevent_flags = flags.bits();
                 },
@@ -1363,6 +1356,8 @@ mod sigevent {
                     sev.sigev_value.sival_ptr = si_value as *mut libc::c_void;
                     sev.sigev_notify_thread_id = thread_id;
                 }
+                #[cfg(not(freebsdlike))]
+                SigevNotify::_Unreachable(_) => unreachable!("This variant could never be constructed")
             }
             SigEvent{sigevent: sev}
         }
@@ -1398,7 +1393,7 @@ mod sigevent {
         }
     }
 
-    impl<'a> From<&'a libc::sigevent> for SigEvent {
+    impl From<&'_ libc::sigevent> for SigEvent {
         #[cfg(target_os = "freebsd")]
         fn from(sigevent: &libc::sigevent) -> Self {
             // Safe because they're really the same structure.  See

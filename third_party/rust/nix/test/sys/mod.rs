@@ -8,7 +8,10 @@ mod test_signal;
 #[cfg(any(
     target_os = "freebsd",
     apple_targets,
-    all(target_os = "linux", not(target_env = "uclibc")),
+    all(
+        target_os = "linux",
+        not(any(target_env = "uclibc", target_env = "ohos"))
+    ),
     target_os = "netbsd"
 ))]
 mod test_aio;
@@ -16,7 +19,8 @@ mod test_aio;
     target_os = "redox",
     target_os = "fuchsia",
     target_os = "haiku",
-    target_os = "hurd"
+    target_os = "hurd",
+    target_os = "cygwin"
 )))]
 mod test_ioctl;
 #[cfg(not(target_os = "redox"))]
@@ -82,3 +86,13 @@ mod test_statfs;
     target_os = "haiku"
 )))]
 mod test_resource;
+
+// This test module should be enabled for both linux_android and freebsd, but
+// the `memfd_create(2)` symbol is not available under Linux QEMU,
+//
+// https://github.com/nix-rust/nix/actions/runs/9427112650/job/25970870477
+//
+// and I haven't found a way to stop the linker from linking that symbol, so
+// only enable this for FreeBSD for now.
+#[cfg(target_os = "freebsd")]
+mod test_memfd;

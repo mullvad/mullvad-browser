@@ -166,8 +166,11 @@ bindgen_0_63 = { package = "bindgen", path = "build/rust/bindgen-0.63" }
 # and for bug 1945218
 bindgen = { path = "third_party/rust/bindgen" }
 
-# Patch nix 0.26 to 0.29
-nix = { path = "build/rust/nix" }
+# Patch nix 0.26 to 0.30+
+nix_0_26 = { package = "nix", path = "build/rust/nix" }
+
+# Patch nix 0.29 to 0.30+
+nix_0_30 = { package = "nix", path = "build/rust/nix-0.29" }
 
 # Patch derive_more 0.99 to 1.0.0-beta
 derive_more = { path = "build/rust/derive_more" }

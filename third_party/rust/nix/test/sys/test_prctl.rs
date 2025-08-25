@@ -89,16 +89,20 @@ mod test_prctl {
     #[cfg_attr(qemu, ignore)]
     #[test]
     fn test_get_set_timerslack() {
-        let original = prctl::get_timerslack().unwrap();
+        let original = prctl::get_timerslack().unwrap() as libc::c_ulong;
 
         let slack = 60_000;
         prctl::set_timerslack(slack).unwrap();
-        let res = prctl::get_timerslack().unwrap();
-        assert_eq!(slack, res as u64);
+        let res = prctl::get_timerslack().unwrap() as libc::c_ulong;
+        assert_eq!(slack, res);
 
-        prctl::set_timerslack(original as u64).unwrap();
+        prctl::set_timerslack(original).unwrap();
     }
 
+    // Loongarch need to use a newer QEMU that disabled these PRCTL subcodes/methods.
+    // https://github.com/qemu/qemu/commit/220717a6f46a99031a5b1af964bbf4dec1310440
+    // So we should ignore them when testing in QEMU environments.
+    #[cfg_attr(all(qemu, target_arch = "loongarch64"), ignore)]
     #[test]
     fn test_disable_enable_perf_events() {
         prctl::task_perf_events_disable().unwrap();
@@ -112,6 +116,10 @@ mod test_prctl {
         assert!(no_new_privs);
     }
 
+    // Loongarch need to use a newer QEMU that disabled these PRCTL subcodes/methods
+    // https://github.com/qemu/qemu/commit/220717a6f46a99031a5b1af964bbf4dec1310440
+    // So we should ignore them when testing in QEMU environments.
+    #[cfg_attr(all(qemu, target_arch = "loongarch64"), ignore)]
     #[test]
     fn test_get_set_thp_disable() {
         let original = prctl::get_thp_disable().unwrap();
@@ -123,7 +131,12 @@ mod test_prctl {
         prctl::set_thp_disable(original).unwrap();
     }
 
+    // Ignore this test under QEMU, as it started failing after updating the Linux CI
+    // runner image, for reasons unknown.
+    //
+    // See: https://github.com/nix-rust/nix/issues/2418
     #[test]
+    #[cfg_attr(qemu, ignore)]
     fn test_set_vma_anon_name() {
         use nix::errno::Errno;
         use nix::sys::mman;

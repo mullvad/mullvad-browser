@@ -201,7 +201,7 @@ impl Inotify {
         let mut events = Vec::new();
         let mut offset = 0;
 
-        let nread = read(self.fd.as_raw_fd(), &mut buffer)?;
+        let nread = read(&self.fd, &mut buffer)?;
 
         while (nread - offset) >= header_size {
             let event = unsafe {
@@ -239,6 +239,17 @@ impl Inotify {
 
         Ok(events)
     }
+
+    /// Constructs an `Inotify` wrapping an existing `OwnedFd`.
+    ///
+    /// # Safety
+    ///
+    /// `OwnedFd` is a valid `Inotify`.
+    pub unsafe fn from_owned_fd(fd: OwnedFd) -> Self {
+        Self {
+            fd
+        }
+    }
 }
 
 impl FromRawFd for Inotify {
@@ -252,5 +263,11 @@ impl FromRawFd for Inotify {
 impl AsFd for Inotify {
     fn as_fd(&'_ self) -> BorrowedFd<'_> {
         self.fd.as_fd()
+    }
+}
+
+impl From<Inotify> for OwnedFd {
+    fn from(value: Inotify) -> Self {
+        value.fd
     }
 }

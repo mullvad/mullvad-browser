@@ -52,6 +52,17 @@ pub enum ForkptyResult {
 #[derive(Debug)]
 pub struct PtyMaster(OwnedFd);
 
+impl PtyMaster {
+    /// Constructs a `PytMaster` wrapping an existing `OwnedFd`.
+    ///
+    /// # Safety
+    ///
+    /// `OwnedFd` is a valid `PtyMaster`.
+    pub unsafe fn from_owned_fd(fd: OwnedFd) -> Self {
+        Self(fd)
+    }
+}
+
 impl AsRawFd for PtyMaster {
     fn as_raw_fd(&self) -> RawFd {
         self.0.as_raw_fd()
@@ -64,6 +75,12 @@ impl AsFd for PtyMaster {
     }
 }
 
+impl From<PtyMaster> for OwnedFd {
+    fn from(value: PtyMaster) -> Self {
+        value.0
+    }
+}
+
 impl IntoRawFd for PtyMaster {
     fn into_raw_fd(self) -> RawFd {
         let fd = self.0;
@@ -73,7 +90,7 @@ impl IntoRawFd for PtyMaster {
 
 impl io::Read for PtyMaster {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        unistd::read(self.0.as_raw_fd(), buf).map_err(io::Error::from)
+        unistd::read(&self.0, buf).map_err(io::Error::from)
     }
 }
 
@@ -88,7 +105,7 @@ impl io::Write for PtyMaster {
 
 impl io::Read for &PtyMaster {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        unistd::read(self.0.as_raw_fd(), buf).map_err(io::Error::from)
+        unistd::read(&self.0, buf).map_err(io::Error::from)
     }
 }
 
@@ -317,9 +334,9 @@ feature! {
 /// # Safety
 ///
 /// In a multithreaded program, only [async-signal-safe] functions like `pause`
-/// and `_exit` may be called by the child (the parent isn't restricted). Note
-/// that memory allocation may **not** be async-signal-safe and thus must be
-/// prevented.
+/// and `_exit` may be called by the child (the parent isn't restricted) until
+/// a call of `execve(2)`. Note that memory allocation may **not** be
+/// async-signal-safe and thus must be prevented.
 ///
 /// Those functions are only a small subset of your operating system's API, so
 /// special care must be taken to only invoke code you can control and audit.

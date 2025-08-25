@@ -4,12 +4,11 @@ use cfg_if::cfg_if;
 use std::os::unix::io::{FromRawFd, OwnedFd, RawFd};
 
 use crate::errno::Errno;
-use crate::Result;
-use std::ffi::CStr;
+use crate::{NixPath, Result};
 
 libc_bitflags!(
     /// Options that change the behavior of [`memfd_create`].
-    pub struct MemFdCreateFlag: libc::c_uint {
+    pub struct MFdFlags: libc::c_uint {
         /// Set the close-on-exec ([`FD_CLOEXEC`]) flag on the new file descriptor.
         ///
         /// By default, the new file descriptor is set to remain open across an [`execve`]
@@ -38,6 +37,18 @@ libc_bitflags!(
         /// [`memfd_create(2)`]: https://man7.org/linux/man-pages/man2/memfd_create.2.html
         #[cfg(linux_android)]
         MFD_HUGETLB;
+        /// Shift to get the huge page size.
+        #[cfg(target_env = "ohos")]
+        MFD_HUGE_SHIFT;
+        /// Mask to get the huge page size.
+        #[cfg(target_env = "ohos")]
+        MFD_HUGE_MASK;
+        /// hugetlb size of 64KB.
+        #[cfg(target_env = "ohos")]
+        MFD_HUGE_64KB;
+        /// hugetlb size of 512KB.
+        #[cfg(target_env = "ohos")]
+        MFD_HUGE_512KB;
         /// Following are to be used with [`MFD_HUGETLB`], indicating the desired hugetlb size.
         ///
         /// See also the hugetlb filesystem in [`memfd_create(2)`].
@@ -75,6 +86,10 @@ libc_bitflags!(
     }
 );
 
+#[deprecated(since = "0.30.0", note = "Use `MFdFlags instead`")]
+/// The deprecated MemFdCreateFlag type alias
+pub type MemFdCreateFlag = MFdFlags;
+
 /// Creates an anonymous file that lives in memory, and return a file-descriptor to it.
 ///
 /// The file behaves like a regular file, and so can be modified, truncated, memory-mapped, and so on.
@@ -84,25 +99,31 @@ libc_bitflags!(
 ///
 /// [`memfd_create(2)`]: https://man7.org/linux/man-pages/man2/memfd_create.2.html
 #[inline] // Delays codegen, preventing linker errors with dylibs and --no-allow-shlib-undefined
-pub fn memfd_create(name: &CStr, flags: MemFdCreateFlag) -> Result<OwnedFd> {
-    let res = unsafe {
-        cfg_if! {
+pub fn memfd_create<P: NixPath + ?Sized>(
+    name: &P,
+    flags: MFdFlags,
+) -> Result<OwnedFd> {
+    let res = name.with_nix_path(|cstr| {
+        unsafe {
+            cfg_if! {
             if #[cfg(all(
                 // Android does not have a memfd_create symbol
                 not(target_os = "android"),
                 any(
                     target_os = "freebsd",
-                    // If the OS is Linux, gnu and musl expose a memfd_create symbol but not uclibc
+                    // If the OS is Linux, gnu/musl/ohos expose a memfd_create symbol but not uclibc
                     target_env = "gnu",
                     target_env = "musl",
+                    target_env = "ohos"
                 )))]
             {
-                libc::memfd_create(name.as_ptr(), flags.bits())
+                libc::memfd_create(cstr.as_ptr(), flags.bits())
             } else {
-                libc::syscall(libc::SYS_memfd_create, name.as_ptr(), flags.bits())
+                libc::syscall(libc::SYS_memfd_create, cstr.as_ptr(), flags.bits())
             }
         }
-    };
+        }
+    })?;
 
     Errno::result(res).map(|r| unsafe { OwnedFd::from_raw_fd(r as RawFd) })
 }

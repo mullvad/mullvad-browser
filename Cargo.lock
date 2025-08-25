@@ -1154,7 +1154,7 @@ dependencies = [
  "anyhow",
  "crash_helper_common",
  "minidump-writer",
- "nix 0.29.0",
+ "nix 0.30.1",
  "num-derive",
  "num-traits",
  "rust_minidump_writer_linux",
@@ -1166,7 +1166,7 @@ name = "crash_helper_common"
 version = "0.1.0"
 dependencies = [
  "minidump-writer",
- "nix 0.29.0",
+ "nix 0.30.1",
  "num-derive",
  "num-traits",
  "thiserror 2.0.9",
@@ -1190,7 +1190,7 @@ dependencies = [
  "mozannotation_server",
  "mozbuild",
  "mozilla-central-workspace-hack",
- "nix 0.29.0",
+ "nix 0.30.1",
  "num-derive",
  "num-traits",
  "once_cell",
@@ -4831,14 +4831,21 @@ checksum = "e4a24736216ec316047a1fc4252e27dabb04218aa4a3f37c6e7ddbf1f9782b54"
 name = "nix"
 version = "0.26.99"
 dependencies = [
- "nix 0.29.0",
+ "nix 0.30.1",
 ]
 
 [[package]]
 name = "nix"
 version = "0.29.0"
+dependencies = [
+ "nix 0.30.1",
+]
+
+[[package]]
+name = "nix"
+version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
+checksum = "74523f3a35e05aba87a1d978330aef40f67b0304ac79c1c00b294c9830543db6"
 dependencies = [
  "bitflags 2.9.0",
  "cfg-if",

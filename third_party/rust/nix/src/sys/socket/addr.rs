@@ -66,7 +66,7 @@ pub enum AddressFamily {
     #[cfg(linux_android)]
     Netlink = libc::AF_NETLINK,
     /// Kernel interface for interacting with the routing table
-    #[cfg(not(any(linux_android, target_os = "redox")))]
+    #[cfg(not(any(linux_android, target_os = "redox", target_os = "cygwin")))]
     Route = libc::PF_ROUTE,
     /// Low level packet interface (see [`packet(7)`](https://man7.org/linux/man-pages/man7/packet.7.html))
     #[cfg(any(linux_android, solarish, target_os = "fuchsia"))]
@@ -78,7 +78,7 @@ pub enum AddressFamily {
     #[cfg(linux_android)]
     Ax25 = libc::AF_AX25,
     /// IPX - Novell protocols
-    #[cfg(not(any(target_os = "aix", target_os = "redox")))]
+    #[cfg(not(any(target_os = "aix", target_os = "redox", target_os = "cygwin")))]
     Ipx = libc::AF_IPX,
     /// AppleTalk
     #[cfg(not(target_os = "redox"))]
@@ -164,6 +164,7 @@ pub enum AddressFamily {
         apple_targets,
         target_os = "hurd",
         target_os = "redox",
+        target_os = "cygwin",
     )))]
     Bluetooth = libc::AF_BLUETOOTH,
     /// IUCV (inter-user communication vehicle) z/VM protocol for
@@ -180,6 +181,7 @@ pub enum AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "redox",
+        target_os = "cygwin",
     )))]
     Isdn = libc::AF_ISDN,
     /// Nokia cellular modem IPC/RPC interface
@@ -263,7 +265,7 @@ impl AddressFamily {
             libc::AF_NETLINK => Some(AddressFamily::Netlink),
             #[cfg(apple_targets)]
             libc::AF_SYSTEM => Some(AddressFamily::System),
-            #[cfg(not(any(linux_android, target_os = "redox")))]
+            #[cfg(not(any(linux_android, target_os = "redox", target_os = "cygwin")))]
             libc::PF_ROUTE => Some(AddressFamily::Route),
             #[cfg(linux_android)]
             libc::AF_PACKET => Some(AddressFamily::Packet),
@@ -446,6 +448,7 @@ impl UnixAddr {
                      target_os = "fuchsia",
                      solarish,
                      target_os = "redox",
+                     target_os = "cygwin",
                 ))]
             {
                 UnixAddr { sun, sun_len }
@@ -510,6 +513,7 @@ impl UnixAddr {
                      target_os = "fuchsia",
                      solarish,
                      target_os = "redox",
+                     target_os = "cygwin",
                 ))]
             {
                 self.sun_len
@@ -526,7 +530,8 @@ impl SockaddrLike for UnixAddr {
         linux_android,
         target_os = "fuchsia",
         solarish,
-        target_os = "redox"
+        target_os = "redox",
+        target_os = "cygwin",
     ))]
     fn len(&self) -> libc::socklen_t {
         self.sun_len.into()
@@ -556,6 +561,7 @@ impl SockaddrLike for UnixAddr {
                          target_os = "fuchsia",
                          solarish,
                          target_os = "redox",
+                         target_os = "cygwin",
                 ))] {
                 let su_len = len.unwrap_or(
                     mem::size_of::<libc::sockaddr_un>() as libc::socklen_t
@@ -655,15 +661,13 @@ pub trait SockaddrLike: private::SockaddrLikePriv {
     ///
     /// # Arguments
     ///
-    /// - `addr`:   raw pointer to something that can be cast to a
-    ///             `libc::sockaddr`. For example, `libc::sockaddr_in`,
-    ///             `libc::sockaddr_in6`, etc.
-    /// - `len`:    For fixed-width types like `sockaddr_in`, it will be
-    ///             validated if present and ignored if not.  For variable-width
-    ///             types it is required and must be the total length of valid
-    ///             data.  For example, if `addr` points to a
-    ///             named `sockaddr_un`, then `len` must be the length of the
-    ///             structure up to but not including the trailing NUL.
+    /// - `addr`:   raw pointer to something that can be cast to a `libc::sockaddr`.
+    ///   For example, `libc::sockaddr_in`, `libc::sockaddr_in6`, etc.
+    /// - `len`:    For fixed-width types like `sockaddr_in`, it will be validated
+    ///   if present and ignored if not. For variable-width types it is required 
+    ///   and must be the total length of valid data. For example, if `addr` 
+    ///   points to a named `sockaddr_un`, then `len` must be the length of the
+    ///   structure up to but not including the trailing NUL.
     ///
     /// # Safety
     ///
@@ -920,6 +924,13 @@ impl From<SockaddrIn> for net::SocketAddrV4 {
 }
 
 #[cfg(feature = "net")]
+impl From<SockaddrIn> for net::SocketAddr {
+    fn from(addr: SockaddrIn) -> Self {
+        net::SocketAddr::from(net::SocketAddrV4::from(addr))
+    }
+}
+
+#[cfg(feature = "net")]
 impl From<SockaddrIn> for libc::sockaddr_in {
     fn from(sin: SockaddrIn) -> libc::sockaddr_in {
         sin.0
@@ -1076,6 +1087,13 @@ impl From<SockaddrIn6> for net::SocketAddrV6 {
 }
 
 #[cfg(feature = "net")]
+impl From<SockaddrIn6> for net::SocketAddr {
+    fn from(addr: SockaddrIn6) -> Self {
+        net::SocketAddr::from(net::SocketAddrV6::from(addr))
+    }
+}
+
+#[cfg(feature = "net")]
 impl std::str::FromStr for SockaddrIn6 {
     type Err = net::AddrParseError;
 
@@ -1110,7 +1128,7 @@ pub union SockaddrStorage {
     alg: AlgAddr,
     #[cfg(all(
         feature = "net",
-        not(any(target_os = "hurd", target_os = "redox"))
+        not(any(target_os = "hurd", target_os = "redox", target_os = "cygwin"))
     ))]
     #[cfg_attr(docsrs, doc(cfg(feature = "net")))]
     dl: LinkAddr,
@@ -1154,6 +1172,7 @@ impl SockaddrLike for SockaddrStorage {
                     linux_android,
                     target_os = "fuchsia",
                     solarish,
+                    target_os = "cygwin",
                 ))]
                 if i32::from(ss.ss_family) == libc::AF_UNIX {
                     // Safe because we UnixAddr is strictly smaller than
@@ -1210,7 +1229,7 @@ impl SockaddrLike for SockaddrStorage {
         }
     }
 
-    #[cfg(any(linux_android, target_os = "fuchsia", solarish))]
+    #[cfg(any(linux_android, target_os = "fuchsia", solarish, target_os = "cygwin"))]
     fn len(&self) -> libc::socklen_t {
         match self.as_unix_addr() {
             // The UnixAddr type knows its own length
@@ -1272,6 +1291,7 @@ impl SockaddrStorage {
             if #[cfg(any(linux_android,
                      target_os = "fuchsia",
                      solarish,
+                     target_os = "cygwin",
                 ))]
             {
                 let p = unsafe{ &self.ss as *const libc::sockaddr_storage };
@@ -1301,6 +1321,7 @@ impl SockaddrStorage {
             if #[cfg(any(linux_android,
                      target_os = "fuchsia",
                      solarish,
+                     target_os = "cygwin",
                 ))]
             {
                 let p = unsafe{ &self.ss as *const libc::sockaddr_storage };
@@ -2176,7 +2197,7 @@ mod tests {
         }
     }
 
-    #[cfg(not(any(target_os = "hurd", target_os = "redox")))]
+    #[cfg(not(any(target_os = "hurd", target_os = "redox", target_os = "cygwin")))]
     #[allow(clippy::cast_ptr_alignment)]
     mod link {
         #[cfg(any(apple_targets, solarish))]
@@ -2200,7 +2221,7 @@ mod tests {
                 sdl_slen: 0,
                 ..unsafe { mem::zeroed() }
             });
-            format!("{la}");
+            let _ = format!("{la}");
         }
 
         #[cfg(all(
@@ -2407,7 +2428,7 @@ mod tests {
             let addr = UnixAddr::new_abstract(name.as_bytes()).unwrap();
 
             let sun_path1 =
-                unsafe { &(*addr.as_ptr()).sun_path[..addr.path_len()] };
+                unsafe { &(&(*addr.as_ptr()).sun_path)[..addr.path_len()] };
             let sun_path2 = [
                 0, 110, 105, 120, 0, 97, 98, 115, 116, 114, 97, 99, 116, 0,
                 116, 101, 115, 116,

@@ -193,7 +193,7 @@ impl<'a> AioCb<'a> {
     }
 }
 
-impl<'a> Debug for AioCb<'a> {
+impl Debug for AioCb<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.debug_struct("AioCb")
             .field("aiocb", &self.aiocb.0)
@@ -202,7 +202,7 @@ impl<'a> Debug for AioCb<'a> {
     }
 }
 
-impl<'a> Drop for AioCb<'a> {
+impl Drop for AioCb<'_> {
     /// If the `AioCb` has no remaining state in the kernel, just drop it.
     /// Otherwise, dropping constitutes a resource leak, which is an error
     fn drop(&mut self) {
@@ -455,10 +455,9 @@ impl<'a> AioFsync<'a> {
     /// * `fd`:           File descriptor to sync.
     /// * `mode`:         Whether to sync file metadata too, or just data.
     /// * `prio`:         If POSIX Prioritized IO is supported, then the
-    ///                   operation will be prioritized at the process's
-    ///                   priority level minus `prio`.
-    /// * `sigev_notify`: Determines how you will be notified of event
-    ///                   completion.
+    ///   operation will be prioritized at the process's priority level minus 
+    ///   `prio`.
+    /// * `sigev_notify`: Determines how you will be notified of event completion.
     pub fn new(
         fd: BorrowedFd<'a>,
         mode: AioFsyncMode,
@@ -499,7 +498,7 @@ impl<'a> Aio for AioFsync<'a> {
 
 // AioFsync does not need AsMut, since it can't be used with lio_listio
 
-impl<'a> AsRef<libc::aiocb> for AioFsync<'a> {
+impl AsRef<libc::aiocb> for AioFsync<'_> {
     fn as_ref(&self) -> &libc::aiocb {
         &self.aiocb.aiocb.0
     }
@@ -573,11 +572,9 @@ impl<'a> AioRead<'a> {
     /// * `fd`:           File descriptor to read from
     /// * `offs`:         File offset
     /// * `buf`:          A memory buffer.  It must outlive the `AioRead`.
-    /// * `prio`:         If POSIX Prioritized IO is supported, then the
-    ///                   operation will be prioritized at the process's
-    ///                   priority level minus `prio`
-    /// * `sigev_notify`: Determines how you will be notified of event
-    ///                   completion.
+    /// * `prio`:         If POSIX Prioritized IO is supported, then the operation
+    ///   will be prioritized at the process's priority level minus `prio`
+    /// * `sigev_notify`: Determines how you will be notified of event completion.
     pub fn new(
         fd: BorrowedFd<'a>,
         offs: off_t,
@@ -609,13 +606,13 @@ impl<'a> Aio for AioRead<'a> {
     aio_methods!(aio_read);
 }
 
-impl<'a> AsMut<libc::aiocb> for AioRead<'a> {
+impl AsMut<libc::aiocb> for AioRead<'_> {
     fn as_mut(&mut self) -> &mut libc::aiocb {
         &mut self.aiocb.aiocb.0
     }
 }
 
-impl<'a> AsRef<libc::aiocb> for AioRead<'a> {
+impl AsRef<libc::aiocb> for AioRead<'_> {
     fn as_ref(&self) -> &libc::aiocb {
         &self.aiocb.aiocb.0
     }
@@ -732,14 +729,14 @@ impl<'a> Aio for AioReadv<'a> {
 }
 
 #[cfg(target_os = "freebsd")]
-impl<'a> AsMut<libc::aiocb> for AioReadv<'a> {
+impl AsMut<libc::aiocb> for AioReadv<'_> {
     fn as_mut(&mut self) -> &mut libc::aiocb {
         &mut self.aiocb.aiocb.0
     }
 }
 
 #[cfg(target_os = "freebsd")]
-impl<'a> AsRef<libc::aiocb> for AioReadv<'a> {
+impl AsRef<libc::aiocb> for AioReadv<'_> {
     fn as_ref(&self) -> &libc::aiocb {
         &self.aiocb.aiocb.0
     }
@@ -805,11 +802,9 @@ impl<'a> AioWrite<'a> {
     /// * `fd`:           File descriptor to write to
     /// * `offs`:         File offset
     /// * `buf`:          A memory buffer.  It must outlive the `AioWrite`.
-    /// * `prio`:         If POSIX Prioritized IO is supported, then the
-    ///                   operation will be prioritized at the process's
-    ///                   priority level minus `prio`
-    /// * `sigev_notify`: Determines how you will be notified of event
-    ///                   completion.
+    /// * `prio`:         If POSIX Prioritized IO is supported, then the operation
+    ///   will be prioritized at the process's priority level minus `prio`
+    /// * `sigev_notify`: Determines how you will be notified of event completion.
     pub fn new(
         fd: BorrowedFd<'a>,
         offs: off_t,
@@ -845,13 +840,13 @@ impl<'a> Aio for AioWrite<'a> {
     aio_methods!(aio_write);
 }
 
-impl<'a> AsMut<libc::aiocb> for AioWrite<'a> {
+impl AsMut<libc::aiocb> for AioWrite<'_> {
     fn as_mut(&mut self) -> &mut libc::aiocb {
         &mut self.aiocb.aiocb.0
     }
 }
 
-impl<'a> AsRef<libc::aiocb> for AioWrite<'a> {
+impl AsRef<libc::aiocb> for AioWrite<'_> {
     fn as_ref(&self) -> &libc::aiocb {
         &self.aiocb.aiocb.0
     }
@@ -965,14 +960,14 @@ impl<'a> Aio for AioWritev<'a> {
 }
 
 #[cfg(target_os = "freebsd")]
-impl<'a> AsMut<libc::aiocb> for AioWritev<'a> {
+impl AsMut<libc::aiocb> for AioWritev<'_> {
     fn as_mut(&mut self) -> &mut libc::aiocb {
         &mut self.aiocb.aiocb.0
     }
 }
 
 #[cfg(target_os = "freebsd")]
-impl<'a> AsRef<libc::aiocb> for AioWritev<'a> {
+impl AsRef<libc::aiocb> for AioWritev<'_> {
     fn as_ref(&self) -> &libc::aiocb {
         &self.aiocb.aiocb.0
     }

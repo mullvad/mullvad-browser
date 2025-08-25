@@ -1,10 +1,9 @@
 use nix::sys::uio::*;
 use nix::unistd::*;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::distr::Alphanumeric;
+use rand::{rng, Rng};
 use std::fs::OpenOptions;
 use std::io::IoSlice;
-use std::os::unix::io::AsRawFd;
 use std::{cmp, iter};
 
 #[cfg(not(target_os = "redox"))]
@@ -15,10 +14,12 @@ use tempfile::tempdir;
 use tempfile::tempfile;
 
 #[test]
+// On Solaris sometimes wrtitev() returns EINVAL.
+#[cfg(not(target_os = "solaris"))]
 fn test_writev() {
     let mut to_write = Vec::with_capacity(16 * 128);
     for _ in 0..16 {
-        let s: String = thread_rng()
+        let s: String = rng()
             .sample_iter(&Alphanumeric)
             .map(char::from)
             .take(128)
@@ -34,7 +35,7 @@ fn test_writev() {
         let slice_len = if left <= 64 {
             left
         } else {
-            thread_rng().gen_range(64..cmp::min(256, left))
+            rng().random_range(64..cmp::min(256, left))
         };
         let b = &to_write[consumed..consumed + slice_len];
         iovecs.push(IoSlice::new(b));
@@ -49,7 +50,7 @@ fn test_writev() {
     let written = write_res.expect("couldn't write");
     // Check whether we written all data
     assert_eq!(to_write.len(), written);
-    let read_res = read(reader.as_raw_fd(), &mut read_buf[..]);
+    let read_res = read(&reader, &mut read_buf[..]);
     let read = read_res.expect("couldn't read");
     // Check we have read as much as we written
     assert_eq!(read, written);
@@ -60,7 +61,7 @@ fn test_writev() {
 #[test]
 #[cfg(not(target_os = "redox"))]
 fn test_readv() {
-    let s: String = thread_rng()
+    let s: String = rng()
         .sample_iter(&Alphanumeric)
         .map(char::from)
         .take(128)
@@ -73,7 +74,7 @@ fn test_readv() {
         let vec_len = if left <= 64 {
             left
         } else {
-            thread_rng().gen_range(64..cmp::min(256, left))
+            rng().random_range(64..cmp::min(256, left))
         };
         let v: Vec<u8> = iter::repeat(0u8).take(vec_len).collect();
         storage.push(v);
@@ -143,7 +144,8 @@ fn test_pread() {
 #[cfg(not(any(
     target_os = "redox",
     target_os = "haiku",
-    target_os = "solaris"
+    target_os = "solaris",
+    target_os = "cygwin"
 )))]
 fn test_pwritev() {
     use std::io::Read;
@@ -182,7 +184,8 @@ fn test_pwritev() {
 #[cfg(not(any(
     target_os = "redox",
     target_os = "haiku",
-    target_os = "solaris"
+    target_os = "solaris",
+    target_os = "cygwin"
 )))]
 fn test_preadv() {
     use std::io::Write;
@@ -228,7 +231,6 @@ fn test_process_vm_readv() {
     use nix::sys::signal::*;
     use nix::sys::wait::*;
     use nix::unistd::ForkResult::*;
-    use std::os::unix::io::AsRawFd;
 
     require_capability!("test_process_vm_readv", CAP_SYS_PTRACE);
     let _m = crate::FORK_MTX.lock();
@@ -242,7 +244,7 @@ fn test_process_vm_readv() {
         Parent { child } => {
             drop(w);
             // wait for child
-            read(r.as_raw_fd(), &mut [0u8]).unwrap();
+            read(&r, &mut [0u8]).unwrap();
             drop(r);
 
             let ptr = vector.as_ptr() as usize;

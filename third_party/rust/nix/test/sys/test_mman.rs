@@ -119,3 +119,82 @@ fn test_mremap_shrink() {
     // The first KB should still be accessible and have the old data in it.
     assert_eq!(slice[ONE_K - 1], 0xFF);
 }
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_mremap_dontunmap() {
+    use nix::libc::size_t;
+    use nix::sys::mman::{mremap, MRemapFlags};
+    use std::num::NonZeroUsize;
+    use std::ptr::NonNull;
+
+    const ONE_K: size_t = 1024;
+    let one_k_non_zero = NonZeroUsize::new(ONE_K).unwrap();
+
+    let slice: &mut [u8] = unsafe {
+        let mem = mmap_anonymous(
+            None,
+            one_k_non_zero,
+            ProtFlags::PROT_READ | ProtFlags::PROT_WRITE,
+            MapFlags::MAP_PRIVATE,
+        )
+        .unwrap();
+        std::slice::from_raw_parts_mut(mem.as_ptr().cast(), ONE_K)
+    };
+
+    // because we do not unmap `slice`, `old_size` and `new_size`
+    // need to be equal or `EINVAL` is set.
+    let _new_slice: &mut [u8] = unsafe {
+        let mem = mremap(
+            NonNull::from(&mut slice[..]).cast(),
+            ONE_K,
+            ONE_K,
+            MRemapFlags::MREMAP_MAYMOVE | MRemapFlags::MREMAP_DONTUNMAP,
+            None,
+        )
+        .unwrap();
+        std::slice::from_raw_parts_mut(mem.cast().as_ptr(), 10 * ONE_K)
+    };
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_madv_wipeonfork() {
+    use nix::libc::size_t;
+    use nix::sys::mman::{madvise, MmapAdvise};
+    use nix::unistd::{fork, ForkResult};
+    use std::num::NonZeroUsize;
+
+    const ONE_K: size_t = 1024;
+    let ten_one_k = NonZeroUsize::new(10 * ONE_K).unwrap();
+    let slice: &mut [u8] = unsafe {
+        let mem = mmap_anonymous(
+            None,
+            ten_one_k,
+            ProtFlags::PROT_READ | ProtFlags::PROT_WRITE,
+            MapFlags::MAP_PRIVATE,
+        )
+        .unwrap();
+        madvise(mem, ONE_K, MmapAdvise::MADV_WIPEONFORK)
+            .expect("madvise failed");
+        std::slice::from_raw_parts_mut(mem.as_ptr().cast(), ONE_K)
+    };
+    slice[ONE_K - 1] = 0xFF;
+    let _m = crate::FORK_MTX.lock();
+
+    unsafe {
+        let res = fork().expect("fork failed");
+        match res {
+            ForkResult::Child => {
+                // that s the whole point of MADV_WIPEONFORK
+                assert_eq!(slice[ONE_K - 1], 0x00);
+                libc::_exit(0);
+            }
+            ForkResult::Parent { child } => {
+                nix::sys::signal::kill(child, nix::sys::signal::SIGTERM)
+                    .unwrap();
+                let _ = nix::sys::wait::wait().unwrap();
+            }
+        }
+    }
+}

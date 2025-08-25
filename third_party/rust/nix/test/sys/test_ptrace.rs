@@ -179,12 +179,17 @@ fn test_ptrace_interrupt() {
 // ptrace::{setoptions, getregs} are only available in these platforms
 #[cfg(all(
     target_os = "linux",
-    target_env = "gnu",
     any(
-        target_arch = "x86_64",
-        target_arch = "x86",
-        target_arch = "aarch64",
-        target_arch = "riscv64",
+        all(
+            target_env = "gnu",
+            any(
+                target_arch = "x86_64",
+                target_arch = "x86",
+                target_arch = "aarch64",
+                target_arch = "riscv64"
+            )
+        ),
+        all(target_env = "musl", target_arch = "aarch64")
     )
 ))]
 #[test]
@@ -292,12 +297,17 @@ fn test_ptrace_syscall() {
 
 #[cfg(all(
     target_os = "linux",
-    target_env = "gnu",
     any(
-        target_arch = "x86_64",
-        target_arch = "x86",
-        target_arch = "aarch64",
-        target_arch = "riscv64",
+        all(
+            target_env = "gnu",
+            any(
+                target_arch = "x86_64",
+                target_arch = "x86",
+                target_arch = "aarch64",
+                target_arch = "riscv64"
+            )
+        ),
+        all(target_env = "musl", target_arch = "aarch64")
     )
 ))]
 #[test]
@@ -369,5 +379,34 @@ fn test_ptrace_regsets() {
                 _ => panic!("The process should have been killed"),
             }
         }
+    }
+}
+
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+#[test]
+fn test_ptrace_syscall_info() {
+    use nix::sys::ptrace;
+    use nix::sys::wait::{waitpid, WaitStatus};
+    use nix::unistd::fork;
+    use nix::unistd::ForkResult::*;
+
+    require_capability!("test_ptrace_syscall_info", CAP_SYS_PTRACE);
+
+    let _m = crate::FORK_MTX.lock();
+    match unsafe { fork() }.expect("Error: Fork Failed") {
+        Child => {
+            ptrace::traceme().unwrap();
+            std::thread::sleep(std::time::Duration::from_millis(1000));
+            unsafe {
+                ::libc::_exit(0);
+            }
+        }
+        Parent { child } => loop {
+            if let Ok(WaitStatus::Exited(_, 0)) = waitpid(child, None) {
+                break;
+            }
+            let si = ptrace::syscall_info(child).unwrap();
+            assert!(si.op >= libc::PTRACE_SYSCALL_INFO_ENTRY);
+        },
     }
 }

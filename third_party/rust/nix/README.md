@@ -2,9 +2,9 @@
 
 [![Cirrus Build Status](https://api.cirrus-ci.com/github/nix-rust/nix.svg)](https://cirrus-ci.com/github/nix-rust/nix)
 [![crates.io](https://img.shields.io/crates/v/nix.svg)](https://crates.io/crates/nix)
-[![maintenance-status](https://img.shields.io/badge/maintenance-looking--for--maintainer-orange.svg)](https://github.com/nix-rust/nix/issues/2132)
-
-[Documentation (Releases)](https://docs.rs/nix/)
+[![docs.rs](https://img.shields.io/badge/docs.rs-nix-blue?style=flat-square&logo=docs.rs)](https://docs.rs/nix)
+![maintenance-status](https://img.shields.io/badge/maintenance-actively--developed-brightgreen.svg)
+[![msrv](https://img.shields.io/badge/msrv-1.69-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
 
 Nix seeks to provide friendly bindings to various *nix platform APIs (Linux, Darwin,
 ...). The goal is to not provide a 100% unified interface, but to unify
@@ -81,19 +81,23 @@ The following targets are supported by `nix`:
    <ul>
     <li>aarch64-apple-ios</li>
     <li>aarch64-linux-android</li>
+    <li>aarch64-unknown-linux-ohos</li>
     <li>arm-linux-androideabi</li>
     <li>arm-unknown-linux-musleabi</li>
     <li>armv7-linux-androideabi</li>
+    <li>armv7-unknown-linux-ohos</li>
     <li>i686-linux-android</li>
+    <li>loongarch64-unknown-linux-gnu</li>
     <li>s390x-unknown-linux-gnu</li>
     <li>x86_64-linux-android</li>
     <li>x86_64-unknown-illumos</li>
+    <li>x86_64-unknown-linux-ohos</li>
     <li>x86_64-unknown-netbsd</li>
    </td>
    <td>
     <li>armv7-unknown-linux-uclibceabihf</li>
     <li>powerpc64-unknown-linux-gnu</li>
-    <li>x86_64-fuchsia</li>
+    <li>x86_64-unknown-fuchsia</li>
     <li>x86_64-unknown-dragonfly</li>
     <li>x86_64-unknown-haiku</li>
     <li>x86_64-unknown-linux-gnux32</li>
@@ -114,7 +118,7 @@ changed in the future without bumping the major or minor version.
 Contributions are very welcome.  Please See [CONTRIBUTING](CONTRIBUTING.md) for
 additional details.
 
-Feel free to join us in [the nix-rust/nix](https://gitter.im/nix-rust/nix) channel on Gitter to
+Feel free to join us in [the nix-rust/nix](https://discord.com/invite/rkBeJUsmyd) channel on Discord to
 discuss `nix` development.
 
 ## License

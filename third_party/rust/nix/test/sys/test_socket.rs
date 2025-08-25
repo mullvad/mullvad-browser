@@ -200,7 +200,7 @@ pub fn test_path_to_sock_addr() {
 
     let expect: &[c_char] =
         unsafe { slice::from_raw_parts(path.as_ptr().cast(), path.len()) };
-    assert_eq!(unsafe { &(*addr.as_ptr()).sun_path[..8] }, expect);
+    assert_eq!(unsafe { &(&(*addr.as_ptr()).sun_path)[..8] }, expect);
 
     assert_eq!(addr.path(), Some(actual));
 }
@@ -321,12 +321,13 @@ pub fn test_socketpair() {
     .unwrap();
     write(&fd1, b"hello").unwrap();
     let mut buf = [0; 5];
-    read(fd2.as_raw_fd(), &mut buf).unwrap();
+    read(&fd2, &mut buf).unwrap();
 
     assert_eq!(&buf[..], b"hello");
 }
 
 #[test]
+#[cfg_attr(target_os = "cygwin", ignore)]
 pub fn test_recvmsg_sockaddr_un() {
     use nix::sys::socket::{
         self, bind, socket, AddressFamily, MsgFlags, SockFlag, SockType,
@@ -841,6 +842,7 @@ pub fn test_recvmsg_ebadf() {
 // 2.12.0.  https://bugs.launchpad.net/qemu/+bug/1701808
 #[cfg_attr(qemu, ignore)]
 #[test]
+#[cfg_attr(target_os = "cygwin", ignore)]
 pub fn test_scm_rights() {
     use nix::sys::socket::{
         recvmsg, sendmsg, socketpair, AddressFamily, ControlMessage,
@@ -908,14 +910,24 @@ pub fn test_scm_rights() {
     // Ensure that the received file descriptor works
     write(&w, b"world").unwrap();
     let mut buf = [0u8; 5];
-    read(received_r.as_raw_fd(), &mut buf).unwrap();
+    // SAFETY:
+    // should be safe since we don't use it after close
+    let borrowed_received_r =
+        unsafe { std::os::fd::BorrowedFd::borrow_raw(received_r) };
+    read(borrowed_received_r, &mut buf).unwrap();
     assert_eq!(&buf[..], b"world");
     close(received_r).unwrap();
 }
 
-// Disable the test on emulated platforms due to not enabled support of AF_ALG in QEMU from rust cross
+// 1. Disable the test on emulated platforms due to not enabled support of
+//    AF_ALG in QEMU from rust cross
+// 2. Disable the test on aarch64/Linux CI because bind() fails with ENOENT
+//    https://github.com/nix-rust/nix/issues/1352
 #[cfg(linux_android)]
-#[cfg_attr(qemu, ignore)]
+#[cfg_attr(
+    any(qemu, all(target_os = "linux", target_arch = "aarch64")),
+    ignore
+)]
 #[test]
 pub fn test_af_alg_cipher() {
     use nix::sys::socket::sockopt::AlgSetKey;
@@ -925,11 +937,6 @@ pub fn test_af_alg_cipher() {
     };
     use nix::unistd::read;
     use std::io::IoSlice;
-
-    skip_if_cirrus!("Fails for an unknown reason Cirrus CI.  Bug #1352");
-    // Travis's seccomp profile blocks AF_ALG
-    // https://docs.docker.com/engine/security/seccomp/
-    skip_if_seccomp!(test_af_alg_cipher);
 
     let alg_type = "skcipher";
     let alg_name = "ctr-aes-aesni";
@@ -975,8 +982,12 @@ pub fn test_af_alg_cipher() {
 
     // allocate buffer for encrypted data
     let mut encrypted = vec![0u8; payload_len];
+    // SAFETY:
+    // should be safe since session_socket won't be closed before the use of this borrowed one
+    let borrowed_session_socket =
+        unsafe { std::os::fd::BorrowedFd::borrow_raw(session_socket) };
     let num_bytes =
-        read(session_socket.as_raw_fd(), &mut encrypted).expect("read encrypt");
+        read(borrowed_session_socket, &mut encrypted).expect("read encrypt");
     assert_eq!(num_bytes, payload_len);
 
     let iov = IoSlice::new(&encrypted);
@@ -998,8 +1009,12 @@ pub fn test_af_alg_cipher() {
 
     // allocate buffer for decrypted data
     let mut decrypted = vec![0u8; payload_len];
+    // SAFETY:
+    // should be safe since session_socket won't be closed before the use of this borrowed one
+    let borrowed_session_socket =
+        unsafe { std::os::fd::BorrowedFd::borrow_raw(session_socket) };
     let num_bytes =
-        read(session_socket.as_raw_fd(), &mut decrypted).expect("read decrypt");
+        read(borrowed_session_socket, &mut decrypted).expect("read decrypt");
 
     assert_eq!(num_bytes, payload_len);
     assert_eq!(decrypted, payload);
@@ -1087,8 +1102,12 @@ pub fn test_af_alg_aead() {
     // allocate buffer for encrypted data
     let mut encrypted =
         vec![0u8; (assoc_size as usize) + payload_len + auth_size];
+    // SAFETY:
+    // should be safe since session_socket won't be closed before the use of this borrowed one
+    let borrowed_session_socket =
+        unsafe { std::os::fd::BorrowedFd::borrow_raw(session_socket) };
     let num_bytes =
-        read(session_socket.as_raw_fd(), &mut encrypted).expect("read encrypt");
+        read(borrowed_session_socket, &mut encrypted).expect("read encrypt");
     assert_eq!(num_bytes, payload_len + auth_size + (assoc_size as usize));
 
     for i in 0..assoc_size {
@@ -1122,10 +1141,16 @@ pub fn test_af_alg_aead() {
     // authentication tag memory is only needed in the output buffer for encryption
     // and in the input buffer for decryption.
     // Do not block on read, as we may have fewer bytes than buffer size
-    fcntl(session_socket, FcntlArg::F_SETFL(OFlag::O_NONBLOCK))
+
+    // SAFETY:
+    //
+    // `session_socket` will be valid for the lifetime of this test
+    // TODO: remove this workaround when accept(2) becomes I/O-safe.
+    let borrowed_fd =
+        unsafe { std::os::fd::BorrowedFd::borrow_raw(session_socket) };
+    fcntl(borrowed_fd, FcntlArg::F_SETFL(OFlag::O_NONBLOCK))
         .expect("fcntl non_blocking");
-    let num_bytes =
-        read(session_socket.as_raw_fd(), &mut decrypted).expect("read decrypt");
+    let num_bytes = read(borrowed_fd, &mut decrypted).expect("read decrypt");
 
     assert!(num_bytes >= payload_len + (assoc_size as usize));
     assert_eq!(
@@ -1304,6 +1329,7 @@ pub fn test_sendmsg_ipv4sendsrcaddr() {
 // 2.12.0.  https://bugs.launchpad.net/qemu/+bug/1701808
 #[cfg_attr(qemu, ignore)]
 #[test]
+#[cfg_attr(target_os = "cygwin", ignore)]
 fn test_scm_rights_single_cmsg_multiple_fds() {
     use nix::sys::socket::{
         recvmsg, sendmsg, ControlMessage, ControlMessageOwned, MsgFlags,
@@ -1615,7 +1641,11 @@ fn test_impl_scm_credentials_and_rights(
     // Ensure that the received file descriptor works
     write(&w, b"world").unwrap();
     let mut buf = [0u8; 5];
-    read(received_r.as_raw_fd(), &mut buf).unwrap();
+    // SAFETY:
+    // It should be safe if we don't use this BorrowedFd after close.
+    let received_r_borrowed =
+        unsafe { std::os::fd::BorrowedFd::borrow_raw(received_r) };
+    read(received_r_borrowed, &mut buf).unwrap();
     assert_eq!(&buf[..], b"world");
     close(received_r).unwrap();
 
@@ -1659,17 +1689,28 @@ pub fn test_named_unixdomain() {
 
     let s3 = accept(s1.as_raw_fd()).expect("accept failed");
 
+    // SAFETY:
+    // It should be safe considering that s3 will be open within this test
+    let s3 = unsafe { std::os::fd::BorrowedFd::borrow_raw(s3) };
     let mut buf = [0; 5];
-    read(s3.as_raw_fd(), &mut buf).unwrap();
+    read(s3, &mut buf).unwrap();
     thr.join().unwrap();
 
     assert_eq!(&buf[..], b"hello");
 }
 
 #[test]
+pub fn test_listen_maxbacklog() {
+    use nix::sys::socket::Backlog;
+
+    assert!(Backlog::new(libc::SOMAXCONN).is_ok());
+}
+
+#[test]
 pub fn test_listen_wrongbacklog() {
     use nix::sys::socket::Backlog;
 
+    #[cfg(not(target_os = "cygwin"))]
     assert!(Backlog::new(libc::SOMAXCONN + 1).is_err());
     assert!(Backlog::new(-2).is_err());
 }
@@ -2544,6 +2585,191 @@ fn test_recvmsg_rxq_ovfl() {
     assert_eq!(drop_counter, 1);
 }
 
+#[cfg(any(linux_android, target_os = "freebsd"))]
+#[cfg(feature = "net")]
+// qemu doesn't seem to be emulating this correctly in these architectures
+#[cfg_attr(
+    all(
+        qemu,
+        any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )
+    ),
+    ignore
+)]
+#[test]
+pub fn test_ip_tos_udp() {
+    use nix::sys::socket::ControlMessageOwned;
+    use nix::sys::socket::{
+        bind, recvmsg, sendmsg, setsockopt, socket, sockopt, ControlMessage,
+        MsgFlags, SockFlag, SockType, SockaddrIn,
+    };
+
+    let sock_addr = SockaddrIn::from_str("127.0.0.1:6909").unwrap();
+    let rsock = socket(
+        AddressFamily::Inet,
+        SockType::Datagram,
+        SockFlag::empty(),
+        None,
+    )
+    .unwrap();
+    setsockopt(&rsock, sockopt::IpRecvTos, &true).unwrap();
+    bind(rsock.as_raw_fd(), &sock_addr).unwrap();
+
+    let sbuf = [0u8; 2048];
+    let iov1 = [std::io::IoSlice::new(&sbuf)];
+
+    let mut rbuf = [0u8; 2048];
+    let mut iov2 = [std::io::IoSliceMut::new(&mut rbuf)];
+    let mut rcmsg = cmsg_space!(libc::c_int);
+
+    let ssock = socket(
+        AddressFamily::Inet,
+        SockType::Datagram,
+        SockFlag::empty(),
+        None,
+    )
+    .expect("send socket failed");
+    setsockopt(&ssock, sockopt::Ipv4Tos, &20).unwrap();
+
+    // Test the sendmsg control message and check the received packet has the same TOS.
+    let scmsg = ControlMessage::Ipv4Tos(&20);
+    sendmsg(
+        ssock.as_raw_fd(),
+        &iov1,
+        &[scmsg],
+        MsgFlags::empty(),
+        Some(&sock_addr),
+    )
+    .unwrap();
+
+    // TODO: this test is weak, but testing for the actual ToS value results in sporadic
+    // failures in CI where the ToS in the message header is not the one set by the
+    // sender, so for now the test only checks for the presence of the ToS in the message
+    // header.
+    let mut tc = None;
+    let recv = recvmsg::<()>(
+        rsock.as_raw_fd(),
+        &mut iov2,
+        Some(&mut rcmsg),
+        MsgFlags::empty(),
+    )
+    .unwrap();
+    for c in recv.cmsgs().unwrap() {
+        if let ControlMessageOwned::Ipv4Tos(t) = c {
+            tc = Some(t);
+        }
+    }
+    assert!(tc.is_some());
+}
+
+#[cfg(target_os = "linux")]
+// qemu doesn't seem to be emulating this correctly in these architectures
+#[cfg_attr(
+    all(
+        qemu,
+        any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )
+    ),
+    ignore
+)]
+#[cfg(feature = "net")]
+#[test]
+pub fn test_ipv6_tclass_udp() {
+    use nix::sys::socket::ControlMessageOwned;
+    use nix::sys::socket::{
+        bind, recvmsg, sendmsg, setsockopt, socket, sockopt, ControlMessage,
+        MsgFlags, SockFlag, SockType, SockaddrIn6,
+    };
+
+    let std_sa = SocketAddrV6::from_str("[::1]:6902").unwrap();
+    let sock_addr: SockaddrIn6 = SockaddrIn6::from(std_sa);
+    let rsock = socket(
+        AddressFamily::Inet6,
+        SockType::Datagram,
+        SockFlag::empty(),
+        None,
+    )
+    .unwrap();
+    setsockopt(&rsock, sockopt::Ipv6RecvTClass, &true).unwrap();
+    // This bind call with IPV6_RECVTCLASS fails on the Linux aarch64 target with EADDRNOTAVAIL,
+    // so the test will only run if `bind` does not return an error..
+    if bind(rsock.as_raw_fd(), &sock_addr).is_ok() {
+        let sbuf = [0u8; 2048];
+        let iov1 = [std::io::IoSlice::new(&sbuf)];
+
+        let mut rbuf = [0u8; 2048];
+        let mut iov2 = [std::io::IoSliceMut::new(&mut rbuf)];
+        let mut rcmsg = cmsg_space!(libc::c_int);
+
+        let ssock = socket(
+            AddressFamily::Inet6,
+            SockType::Datagram,
+            SockFlag::empty(),
+            None,
+        )
+        .expect("send socket failed");
+        setsockopt(&ssock, sockopt::Ipv6TClass, &10).unwrap();
+
+        sendmsg(
+            ssock.as_raw_fd(),
+            &iov1,
+            &[],
+            MsgFlags::empty(),
+            Some(&sock_addr),
+        )
+        .unwrap();
+
+        let mut tc = None;
+        let recv = recvmsg::<()>(
+            rsock.as_raw_fd(),
+            &mut iov2,
+            Some(&mut rcmsg),
+            MsgFlags::empty(),
+        )
+        .unwrap();
+        for c in recv.cmsgs().unwrap() {
+            if let ControlMessageOwned::Ipv6TClass(t) = c {
+                tc = Some(t);
+            }
+        }
+        assert_eq!(tc, Some(10));
+
+        let scmsg = ControlMessage::Ipv6TClass(&20);
+        sendmsg(
+            ssock.as_raw_fd(),
+            &iov1,
+            &[scmsg],
+            MsgFlags::empty(),
+            Some(&sock_addr),
+        )
+        .unwrap();
+
+        let mut tc = None;
+        let recv = recvmsg::<()>(
+            rsock.as_raw_fd(),
+            &mut iov2,
+            Some(&mut rcmsg),
+            MsgFlags::empty(),
+        )
+        .unwrap();
+        for c in recv.cmsgs().unwrap() {
+            if let ControlMessageOwned::Ipv6TClass(t) = c {
+                tc = Some(t);
+            }
+        }
+
+        assert_eq!(tc, Some(20));
+    }
+}
+
 #[cfg(linux_android)]
 mod linux_errqueue {
     use super::FromStr;
@@ -2693,7 +2919,7 @@ mod linux_errqueue {
         )
         .unwrap();
         // The sent message / destination associated with the error is returned:
-        assert_eq!(msg.bytes, MESSAGE_CONTENTS.as_bytes().len());
+        assert_eq!(msg.bytes, MESSAGE_CONTENTS.len());
         // recvmsg(2): "The original destination address of the datagram that caused the error is
         // supplied via msg_name;" however, this is not literally true.  E.g., an earlier version
         // of this test used 0.0.0.0 (::0) as the destination address, which was mutated into
@@ -2930,7 +3156,12 @@ fn can_use_cmsg_space() {
     let _ = cmsg_space!(u8);
 }
 
-#[cfg(not(any(linux_android, target_os = "redox", target_os = "haiku")))]
+#[cfg(not(any(
+    linux_android,
+    target_os = "redox",
+    target_os = "haiku",
+    target_os = "cygwin"
+)))]
 #[test]
 fn can_open_routing_socket() {
     use nix::sys::socket::{socket, AddressFamily, SockFlag, SockType};

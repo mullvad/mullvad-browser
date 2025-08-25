@@ -1,7 +1,10 @@
 //! Mostly platform-specific functionality
 #[cfg(any(
     freebsdlike,
-    all(target_os = "linux", not(target_env = "uclibc")),
+    all(
+        target_os = "linux",
+        not(any(target_env = "uclibc", target_env = "ohos"))
+    ),
     apple_targets,
     target_os = "netbsd"
 ))]
@@ -20,8 +23,8 @@ feature! {
     #[cfg(bsd)]
     pub mod event;
 
+    /// Event file descriptor.
     #[cfg(any(linux_android, target_os = "freebsd"))]
-    #[allow(missing_docs)]
     pub mod eventfd;
 }
 
@@ -31,7 +34,13 @@ feature! {
     pub mod fanotify;
 }
 
-#[cfg(any(bsd, linux_android, target_os = "redox", solarish))]
+#[cfg(any(
+    bsd,
+    linux_android,
+    solarish,
+    target_os = "fuchsia",
+    target_os = "redox",
+))]
 #[cfg(feature = "ioctl")]
 #[cfg_attr(docsrs, doc(cfg(feature = "ioctl")))]
 #[macro_use]
@@ -43,7 +52,6 @@ feature! {
     pub mod memfd;
 }
 
-#[cfg(not(target_os = "redox"))]
 feature! {
     #![feature = "mman"]
     pub mod mman;
@@ -128,7 +136,13 @@ feature! {
     pub mod stat;
 }
 
-#[cfg(any(linux_android, freebsdlike, apple_targets, target_os = "openbsd"))]
+#[cfg(any(
+    linux_android,
+    freebsdlike,
+    apple_targets,
+    target_os = "openbsd",
+    target_os = "cygwin"
+))]
 feature! {
     #![feature = "fs"]
     pub mod statfs;
