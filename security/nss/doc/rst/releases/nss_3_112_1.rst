@@ -1,0 +1,34 @@
+.. _mozilla_projects_nss_nss_3_112_1_release_notes:
+
+NSS 3.112.1 release notes
+========================
+
+`Introduction <#introduction>`__
+--------------------------------
+
+.. container::
+
+   Network Security Services (NSS) 3.112.1 was released on *21 August 2025**.
+
+`Distribution Information <#distribution_information>`__
+--------------------------------------------------------
+
+.. container::
+
+   The HG tag is NSS_3_112_1_RTM. NSS 3.112.1 requires NSPR 4.36 or newer. The latest version of NSPR is 4.36.
+
+   NSS 3.112.1 source distributions are available on ftp.mozilla.org for secure HTTPS download:
+
+   -  Source tarballs:
+      https://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_3_112_1_RTM/src/
+
+   Other releases are available :ref:`mozilla_projects_nss_releases`.
+
+.. _changes_in_nss_3.112.1:
+
+`Changes in NSS 3.112.1 <#changes_in_nss_3.112.1>`__
+------------------------------------------------------------------
+
+.. container::
+
+   - Bug 1982742 - restore support for finding certificates by decoded serial number.
