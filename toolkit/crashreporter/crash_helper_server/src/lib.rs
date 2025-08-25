@@ -40,6 +40,7 @@ pub unsafe extern "C" fn crash_generator_logic_desktop(
     listener: *const c_char,
     pipe: *const c_char,
 ) -> i32 {
+    daemonize();
     logging::init();
 
     let breakpad_data = BreakpadData::new(breakpad_data);
@@ -139,6 +140,47 @@ fn main_loop(mut ipc_server: IPCServer, mut crash_generator: CrashGenerator) -> 
                 return -1;
             }
             _ => {} // Go on
+        }
+    }
+}
+
+// Daemonize the current process by forking it and then immediately returning
+// in the parent. This should have been done via a double fork() in the
+// crash_helper_client crate, however the first fork() call causes issues to
+// Thunderbird on macOS 10.15 (see bug 1977514). This is a known problem with
+// macOS 10.15 implemenetation, not a flaw in our logic, and the only way to
+// work around it is to use posix_spawn() instead, which forces use to move
+// the step to reparent the crash helper to PID 1 here.
+//
+// Note that if this fails for some reason, the crash helper will still launch,
+// but not as a daemon. Not ideal but still better to have a fallback.
+#[cfg(not(target_os = "android"))]
+fn daemonize() {
+    #[cfg(not(target_os = "windows"))]
+    {
+        use nix::unistd::{fork, setsid, ForkResult};
+
+        // Create a new process group and a new session, this guarantees
+        // that the crash helper process will be disconnected from the
+        // signals of Firefox main process' controlling terminal. Killing
+        // Firefox via the terminal shouldn't kill the crash helper which
+        // has its own lifecycle management.
+        //
+        // We don't check for errors as there's nothing we can do to
+        // handle one in this context.
+        let _ = setsid();
+
+        let res = unsafe { fork() };
+        let Ok(res) = res else {
+            return;
+        };
+
+        match res {
+            ForkResult::Child => {}
+            ForkResult::Parent { child: _ } => unsafe {
+                // We're done, exit cleanly
+                nix::libc::_exit(0);
+            },
         }
     }
 }
