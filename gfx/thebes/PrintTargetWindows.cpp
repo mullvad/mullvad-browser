@@ -7,7 +7,14 @@
 
 #include "cairo-win32.h"
 #include "mozilla/gfx/HelpersCairo.h"
+#include "mozilla/StaticPrefs_browser.h"
+#include "mozilla/WidgetUtils.h"
 #include "nsCoord.h"
+#include "nsIContentAnalysis.h"
+#include "nsIWidget.h"
+#include "nsIWindowMediator.h"
+#include "nsPIDOMWindow.h"
+#include "nsServiceManagerUtils.h"
 #include "nsString.h"
 
 namespace mozilla {
@@ -52,6 +59,8 @@ already_AddRefed<PrintTargetWindows> PrintTargetWindows::CreateOrNull(HDC aDC) {
   return target.forget();
 }
 
+LazyLogModule gPrintingLog("printing");
+
 nsresult PrintTargetWindows::BeginPrinting(const nsAString& aTitle,
                                            const nsAString& aPrintToFileName,
                                            int32_t aStartPage,
@@ -74,6 +83,36 @@ nsresult PrintTargetWindows::BeginPrinting(const nsAString& aTitle,
   docinfo.lpszDatatype = nullptr;
   docinfo.fwType = 0;
 
+  // If we just did content analysis on this print request, it may have popped
+  // up a dialog, and this can prevent StartDocW() from working properly if the
+  // printer wants to pop up a dialog window (to get a file name to save to, for
+  // example). Setting the foreground window to any browser window seems to work
+  // around this. See bug 1980225.
+  if (nsIContentAnalysis::MightBeActive() &&
+      StaticPrefs::browser_contentanalysis_print_set_foreground_window()) {
+    nsCOMPtr<nsIWindowMediator> winMediator =
+        do_GetService(NS_WINDOWMEDIATOR_CONTRACTID);
+    if (winMediator) {
+      nsCOMPtr<mozIDOMWindowProxy> domWindow;
+      nsresult rv =
+          winMediator->GetMostRecentBrowserWindow(getter_AddRefs(domWindow));
+      if (NS_SUCCEEDED(rv) && domWindow) {
+        nsPIDOMWindowOuter* win = nsPIDOMWindowOuter::From(domWindow);
+        if (win) {
+          nsCOMPtr<nsIWidget> widget =
+              widget::WidgetUtils::DOMWindowToWidget(win);
+          if (widget) {
+            HWND hwnd =
+                static_cast<HWND>(widget->GetNativeData(NS_NATIVE_WINDOW));
+            BOOL foregroundReturn = ::SetForegroundWindow(hwnd);
+            MOZ_LOG(gPrintingLog, mozilla::LogLevel::Debug,
+                    ("Called SetForegroundWindow(), which returned %d",
+                     foregroundReturn));
+          }
+        }
+      }
+    }
+  }
   // If the user selected Microsoft Print to PDF or XPS Document Printer, then
   // the following StartDoc call will put up a dialog window to prompt the
   // user to provide the name and location of the file to be saved.  A zero or
@@ -84,7 +123,8 @@ nsresult PrintTargetWindows::BeginPrinting(const nsAString& aTitle,
   // XXX We should perhaps introduce a new NS_ERROR_USER_CANCELLED errer.
   int result = ::StartDocW(mDC, &docinfo);
   if (result <= 0) {
-    if (::GetLastError() == ERROR_CANCELLED) {
+    DWORD lastError = ::GetLastError();
+    if (lastError == ERROR_CANCELLED) {
       return NS_ERROR_ABORT;
     }
     return NS_ERROR_FAILURE;

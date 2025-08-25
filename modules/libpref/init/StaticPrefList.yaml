@@ -1232,6 +1232,13 @@
   value: false
   mirror: always
 
+# On Windows, whether to bring the foreground window to the front when printing
+# to avoid a DLP agent stealing focus and cancelling the print (bug 1980225)
+- name: browser.contentanalysis.print_set_foreground_window
+  type: bool
+  value: true
+  mirror: always
+
 # What content analysis should return if there is a problem communicating
 # with the agent. (see DefaultResponse enum in ContentAnalysis.h)
 # Make sure these stay in sync with the out-of-range check in Policies.sys.mjs.
