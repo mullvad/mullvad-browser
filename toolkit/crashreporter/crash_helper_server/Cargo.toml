@@ -28,7 +28,7 @@ env_logger = { version = "0.10", default-features = false }
 android_logger = "0.12"
 
 [target."cfg(any(target_os = \"android\", target_os = \"linux\"))".dependencies]
-nix = { version = "0.30", features = ["poll", "socket", "uio"] }
+nix = { version = "0.30", features = ["process", "poll", "socket", "uio"] }
 minidump-writer = { version = "0.10" }
 rust_minidump_writer_linux = { path = "../rust_minidump_writer_linux" }
 
@@ -43,7 +43,7 @@ windows-sys = { version = "0.52", features = [
 ] }
 
 [target."cfg(target_os = \"macos\")".dependencies]
-nix = { version = "0.30", features = ["fs", "poll", "socket", "uio"] }
+nix = { version = "0.30", features = ["process", "fs", "poll", "socket", "uio"] }
 
 [build-dependencies]
 cc = "1"

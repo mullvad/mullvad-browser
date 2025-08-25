@@ -44,16 +44,15 @@ pub(crate) fn unix_socketpair() -> Result<(OwnedFd, OwnedFd)> {
 
 pub(crate) fn set_socket_default_flags(socket: BorrowedFd) -> Result<()> {
     // All our sockets are in non-blocking mode.
-    let fd = socket.as_raw_fd();
-    let flags = OFlag::from_bits_retain(fcntl(fd, F_GETFL)?);
-    fcntl(fd, F_SETFL(flags.union(OFlag::O_NONBLOCK)))?;
+    let flags = OFlag::from_bits_retain(fcntl(socket, F_GETFL)?);
+    fcntl(socket, F_SETFL(flags.union(OFlag::O_NONBLOCK)))?;
 
     // TODO: nix doesn't have a safe wrapper for SO_NOSIGPIPE yet, but we need
     // to set this flag because we're using stream sockets unlike Linux, where
     // we use sequential packets that don't raise SIGPIPE.
     let res = unsafe {
         setsockopt(
-            fd,
+            socket.as_raw_fd(),
             SOL_SOCKET,
             SO_NOSIGPIPE,
             (&1 as *const i32).cast(),
@@ -69,7 +68,7 @@ pub(crate) fn set_socket_default_flags(socket: BorrowedFd) -> Result<()> {
 }
 
 pub(crate) fn set_socket_cloexec(socket: BorrowedFd) -> Result<()> {
-    fcntl(socket.as_raw_fd(), F_SETFD(FdFlag::FD_CLOEXEC)).map(|_res| ())
+    fcntl(socket, F_SETFD(FdFlag::FD_CLOEXEC)).map(|_res| ())
 }
 
 pub fn server_addr(pid: Pid) -> Result<UnixAddr> {

@@ -74,8 +74,10 @@ impl IPCConnector {
 
         loop {
             let timeout = PollTimeout::from(IO_TIMEOUT);
-            let pollfd = PollFd::new(socket.as_fd(), PollFlags::POLLOUT);
-            let res = ignore_eintr!(poll(&mut [pollfd], timeout));
+            let res = ignore_eintr!(poll(
+                &mut [PollFd::new(socket.as_fd(), PollFlags::POLLOUT)],
+                timeout
+            ));
             match res {
                 Err(e) => return Err(IPCError::ConnectionFailure(e)),
                 Ok(_res @ 0) => return Err(IPCError::ConnectionFailure(Errno::ETIMEDOUT)),
@@ -135,8 +137,10 @@ impl IPCConnector {
 
     pub fn poll(&self, flags: PollFlags) -> Result<(), Errno> {
         let timeout = PollTimeout::from(IO_TIMEOUT);
-        let pollfd = PollFd::new(self.socket.as_fd(), flags);
-        let res = ignore_eintr!(poll(&mut [pollfd], timeout));
+        let res = ignore_eintr!(poll(
+            &mut [PollFd::new(self.socket.as_fd(), flags)],
+            timeout
+        ));
         match res {
             Err(e) => Err(e),
             Ok(_res @ 0) => Err(Errno::EAGAIN),
@@ -236,14 +240,12 @@ impl IPCConnector {
         // workaround.
         let res = match res {
             #[cfg(target_os = "macos")]
-            Err(_code @ Errno::ENOMEM) => {
-              ignore_eintr!(recvmsg::<()>(
-                  self.raw_fd(),
-                  &mut iov,
-                  Some(&mut cmsg_buffer),
-                  MsgFlags::empty(),
-              ))?
-            },
+            Err(_code @ Errno::ENOMEM) => ignore_eintr!(recvmsg::<()>(
+                self.raw_fd(),
+                &mut iov,
+                Some(&mut cmsg_buffer),
+                MsgFlags::empty(),
+            ))?,
             Err(e) => return Err(e),
             Ok(val) => val,
         };
