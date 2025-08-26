@@ -1,6 +1,7 @@
 import textwrap
 
-from combine import combine_files
+import mozunit
+from base_browser.l10n.combine import combine_files
 
 
 def assert_result(new_content, old_content, expect):
@@ -475,3 +476,7 @@ def test_alternatives():
         -string-4-alt = Other string
         """,
     )
+
+
+if __name__ == "__main__":
+    mozunit.main()

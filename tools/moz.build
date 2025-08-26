@@ -71,6 +71,7 @@ with Files("tryselect/docs/**"):
     SCHEDULES.exclusive = ["docs"]
 
 PYTHON_UNITTEST_MANIFESTS += [
+    "base_browser/l10n/combine/tests/python.toml",
     "fuzzing/smoke/python.toml",
     "lint/test/python.toml",
     "tryselect/test/python.toml",

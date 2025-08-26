@@ -1,0 +1,10 @@
+[DEFAULT]
+subsuite = "base-browser"
+
+["test_android.py"]
+
+["test_dtd.py"]
+
+["test_fluent.py"]
+
+["test_properties.py"]

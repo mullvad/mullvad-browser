@@ -1,6 +1,7 @@
 import textwrap
 
-from combine import combine_files
+import mozunit
+from base_browser.l10n.combine import combine_files
 
 
 def wrap_in_xml(content):
@@ -413,3 +414,7 @@ def test_alternatives():
         <string name="string_4_alt">Other string</string>
         """,
     )
+
+
+if __name__ == "__main__":
+    mozunit.main()
