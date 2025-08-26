@@ -48,6 +48,9 @@ export class CreateLoginButton extends MozLitElement {
   static get properties() {
     return {
       disabled: { type: Boolean, reflect: true },
+      // Whether the button is disabled no matter if the "disabled" attribute is
+      // switched.
+      hardDisabled: { type: Boolean, reflect: true },
     };
   }
 
@@ -62,7 +65,7 @@ export class CreateLoginButton extends MozLitElement {
         l10nId: "create-login-button",
         variant: "icon-button",
         icon: "chrome://global/skin/icons/plus.svg",
-        disabled: this.disabled,
+        disabled: this.disabled || this.hardDisabled,
       })}
     `;
   }

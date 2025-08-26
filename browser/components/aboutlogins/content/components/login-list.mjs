@@ -111,6 +111,28 @@ export default class LoginList extends HTMLElement {
     this._blankLoginListItem.hidden = true;
   }
 
+  /**
+   * Whether the user can create logins.
+   *
+   * @type {boolean}
+   */
+  _canCreateLogins = false;
+
+  get canCreateLogins() {
+    return this._canCreateLogins;
+  }
+
+  set canCreateLogins(value) {
+    this._canCreateLogins = Boolean(value);
+    this._canCreateLoginsUpdate();
+  }
+
+  _canCreateLoginsUpdate() {
+    if (this._createLoginButton) {
+      this._createLoginButton.hardDisabled = !this.canCreateLogins;
+    }
+  }
+
   connectedCallback() {
     if (this.shadowRoot) {
       return;
@@ -122,6 +144,7 @@ export default class LoginList extends HTMLElement {
 
     this._count = shadowRoot.querySelector(".count");
     this._createLoginButton = shadowRoot.querySelector("create-login-button");
+    this._canCreateLoginsUpdate();
     this._list = shadowRoot.querySelector("ol");
     this._list.appendChild(this._blankLoginListItem);
     this._sortSelect = shadowRoot.querySelector("#login-sort");
@@ -426,7 +449,7 @@ export default class LoginList extends HTMLElement {
         break;
       }
       case "AboutLoginsShowBlankLogin": {
-        if (!event.defaultPrevented) {
+        if (!event.defaultPrevented && this.canCreateLogins) {
           this._selectedGuid = null;
           this._setListItemAsSelected(this._blankLoginListItem);
         }
