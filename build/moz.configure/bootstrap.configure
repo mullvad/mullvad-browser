@@ -205,9 +205,7 @@ def bootstrap_path(path, **kwargs):
             if not target.tor_browser_build_alias:
                 return False
 
-            artifact = mozbuild.tbbutils.get_artifact_name(
-                path_parts[0], target, tasks.prefix
-            )
+            artifact = mozbuild.tbbutils.get_artifact_name(path_parts[0], tasks.prefix)
             if not artifact:
                 log.info("%s is not mapped to a tbb artifact", path_parts[0])
                 return False

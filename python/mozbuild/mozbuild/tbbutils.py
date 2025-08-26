@@ -41,7 +41,7 @@ ARTIFACT_NAME_MAP = {
 }
 
 
-def get_artifact_name(original_artifact_name, target, host):
+def get_artifact_name(original_artifact_name, host):
     # These are not build artifacts, they are pre-built artifacts to be added to the final build,
     # therefore this check can come before the host check.
     if original_artifact_name in TOR_BROWSER_BUILD_ARTIFACTS:
@@ -72,7 +72,7 @@ def get_artifact_path(url, artifact, target, prefix=""):
     def filter_files(files, keyword):
         return [file for file in files if keyword in file]
 
-    artifact_files = filter_files(files, artifact)
+    artifact_files = [file for file in files if file.startswith(artifact)]
 
     if len(artifact_files) == 1:
         return f"{url}/{path}/{artifact_files[0]}"
@@ -80,8 +80,13 @@ def get_artifact_path(url, artifact, target, prefix=""):
     files_per_os = filter_files(artifact_files, target.tor_browser_build_alias)
 
     # If there are files in the folder, but they don't have the OS in the name
-    # it means we can get any of them because they can be used to build for any OS.
-    # So let's just get the first one.
+    # it probably means we can get any of them because they can be used to build
+    # for any OS. So let's just get the first one.
+    #
+    # Note: It could be the case that the artifact _is_ OS dependant, but there
+    # just are no files for the OS we are looking for. In that case, this will
+    # return an incorrect artifact. This should not happen often though and is
+    # something we cannot address until artifact names are standardized on tbb.
     if len(files_per_os) == 0:
         return f"{url}/{artifact}/{artifact_files[0]}"
 
