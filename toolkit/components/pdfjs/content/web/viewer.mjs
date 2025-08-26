@@ -2072,6 +2072,9 @@ class SignatureStorage {
   async size() {
     return (await this.getAll()).size;
   }
+  async isVolatile() {
+    return await this.#handleSignature({action: "isVolatile"});
+  }
   async create(data) {
     if (await this.isFull()) {
       return null;
@@ -15852,7 +15855,8 @@ class SignatureManager {
     this.#uiManager.removeEditListeners();
     const isStorageFull = this.#isStorageFull = await this.#signatureStorage.isFull();
     this.#saveContainer.classList.toggle("fullStorage", isStorageFull);
-    this.#saveCheckbox.checked = !isStorageFull;
+    const isVolatile = await this.#signatureStorage.isVolatile();
+    this.#saveCheckbox.checked = !(isStorageFull || isVolatile);
     await this.#overlayManager.open(this.#dialog);
     const tabType = this.#tabButtons.get("type");
     tabType.focus();
