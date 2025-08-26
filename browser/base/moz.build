@@ -76,6 +76,7 @@ PERFTESTS_MANIFESTS += ["content/test/perftest.toml"]
 DEFINES["MOZ_APP_VERSION"] = CONFIG["MOZ_APP_VERSION"]
 DEFINES["MOZ_APP_VERSION_DISPLAY"] = CONFIG["MOZ_APP_VERSION_DISPLAY"]
 
-DEFINES["APP_LICENSE_BLOCK"] = "%s/content/overrides/app-license.html" % SRCDIR
+# Do not include the Firefox app-license.html in about:license.
+# tor-browser#43901.
 
 JAR_MANIFESTS += ["jar.mn"]
