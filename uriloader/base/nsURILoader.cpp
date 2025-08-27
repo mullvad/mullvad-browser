@@ -432,21 +432,17 @@ nsresult nsDocumentOpenInfo::DispatchContent(nsIRequest* request) {
 
   bool maybeForceInternalHandling =
       forceExternalHandling &&
-      (mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline() ||
-       mozilla::StaticPrefs::browser_download_ignore_content_disposition());
+      mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline();
 
   // Check if this is a PDF which should be opened internally. We also handle
   // octet-streams that look like they might be PDFs based on their extension.
-  if (maybeForceInternalHandling) {
+  if (maybeForceInternalHandling && IsContentPDF(aChannel, mContentType)) {
     // For a PDF, check if the preference is set that forces attachments to be
     // opened inline. If so, treat it as a non-attachment by clearing
     // 'forceExternalHandling' again. This allows it open a PDF directly
     // instead of downloading it first. It may still end up being handled by
     // a helper app depending anyway on the later checks.
-    nsCString mimeType = IsContentPDF(aChannel, mContentType)
-                             ? nsLiteralCString(APPLICATION_PDF)
-                             : mContentType;
-    auto result = ShouldHandleExternally(mimeType);
+    auto result = ShouldHandleExternally(nsLiteralCString(APPLICATION_PDF));
     if (result.isErr()) {
       return result.unwrapErr();
     }
