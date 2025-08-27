@@ -39,7 +39,7 @@ combine-en-US-translations:
     # push-en-US-translations job.
     - echo 'COMBINE_TRANSLATIONS_JOB_ID='"$CI_JOB_ID" >job_id.env
     - pip install compare_locales
-    - python ./tools/base-browser/l10n/combine-translation-versions.py "$CI_COMMIT_BRANCH" "$TRANSLATION_FILES" "$COMBINED_FILES_JSON"
+    - python ./tools/base_browser/l10n/combine-translation-versions.py "$CI_COMMIT_BRANCH" "$TRANSLATION_FILES" "$COMBINED_FILES_JSON"
 
 push-en-US-translations:
   extends: .update-translation-base

@@ -112,7 +112,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--get-changed-files",
         help="Get list of changed files."
-        "When running from a merge request get sthe list of changed files since the merge-base of the current branch."
+        "When running from a merge request gets the list of changed files since the merge-base of the current branch."
         "When running from a protected branch i.e. any branch that starts with <something>-browser-, gets the list of files changed since the FIREFOX_ tag.",
         action="store_true",
     )

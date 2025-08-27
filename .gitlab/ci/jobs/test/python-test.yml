@@ -1,10 +1,9 @@
-lint-all:
+python-test:
   extends: .with-local-repo-bash
-  stage: lint
+  stage: test
   image: $IMAGE_PATH
   interruptible: true
   variables:
-    # Has to be the same as defined in `containers/base/Containerfile`
     MOZBUILD_STATE_PATH: "/var/tmp/mozbuild"
   cache:
     paths:
@@ -18,8 +17,8 @@ lint-all:
     - firefox
   script:
     - ./mach configure --with-base-browser-version=0.0.0
-    - .gitlab/ci/jobs/helpers.py --get-changed-files | xargs -0 --no-run-if-empty ./mach lint -v
+    - .gitlab/ci/jobs/helpers.py --get-changed-files | xargs -0 --no-run-if-empty ./mach python-test -v
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    # Run job whenever a commit is merged to a protected branch
-    - if: ($CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true' && $CI_PIPELINE_SOURCE == 'push')
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' || ($CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true' && $CI_PIPELINE_SOURCE == 'push')
+      changes:
+        - "**/test_*.py"
