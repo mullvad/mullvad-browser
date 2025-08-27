@@ -92,7 +92,11 @@ class InlineTranslator : public Translator {
   already_AddRefed<SourceSurface> LookupExternalSurface(uint64_t aKey) override;
 
   void AddDrawTarget(ReferencePtr aRefPtr, DrawTarget* aDT) final {
-    mDrawTargets.InsertOrUpdate(aRefPtr, RefPtr{aDT});
+    RefPtr<DrawTarget>& value = mDrawTargets.LookupOrInsert(aRefPtr);
+    if (mCurrentDT && mCurrentDT == value) {
+      mCurrentDT = nullptr;
+    }
+    value = aDT;
   }
 
   void AddPath(ReferencePtr aRefPtr, Path* aPath) final {
