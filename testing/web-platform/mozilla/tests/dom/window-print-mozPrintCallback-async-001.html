@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>
+  Test for window.print(), with mozPrintCallback making async call to obj.done
+</title>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<canvas id="myCanvas" width="80" height="80"></canvas>
+<script>
+  let t = async_test(
+    "window.print(), with mozPrintCallback making async call to obj.done"
+  );
+
+  // mozPrintCallback needs to ensure that obj.done() will be called, as a signal
+  // that it's done with its rendering work. Here, we make that call via an async
+  // task, scheduled via setTimeout, to mimic the asynchronous work that's
+  // involved in real-life mozPrintCallback scenarios (e.g. PDF.js waiting for
+  // assets like fonts to be ready before it can render the content).
+  myCanvas.mozPrintCallback = function (obj) {
+    setTimeout(() => {
+      obj.done();
+    }, 0);
+  };
+
+  // window.print shouldn't block the main thread for any substantial time here.
+  //
+  // To validate this expectation, we see how soon after calling window.print()
+  // we're able to execute another task on the main thread (scheduled via
+  // requestAnimationFrame), and we expect the delay to be (substantially) less
+  // than this TOO_LONG_WINDOW_PRINT_DUR threshold. (In bug 1980356, we were
+  // consistently overshooting this, because window.print would spawn a task that
+  // would block the main thread until the page print timer "watchdog" kicked in
+  // after ~10 seconds.)
+  const TOO_LONG_WINDOW_PRINT_DUR = 5000; // 5 seconds
+
+  window.addEventListener("load", () => {
+    let timestampBeforePrint = performance.now();
+    window.print();
+
+    // See how soon we're able to execute another task, scheduled via rAF:
+    requestAnimationFrame(
+      t.step_func(function () {
+        let timestampAfterPrint = performance.now();
+        let printDur = timestampAfterPrint - timestampBeforePrint;
+        assert_less_than(
+          printDur,
+          TOO_LONG_WINDOW_PRINT_DUR,
+          "window.print shouldn't block main thread for too long."
+        );
+        t.done();
+      })
+    );
+  });
+</script>
