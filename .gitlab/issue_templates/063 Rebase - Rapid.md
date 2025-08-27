@@ -90,4 +90,5 @@
 
 /label ~"Apps::Product::MullvadBrowser"
 /label ~"Apps::Type::Rebase"
+/label ~"Apps::Impact::High"
 /label ~"Priority::High"
