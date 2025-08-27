@@ -139,8 +139,12 @@ struct BufferChunk : public ChunkBase,
   MainThreadOrGCTaskData<BufferMarkBitmap> markBits;
 
   using PerAllocBitmap = mozilla::BitSet<MaxAllocsPerChunk>;
+  using AtomicPerAllocBitmap =
+      mozilla::BitSet<MaxAllocsPerChunk,
+                      mozilla::Atomic<size_t, mozilla::Relaxed>>;
+
   MainThreadOrGCTaskData<PerAllocBitmap> allocBitmap;
-  MainThreadOrGCTaskData<PerAllocBitmap> nurseryOwnedBitmap;
+  MainThreadOrGCTaskData<AtomicPerAllocBitmap> nurseryOwnedBitmap;
 
   static constexpr size_t PagesPerChunk = ChunkSize / PageSize;
   using PerPageBitmap = mozilla::BitSet<PagesPerChunk, uint32_t>;
