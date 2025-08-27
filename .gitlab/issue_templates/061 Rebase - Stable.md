@@ -114,4 +114,5 @@
 
 /label ~"Apps::Product::TorBrowser"
 /label ~"Apps::Type::Rebase"
+/label ~"Apps::Impact::High"
 /label ~"Priority::Blocker"
