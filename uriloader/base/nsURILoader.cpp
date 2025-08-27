@@ -320,7 +320,11 @@ NS_IMETHODIMP nsDocumentOpenInfo::OnStopRequest(nsIRequest* request,
   return NS_OK;
 }
 
-static bool IsContentPDF(nsIChannel* aChannel, const nsACString& aContentType) {
+static bool IsContentPDF(
+    nsIChannel* aChannel, const nsACString& aContentType,
+    nsAutoCString* aOutExt =
+        nullptr  // best-guess file extension, useful for non-PDFs
+) {
   bool isPDF = aContentType.LowerCaseEqualsASCII(APPLICATION_PDF);
   if (!isPDF && (aContentType.LowerCaseEqualsASCII(APPLICATION_OCTET_STREAM) ||
                  aContentType.IsEmpty())) {
@@ -328,13 +332,24 @@ static bool IsContentPDF(nsIChannel* aChannel, const nsACString& aContentType) {
     aChannel->GetContentDispositionFilename(flname);
     isPDF = StringEndsWith(flname, u".pdf"_ns);
     if (!isPDF) {
+      nsAutoCString ext;
       nsCOMPtr<nsIURI> uri;
       aChannel->GetURI(getter_AddRefs(uri));
       nsCOMPtr<nsIURL> url(do_QueryInterface(uri));
       if (url) {
-        nsAutoCString ext;
         url->GetFileExtension(ext);
         isPDF = ext.EqualsLiteral("pdf");
+      }
+      if (aOutExt) {
+        // Fill the extension out param if required
+        if (!(isPDF || flname.IsEmpty())) {
+          // For non PDFs, fallback to filename from content disposition
+          int32_t extStart = flname.RFindChar(u'.');
+          if (extStart != kNotFound) {
+            CopyUTF16toUTF8(Substring(flname, extStart + 1), ext);
+          }
+        }
+        *aOutExt = ext;
       }
     }
   }
@@ -343,7 +358,7 @@ static bool IsContentPDF(nsIChannel* aChannel, const nsACString& aContentType) {
 }
 
 static mozilla::Result<bool, nsresult> ShouldHandleExternally(
-    const nsACString& aMimeType) {
+    const nsACString& aMimeType, const nsACString& aExtension) {
   // For a PDF, check if the preference is set that forces attachments to be
   // opened inline. If so, treat it as a non-attachment by clearing
   // 'forceExternalHandling' again. This allows it open a PDF directly
@@ -356,7 +371,7 @@ static mozilla::Result<bool, nsresult> ShouldHandleExternally(
     return mozilla::Err(NS_ERROR_FAILURE);
   }
 
-  mimeSvc->GetFromTypeAndExtension(aMimeType, EmptyCString(),
+  mimeSvc->GetFromTypeAndExtension(aMimeType, aExtension,
                                    getter_AddRefs(mimeInfo));
 
   if (mimeInfo) {
@@ -430,31 +445,43 @@ nsresult nsDocumentOpenInfo::DispatchContent(nsIRequest* request) {
     forceExternalHandling = false;
   }
 
+  nsAutoCString ext;
+  bool isPDF =
+      forceExternalHandling && IsContentPDF(aChannel, mContentType, &ext);
+
   bool maybeForceInternalHandling =
-      forceExternalHandling &&
-      (mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline() ||
-       mozilla::StaticPrefs::browser_download_ignore_content_disposition());
+      (isPDF &&
+        mozilla::StaticPrefs::browser_download_open_pdf_attachments_inline()) ||
+       (
+        forceExternalHandling &&
+        mozilla::StaticPrefs::browser_download_ignore_content_disposition() &&
+        // we want to exclude html and svg files, which could execute
+        // scripts (tor-browser#43211)
+        kNotFound == mContentType.LowerCaseFindASCII("html") &&
+        kNotFound == ext.LowerCaseFindASCII("htm") &&
+        kNotFound == mContentType.LowerCaseFindASCII("/svg+") &&
+        !ext.EqualsIgnoreCase("svg"));
 
   // Check if this is a PDF which should be opened internally. We also handle
   // octet-streams that look like they might be PDFs based on their extension.
+  // Additionally, we try to avoid downloading also non-PDF attachments
+  // when the general Content-Disposition override preference is set to true.
   if (maybeForceInternalHandling) {
-    // For a PDF, check if the preference is set that forces attachments to be
-    // opened inline. If so, treat it as a non-attachment by clearing
+    // Preferences are set to open attachments inline by clearing
     // 'forceExternalHandling' again. This allows it open a PDF directly
     // instead of downloading it first. It may still end up being handled by
     // a helper app depending anyway on the later checks.
-    nsCString mimeType = IsContentPDF(aChannel, mContentType)
-                             ? nsLiteralCString(APPLICATION_PDF)
-                             : mContentType;
-    auto result = ShouldHandleExternally(mimeType);
+    // This may apply to other file types if an internal handler exists.
+    auto result = ShouldHandleExternally(
+        isPDF ? nsLiteralCString(APPLICATION_PDF) : mContentType, ext);
     if (result.isErr()) {
       return result.unwrapErr();
     }
     forceExternalHandling = result.unwrap();
 
-    // If we're not opening the PDF externally we block it if it's sandboxed.
+    // If we're not opening the file externally and it's sandboxed we block it.
     if (IsSandboxed(aChannel) && !forceExternalHandling) {
-      LOG(("Blocked sandboxed PDF"));
+      LOG(("Blocked sandboxed file"));
       nsCOMPtr<nsIHttpChannel> httpChannel = do_QueryInterface(aChannel);
       if (httpChannel) {
         nsContentSecurityUtils::LogMessageToConsole(
