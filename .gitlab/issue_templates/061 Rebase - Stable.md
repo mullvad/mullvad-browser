@@ -74,6 +74,8 @@
      - **Example**: `git rebase --autosquash --interactive FIREFOX_102_8_0esr_RELEASE`
   - [ ] Cherry-pick remainder of patches after the last `tor-browser` `buildN` tag
     - **Example**: `git cherry-pick tor-browser-102.7.0esr-12.0-1-build1..upstream/tor-browser-102.7.0esr-12.0-1`
+  - [ ] Rebase and `pick` new security backport patches to the end of the **MOZILLA BACKPORTS** section of the commit history
+    - **Example**: `git rebase --interactive FIREFOX_102_8_0esr_RELEASE`
   - [ ] Rebase and autosquash again, this time replacing all `fixup` and `squash` commands with `pick`. The goal here is to have all of the `fixup` and `squash` commits beside the commit which they modify, but kept un-squashed for easy debugging/bisecting.
     - **Example**: `git rebase --autosquash --interactive FIREFOX_102_8_0esr_RELEASE`
 - [ ] Compare patch sets to ensure nothing *weird* happened during conflict resolution:
