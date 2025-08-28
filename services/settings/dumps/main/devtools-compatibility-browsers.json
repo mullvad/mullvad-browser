@@ -1,6 +1,15 @@
 {
   "data": [
     {
+      "name": "Bun",
+      "schema": 1756174543714,
+      "status": "current",
+      "version": "1.2.20",
+      "browserid": "bun",
+      "id": "76600f9b-f03e-47f1-9775-cc8d7b6b0860",
+      "last_modified": 1756362740769
+    },
+    {
       "name": "Opera Android",
       "schema": 1755648303899,
       "status": "current",
@@ -370,5 +379,5 @@
       "last_modified": 1665656484764
     }
   ],
-  "timestamp": 1755841815012
+  "timestamp": 1756362740769
 }
