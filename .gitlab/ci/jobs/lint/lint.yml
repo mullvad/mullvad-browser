@@ -4,11 +4,11 @@ lint-all:
   image: $IMAGE_PATH
   interruptible: true
   variables:
-    MOZBUILD_STATE_PATH: "$CI_PROJECT_DIR/.cache/mozbuild"
+    # Has to be the same as defined in `containers/base/Containerfile`
+    MOZBUILD_STATE_PATH: "/var/tmp/mozbuild"
   cache:
     paths:
       - node_modules
-      - .cache/mozbuild
     # Store the cache regardless on job outcome
     when: 'always'
     # Share the cache throughout all pipelines running for a given branch
@@ -17,7 +17,7 @@ lint-all:
     # Run these jobs in the browser dedicated runners.
     - firefox
   script:
-    - ./mach configure --without-wasm-sandboxed-libraries --with-base-browser-version=0.0.0
+    - ./mach configure --with-base-browser-version=0.0.0
     - .gitlab/ci/jobs/lint/helpers.py --get-changed-files | xargs -0 --no-run-if-empty ./mach lint -v
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
