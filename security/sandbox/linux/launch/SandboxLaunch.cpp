@@ -336,6 +336,8 @@ bool SandboxLaunch::Configure(GeckoProcessType aType, SandboxingKind aKind,
     return true;
   }
 
+  // Warning: don't combine multiple case labels, even if the code is
+  // currently the same, to avoid mistakes when changes are made.
   switch (aType) {
     case GeckoProcessType_Socket:
       if (level >= 1) {
@@ -344,6 +346,12 @@ bool SandboxLaunch::Configure(GeckoProcessType aType, SandboxingKind aKind,
       }
       break;
     case GeckoProcessType_GMPlugin:
+      if (level >= 1) {
+        canChroot = true;
+        flags |= CLONE_NEWIPC;
+        flags |= CLONE_NEWNET;
+      }
+      break;
     case GeckoProcessType_RDD:
       if (level >= 1) {
         canChroot = true;
