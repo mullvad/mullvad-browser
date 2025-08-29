@@ -269,7 +269,7 @@ bool IsImageExtractionAllowed_impl(
   if (!aCanvasImageExtractionPrompt &&
       aCanvasExtractionBeforeUserInputIsBlocked) {
     // If so, see if this is in response to user input.
-    if (dom::UserActivation::IsHandlingUserInput()) {
+    if (NS_IsMainThread() && dom::UserActivation::IsHandlingUserInput()) {
       return true;
     }
 
@@ -280,8 +280,9 @@ bool IsImageExtractionAllowed_impl(
   // Now we know we're going to block it, and log something to the console,
   // and show some sort of prompt maybe with the doorhanger, maybe not
 
-  hidePermissionDoorhanger |= aCanvasExtractionBeforeUserInputIsBlocked &&
-                              !dom::UserActivation::IsHandlingUserInput();
+  hidePermissionDoorhanger |=
+      aCanvasExtractionBeforeUserInputIsBlocked &&
+      (!NS_IsMainThread() || !dom::UserActivation::IsHandlingUserInput());
 
   nsAutoString message;
   message.AppendPrintf("Blocked %s from extracting canvas data",
@@ -337,25 +338,18 @@ bool IsImageExtractionAllowed(dom::Document* aDocument, JSContext* aCx,
       return;
     }
 
-    nsPIDOMWindowOuter* win = aDocument->GetWindow();
+    if (!XRE_IsContentProcess()) {
+      MOZ_ASSERT_UNREACHABLE(
+          "Who's calling this from the parent process without a chrome window "
+          "(it would have been exempt from the RFP targets)?");
+      return;
+    }
 
-    if (XRE_IsContentProcess()) {
-      dom::BrowserChild* browserChild = dom::BrowserChild::GetFrom(win);
-      if (browserChild) {
-        browserChild->SendShowCanvasPermissionPrompt(origin,
-                                                     hidePermissionDoorhanger);
-      }
-    } else {
-      nsCOMPtr<nsIObserverService> obs =
-          mozilla::services::GetObserverService();
-      if (obs) {
-        obs->NotifyObservers(
-            win,
-            hidePermissionDoorhanger
-                ? TOPIC_CANVAS_PERMISSIONS_PROMPT_HIDE_DOORHANGER
-                : TOPIC_CANVAS_PERMISSIONS_PROMPT,
-            NS_ConvertUTF8toUTF16(origin).get());
-      }
+    nsPIDOMWindowOuter* win = aDocument->GetWindow();
+    if (RefPtr<dom::BrowserChild> browserChild =
+            dom::BrowserChild::GetFrom(win)) {
+      browserChild->SendShowCanvasPermissionPrompt(origin,
+                                                   hidePermissionDoorhanger);
     }
   };
 
@@ -414,20 +408,21 @@ bool IsImageExtractionAllowed(dom::OffscreenCanvas* aOffscreenCanvas,
     winId = Nothing();
   }
 
-  RefPtr<dom::WindowContext> win;
-  if (winId.isSome()) {
-    win = dom::WindowGlobalParent::GetById(*winId);
-    if (!win) {
-      winId = Nothing();
-    }
-  }
-
   auto getIsThirdPartyWindow = [&]() {
-    if (!win) {
+    if (winId.isNothing()) {
       return false;
     }
 
-    return win->GetIsThirdPartyWindow();
+    if (NS_IsMainThread()) {
+      if (RefPtr<dom::WindowContext> win =
+              dom::WindowGlobalParent::GetById(*winId)) {
+        return win->GetIsThirdPartyWindow();
+      }
+    } else if (auto* workerPrivate = dom::GetCurrentThreadWorkerPrivate()) {
+      return workerPrivate->IsThirdPartyContext();
+    }
+
+    return false;
   };
 
   auto reportToConsole = [&](const nsAutoString& message) {
@@ -445,39 +440,72 @@ bool IsImageExtractionAllowed(dom::OffscreenCanvas* aOffscreenCanvas,
     origin = ""_ns;
   }
 
+  RefPtr<dom::OffscreenCanvas> canvasRef = aOffscreenCanvas;
   auto prompt = [=](bool hidePermissionDoorhanger) {
     if (origin.IsEmpty()) {
       return;
     }
 
-    NS_DispatchToMainThread(
-        NS_NewRunnableFunction("IsImageExtractionAllowedOffscreen", [=]() {
-          if (XRE_IsContentProcess()) {
-            if (!win || !win->GetExtantDoc() ||
-                !win->GetExtantDoc()->GetWindow()) {
-              return;
-            }
+    if (!XRE_IsContentProcess()) {
+      MOZ_ASSERT_UNREACHABLE(
+          "Who's calling this from the parent process without a chrome window "
+          "(it would have been exempt from the RFP targets)?");
+      return;
+    }
 
-            dom::BrowserChild* browserChild =
-                dom::BrowserChild::GetFrom(win->GetExtantDoc()->GetWindow());
+    if (NS_IsMainThread()) {
+      nsCOMPtr<nsIGlobalObject> global = canvasRef->GetOwnerGlobal();
+      NS_ENSURE_TRUE_VOID(global);
 
-            if (browserChild) {
-              browserChild->SendShowCanvasPermissionPrompt(
-                  origin, hidePermissionDoorhanger);
-            }
-          } else {
-            nsCOMPtr<nsIObserverService> obs =
-                mozilla::services::GetObserverService();
-            if (obs) {
-              obs->NotifyObservers(
-                  win,
-                  hidePermissionDoorhanger
-                      ? TOPIC_CANVAS_PERMISSIONS_PROMPT_HIDE_DOORHANGER
-                      : TOPIC_CANVAS_PERMISSIONS_PROMPT,
-                  NS_ConvertUTF8toUTF16(origin).get());
-            }
-          }
-        }));
+      RefPtr<nsPIDOMWindowInner> window = global->GetAsInnerWindow();
+      NS_ENSURE_TRUE_VOID(window);
+
+      RefPtr<dom::BrowserChild> browserChild =
+          dom::BrowserChild::GetFrom(window);
+      NS_ENSURE_TRUE_VOID(browserChild);
+
+      browserChild->SendShowCanvasPermissionPrompt(origin,
+                                                   hidePermissionDoorhanger);
+      return;
+    }
+
+    class OffscreenCanvasPromptRunnable
+        : public dom::WorkerProxyToMainThreadRunnable {
+     public:
+      explicit OffscreenCanvasPromptRunnable(const nsCString& aOrigin,
+                                             bool aHidePermissionDoorhanger)
+          : mOrigin(aOrigin),
+            mHidePermissionDoorhanger(aHidePermissionDoorhanger) {}
+
+      // Runnables don't support MOZ_CAN_RUN_SCRIPT, bug 1535398
+      MOZ_CAN_RUN_SCRIPT_BOUNDARY void RunOnMainThread(
+          dom::WorkerPrivate* aWorkerPrivate) override {
+        MOZ_ASSERT(aWorkerPrivate);
+        AssertIsOnMainThread();
+
+        RefPtr<nsPIDOMWindowInner> inner = aWorkerPrivate->GetWindow();
+        RefPtr<dom::BrowserChild> win = dom::BrowserChild::GetFrom(inner);
+        NS_ENSURE_TRUE_VOID(win);
+
+        win->SendShowCanvasPermissionPrompt(mOrigin, mHidePermissionDoorhanger);
+      }
+
+      void RunBackOnWorkerThreadForCleanup(
+          dom::WorkerPrivate* aWorkerPrivate) override {
+        MOZ_ASSERT(aWorkerPrivate);
+        aWorkerPrivate->AssertIsOnWorkerThread();
+      }
+
+      nsCString mOrigin;
+      bool mHidePermissionDoorhanger;
+    };
+
+    if (auto* workerPrivate = dom::GetCurrentThreadWorkerPrivate()) {
+      RefPtr<OffscreenCanvasPromptRunnable> runnable =
+          new OffscreenCanvasPromptRunnable(origin, hidePermissionDoorhanger);
+      runnable->Dispatch(workerPrivate);
+      return;
+    }
   };
 
   return IsImageExtractionAllowed_impl(
