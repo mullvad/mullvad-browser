@@ -98,3 +98,10 @@ TEST(TestCacheControlParser, CaseInsensitive)
   ASSERT_TRUE(cc2.StaleWhileRevalidate(&stale_while_revalidate));
   ASSERT_EQ(stale_while_revalidate, 8U);
 }
+
+TEST(TestCacheControlParser, NoCacheAfterNoStore)
+{
+  CacheControlParser cc("no-store, no-cache"_ns);
+  ASSERT_TRUE(cc.NoCache());
+  ASSERT_TRUE(cc.NoStore());
+}

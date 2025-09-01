@@ -496,7 +496,7 @@ nsresult nsHttpResponseHead::ParseHeaderLine_locked(
     LOG(("ParseContentType [input=%s, type=%s, charset=%s]\n", val.get(),
          mContentType.get(), mContentCharset.get()));
   } else if (hdr == nsHttp::Cache_Control) {
-    ParseCacheControl(val.get());
+    ParseCacheControl(mHeaders.PeekHeader(hdr));
   } else if (hdr == nsHttp::Pragma) {
     ParsePragma(val.get());
   }
