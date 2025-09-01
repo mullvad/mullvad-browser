@@ -47,12 +47,12 @@ static void ApplyMorphologyHorizontal_Scalar(
          x++, startX++, endX++) {
       int32_t sourceIndex = y * aSourceStride + 4 * startX;
       uint8_t u[4];
-      for (size_t i = 0; i < 4; i++) {
+      for (int32_t i = 0; i < int32_t(std::size(u)); i++) {
         u[i] = aSourceData[sourceIndex + i];
       }
       sourceIndex += 4;
       for (int32_t ix = startX + 1; ix <= endX; ix++, sourceIndex += 4) {
-        for (size_t i = 0; i < 4; i++) {
+        for (int32_t i = 0; i < int32_t(std::size(u)); i++) {
           if (Operator == MORPHOLOGY_OPERATOR_ERODE) {
             u[i] = umin(u[i], aSourceData[sourceIndex + i]);
           } else {
@@ -62,7 +62,7 @@ static void ApplyMorphologyHorizontal_Scalar(
       }
 
       int32_t destIndex = y * aDestStride + 4 * x;
-      for (size_t i = 0; i < 4; i++) {
+      for (int32_t i = 0; i < int32_t(std::size(u)); i++) {
         aDestData[destIndex + i] = u[i];
       }
     }
@@ -97,13 +97,13 @@ static void ApplyMorphologyVertical_Scalar(
     for (int32_t x = aDestRect.X(); x < aDestRect.XMost(); x++) {
       int32_t sourceIndex = startY * aSourceStride + 4 * x;
       uint8_t u[4];
-      for (size_t i = 0; i < 4; i++) {
+      for (int32_t i = 0; i < int32_t(std::size(u)); i++) {
         u[i] = aSourceData[sourceIndex + i];
       }
       sourceIndex += aSourceStride;
       for (int32_t iy = startY + 1; iy <= endY;
            iy++, sourceIndex += aSourceStride) {
-        for (size_t i = 0; i < 4; i++) {
+        for (int32_t i = 0; i < int32_t(std::size(u)); i++) {
           if (Operator == MORPHOLOGY_OPERATOR_ERODE) {
             u[i] = umin(u[i], aSourceData[sourceIndex + i]);
           } else {
@@ -113,7 +113,7 @@ static void ApplyMorphologyVertical_Scalar(
       }
 
       int32_t destIndex = y * aDestStride + 4 * x;
-      for (size_t i = 0; i < 4; i++) {
+      for (int32_t i = 0; i < int32_t(std::size(u)); i++) {
         aDestData[destIndex + i] = u[i];
       }
     }
