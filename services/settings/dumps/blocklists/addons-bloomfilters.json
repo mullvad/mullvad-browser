@@ -5,6 +5,457 @@
         "blocked": [],
         "unblocked": [],
         "softblocked": [
+          "browser-extensions@kenli:1.0",
+          "browser-extensions@kenli:1.1",
+          "surv-capture-piggy@exampleyy.com:1.0",
+          "tampdev@exampleyy.com:1.1",
+          "{0117460d-4e4a-49bc-a143-9f07bfeeb021}:1.0",
+          "{0117460d-4e4a-49bc-a143-9f07bfeeb021}:1.0.1",
+          "{0117460d-4e4a-49bc-a143-9f07bfeeb021}:1.0.3",
+          "{0117460d-4e4a-49bc-a143-9f07bfeeb021}:1.1.0",
+          "{d5b00205-0d14-49ed-af07-1fe16f9c57db}:1.0",
+          "{463c060a-9b43-4d3b-a0c3-7718f3488671}:1.1",
+          "{1697fd14-9a8e-4413-9583-914468d314b3}:1.0",
+          "hi@sp4ceMan.xyz:1.7.2",
+          "{2794e354-d57c-4417-ab10-6e2e4a3ea272}:1.1.5"
+        ]
+      },
+      "schema": 1756692942803,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756708506089,
+      "id": "e1b54f0e-4937-457e-8340-c4a312fb6d05",
+      "last_modified": 1756708594503
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{b9fcbae1-b38b-47d6-ab0a-70b6a75b685b}:1.0",
+          "hue@eyadia.com:1.0.0",
+          "valra@media.recorder:1.0.0",
+          "{9240d611-9443-48b5-9921-fd4fc04370af}:1.0",
+          "valra@media.recorder:1.0.1",
+          "{5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b}:18.0"
+        ]
+      },
+      "schema": 1756665392970,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756686906088,
+      "id": "c4537060-aa53-4929-83ea-68493ed87b9b",
+      "last_modified": 1756686987718
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{a802aaa1-aa08-4a96-8035-da50279b8bb8}:1.0",
+          "knownasjunaid@gmail.com:3.2.0",
+          "custom@sidebar.mozilla.org:1.0",
+          "{f99dd5a4-f9e6-4d1c-b197-34ec2087defb}:1.0.0",
+          "omarchy-theme-switcher@local:1.1",
+          "{8b228111-8b68-4a24-9299-6f629dd4aa27}:2.0",
+          "{1c99524a-5aad-4e79-9fa3-fb3eccdf294e}:241029.1",
+          "{ab4974a5-6a02-4c4f-b3ac-2a04d9980dfb}:241029.1",
+          "ozel-yeni-sekme@example.com:1.0",
+          "{11dc8e00-25a3-4455-9c61-8c82d30f4905}:1.0",
+          "{11dc8e00-25a3-4455-9c61-8c82d30f4905}:1.1",
+          "{b0e0fad0-1fba-4b29-b5ad-b0c402affbf1}:1.0",
+          "{b0e0fad0-1fba-4b29-b5ad-b0c402affbf1}:1.1",
+          "{733daf43-945d-43a5-bff7-a6368acc6c3c}:1.0",
+          "{68320f6e-e00f-42e5-a16f-f246d20ea17b}:1.0",
+          "{68320f6e-e00f-42e5-a16f-f246d20ea17b}:2.0",
+          "mailcow-client@vj1.org:1.0.0",
+          "mailcow-client@vj1.org:1.0.1",
+          "mailcow-client@vj1.org:1.0.2",
+          "pixer@example.com:3.1",
+          "{a1b2c3d4-e5f6-7890-abcd-ef1234567000}:1.0.3"
+        ]
+      },
+      "schema": 1756643788358,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756665306124,
+      "id": "0368af8e-b583-43c7-adb7-c80599fc1214",
+      "last_modified": 1756665392731
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "download-video-without-sound-addon@example.com:2025.8.31.2",
+          "add-subtitles-extended-ver2@tszngaiyip.github.io:1.61",
+          "{b656a140-ac1b-40dd-b099-8b156efe4fe9}:1.0",
+          "{6b435226-551d-486b-8328-8cab8b44654a}:1.0.0"
+        ]
+      },
+      "schema": 1756622195746,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756643706018,
+      "id": "638dc09e-de74-403c-9214-6c299a0cec76",
+      "last_modified": 1756643788166
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{384c4e73-d950-4b94-8e47-8daa7206e94f}:1.3",
+          "{b7fa0ea1-4365-4e5c-960a-e0951c5ff1db}:1.0.6",
+          "{b7fa0ea1-4365-4e5c-960a-e0951c5ff1db}:1.0.3",
+          "{b7fa0ea1-4365-4e5c-960a-e0951c5ff1db}:1.0.4",
+          "{13F757AA-8611-11F0-353C-89F9C65BC26C}:1.0",
+          "volume-control-for-facebook@your-domain.com:1.1.0",
+          "download-video-without-sound-addon@example.com:2025.8.31.1",
+          "yt-fixes@example.com:1.3"
+        ]
+      },
+      "schema": 1756606543626,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756622106251,
+      "id": "0b4d3448-5af9-411e-a2f5-0f8833f34cb3",
+      "last_modified": 1756622195528
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "Android@bravenhancer.com:16.0.0",
+          "enhancer@goldenfox.com:16.0.0",
+          "@AutomatcCandidateImporter.wisestep:3.1.2",
+          "{8e4db3cc-c8f8-4618-9f93-750c011298af}:1.0",
+          "{85a37267-94ec-4447-b925-ff920c4d9d7f}:1.0"
+        ]
+      },
+      "schema": 1756578983907,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756600506306,
+      "id": "3c42b850-ce75-4667-abc8-32bf60006437",
+      "last_modified": 1756600593135
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{bb021e15-6633-44fa-9937-05c26f172f02}:1.0",
+          "gesturevideocontrols_uv_Video@example.com:2.4.3"
+        ]
+      },
+      "schema": 1756557379768,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756578905237,
+      "id": "5612377d-2bb8-4673-b9e3-62d9e0b489b6",
+      "last_modified": 1756578983712
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "HistoryCleanerRefreshPriv@chway:1.0.0",
+          "HistoryCleanerRefreshPriv@chway:1.0.1",
+          "HistoryCleanerRefreshPriv@chway:1.0.4",
+          "HistoryCleanerRefreshPriv@chway:1.0.5",
+          "HistoryCleanerRefreshPriv@chway:1.0.6",
+          "HistoryCleanerRefreshPriv@chway:1.0.7",
+          "HistoryCleanerRefreshPriv@chway:1.1.1",
+          "HistoryCleanerRefreshPriv@chway:1.1.2",
+          "HistoryCleanerRefreshPriv@chway:1.1.4",
+          "HistoryCleanerRefreshPriv@chway:1.1.5",
+          "HistoryCleanerRefreshPriv@chway:1.1.6",
+          "HistoryCleanerRefreshPriv@chway:1.2.0",
+          "prieco-web-discovery@yourdomain.com:1.0.0",
+          "{9a4c79dc-b758-4381-9ff3-68e80f9a9ebf}:0.1.21",
+          "{9a4c79dc-b758-4381-9ff3-68e80f9a9ebf}:18.0",
+          "{1e1c4cd2-e30c-4d14-8d77-03b5b8a4b4f4}:0.11",
+          "{1e1c4cd2-e30c-4d14-8d77-03b5b8a4b4f4}:5",
+          "{1e1c4cd2-e30c-4d14-8d77-03b5b8a4b4f4}:5.1",
+          "theme@custom.com:1.0",
+          "{03adf2a1-63db-46cb-bd0b-b0bdfc52d02d}:1.0",
+          "{7170c636-a22c-4669-8389-4ae6bbed5385}:1.1",
+          "com.rohith.imageblur@example.com:2.0"
+        ]
+      },
+      "schema": 1756535793723,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756557305573,
+      "id": "abd76575-a97b-4a8b-8481-a65b5fe1e5cf",
+      "last_modified": 1756557379540
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{a6eb97b0-3342-410b-aa3e-be1de5936745}:1.0.0",
+          "{a3c9e7b2-5d1f-4f8a-9c3b-2e7d6f4a1b5c}:11.50.3",
+          "black-screen@example.com:1.0",
+          "bruh@mail.com:0.0.1",
+          "{b2c3f2f1-1a4d-4b8a-8df5-b0b6c8b2a1e3}:12.23.1",
+          "{8927f234-4dd9-48b1-bf76-44a9e153eee1}:6.0.3"
+        ]
+      },
+      "schema": 1756520142720,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756535706323,
+      "id": "29fcd277-1cdc-4c24-a3ea-3072adbd7794",
+      "last_modified": 1756535793613
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "@addon-matcher:3.1",
+          "@addon-matcher:3.0",
+          "{cfed8afa-3e33-41fd-b452-17552e7569da}:0.0.7",
+          "{cfed8afa-3e33-41fd-b452-17552e7569da}:0.0.8",
+          "{5e3e5e28-20da-42bb-a6a4-f9b2fa8a4fa0}:1.0",
+          "{c51bc353-e04d-49b9-b069-fb9620d4db28}:1.3",
+          "{79657e5f-d42e-4662-8862-e7af547364b7}:1.0",
+          "{ad1aeb43-7f92-4936-9eed-54904e19db9f}:1.0",
+          "{a4887de5-134a-4405-b09c-6734c77a3717}:1.1",
+          "custom-theme@example.com:1.0",
+          "{e72950e5-6632-4987-a19a-7fc4c89fca60}:1.2"
+        ]
+      },
+      "schema": 1756492588058,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756514105660,
+      "id": "561d2c43-8890-4a60-94d8-97b23a6b29cc",
+      "last_modified": 1756514193426
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{67f90159-010c-4cfa-9fc2-5a1a2896c23e}:1.1",
+          "{67f90159-010c-4cfa-9fc2-5a1a2896c23e}:18.0",
+          "{30bbc7f1-dcb7-4780-a7f8-bbd66f29d732}:1.1",
+          "{30bbc7f1-dcb7-4780-a7f8-bbd66f29d732}:1.93.45",
+          "{8fabf046-d7f5-418e-89b3-d510833876dc}:1.1",
+          "{8fabf046-d7f5-418e-89b3-d510833876dc}:5",
+          "{2dba1704-2c21-4580-98d5-fa7fb92ab6d9}:1.0.7",
+          "{e108f649-5d8b-4e87-9df1-92b9d44f26b1}:1.2",
+          "{e108f649-5d8b-4e87-9df1-92b9d44f26b1}:18.0",
+          "{1e1c4cd2-e30c-4d14-8d77-03b5b8a4b4f5}:0.11",
+          "aws@amazon.com:1.0.2",
+          "{df0a16a9-097c-4969-ad99-6d0942d88bda}:1.0",
+          "better-lyrics@boidu.dev:1.10.3",
+          "CASB_Efficacy@opentext.com:3.1.1",
+          "{d7792d3b-d731-4a7f-9794-4b52c251273b}:1.3.21",
+          "{f87a91de-25ec-4a83-a04d-68fc2e34e663}:0.1.21"
+        ]
+      },
+      "schema": 1756470987611,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756492505662,
+      "id": "48b5e40f-be55-4e67-a52f-8f90c9ea34a9",
+      "last_modified": 1756492587855
+    },
+    {
+      "stash": {
+        "blocked": [
+          "{1b2f6f13-fd95-4e21-ae7d-91a743dc5a55}:1",
+          "{1b2f6f13-fd95-4e21-ae7d-91a743dc5a55}:18.0",
+          "{9dc5d9d1-c0cb-4dc1-9cc7-b68c215f3b11}:1.2.5",
+          "{9dc5d9d1-c0cb-4dc1-9cc7-b68c215f3b11}:5",
+          "{9dc5d9d1-c0cb-4dc1-9cc7-b68c215f3b14}:1.2.5",
+          "{9dc5d9d1-c0cb-4dc1-9cc7-b68c215f3b14}:1.93.45"
+        ],
+        "unblocked": [
+          "cryptoextension@wallethighlighter.com:1.0.0",
+          "cryptoextension@wallethighlighter.com:2.1.4",
+          "cryptoextension@wallethighlighter.com:2.1.5",
+          "cryptoextension@wallethighlighter.com:2.1.6",
+          "cryptoextension@wallethighlighter.com:2.1.7",
+          "cryptoextension@wallethighlighter.com:2.1.8",
+          "cryptoextension@wallethighlighter.com:2.1.9",
+          "cryptoextension@wallethighlighter.com:2.1.10",
+          "cryptoextension@wallethighlighter.com:2.1.11",
+          "wallet@ambire.com:5.7.1",
+          "wallet@ambire.com:5.10.2",
+          "wallet@ambire.com:5.11.2",
+          "wallet@ambire.com:5.12",
+          "wallet@ambire.com:5.13.0",
+          "wallet@ambire.com:5.14.1",
+          "wallet@ambire.com:5.15.0",
+          "wallet@ambire.com:5.16.0",
+          "wallet@ambire.com:5.16.1",
+          "wallet@ambire.com:5.18.0",
+          "wallet@ambire.com:5.18.1",
+          "wallet@ambire.com:5.20.0"
+        ],
+        "softblocked": [
+          "{fec54110-fdaf-4d36-b694-1693e17f7bdd}:1.0",
+          "{2714344f-14c6-4922-ba52-c9ef4aae3059}:1.0",
+          "{3df922bf-40f0-4555-9cc6-787e4421db26}:1.0.2.2",
+          "{36b6cee1-be48-4b14-ab9b-7c275aecacb4}:0.0.6",
+          "{36b6cee1-be48-4b14-ab9b-7c275aecacb4}:0.0.7",
+          "{36b6cee1-be48-4b14-ab9b-7c275aecacb4}:0.0.8",
+          "{36b6cee1-be48-4b14-ab9b-7c275aecacb4}:0.0.9"
+        ]
+      },
+      "schema": 1756449390863,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756470906159,
+      "id": "420c01fb-2bfc-4d22-a919-8d92900632b4",
+      "last_modified": 1756470987468
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{273fc1b8-1d80-44de-a722-9f7a05155f97}:2.0",
+          "{8e19e8f4-06bd-46e3-9f1f-4ff19f65d609}:1.0",
+          "better-trading@example.com:0.0.3"
+        ]
+      },
+      "schema": 1756433743863,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756449306281,
+      "id": "3fcf6f1e-1a96-4146-8890-08721e996cba",
+      "last_modified": 1756449390615
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{d922d5bb-bfa6-4bf6-8d7f-b0d5e047a7c3}:1.0",
+          "@addon-matcher:2.5",
+          "@addon-matcher:2.4",
+          "@addon-matcher:2.3",
+          "{2cbe63ce-e795-43f8-8d22-83332fcfd57a}:1.0",
+          "{2cbe63ce-e795-43f8-8d22-83332fcfd57a}:2.0",
+          "yt-channel-blocker@yourdomain.dev:1.2.1",
+          "@addon-matcher:2.8",
+          "@addon-matcher:2.7",
+          "@addon-matcher:2.6",
+          "kbf@tjsdeveloper:1.4.14",
+          "{8555d133-351b-47ba-b082-10a3a806c1cf}:2.0",
+          "@addon-matcher:2.10"
+        ]
+      },
+      "schema": 1756406190525,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756427705211,
+      "id": "d644e1f1-dc9c-4004-a28f-ad1a660452bf",
+      "last_modified": 1756427777825
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
+          "{af401a41-c557-422e-b655-7cd3a46e4597}:1.0",
+          "@Diag-Informes.Matias-1:1.0",
+          "{81325e35-4619-44aa-8e6e-68d1ea132f75}:1.0",
+          "{3d768af4-7b82-4c46-bb4b-5c2bc4028a92}:0.5",
+          "{0f3b220f-463b-4dbd-a1ef-7e0a0a876e1f}:2.6.0",
+          "Linkumori-URLCleaner@linkumori:1.1",
+          "kbf@tjsdeveloper:1.4.13",
+          "URLCleaner@linkumori:1.1",
+          "URLCleaner@linkumori:1.2",
+          "wallet@ambire.com:5.20.0",
+          "github-soft-dark@ktsenov:1.0.0",
+          "@addon-matcher:1.1",
+          "@addon-matcher:1.0",
+          "@addon-matcher:2.0",
+          "@addon-matcher:2.1",
+          "@addon-matcher:2.2"
+        ]
+      },
+      "schema": 1756399543164,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756406105758,
+      "id": "eb63f879-055e-4f56-b466-8b899662da81",
+      "last_modified": 1756406190297
+    },
+    {
+      "stash": {
+        "blocked": [
+          "{7468de1a-5a1e-4f11-bc24-df5b137ad4c2}:1",
+          "{4d7dc291-cf3f-49f2-82e1-6651289c6707}:5",
+          "{42f38b13-bb34-4af2-96c0-123eeb7de44e}:1.88.0"
+        ],
+        "unblocked": [
+          "{81325e35-4619-44aa-8e6e-68d1ea132f75}:1.0"
+        ],
+        "softblocked": [
+          "sukent@nusoft.com.tw:5.8.28.5",
+          "{E30039D8-ED47-4A32-AEC8-2A951E1F55D6}:1.0.0",
+          "{E30039D8-ED47-4A32-AEC8-2A951E1F55D6}:1.0.1",
+          "{bc8fc82b-c774-478d-8973-51830d7e0171}:1.0",
+          "{3c3741c7-8ad2-4ae4-a113-c73445eaed8d}:1.0",
+          "{88435d9b-5be7-4815-8e78-40587302d2a5}:2.5.15.1",
+          "{8498cde9-2a3b-479e-a62f-4b4910f55b3a}:0.41",
+          "ioc_highlight@cert.cfcs.dk:1.0.1",
+          "ioc_highlight@cert.cfcs.dk:1.0.2",
+          "ioc_highlight@cert.cfcs.dk:1.0.3",
+          "ioc_highlight@cert.cfcs.dk:1.0.5",
+          "ioc_highlight@cert.cfcs.dk:1.0.6",
+          "ioc_highlight@cert.cfcs.dk:1.0.7",
+          "ioc_highlight@cert.cfcs.dk:1.0.8",
+          "ioc_highlight@cert.cfcs.dk:1.0.9",
+          "ioc_highlight@cert.cfcs.dk:1.0.10",
+          "ioc_highlight@cert.cfcs.dk:1.1.0",
+          "ioc_highlight@cert.cfcs.dk:1.1.1",
+          "ioc_highlight@cert.cfcs.dk:1.1.2",
+          "ioc_highlight@cert.cfcs.dk:1.1.3",
+          "ioc_highlight@cert.cfcs.dk:1.1.4",
+          "ioc_highlight@cert.cfcs.dk:2.0.0",
+          "ioc_highlight@cert.cfcs.dk:2.0.1",
+          "ioc_highlight@cert.cfcs.dk:2.0.2",
+          "ioc_highlight@cert.cfcs.dk:2.0.3",
+          "ioc_highlight@cert.cfcs.dk:2.0.4",
+          "ioc_highlight@cert.cfcs.dk:2.1.0",
+          "ioc_highlight@cert.cfcs.dk:2.1.1",
+          "ioc_highlight@cert.cfcs.dk:2.1.2",
+          "ioc_highlight@cert.cfcs.dk:2.1.3",
+          "ioc_highlight@cert.cfcs.dk:2.1.4",
+          "ioc_highlight@cert.cfcs.dk:2.1.5",
+          "ioc_highlight@cert.cfcs.dk:2.1.6",
+          "ioc_highlight@cert.cfcs.dk:3.0.0",
+          "ioc_highlight@cert.cfcs.dk:3.0.1",
+          "ioc_highlight@cert.cfcs.dk:3.0.2",
+          "cryptoextension@wallethighlighter.com:1.0.0",
+          "cryptoextension@wallethighlighter.com:2.1.4",
+          "cryptoextension@wallethighlighter.com:2.1.5",
+          "cryptoextension@wallethighlighter.com:2.1.6",
+          "cryptoextension@wallethighlighter.com:2.1.7",
+          "cryptoextension@wallethighlighter.com:2.1.8",
+          "cryptoextension@wallethighlighter.com:2.1.9",
+          "cryptoextension@wallethighlighter.com:2.1.10",
+          "cryptoextension@wallethighlighter.com:2.1.11",
+          "{eae7113a-ce23-402b-9df4-6c22bc95f353}:1.1.4",
+          "{eae7113a-ce23-402b-9df4-6c22bc95f353}:1.1.5",
+          "{eae7113a-ce23-402b-9df4-6c22bc95f353}:1.1.6",
+          "{d9f2a4f5-81d6-46a0-8709-16f3b7d9b201}:0.2.0",
+          "{d9f2a4f5-81d6-46a0-8709-16f3b7d9b201}:0.3.0",
+          "{d9f2a4f5-81d6-46a0-8709-16f3b7d9b201}:0.4.0",
+          "{d9f2a4f5-81d6-46a0-8709-16f3b7d9b201}:0.5.0",
+          "kick-extension@maxbypassA.firefox:8.6",
+          "kick-emoji-spammer-v3@mohammadalbdour0-cmd:2.0",
+          "kick-extension@maxbypass.firefox:8.5"
+        ]
+      },
+      "schema": 1756362989456,
+      "key_format": "{guid}:{version}",
+      "stash_time": 1756384505685,
+      "id": "29b0b181-a2be-4671-9774-0aa4355f6899",
+      "last_modified": 1756384589588
+    },
+    {
+      "stash": {
+        "blocked": [],
+        "unblocked": [],
+        "softblocked": [
           "{f1b7d3c8-6a2e-4e9b-8d5c-3f6a2b1c4d7e}:19.80.3",
           "{4a1d3f7e-9b2c-4c6a-8f21-7e5b9d2c1a4f}:95.10.2",
           "wubi-input@yourdomain.com:1.0",
@@ -2734,5 +3185,5 @@
       "last_modified": 1755023922753
     }
   ],
-  "timestamp": 1756362989308
+  "timestamp": 1756708594503
 }

@@ -30079,24 +30079,6 @@
       "last_modified": 1562024764178
     },
     {
-      "schema": 1562024709140,
-      "derHash": "QPR5Vb6j6nJsraxdP+YSl/57665bBQnh73spyDj0nSA=",
-      "subject": "CN=Atos TrustedRoot Client Issuing CA 2015,O=Atos,C=DE",
-      "subjectDN": "ME4xMDAuBgNVBAMMJ0F0b3MgVHJ1c3RlZFJvb3QgQ2xpZW50IElzc3VpbmcgQ0EgMjAxNTENMAsGA1UECgwEQXRvczELMAkGA1UEBhMCREU=",
-      "whitelist": false,
-      "attachment": {
-        "hash": "dd579a2edbed1e53c1f47b7a826616a0d492b19006df01fe4ca95fec7212d82c",
-        "size": 1569,
-        "filename": "tjnIUgKXmzH2ph7qdeq_3nm1xMqgGPtNJ8mM19Zcu-M=.pem",
-        "location": "security-state-staging/intermediates/f292bc25-f1b7-45ff-9df5-d56c9893901c.pem",
-        "mimetype": "application/x-pem-file"
-      },
-      "pubKeyHash": "tjnIUgKXmzH2ph7qdeq/3nm1xMqgGPtNJ8mM19Zcu+M=",
-      "crlite_enrolled": false,
-      "id": "4f00eb7d-2e3c-402b-9dbb-97c1958dac20",
-      "last_modified": 1562024709874
-    },
-    {
       "schema": 1562024693355,
       "derHash": "4SHBaU2nN8F7hkSK7cYU7r15Rqe0uR+zACW2NgcCOeo=",
       "subject": "CN=TU Dortmund Chipcard CA 2,O=Technische Universitaet Dortmund,C=DE",
@@ -30367,5 +30349,5 @@
       "last_modified": 1559865884636
     }
   ],
-  "timestamp": 1756133822393
+  "timestamp": 1756565822552
 }
