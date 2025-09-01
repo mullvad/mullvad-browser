@@ -89,7 +89,7 @@ public class IntentUtils {
     }
 
     if (("intent".equals(scheme) || "android-app".equals(scheme))) {
-      // Bug 1356893 - Rject intents with file data schemes.
+      // Bug 1356893 - Reject intents with file data schemes.
       return getSafeIntent(aUri) != null;
     }
 
@@ -115,8 +115,11 @@ public class IntentUtils {
     }
 
     final Uri data = intent.getData();
-    if (data != null && "file".equals(normalizeUriScheme(data).getScheme())) {
-      return null;
+    if (data != null) {
+      final String scheme = normalizeUriScheme(data).getScheme();
+      if ("file".equals(scheme) || "fido".equals(scheme)) {
+        return null;
+      }
     }
 
     // Only open applications which can accept arbitrary data from a browser.
