@@ -37,6 +37,9 @@ tags = "remote-settings"
 
 ["test_async.js"]
 
+["test_base_browser.js"]
+tags = "base-browser"
+
 ["test_configExpansion.js"]
 support-files = [
   "../../schema/search-config-v2-schema.json",
