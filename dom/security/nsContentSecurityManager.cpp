@@ -348,6 +348,47 @@ static nsresult DoSOPChecks(nsIURI* aURI, nsILoadInfo* aLoadInfo,
   return NS_OK;
 }
 
+// Determine which principal to use in DoCORSChecks.  Normally, we do CORS
+// checks using the LoadingPrincipal (whose Origin comes from the host
+// document).  But under certain configurations/situations, we instead use
+// the TriggeringPrincipal() (whose Origin comes from the specific resource
+// that initiated the request).
+static nsIPrincipal* DeterminePrincipalForCORSChecks(nsILoadInfo* aLoadInfo) {
+  nsIPrincipal* const triggeringPrincipal = aLoadInfo->TriggeringPrincipal();
+
+  if (StaticPrefs::content_cors_use_triggering_principal()) {
+    // This pref forces us to use the TriggeringPrincipal.
+    // TODO(dholbert): Remove this special-case, perhaps right after we
+    // fix bug 1982916 which requires it for a test.
+    return triggeringPrincipal;
+  }
+
+  if (!StaticPrefs::extensions_content_web_accessible_enabled() &&
+      triggeringPrincipal->GetIsAddonOrExpandedAddonPrincipal()) {
+    // If we get here, then we know:
+    // * we want to allow MV2 WebExtensions to access their own resources
+    // regardless of whether those are listed in 'web_accessible_resources' in
+    // their manifest (this is nonstandard but it's a legacy thing we allow).
+    // * this load was initiated by a WebExtension (possibly running in a
+    // content script in the context of a web page).
+    //
+    // Hence: in this case, we use the TriggeringPrincipal for our CORS checks
+    // (so that a WebExtension requesting its own resources will be treated as
+    // same-origin, rather than being rejected as a cross-origin request from
+    // the page's origin).
+    //
+    // NOTE: Technically we should also check whether the extension uses MV2
+    // here, since this pref is specific to MV2. But that's not strictly
+    // necessary because we already unconditionally block MV3-WebExtension
+    // content-loads of this type at a different level (in
+    // nsScriptSecurityManager::CheckLoadURIWithPrincipal).
+    return triggeringPrincipal;
+  }
+
+  // Otherwise we use the LoadingPrincipal.
+  return aLoadInfo->GetLoadingPrincipal();
+}
+
 static nsresult DoCORSChecks(nsIChannel* aChannel, nsILoadInfo* aLoadInfo,
                              nsCOMPtr<nsIStreamListener>& aInAndOutListener) {
   MOZ_RELEASE_ASSERT(aInAndOutListener,
@@ -358,19 +399,11 @@ static nsresult DoCORSChecks(nsIChannel* aChannel, nsILoadInfo* aLoadInfo,
     return NS_OK;
   }
 
-  nsIPrincipal* principal = aLoadInfo->GetLoadingPrincipal();
-  if (StaticPrefs::content_cors_use_triggering_principal()) {
-    // We use the triggering principal here, rather than the loading principal,
-    // to ensure that WebExtensions can reuse their own resources from content
-    // that they inject into a page.
-    //
-    // TODO(dholbert): Is there actually a legitimate reason that WebExtensions
-    // might need this (as opposed to exposing their resources for use in
-    // web-content via the 'web_accessible_resources' manifest field)?
-    principal = aLoadInfo->TriggeringPrincipal();
-  }
+  nsIPrincipal* principalForCORSCheck =
+    DeterminePrincipalForCORSChecks(aLoadInfo);
+
   RefPtr<nsCORSListenerProxy> corsListener = new nsCORSListenerProxy(
-      aInAndOutListener, principal,
+      aInAndOutListener, principalForCORSCheck,
       aLoadInfo->GetCookiePolicy() == nsILoadInfo::SEC_COOKIES_INCLUDE);
   // XXX: @arg: DataURIHandling::Allow
   // lets use  DataURIHandling::Allow for now and then decide on callsite basis.

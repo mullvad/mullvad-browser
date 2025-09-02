@@ -2189,8 +2189,12 @@
   mirror: always
 
 # If true, we'll use the triggering principal rather than the loading principal
-# when doing CORS checks.  This might be needed for WebExtensions to load their
-# own resources from content that they inject into sites.
+# when doing CORS checks.  Doing so is generally not correct, but we shipped
+# with this behavior for a long time, so we're leaving it preffable in case
+# it's needed for testing or if we discover some edge case that requires it.
+#
+# TODO(dholbert): Remove this pref after the 'false' default-value has
+# successfully shipped for a release or two.
 - name: content.cors.use_triggering_principal
   type: bool
   value: false
