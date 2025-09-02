@@ -24,14 +24,26 @@ function test() {
       Services.obs.removeObserver(onCertUI, "cert-exception-ui-ready");
       ok(win.gCert, "The certificate information should be available now");
 
+      // Clicking on the View… button should open the certificate viewer.
       let viewButton = win.document.getElementById("viewCertButton");
       let tabPromise = BrowserTestUtils.waitForNewTab(
         gBrowser,
         url => url.startsWith("about:certificate?cert="),
         true
       );
-      viewButton.click();
+      EventUtils.synthesizeMouseAtCenter(viewButton, {}, win);
       BrowserTestUtils.removeTab(await tabPromise);
+
+      if (AppConstants.platform != "macosx") {
+        // Pressing enter on the View… button should open the certificate viewer.
+        tabPromise = BrowserTestUtils.waitForNewTab(
+          gBrowser,
+          url => url.startsWith("about:certificate?cert="),
+          true
+        );
+        EventUtils.synthesizeKey("KEY_Enter", {}, win);
+        BrowserTestUtils.removeTab(await tabPromise);
+      }
 
       let dialog = win.document.getElementById("exceptiondialog");
       let confirmButton = dialog.getButton("extra1");
