@@ -159,18 +159,37 @@ var serverRichList = {
   },
 
   addException() {
-    let retval = {
+    let params = {
       exceptionAdded: false,
     };
+    let closedCallback = () => {
+      if (params.exceptionAdded) {
+        this.buildRichList();
+      }
+    };
+    // Try to use a subdialog, if available.
+    let cur = window;
+    let prev = null;
+    while (cur != prev) {
+      if (cur.gSubDialog) {
+        cur.gSubDialog.open(
+          "chrome://pippki/content/exceptionDialog.xhtml",
+          { features: "chrome,centerscreen,modal", closedCallback },
+          params
+        );
+        return;
+      }
+      prev = cur;
+      cur = cur.parent;
+    }
+    // Otherwise, fall back to a dialog.
     window.browsingContext.topChromeWindow.openDialog(
       "chrome://pippki/content/exceptionDialog.xhtml",
       "",
       "chrome,centerscreen,modal",
-      retval
+      params
     );
-    if (retval.exceptionAdded) {
-      this.buildRichList();
-    }
+    closedCallback();
   },
 
   _setButtonState() {
