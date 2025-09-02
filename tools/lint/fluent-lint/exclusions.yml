@@ -59,7 +59,7 @@ ID01:
         - clockSkewError-title
         - connectionFailure-title
         - contentEncodingError-title
-        - corruptedContentError-title
+        - corruptedContentErrorv2-title
         - deniedPortAccess-title
         - dnsNotFound-title
         - fileAccessDenied-title
