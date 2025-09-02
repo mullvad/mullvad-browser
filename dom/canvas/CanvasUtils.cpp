@@ -483,7 +483,7 @@ bool IsImageExtractionAllowed(dom::OffscreenCanvas* aOffscreenCanvas,
         MOZ_ASSERT(aWorkerPrivate);
         AssertIsOnMainThread();
 
-        RefPtr<nsPIDOMWindowInner> inner = aWorkerPrivate->GetWindow();
+        RefPtr<nsPIDOMWindowInner> inner = aWorkerPrivate->GetAncestorWindow();
         RefPtr<dom::BrowserChild> win = dom::BrowserChild::GetFrom(inner);
         NS_ENSURE_TRUE_VOID(win);
 
