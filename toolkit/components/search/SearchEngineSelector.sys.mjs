@@ -9,6 +9,7 @@
  * } from "../uniffi-bindgen-gecko-js/components/generated/RustSearch.sys.mjs";
  */
 
+import { AppConstants } from "resource://gre/modules/AppConstants.sys.mjs";
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
@@ -97,16 +98,21 @@ export class SearchEngineSelector {
     ]);
     let remoteSettingsData = await this.#getConfigurationPromise;
     this.#configuration = remoteSettingsData[0];
-    this.#getConfigurationPromise = null;
+    // For Base Browser, we don't expect the configuration to ever change in a
+    // session, so we keep the #getConfigurationPromise as-is for later calls.
 
     if (!this.#configuration?.length) {
-      throw new Error("Failed to get engine data from Remote Settings");
+      throw Components.Exception(
+        "Failed to get engine data from Remote Settings",
+        Cr.NS_ERROR_UNEXPECTED
+      );
     }
 
     /**
      * Records whether the listeners have been added or not.
      */
-    if (!this.#listenerAdded) {
+    // For Base Browser, we don't use remoteConfig. tor-browser#43525.
+    if (!AppConstants.BASE_BROWSER_VERSION && !this.#listenerAdded) {
       this.#remoteConfig.on("sync", this.#boundOnConfigurationUpdated);
       this.#remoteConfigOverrides.on(
         "sync",
@@ -328,6 +334,15 @@ export class SearchEngineSelector {
    *   could be obtained.
    */
   async #getConfiguration(firstTime = true) {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // For Base Browser, load the config from a local file, rather than
+      // #remoteConfig. tor-browser#43525.
+      return (
+        await fetch(
+          "chrome://global/content/search/base-browser-search-engines.json"
+        )
+      ).json();
+    }
     let result = [];
     let failed = false;
     try {
@@ -366,6 +381,12 @@ export class SearchEngineSelector {
    *   The new configuration object
    */
   _onConfigurationUpdated({ data: { current } }) {
+    // tor-browser#43525: Even though RemoteSettings are a no-op for us, we do
+    // not want them to interfere in any way.
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      return;
+    }
+
     this.#configuration = current;
 
     this.#selector.setSearchConfig(
@@ -393,6 +414,12 @@ export class SearchEngineSelector {
    *   The new configuration object
    */
   _onConfigurationOverridesUpdated({ data: { current } }) {
+    // tor-browser#43525: Even though RemoteSettings are a no-op for us, we do
+    // not want them to interfere in any way.
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      return;
+    }
+
     this.#selector.setConfigOverrides(JSON.stringify({ data: current }));
 
     lazy.logConsole.debug("Search configuration overrides updated remotely");
@@ -409,6 +436,10 @@ export class SearchEngineSelector {
    *   could be obtained.
    */
   async #getConfigurationOverrides() {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // For Base Browser, we don't want overrides. tor-browser#43525.
+      return [];
+    }
     let result = [];
     try {
       result = await this.#remoteConfigOverrides.get();
