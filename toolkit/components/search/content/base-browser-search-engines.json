@@ -1,6 +1,24 @@
 [
   {
     "base": {
+      "aliases": ["mullvad-leta", "leta", "mullvad", "ml"],
+      "classification": "general",
+      "name": "Mullvad Leta",
+      "urls": {
+        "search": {
+          "base": "https://leta.mullvad.net/",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "ee88d691-6d7a-4adb-9fec-5a205565505a",
+    "identifier": "mullvad-leta",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
       "aliases": ["duckduckgo", "ddg"],
       "classification": "general",
       "name": "DuckDuckGo",
@@ -14,6 +32,60 @@
     },
     "id": "04e99a38-13ee-47d8-8aa4-64482b3dea99",
     "identifier": "ddg",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
+      "aliases": ["ddg-html", "duckduckgohtml", "ddgh"],
+      "classification": "general",
+      "name": "DuckDuckGo (HTML)",
+      "urls": {
+        "search": {
+          "base": "https://html.duckduckgo.com/html/",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "98d8c84b-7455-431d-98b9-890e7bcc0041",
+    "identifier": "ddg-html",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
+      "aliases": ["mojeek", "mj"],
+      "classification": "general",
+      "name": "Mojeek",
+      "urls": {
+        "search": {
+          "base": "https://www.mojeek.com/search",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "10df12ac-2b39-4aa9-8845-d5b35d5bb70c",
+    "identifier": "mojeek",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
+      "aliases": ["brave", "bv"],
+      "classification": "general",
+      "name": "Brave Search",
+      "urls": {
+        "search": {
+          "base": "https://search.brave.com/search",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "f479314b-030b-49a8-a2fe-7e1c5d1d9071",
+    "identifier": "brave",
     "recordType": "engine",
     "variants": [{ "environment": { "allRegionsAndLocales": true } }]
   },
@@ -36,8 +108,26 @@
     "variants": [{ "environment": { "allRegionsAndLocales": true } }]
   },
   {
+    "base": {
+      "aliases": ["metager", "mg"],
+      "classification": "general",
+      "name": "MetaGer",
+      "urls": {
+        "search": {
+          "base": "https://metager.org/meta/meta.ger3",
+          "params": [],
+          "searchTermParamName": "eingabe"
+        }
+      }
+    },
+    "id": "a9d07d93-469c-4bf4-8dd1-fa137f1cc85f",
+    "identifier": "metager",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
     "recordType": "defaultEngines",
-    "globalDefault": "ddg",
-    "globalDefaultPrivate": "ddg"
+    "globalDefault": "mullvad-leta",
+    "globalDefaultPrivate": "mullvad-leta"
   }
 ]
