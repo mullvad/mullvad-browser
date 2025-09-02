@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import { AppConstants } from "resource://gre/modules/AppConstants.sys.mjs";
+
 /**
  * @typedef {import("../uniffi-bindgen-gecko-js/components/generated/RustSearch.sys.mjs").SearchEngineSelector} RustSearchEngineSelector
  * We use "Rust" above to avoid conflict with the class name for the JavaScript wrapper.
@@ -92,30 +94,15 @@ export class SearchEngineSelector {
       return this._getConfigurationPromise;
     }
 
-    this._getConfigurationPromise = Promise.all([
-      this._getConfiguration(),
-      this._getConfigurationOverrides(),
-    ]);
-    let remoteSettingsData = await this._getConfigurationPromise;
-    this._configuration = remoteSettingsData[0];
-    this._configurationOverrides = remoteSettingsData[1];
-    delete this._getConfigurationPromise;
-
-    if (!this._configuration?.length) {
-      throw Components.Exception(
-        "Failed to get engine data from Remote Settings",
-        Cr.NS_ERROR_UNEXPECTED
-      );
-    }
-
-    if (!this._listenerAdded) {
-      this._remoteConfig.on("sync", this._onConfigurationUpdated);
-      this._remoteConfigOverrides.on(
-        "sync",
-        this._onConfigurationOverridesUpdated
-      );
-      this._listenerAdded = true;
-    }
+    let { promise, resolve } = Promise.withResolvers();
+    this._getConfigurationPromise = promise;
+    this._configuration = await (
+      await fetch(
+        "chrome://global/content/search/base-browser-search-engines.json"
+      )
+    ).json();
+    this._configurationOverrides = [];
+    resolve(this._configuration);
 
     if (lazy.SearchUtils.rustSelectorFeatureGate) {
       this.#selector.setSearchConfig(
@@ -242,6 +229,12 @@ export class SearchEngineSelector {
    *   The new configuration object
    */
   _onConfigurationUpdated({ data: { current } }) {
+    // tor-browser#43525: Even though RemoteSettings are a no-op for us, we do
+    // not want them to interfere in any way.
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      return;
+    }
+
     this._configuration = current;
 
     if (lazy.SearchUtils.rustSelectorFeatureGate) {
@@ -268,6 +261,12 @@ export class SearchEngineSelector {
    *   The new configuration object
    */
   _onConfigurationOverridesUpdated({ data: { current } }) {
+    // tor-browser#43525: Even though RemoteSettings are a no-op for us, we do
+    // not want them to interfere in any way.
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      return;
+    }
+
     this._configurationOverrides = current;
 
     if (lazy.SearchUtils.rustSelectorFeatureGate) {

@@ -1,0 +1,15 @@
+{
+  "ddg": [
+    { "url": "chrome://global/content/search/duckduckgo.ico", "imageSize": 32 }
+  ],
+  "startpage": [
+    {
+      "url": "chrome://global/content/search/startpage-16.png",
+      "imageSize": 16
+    },
+    {
+      "url": "chrome://global/content/search/startpage-32.png",
+      "imageSize": 32
+    }
+  ]
+}

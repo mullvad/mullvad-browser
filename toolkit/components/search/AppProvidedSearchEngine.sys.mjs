@@ -116,6 +116,10 @@ class IconHandler {
       await this.#buildIconMap();
     }
 
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      return this.#iconMap.get(engineIdentifier);
+    }
+
     let iconList = this.#iconMap.get(this.getKey(engineIdentifier)) || [];
     return iconList.filter(r =>
       this.#identifierMatches(engineIdentifier, r.engineIdentifiers)
@@ -132,29 +136,7 @@ class IconHandler {
    *   source object or null of there is no icon with the supplied width.
    */
   async createIconURL(iconRecord) {
-    let iconData;
-    try {
-      iconData = await this.#iconCollection.attachments.get(iconRecord);
-    } catch (ex) {
-      console.error(ex);
-    }
-    if (!iconData) {
-      console.warn("Unable to find the attachment for", iconRecord.id);
-      // Queue an update in case we haven't downloaded it yet.
-      this.#pendingUpdatesMap.set(iconRecord.id, iconRecord);
-      this.#maybeQueueIdle();
-      return null;
-    }
-
-    if (iconData.record.last_modified != iconRecord.last_modified) {
-      // The icon we have stored is out of date, queue an update so that we'll
-      // download the new icon.
-      this.#pendingUpdatesMap.set(iconRecord.id, iconRecord);
-      this.#maybeQueueIdle();
-    }
-    return URL.createObjectURL(
-      new Blob([iconData.buffer], { type: iconRecord.attachment.mimetype })
-    );
+    return iconRecord.url;
   }
 
   QueryInterface = ChromeUtils.generateQI(["nsIObserver"]);
@@ -238,26 +220,22 @@ class IconHandler {
    * Obtains the icon list from the remote settings collection.
    */
   async #buildIconMap() {
-    let iconList = [];
     try {
-      iconList = await this.#iconCollection.get();
+      this.#iconMap = new Map(
+        Object.entries(
+          await (
+            await fetch(
+              "chrome://global/content/search/base-browser-search-engine-icons.json"
+            )
+          ).json()
+        )
+      );
     } catch (ex) {
       console.error(ex);
+      this.#iconMap = null;
     }
-    if (!iconList.length) {
+    if (!this.#iconMap) {
       console.error("Failed to obtain search engine icon list records");
-    }
-
-    this.#iconMap = new Map();
-    for (let record of iconList) {
-      let keys = new Set(record.engineIdentifiers.map(this.getKey));
-      for (let key of keys) {
-        if (this.#iconMap.has(key)) {
-          this.#iconMap.get(key).push(record);
-        } else {
-          this.#iconMap.set(key, [record]);
-        }
-      }
     }
   }
 

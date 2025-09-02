@@ -1,0 +1,43 @@
+[
+  {
+    "base": {
+      "aliases": ["duckduckgo", "ddg"],
+      "classification": "general",
+      "name": "DuckDuckGo",
+      "urls": {
+        "search": {
+          "base": "https://duckduckgo.com/",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "04e99a38-13ee-47d8-8aa4-64482b3dea99",
+    "identifier": "ddg",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "base": {
+      "aliases": ["startpage", "sp"],
+      "classification": "general",
+      "name": "Startpage",
+      "urls": {
+        "search": {
+          "base": "https://www.startpage.com/sp/search",
+          "params": [],
+          "searchTermParamName": "q"
+        }
+      }
+    },
+    "id": "927bbd9f-b2f3-48b4-8974-1c1148028f4d",
+    "identifier": "startpage",
+    "recordType": "engine",
+    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
+  },
+  {
+    "recordType": "defaultEngines",
+    "globalDefault": "ddg",
+    "globalDefaultPrivate": "ddg"
+  }
+]
