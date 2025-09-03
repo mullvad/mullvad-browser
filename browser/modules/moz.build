@@ -136,7 +136,6 @@ EXTRA_JS_MODULES += [
     "PopupBlockerObserver.sys.mjs",
     "ProcessHangMonitor.sys.mjs",
     "Sanitizer.sys.mjs",
-    "SecurityLevelRestartNotification.sys.mjs",
     "SelectionChangedMenulist.sys.mjs",
     "SharingUtils.sys.mjs",
     "SiteDataManager.sys.mjs",
@@ -150,6 +149,7 @@ EXTRA_JS_MODULES += [
 MOZ_SRC_FILES += [
     "ContextId.sys.mjs",
     "ClipboardPrivacy.sys.mjs",
+    "SecurityLevelRestartNotification.sys.mjs",
 ]
 
 if CONFIG["MOZ_WIDGET_TOOLKIT"] == "windows":
