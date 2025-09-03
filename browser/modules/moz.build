@@ -148,6 +148,7 @@ EXTRA_JS_MODULES += [
 
 MOZ_SRC_FILES += [
     "ContextId.sys.mjs",
+    "ClipboardPrivacy.sys.mjs",
 ]
 
 if CONFIG["MOZ_WIDGET_TOOLKIT"] == "windows":
