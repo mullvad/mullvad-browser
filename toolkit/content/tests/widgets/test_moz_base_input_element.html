@@ -93,6 +93,29 @@
           "support link created"
         );
       });
+
+      add_task(async function testLabelChange() {
+        let el = await renderTemplate();
+
+        let labelEl = el.shadowRoot.querySelector("label");
+        is(labelEl.innerText.trim(), "Example label!", "Label is correct");
+        is(labelEl.getAttribute("shownaccesskey"), "x", "Accesskey is shown");
+
+        // Test changing the label text, this could happen when the locale changes.
+        el.label = "Example new label!";
+        await el.updateComplete;
+
+        is(
+          labelEl.innerText.trim(),
+          "Example new label!",
+          "Label is updated correctly"
+        );
+        is(
+          labelEl.getAttribute("shownaccesskey"),
+          "x",
+          "Accesskey is still shown"
+        );
+      });
     </script>
   </head>
   <body>

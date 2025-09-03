@@ -48,6 +48,13 @@
         Shownaccesskey highlights the key
         <input type="checkbox" />
       </label>
+
+      <label is="moz-label" accesskey="t" class="test-changetext"
+        ><span class="text">It has text</span></label
+      >
+      <label is="moz-label" shownaccesskey="t" class="test-changetext"
+        ><span class="text">It has text</span></label
+      >
     </div>
     <script class="testbody" type="application/javascript">
       let labels = document.querySelectorAll("label[is='moz-label']");
@@ -101,7 +108,7 @@
       add_task(async function testAccesskeyFocus() {
         labels.forEach(label => {
           let accessKey = label.getAttribute("accesskey");
-          if (!accessKey) {
+          if (!accessKey || label.classList.contains("test-changetext")) {
             return;
           }
           // Find the labelled element via the "for" attr if there's an ID
@@ -204,6 +211,70 @@
           input.checked,
           false,
           "The associated input is not triggered by accesskey."
+        );
+      });
+
+      add_task(async function testAccesskeyTextContentChange() {
+        const ORIG_TEXT = "It has text";
+        const NEW_TEXT = "New text";
+        const ACCESSKEY = "t";
+        let [accesskeyLabel, shownaccesskeyLabel] =
+          document.querySelectorAll(".test-changetext");
+
+        is(
+          accesskeyLabel.textContent,
+          ORIG_TEXT,
+          "Original text is correct accesskey"
+        );
+        is(
+          shownaccesskeyLabel.textContent,
+          ORIG_TEXT,
+          "Original text is correct shownaccesskey"
+        );
+
+        let getWrapper = label => label.querySelector(".accesskey");
+        is(
+          getWrapper(accesskeyLabel).textContent,
+          ACCESSKEY,
+          "Original accesskey character is wrapped accesskey"
+        );
+        is(
+          getWrapper(shownaccesskeyLabel).textContent,
+          ACCESSKEY,
+          "Original accesskey character is wrapped accesskey"
+        );
+
+        // Set the textContent on the inner span so we don't hit `set textContent`
+        accesskeyLabel.firstElementChild.textContent = NEW_TEXT;
+        is(
+          accesskeyLabel.textContent,
+          NEW_TEXT,
+          "Updated text is correct accesskey"
+        );
+        ok(!getWrapper(accesskeyLabel), "Accesskey span was removed accesskey");
+        // formatAccessKey waits a tick so we don't get infinite observer looping
+        await new Promise(r => queueMicrotask(r));
+        is(
+          getWrapper(accesskeyLabel).textContent,
+          ACCESSKEY,
+          "Updated accesskey character is wrapped accesskey"
+        );
+        shownaccesskeyLabel.firstElementChild.textContent = NEW_TEXT;
+        is(
+          shownaccesskeyLabel.textContent,
+          NEW_TEXT,
+          "Updated text is correct shownaccesskey"
+        );
+        ok(
+          !getWrapper(shownaccesskeyLabel),
+          "Accesskey span was removed shownaccesskey"
+        );
+        // formatAccessKey waits a tick so we don't get infinite observer looping
+        await new Promise(r => queueMicrotask(r));
+        is(
+          getWrapper(shownaccesskeyLabel).textContent,
+          ACCESSKEY,
+          "Updated accesskey character is wrapped accesskey"
         );
       });
     </script>
