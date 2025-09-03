@@ -15,7 +15,7 @@ ChromeUtils.defineLazyGetter(lazy, "NotificationStrings", function () {
 /**
  * Interface for showing the security level restart notification on desktop.
  */
-export const SecurityLevelRestartNotification = {
+export const SecurityLevelNotification = {
   /**
    * Whether we have already been initialised.
    *
@@ -31,11 +31,13 @@ export const SecurityLevelRestartNotification = {
       return;
     }
     this._initialized = true;
-    lazy.SecurityLevelPrefs.setRestartNotificationHandler(this);
+    lazy.SecurityLevelPrefs.setNotificationHandler(this);
   },
 
   /**
    * Show the restart notification, and perform the restart if the user agrees.
+   *
+   * @returns {boolean} - Whether we are restarting the browser.
    */
   async tryRestartBrowser() {
     const [titleText, bodyText, primaryButtonText, secondaryButtonText] =
@@ -69,6 +71,49 @@ export const SecurityLevelRestartNotification = {
       Services.startup.quit(
         Services.startup.eAttemptQuit | Services.startup.eRestart
       );
+      return true;
     }
+    return false;
+  },
+
+  /**
+   * Show or re-show the custom security notification.
+   *
+   * @param {Function} userDismissedCallback - The callback for when the user
+   *   dismisses the notification.
+   */
+  async showCustomWarning(userDismissedCallback) {
+    const win = lazy.BrowserWindowTracker.getTopWindow();
+    if (!win) {
+      return;
+    }
+    const typeName = "security-level-custom";
+    const existing = win.gNotificationBox.getNotificationWithValue(typeName);
+    if (existing) {
+      win.gNotificationBox.removeNotification(existing);
+    }
+
+    const buttons = [
+      {
+        "l10n-id": "security-level-panel-open-settings-button",
+        callback() {
+          win.openPreferences("privacy-securitylevel");
+        },
+      },
+    ];
+
+    win.gNotificationBox.appendNotification(
+      typeName,
+      {
+        label: { "l10n-id": "security-level-summary-custom" },
+        priority: win.gNotificationBox.PRIORITY_WARNING_HIGH,
+        eventCallback: event => {
+          if (event === "dismissed") {
+            userDismissedCallback();
+          }
+        },
+      },
+      buttons
+    );
   },
 };

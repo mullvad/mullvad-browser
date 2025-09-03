@@ -226,7 +226,7 @@ var initializeNoScriptControl = () => {
       } catch (e) {
         logger.error("Could not apply NoScript settings", e);
         // Treat as a custom security level for the rest of the session.
-        Services.prefs.setBoolPref(kCustomPref, true);
+        SecurityLevelPrefs.setCustomAndWarn();
       }
     };
     waitForExtensionMessage(noscriptID, a => a.__meta.name === "started").then(
@@ -236,7 +236,7 @@ var initializeNoScriptControl = () => {
   } catch (e) {
     logger.exception(e);
     // Treat as a custom security level for the rest of the session.
-    Services.prefs.setBoolPref(kCustomPref, true);
+    SecurityLevelPrefs.setCustomAndWarn();
   }
 };
 
@@ -389,7 +389,12 @@ var initializeSecurityPrefs = function () {
     // particular, for the NoScript addon.
     Services.prefs.setBoolPref(kCustomPref, false);
     Services.prefs.setIntPref(kSliderPref, effectiveIndex);
-  } else if (!wasCustom && effectiveIndex !== desiredIndex) {
+  }
+  // Warn the user if they have booted the browser in a custom state, and have
+  // not yet acknowledged it in a previous session.
+  SecurityLevelPrefs.maybeWarnCustom();
+
+  if (!wasCustom && effectiveIndex !== desiredIndex) {
     // NOTE: We assume all our controlled preferences require a restart.
     // In practice, only a subset of these preferences may actually require a
     // restart, so we could switch their values. But we treat them all the same
@@ -436,7 +441,7 @@ var initializeSecurityPrefs = function () {
         // properly applied. See tor-browser#43783.
         // In the case where it does match a pre-set security level, the custom
         // flag will be cleared at the next startup.
-        Services.prefs.setBoolPref(kCustomPref, true);
+        SecurityLevelPrefs.setCustomAndWarn();
       }),
     });
   }
@@ -505,12 +510,27 @@ export class SecurityLevel {
 }
 
 /**
- * @typedef {object} SecurityLevelRestartNotificationHandler
+ * @callback SecurityLevelTryRestartBrowserCallback
  *
- * An object that can serve the user a restart notification.
+ * @returns {Promise<boolean>} - A promise that resolves when the user has made
+ *   a decision. Should return `true` when the browser is now restarting.
+ */
+/**
+ * @callback SecurityLevelShowCustomWarningCallback
  *
- * @property {Function} tryRestartBrowser - The method that should be called to
- *   ask the user to restart the browser.
+ * @param {Function} userDismissedCallback - A callback that should be called
+ *   if the user has acknowledged and dismissed the notification.
+ */
+/**
+ * @typedef {object} SecurityLevelNotificationHandler
+ *
+ * An object that can serve the user notifications.
+ *
+ * @property {SecurityLevelTryRestartBrowserCallback} tryRestartBrowser - The
+ *   method that should be called to ask the user to restart the browser.
+ * @property {SecurityLevelShowCustomWarningCallback} showCustomWarning - The
+ *   method that should be called to let the user know they have a custom
+ *   security level.
  */
 
 /*
@@ -526,6 +546,8 @@ export const SecurityLevelPrefs = {
   }),
   security_slider_pref: "browser.security_level.security_slider",
   security_custom_pref: "browser.security_level.security_custom",
+  _customWarningDismissedPref:
+    "browser.security_level.custom_warning_dismissed",
 
   /**
    * The current security level preference.
@@ -581,18 +603,18 @@ export const SecurityLevelPrefs = {
   },
 
   /**
-   * Whether the browser should be restarted to apply the security level.
-   *
-   * @type {boolean}
-   */
-  _needRestart: false,
-
-  /**
    * The external handler that can show a notification to the user, if any.
    *
-   * @type {?SecurityLevelRestartNotificationHandler}
+   * @type {?SecurityLevelNotificationHandler}
    */
-  _restartNotificationHandler: null,
+  _notificationHandler: null,
+
+  /**
+   * The notifications we are waiting for a handler to show.
+   *
+   * @type {Set}
+   */
+  _pendingNotifications: {},
 
   /**
    * Set the external handler for showing notifications to the user.
@@ -600,49 +622,73 @@ export const SecurityLevelPrefs = {
    * This should only be called once per session once the handler is ready to
    * show a notification, which may occur immediately during this call.
    *
-   * @param {SecurityLevelRestartNotificationHandler} handler - The new handler
-   *   to use.
+   * @param {SecurityLevelNotificationHandler} handler - The new handler to use.
    */
-  setRestartNotificationHandler(handler) {
+  setNotificationHandler(handler) {
     logger.info("Restart notification handler is set");
-    this._restartNotificationHandler = handler;
-    if (this._needRestart) {
-      // Show now using the new handler.
-      this._tryShowRestartNotification();
-    }
+    this._notificationHandler = handler;
+    this._tryShowNotifications(this._pendingNotifications);
   },
 
   /**
    * A promise for any ongoing notification prompt task.
    *
-   * @type {Promise}
+   * Resolves with whether the browser is restarting.
+   *
+   * @type {Promise<boolean>}
    */
   _restartNotificationPromise: null,
 
   /**
-   * Try show a notification to the user.
+   * Try show notifications to the user.
    *
-   * If no notification handler has been attached yet, this will do nothing.
+   * If no notification handler has been attached yet, this will queue the
+   * notification for when it is added, if ever.
+   *
+   * @param {object} notifications - The notifications to try and show.
+   * @param {boolean} notifications.restart - Whether to show the restart
+   *   notification.
+   * @param {boolean} notifications.custom - Whether to show the custom security
+   *   level notification.
    */
-  async _tryShowRestartNotification() {
-    if (!this._restartNotificationHandler) {
-      logger.info("Missing a restart notification handler");
+  async _tryShowNotifications(notifications) {
+    if (!this._notificationHandler) {
+      logger.info("Missing a notification handler", notifications);
       // This may be added later in the session.
+      if (notifications.custom) {
+        this._pendingNotifications.custom = true;
+      }
+      if (notifications.restart) {
+        this._pendingNotifications.restart = true;
+      }
       return;
     }
 
-    const prevPromise = this._restartNotificationPromise;
-    let resolve;
-    ({ promise: this._restartNotificationPromise, resolve } =
-      Promise.withResolvers());
-    await prevPromise;
+    let isRestarting = false;
+    if (notifications.restart) {
+      const prevPromise = this._restartNotificationPromise;
+      let resolve;
+      ({ promise: this._restartNotificationPromise, resolve } =
+        Promise.withResolvers());
+      await prevPromise;
 
-    try {
-      await this._restartNotificationHandler?.tryRestartBrowser();
-    } finally {
-      // Allow the notification to be shown again.
-      resolve();
+      try {
+        isRestarting = await this._notificationHandler?.tryRestartBrowser();
+      } finally {
+        // Allow the notification to be shown again.
+        resolve();
+      }
     }
+    // NOTE: We wait for the restart notification to resolve before showing the
+    // custom warning. We do not show the warning if we are already restarting.
+    if (!isRestarting && notifications.custom) {
+      this._notificationHandler?.showCustomWarning(() => {
+        // User has acknowledged and dismissed the notification.
+        Services.prefs.setBoolPref(this._customWarningDismissedPref, true);
+      });
+    }
+
+    this._pendingNotifications = {};
   },
 
   /**
@@ -658,7 +704,6 @@ export const SecurityLevelPrefs = {
     // At the next startup, the custom flag may be cleared if the settings are
     // as expected.
     Services.prefs.setBoolPref(kCustomPref, true);
-    this._needRestart = true;
 
     // NOTE: We need to change the controlled security level preferences in
     // response to the desired change in security level. We could either:
@@ -684,6 +729,39 @@ export const SecurityLevelPrefs = {
     // still be marked as "custom" because:
     // 1. Some preferences require a browser restart to be applied.
     // 2. NoScript has not been updated with the new settings.
-    this._tryShowRestartNotification();
+
+    this._tryShowNotifications({ restart: true, custom: true });
+  },
+
+  /**
+   * Put the user in the custom security level state and show them a warning
+   * about this state.
+   */
+  setCustomAndWarn() {
+    Services.prefs.setBoolPref(kCustomPref, true);
+    // NOTE: We clear _customWarningDismissedPref because the entry points
+    // for this method imply we should re-warn the user each time.
+    Services.prefs.clearUserPref(this._customWarningDismissedPref);
+    this._tryShowNotifications({ custom: true });
+  },
+
+  /**
+   * If the user is in a custom state, try and notify them of this state.
+   */
+  maybeWarnCustom() {
+    const isCustom = Services.prefs.getBoolPref(kCustomPref, false);
+    if (!isCustom) {
+      // Clear the dismissed preference so the user will be re-shown the
+      // notification when they re-enter the custom state.
+      Services.prefs.clearUserPref(this._customWarningDismissedPref);
+      return;
+    }
+    if (Services.prefs.getBoolPref(this._customWarningDismissedPref, false)) {
+      // Do not warn the user of the custom state if they have already
+      // acknowledged and dismissed this in a previous session.
+      return;
+    }
+
+    this._tryShowNotifications({ custom: true });
   },
 }; /* Security Level Prefs */

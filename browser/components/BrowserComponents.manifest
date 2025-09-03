@@ -51,7 +51,7 @@ category browser-first-window-ready resource://gre/modules/SandboxUtils.sys.mjs 
 #endif
 #endif
 category browser-first-window-ready moz-src:///browser/modules/ClipboardPrivacy.sys.mjs ClipboardPrivacy.init
-category browser-first-window-ready moz-src:///browser/modules/SecurityLevelRestartNotification.sys.mjs SecurityLevelRestartNotification.ready
+category browser-first-window-ready moz-src:///browser/modules/SecurityLevelNotification.sys.mjs SecurityLevelNotification.ready
 
 category browser-idle-startup resource:///modules/PlacesUIUtils.sys.mjs PlacesUIUtils.unblockToolbars
 category browser-idle-startup resource:///modules/BuiltInThemes.sys.mjs BuiltInThemes.ensureBuiltInThemes
