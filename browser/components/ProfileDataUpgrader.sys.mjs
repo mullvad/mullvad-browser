@@ -900,4 +900,78 @@ export let ProfileDataUpgrader = {
     // Update the migration version.
     Services.prefs.setIntPref("browser.migration.version", newVersion);
   },
+
+  upgradeBB(isNewProfile) {
+    // Version 1: 13.0a3. Reset layout.css.prefers-color-scheme.content-override
+    //            for tor-browser#41739.
+    // Version 2: 14.0a5: Reset the privacy tracking headers preferences since
+    //            the UI is hidden. tor-browser#42777.
+    //            Also, do not set
+    //            dom.security.https_only_mode_send_http_background_request in
+    //            the security level anymore (tor-browser#42149).
+    //            Also, reset security.xfocsp.errorReporting.automatic since we
+    //            hid its neterror checkbox. tor-browser#42653.
+    // Version 3: 14.0a7: Reset general.smoothScroll. tor-browser#42070.
+    // Version 4: 15.0a2: Drop ML components. tor-browser#44045.
+    const MIGRATION_VERSION = 4;
+    const MIGRATION_PREF = "basebrowser.migration.version";
+
+    if (isNewProfile) {
+      // Do not migrate fresh profiles
+      Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
+      return;
+    } else if (isNewProfile === undefined) {
+      // If this happens, check if upstream updated their function and do not
+      // set this member anymore!
+      console.error("upgradeBB: isNewProfile is undefined.");
+    }
+
+    const currentVersion = Services.prefs.getIntPref(MIGRATION_PREF, 0);
+    if (currentVersion < 1) {
+      Services.prefs.clearUserPref(
+        "layout.css.prefers-color-scheme.content-override"
+      );
+    }
+    if (currentVersion < 2) {
+      for (const prefName of [
+        "privacy.globalprivacycontrol.enabled",
+        "privacy.donottrackheader.enabled",
+        // Telemetry preference for if the user changed the value.
+        "privacy.globalprivacycontrol.was_ever_enabled",
+        // The next two preferences have no corresponding UI, but are related.
+        "privacy.globalprivacycontrol.functionality.enabled",
+        "privacy.globalprivacycontrol.pbmode.enabled",
+        "dom.security.https_only_mode_send_http_background_request",
+        "security.xfocsp.errorReporting.automatic",
+      ]) {
+        Services.prefs.clearUserPref(prefName);
+      }
+    }
+    if (currentVersion < 3) {
+      Services.prefs.clearUserPref("general.smoothScroll");
+    }
+    if (currentVersion < 4) {
+      for (const prefName of [
+        "browser.translations.enable",
+        "browser.ml.enable",
+        "browser.ml.chat.enabled",
+        "browser.ml.linkPreview.enabled",
+        "browser.tabs.groups.smart.enabled",
+        "browser.tabs.groups.smart.userEnabled",
+        "extensions.ml.enabled",
+        "pdfjs.enableAltText",
+        "pdfjs.enableAltTextForEnglish",
+        "pdfjs.enableGuessAltText",
+        "pdfjs.enableAltTextModelDownload",
+        "browser.urlbar.quicksuggest.mlEnabled",
+        "places.semanticHistory.featureGate",
+      ]) {
+        // Preferences are locked. Do not want user values to linger in the
+        // user's profile and become active if these preferences become unlocked
+        // in the future.
+        Services.prefs.clearUserPref(prefName);
+      }
+    }
+    Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
+  },
 };
