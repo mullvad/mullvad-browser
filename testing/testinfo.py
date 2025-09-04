@@ -608,6 +608,15 @@ class TestInfoReport(TestInfo):
             show_manifests = True
             show_summary = True
 
+        trunk = False
+        if os.environ.get("GECKO_HEAD_REPOSITORY", "") in [
+            "https://hg.mozilla.org/mozilla-central",
+            "https://hg.mozilla.org/try",
+        ]:
+            trunk = True
+        else:
+            show_testruns = False
+
         by_component = {}
         if components:
             components = components.split(",")
@@ -622,10 +631,8 @@ class TestInfoReport(TestInfo):
         ifd = self.get_intermittent_failure_data(start, end)
 
         runcount = {}
-        if show_testruns and os.environ.get("GECKO_HEAD_REPOSITORY", "") in [
-            "https://hg.mozilla.org/mozilla-central",
-            "https://hg.mozilla.org/try",
-        ]:
+
+        if show_testruns and trunk:
             runcount = self.get_runcount_data(runcounts_input_file, start, end)
 
         print("Finding tests...")
@@ -647,7 +654,7 @@ class TestInfoReport(TestInfo):
         manifest_count = len(manifest_paths)
         print(f"Resolver found {len(tests)} tests, {manifest_count} manifests")
 
-        if config_matrix_output_file:
+        if config_matrix_output_file and trunk:
             topsrcdir = self.build_obj.topsrcdir
             config_matrix = {}
             for manifest in manifest_paths:
