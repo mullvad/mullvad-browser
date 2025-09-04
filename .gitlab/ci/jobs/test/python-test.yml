@@ -17,7 +17,7 @@ python-test:
     - firefox
   script:
     - ./mach configure --with-base-browser-version=0.0.0
-    - .gitlab/ci/jobs/helpers.py --get-changed-files | xargs -0 --no-run-if-empty ./mach python-test -v
+    - ./mach python-test --subsuite base-browser
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event' || ($CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true' && $CI_PIPELINE_SOURCE == 'push')
       changes:
