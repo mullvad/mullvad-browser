@@ -14,7 +14,7 @@
 
 #include <stddef.h>
 
-static const PRTime kCTExpirationTime = INT64_C(1762772255000000);
+static const PRTime kCTExpirationTime = INT64_C(1763038888000000);
 
 namespace mozilla::ct {
 
@@ -218,7 +218,7 @@ const CTLogInfo kCTLogList[] = {
      "\xcc",
      91},
     {"Sectigo 'Mammoth2025h2'", CTLogState::Admissible, CTLogFormat::RFC6962,
-     1701000000000,  // 2023-11-26T12:00:00Z
+     1756500000000,  // 2025-08-29T20:40:00Z
      3,              // operated by Sectigo
      "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48"
      "\xce\x3d\x03\x01\x07\x03\x42\x00\x04\x88\xe2\xc7\xb3\xd7\x37\xa3\x91\xd7"
@@ -447,18 +447,8 @@ const CTLogInfo kCTLogList[] = {
      "\x75\xe3\x66\x75\xa9\x59\x70\x2d\xe2\x5a\x8b\xc0\x7c\x0a\x6f\x5d\x2d\xf7"
      "\x37",
      91},
-    {"Bogus RFC6962 log to avoid breaking misbehaving CT libraries", CTLogState::Retired, CTLogFormat::RFC6962,
-     1750489200000,  // 2025-06-21T07:00:00Z
-     6,              // operated by Geomys
-     "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48"
-     "\xce\x3d\x03\x01\x07\x03\x42\x00\x04\x2f\x33\x56\x87\xe0\x6c\x02\x4d\x07"
-     "\x9c\x41\x04\xed\x99\x35\x6c\x08\x5d\x1f\x54\x8c\xe6\xe7\x68\xd7\xe0\x93"
-     "\x17\xa2\xc6\x70\xbe\x80\x55\x52\x17\x4a\xe3\x85\xf7\x9f\xd6\x83\x4a\x8b"
-     "\x65\x5e\x3d\xd5\x06\xeb\x35\x18\x34\xea\x63\x3a\x2b\x01\x33\x0d\x75\xed"
-     "\xaa",
-     91},
     {"Geomys 'Tuscolo2025h2'", CTLogState::Admissible, CTLogFormat::Tiled,
-     1749782400000,  // 2025-06-13T02:40:00Z
+     1756623600000,  // 2025-08-31T07:00:00Z
      6,              // operated by Geomys
      "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48"
      "\xce\x3d\x03\x01\x07\x03\x42\x00\x04\x2b\xd7\x78\x18\x6b\x73\x6e\x4c\x30"
@@ -468,7 +458,7 @@ const CTLogInfo kCTLogList[] = {
      "\xa3",
      91},
     {"Geomys 'Tuscolo2026h1'", CTLogState::Admissible, CTLogFormat::Tiled,
-     1749782400000,  // 2025-06-13T02:40:00Z
+     1756623600000,  // 2025-08-31T07:00:00Z
      6,              // operated by Geomys
      "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48"
      "\xce\x3d\x03\x01\x07\x03\x42\x00\x04\x7e\x5c\x73\x32\x0d\x80\x8e\x38\x3b"
@@ -478,7 +468,7 @@ const CTLogInfo kCTLogList[] = {
      "\x3b",
      91},
     {"Geomys 'Tuscolo2026h2'", CTLogState::Admissible, CTLogFormat::Tiled,
-     1749782400000,  // 2025-06-13T02:40:00Z
+     1756623600000,  // 2025-08-31T07:00:00Z
      6,              // operated by Geomys
      "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48"
      "\xce\x3d\x03\x01\x07\x03\x42\x00\x04\x68\x0e\x8f\xd2\x2e\xc9\x4e\xc7\x7d"
@@ -507,10 +497,20 @@ const CTLogInfo kCTLogList[] = {
      "\x66\x8c\x31\x22\x44\x8a\xa5\x96\x06\x96\xa2\xed\x74\xb5\x5c\x2d\x60\xd2"
      "\xe7",
      91},
+    {"Bogus RFC6962 log to avoid breaking misbehaving CT libraries", CTLogState::Retired, CTLogFormat::RFC6962,
+     1750489200000,  // 2025-06-21T07:00:00Z
+     7,              // operated by IPng Networks
+     "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48"
+     "\xce\x3d\x03\x01\x07\x03\x42\x00\x04\x2f\x33\x56\x87\xe0\x6c\x02\x4d\x07"
+     "\x9c\x41\x04\xed\x99\x35\x6c\x08\x5d\x1f\x54\x8c\xe6\xe7\x68\xd7\xe0\x93"
+     "\x17\xa2\xc6\x70\xbe\x80\x55\x52\x17\x4a\xe3\x85\xf7\x9f\xd6\x83\x4a\x8b"
+     "\x65\x5e\x3d\xd5\x06\xeb\x35\x18\x34\xea\x63\x3a\x2b\x01\x33\x0d\x75\xed"
+     "\xaa",
+     91},
 #ifdef DEBUG
     {"Mozilla Test RSA Log 1", CTLogState::Admissible, CTLogFormat::RFC6962,
      1721666666000,  // 2024-07-22T16:44:26Z
-     7,              // operated by Mozilla Test Org 1
+     8,              // operated by Mozilla Test Org 1
      "\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05"
      "\x00\x03\x82\x01\x0f\x00\x30\x82\x01\x0a\x02\x82\x01\x01\x00\xba\x88\x51"
      "\xa8\x44\x8e\x16\xd6\x41\xfd\x6e\xb6\x88\x06\x36\x10\x3d\x3c\x13\xd9\xea"
@@ -533,7 +533,7 @@ const CTLogInfo kCTLogList[] = {
 #ifdef DEBUG
     {"Mozilla Test EC Log", CTLogState::Admissible, CTLogFormat::RFC6962,
      1721666666000,  // 2024-07-22T16:44:26Z
-     7,              // operated by Mozilla Test Org 1
+     8,              // operated by Mozilla Test Org 1
      "\x30\x59\x30\x13\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x08\x2a\x86\x48"
      "\xce\x3d\x03\x01\x07\x03\x42\x00\x04\x4f\xbf\xbb\xbb\x61\xe0\xf8\xf9\xb1"
      "\xa6\x0a\x59\xac\x87\x04\xe2\xec\x05\x0b\x42\x3e\x3c\xf7\x2e\x92\x3f\x2c"
@@ -545,7 +545,7 @@ const CTLogInfo kCTLogList[] = {
 #ifdef DEBUG
     {"Mozilla Test RSA Log 2", CTLogState::Admissible, CTLogFormat::RFC6962,
      1721666666000,  // 2024-07-22T16:44:26Z
-     8,              // operated by Mozilla Test Org 2
+     9,              // operated by Mozilla Test Org 2
      "\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05"
      "\x00\x03\x82\x01\x0f\x00\x30\x82\x01\x0a\x02\x82\x01\x01\x00\xc1\x75\xc6"
      "\x52\x66\x09\x9f\x77\x08\x2a\x67\x91\xf1\xb8\x76\xc3\x7f\x5c\xe5\x38\xb0"
@@ -568,7 +568,7 @@ const CTLogInfo kCTLogList[] = {
 #ifdef DEBUG
     {"Mozilla Test RSA Log 4", CTLogState::Admissible, CTLogFormat::Tiled,
      1750853366000,  // 2025-06-25T12:09:26Z
-     9,              // operated by Mozilla Test Org 3
+     10,             // operated by Mozilla Test Org 3
      "\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05"
      "\x00\x03\x82\x01\x0f\x00\x30\x82\x01\x0a\x02\x82\x01\x01\x00\xb5\x49\x89"
      "\x5c\x9d\x00\x10\x8d\x11\xa1\xf9\x9f\x87\xa9\xe3\xd1\xa5\xdb\x5d\xfa\xec"
@@ -598,14 +598,15 @@ const CTLogOperatorInfo kCTLogOperatorList[] = {
     {"Let's Encrypt", 4},
     {"TrustAsia", 5},
     {"Geomys", 6},
+    {"IPng Networks", 7},
 #ifdef DEBUG
-    {"Mozilla Test Org 1", 7},
+    {"Mozilla Test Org 1", 8},
 #endif  // DEBUG
 #ifdef DEBUG
-    {"Mozilla Test Org 2", 8},
+    {"Mozilla Test Org 2", 9},
 #endif  // DEBUG
 #ifdef DEBUG
-    {"Mozilla Test Org 3", 9},
+    {"Mozilla Test Org 3", 10},
 #endif  // DEBUG
 };
 
