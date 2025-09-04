@@ -434,6 +434,9 @@ pref("gfx.offscreencanvas.enabled", false);
 pref("dom.disable_window_move_resize", true);
 // Set video VP9 to 0 for everyone (bug 22548)
 pref("media.benchmark.vp9.threshold", 0);
+// tor-browser#43950: Disable HEVC, as it will reveal lacking hardware support,
+// or differences in installed codec for Linux systems.
+pref("media.hevc.enabled", false);
 pref("privacy.resistFingerprinting.block_mozAddonManager", true); // Bug 26114
 pref("dom.webmidi.enabled", false); // Bug 41398: Disable Web MIDI API
 // tor-browser#42043: Stop reporting device IDs (and spoof their number without
