@@ -33,7 +33,7 @@ It is also available directly in the [Tor Project GitLab](https://gitlab.torproj
 
 ## Build instructions
 
-Follow the instructions from the Tor Browser [building guide](https://gitlab.torproject.org/tpo/applications/team/-/wikis/Development-Information/Tor-Browser/Building).
+Follow the instructions from the Tor Browser [building guide](https://gitlab.torproject.org/tpo/applications/wiki/-/wikis/Development-Information/Tor-Browser/Building).
 
 ## License
 
