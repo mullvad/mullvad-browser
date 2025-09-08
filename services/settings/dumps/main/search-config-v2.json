@@ -2594,6 +2594,7 @@
               "image/jpeg",
               "image/gif",
               "image/png",
+              "image/avif",
               "image/webp"
             ],
             "base": "https://lens.google.com/upload",
@@ -2614,9 +2615,9 @@
       },
       "id": "7ace4aa1-e762-4f4b-87b9-b23b3c3a930b",
       "identifier": "google",
-      "last_modified": 1754960960048,
+      "last_modified": 1757010932841,
       "recordType": "engine",
-      "schema": 1754878540880,
+      "schema": 1756779343136,
       "variants": [
         {
           "environment": {
@@ -3453,15 +3454,21 @@
             "searchTermParamName": "q"
           },
           "trending": {
-            "base": "https://www.perplexity.ai/rest/autosuggest/list-trending-suggest"
+            "base": "https://www.perplexity.ai/rest/autosuggest/list-trending-suggest",
+            "params": [
+              {
+                "name": "lang",
+                "value": "{acceptLanguages}"
+              }
+            ]
           }
         }
       },
       "id": "bb836721-7be9-4de6-ac18-520189a69076",
       "identifier": "perplexity",
-      "last_modified": 1749848937099,
+      "last_modified": 1757017987655,
       "recordType": "engine",
-      "schema": 1749743664865,
+      "schema": 1757010932955,
       "variants": [
         {
           "environment": {
@@ -3470,9 +3477,20 @@
           "subVariants": [
             {
               "environment": {
+                "maxVersion": "143.0a1"
+              },
+              "urls": {
+                "trending": {
+                  "params": []
+                }
+              }
+            },
+            {
+              "environment": {
                 "locales": [
                   "de"
                 ],
+                "maxVersion": "143.0a1",
                 "regions": [
                   "de",
                   "us",
@@ -3481,7 +3499,12 @@
               },
               "urls": {
                 "trending": {
-                  "base": "https://www.perplexity.ai/rest/autosuggest/list-trending-suggest?lang=de-DE"
+                  "params": [
+                    {
+                      "name": "lang",
+                      "value": "de-DE"
+                    }
+                  ]
                 }
               }
             }
@@ -8421,5 +8444,5 @@
       "schema": 1707824831520
     }
   ],
-  "timestamp": 1754960960048
+  "timestamp": 1757017987655
 }
