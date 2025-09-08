@@ -974,4 +974,50 @@ export let ProfileDataUpgrader = {
     }
     Services.prefs.setIntPref(MIGRATION_PREF, MIGRATION_VERSION);
   },
+
+  async upgradeMB(isNewProfile) {
+    // Version 1: Mullvad Browser 14.5a6: Clear home page update url preference
+    //            (mullvad-browser#411).
+    // Version 2: Mullvad Browser 15.0a2: Remove legacy search addons
+    //            (tor-browser#43111).
+    const MB_MIGRATION_VERSION = 2;
+    const MIGRATION_PREF = "mullvadbrowser.migration.version";
+
+    if (isNewProfile) {
+      // Do not migrate fresh profiles
+      Services.prefs.setIntPref(MIGRATION_PREF, MB_MIGRATION_VERSION);
+      return;
+    } else if (isNewProfile === undefined) {
+      // If this happens, check if upstream updated their function and do not
+      // set this member anymore!
+      console.error("upgradeTB: isNewProfile is undefined.");
+    }
+
+    const currentVersion = Services.prefs.getIntPref(MIGRATION_PREF, 0);
+
+    if (currentVersion < 1) {
+      Services.prefs.clearUserPref("mullvadbrowser.post_update.url");
+    }
+    const dropAddons = async list => {
+      for (const id of list) {
+        try {
+          const engine = await lazy.AddonManager.getAddonByID(id);
+          await engine?.uninstall();
+        } catch {}
+      }
+    };
+    if (currentVersion < 2) {
+      await dropAddons([
+        "brave@search.mozilla.org",
+        "ddg@search.mozilla.org",
+        "ddg-html@search.mozilla.org",
+        "metager@search.mozilla.org",
+        "mojeek@search.mozilla.org",
+        "mullvad-leta@search.mozilla.org",
+        "startpage@search.mozilla.org",
+      ]);
+    }
+
+    Services.prefs.setIntPref(MIGRATION_PREF, MB_MIGRATION_VERSION);
+  },
 };
