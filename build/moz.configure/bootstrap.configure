@@ -211,7 +211,11 @@ def bootstrap_path(path, **kwargs):
                 return False
 
             artifact_path = mozbuild.tbbutils.get_artifact_path(
-                tor_browser_build_out, artifact, target, prefix=path_prefix
+                tor_browser_build_out,
+                artifact,
+                target,
+                prefix=path_prefix,
+                log=log.warning,
             )
             if not artifact_path:
                 log.info("no path found in tbb/out for %s", artifact)

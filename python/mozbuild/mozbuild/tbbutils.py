@@ -54,7 +54,7 @@ def get_artifact_name(original_artifact_name, host):
     return ARTIFACT_NAME_MAP.get(original_artifact_name)
 
 
-def get_artifact_path(url, artifact, target, prefix=""):
+def get_artifact_path(url, artifact, target, prefix="", log=lambda *args, **kwargs: {}):
     if prefix:
         path = prefix
     else:
@@ -67,12 +67,17 @@ def get_artifact_path(url, artifact, target, prefix=""):
     files = list_files_http(f"{url}/{path}?C=M;O=D")
 
     if not files:
+        log(f"No files found in {url} for {artifact}.")
         return None
 
     def filter_files(files, keyword):
         return [file for file in files if keyword in file]
 
     artifact_files = [file for file in files if file.startswith(artifact)]
+
+    if len(artifact_files) == 0:
+        log(f"No files found in {url} for {artifact}.")
+        return None
 
     if len(artifact_files) == 1:
         return f"{url}/{path}/{artifact_files[0]}"

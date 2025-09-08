@@ -49,6 +49,12 @@ class TestGetArtifactPath(unittest.TestCase):
         self.assertIsNone(result)
 
     @patch("mozbuild.tbbutils.list_files_http")
+    def test_no_matching_files_returns_none(self, mock_list_files):
+        mock_list_files.return_value = ["somethingelse.zip", "yetanotherthing.zip"]
+        result = get_artifact_path(self.url, self.artifact, self.target)
+        self.assertIsNone(result)
+
+    @patch("mozbuild.tbbutils.list_files_http")
     def test_single_artifact_match(self, mock_list_files):
         mock_list_files.return_value = ["artifact-1.zip"]
         result = get_artifact_path(self.url, self.artifact, self.target)
