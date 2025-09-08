@@ -222,3 +222,5 @@ pref(layout.css.font-variant-emoji.enabled,true) == 1971148-digits-color-font-05
 pref(layout.css.font-variant-emoji.enabled,true) == 1971148-digits-color-font-06.html 1971148-digits-color-font-01-ref.html
 pref(layout.css.font-variant-emoji.enabled,true) == 1971148-digits-color-font-07.html 1971148-digits-color-font-03-ref.html
 pref(layout.css.font-variant-emoji.enabled,true) == 1971148-digits-color-font-08.html 1971148-digits-color-font-03-ref.html
+
+fails-if(Android&&/24/.test(AndroidVersion)) != regional-flags.html regional-flags-notref.html # fails on Android 7 due to old Noto Color Emoji font
