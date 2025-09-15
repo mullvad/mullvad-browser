@@ -364,7 +364,7 @@ class CanvasTranslator final : public gfx::InlineTranslator,
       if (!shmem) {
         return {nullptr, 0};
       }
-      return {static_cast<char*>(shmem->Memory()), Size()};
+      return {static_cast<char*>(shmem->memory()), Size()};
     }
   };
   std::queue<CanvasShmem> mCanvasShmems;
