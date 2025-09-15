@@ -1083,3 +1083,10 @@ pref("font.name-list.monospace.x-unicode", "Cousine, Noto Sans Balinese, Noto Sa
 // The rest are not customized, because they are covered only by one font
 #endif
 #endif
+
+// tor-browser#42630: Disable LaterRun.
+//
+// This preference is set in a few places in code. Even though it's locked,
+// setting it will still change the value in `prefs.js`, but it will be ignored.
+// If this is ever unlocked, the value in prefs.js will be used.
+pref("browser.laterrun.enabled", false, locked);
