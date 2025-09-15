@@ -913,7 +913,8 @@ export let ProfileDataUpgrader = {
     //            hid its neterror checkbox. tor-browser#42653.
     // Version 3: 14.0a7: Reset general.smoothScroll. tor-browser#42070.
     // Version 4: 15.0a2: Drop ML components. tor-browser#44045.
-    const MIGRATION_VERSION = 4;
+    // Version 5: 15.0a3: Disable LaterRun using prefs. tor-browser#42630.
+    const MIGRATION_VERSION = 5;
     const MIGRATION_PREF = "basebrowser.migration.version";
 
     if (isNewProfile) {
@@ -969,6 +970,15 @@ export let ProfileDataUpgrader = {
         // Preferences are locked. Do not want user values to linger in the
         // user's profile and become active if these preferences become unlocked
         // in the future.
+        Services.prefs.clearUserPref(prefName);
+      }
+    }
+    if (currentVersion < 5) {
+      for (const prefName of [
+        "browser.laterrun.bookkeeping.sessionCount",
+        "browser.laterrun.bookkeeping.profileCreationTime",
+        "browser.laterrun.bookkeeping.updateAppliedTime",
+      ]) {
         Services.prefs.clearUserPref(prefName);
       }
     }
