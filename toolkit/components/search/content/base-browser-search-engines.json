@@ -108,24 +108,6 @@
     "variants": [{ "environment": { "allRegionsAndLocales": true } }]
   },
   {
-    "base": {
-      "aliases": ["metager", "mg"],
-      "classification": "general",
-      "name": "MetaGer",
-      "urls": {
-        "search": {
-          "base": "https://metager.org/meta/meta.ger3",
-          "params": [],
-          "searchTermParamName": "eingabe"
-        }
-      }
-    },
-    "id": "a9d07d93-469c-4bf4-8dd1-fa137f1cc85f",
-    "identifier": "metager",
-    "recordType": "engine",
-    "variants": [{ "environment": { "allRegionsAndLocales": true } }]
-  },
-  {
     "recordType": "defaultEngines",
     "globalDefault": "mullvad-leta",
     "globalDefaultPrivate": "mullvad-leta"

@@ -26,8 +26,5 @@
       "url": "chrome://global/content/search/startpage-32.png",
       "imageSize": 32
     }
-  ],
-  "metager": [
-    { "url": "chrome://global/content/search/metager.ico", "imageSize": 196 }
   ]
 }
