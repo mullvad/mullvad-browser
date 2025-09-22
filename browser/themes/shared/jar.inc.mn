@@ -7,6 +7,11 @@
 # be specified once. As a result, the source file paths are relative
 # to the location of the actual manifest.
 
+# Temporary work-around to include a single firefoxview asset needed for the
+# "Switch to tab" search action. tor-browser#44107.
+# Should be dropped after bugzilla bug 1987279.
+  content/browser/firefoxview/view-opentabs.svg                (../../components/firefoxview/content/view-opentabs.svg)
+
   skin/classic/browser/aboutFrameCrashed.css                   (../shared/aboutFrameCrashed.css)
   skin/classic/browser/aboutRestartRequired.css                (../shared/aboutRestartRequired.css)
   skin/classic/browser/aboutSessionRestore.css                 (../shared/aboutSessionRestore.css)
