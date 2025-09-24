@@ -1,0 +1,41 @@
+name: New browser release
+run-name: ${{ inputs.version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+        description: The browser version
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  VERSION: ${{ inputs.version }}
+
+permissions:
+  contents: write
+
+jobs:
+  main:
+    name: main
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create draft release
+        run: ./scripts/create_draft_release.sh
+
+      - name: Trigger slack webhook for alpha release
+        if: ${{ contains(inputs.version, 'a') }}
+        run: ./scripts/trigger_slack_webhook.sh
+        env:
+          WEBHOOK: ${{ secrets.SLACK_BROWSER_ALPHA_WEBHOOK }}
+
+      - name: Trigger slack webhook for stable release
+        if: ${{ ! contains(inputs.version, 'a') }}
+        run: ./scripts/trigger_slack_webhook.sh
+        env:
+          WEBHOOK: ${{ secrets.SLACK_BROWSER_STABLE_WEBHOOK }}
