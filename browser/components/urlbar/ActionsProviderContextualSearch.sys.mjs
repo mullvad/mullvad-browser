@@ -9,6 +9,8 @@ import {
   ActionsResult,
 } from "moz-src:///browser/components/urlbar/ActionsProvider.sys.mjs";
 
+import { AppConstants } from "resource://gre/modules/AppConstants.sys.mjs";
+
 const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -347,6 +349,11 @@ class ProviderContextualSearch extends ActionsProvider {
     );
 
     if (
+      // Do not show the install prompt in non-private windows to have
+      // consistent behaviour with private windows and avoid linkability
+      // concerns. tor-browser#44134.
+      // Maybe re-enable as part of tor-browser#44117.
+      !AppConstants.BASE_BROWSER_VERSION &&
       !queryContext.isPrivate &&
       type != INSTALLED_ENGINE &&
       (await lazy.SearchService.shouldShowInstallPrompt(engine))
