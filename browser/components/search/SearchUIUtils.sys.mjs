@@ -95,8 +95,12 @@ export var SearchUIUtils = {
    *   name of the engine to be moved and replaced.
    * @param {string} newEngine
    *   name of the application default engine to replaced the removed engine.
+   * @param {object} [details]
+   *   Additional details about the removed search engine.
+   * @param {boolean} [details.removedMullvadLeta]
+   *   Whether we removed Mullvad Leta.
    */
-  async removalOfSearchEngineNotificationBox(oldEngine, newEngine) {
+  async removalOfSearchEngineNotificationBox(oldEngine, newEngine, details) {
     let win = lazy.BrowserWindowTracker.getTopWindow({
       allowFromInactiveWorkspace: true,
     });
@@ -112,9 +116,14 @@ export var SearchUIUtils = {
           win.gNotificationBox.removeNotification(notificationBox);
         },
       },
-      {
-        supportPage: "search-engine-removal",
-      },
+      details?.removedMullvadLeta
+        ? {
+            link: "https://leta.mullvad.net/mullvad-browser",
+            "l10n-id": "moz-support-link-text",
+          }
+        : {
+            supportPage: "search-engine-removal",
+          },
     ];
 
     await win.gNotificationBox.appendNotification(
