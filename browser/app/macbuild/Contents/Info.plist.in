@@ -190,8 +190,6 @@
 	<string>@MAC_APP_NAME@ @APP_VERSION@</string>
 	<key>CFBundleIconFile</key>
 	<string>firefox.icns</string>
-	<key>CFBundleIconName</key>
-	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>@MOZ_MACBUNDLE_ID@</string>
 	<key>CFBundleInfoDictionaryVersion</key>
