@@ -49,27 +49,27 @@ Note on Artifact Mode:
 Artifact builds download prebuilt C++ components rather than building
 them locally. Artifact builds are faster!
 
-Artifact builds are recommended for people working on Tor Browser or
+Artifact builds are recommended for people working on Mullvad Browser or
 Base Browser for Android frontends, or the GeckoView Java API. They are unsuitable
 for those working on C++ code. For more information see:
 https://firefox-source-docs.mozilla.org/contributing/build/artifact_builds.html.
 
-# Note to Base Browser developers
+# Note to Mullvad Browser developers
 
 This is still highly experimental. Expect bugs!
 
-Please choose the version of Base Browser you want to build (see note above):
+Please choose the version of Mullvad Browser you want to build (see note above):
 %s
 Your choice: """
 
 APPLICATIONS = OrderedDict([
-    ("Base Browser for Desktop Artifact Mode", "browser_artifact_mode"),
-    ("Base Browser for Desktop", "browser"),
+    ("Mullvad Browser for Desktop Artifact Mode", "browser_artifact_mode"),
+    ("Mullvad Browser for Desktop", "browser"),
     (
-        "GeckoView/Base Browser for Android Artifact Mode",
+        "GeckoView/Mullvad Browser for Android Artifact Mode",
         "mobile_android_artifact_mode",
     ),
-    ("GeckoView/Base Browser for Android", "mobile_android"),
+    ("GeckoView/Mullvad Browser for Android", "mobile_android"),
     ("SpiderMonkey JavaScript engine", "js"),
 ])
 

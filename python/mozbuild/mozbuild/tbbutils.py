@@ -22,10 +22,12 @@ def list_files_http(url):
     return links
 
 
-TOR_BROWSER_BUILD_ARTIFACTS = [
-    # Tor Browser Build-only artifacts, these artifacts are not common with Firefox.
+MULLVAD_BROWSER_BUILD_ARTIFACTS = [
+    # Mullvad Browser Build-only artifacts, these artifacts are not common with Firefox.
+    "mullvad-browser-extension",
     "noscript",
     "fonts",
+    "ublock",
 ]
 
 # Mapping of artifacts from taskcluster to tor-browser-build.
@@ -55,7 +57,7 @@ def get_artifact_index(artifact_path):
 def get_artifact_name(original_artifact_name, host):
     # These are not build artifacts, they are pre-built artifacts to be added to the final build,
     # therefore this check can come before the host check.
-    if original_artifact_name in TOR_BROWSER_BUILD_ARTIFACTS:
+    if original_artifact_name in MULLVAD_BROWSER_BUILD_ARTIFACTS:
         return original_artifact_name
 
     if host != "linux64":

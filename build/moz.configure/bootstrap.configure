@@ -199,7 +199,11 @@ def bootstrap_path(path, **kwargs):
             path_prefix = path_parts.pop(0)
 
         # Small hack because extensions are inside the browser folder.
-        if path_parts[0] in ("noscript",):
+        if path_parts[0] in (
+            "noscript",
+            "ublock",
+            "mullvad-browser-extension",
+        ):
             path_prefix = "browser"
 
         def try_tbb_bootstrap(exists):

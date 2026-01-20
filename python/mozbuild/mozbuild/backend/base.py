@@ -278,6 +278,12 @@ class BuildBackend(LoggingMixin):
         noscript_target_filename = "{73a6fe31-595d-460b-a920-fcc0f8843232}.xpi"
         noscript_location = config.substs.get("NOSCRIPT")
 
+        ublock_target_filename = "uBlock0@raymondhill.net.xpi"
+        ublock_location = config.substs.get("UBLOCK")
+
+        mullvad_extension_target_filename = "{d19a89b9-76c1-4a61-bcd4-49e8de916403}.xpi"
+        mullvad_extension_location = config.substs.get("MULLVAD_EXTENSION")
+
         if app == "browser":
             if config.substs.get("OS_TARGET") == "Darwin":
                 tbdir = (
@@ -317,6 +323,18 @@ class BuildBackend(LoggingMixin):
             self._setup_extension_symlink(
                 noscript_location,
                 noscript_target_filename,
+                paths["exts"],
+            )
+
+            self._setup_extension_symlink(
+                ublock_location,
+                ublock_target_filename,
+                paths["exts"],
+            )
+
+            self._setup_extension_symlink(
+                mullvad_extension_location,
+                mullvad_extension_target_filename,
                 paths["exts"],
             )
 
