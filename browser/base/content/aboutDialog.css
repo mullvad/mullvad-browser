@@ -126,6 +126,10 @@
   }
 }
 
+/* #releasenotes is moved to the same line as #aboutDialogHelpLink and
+ * #submit-feedback, so we also want #aboutDialogHelpLink to have a starting
+ * margin. */
+#releasenotes:not([hidden]) ~ #aboutDialogHelpLink,
 #submit-feedback {
   margin-inline-start: 0.9em;
 }
@@ -176,5 +180,49 @@
   &:is(.checkingForUpdates, .downloading, .applying, .restarting) {
     display: block;
     content: url("chrome://global/skin/icons/loading.svg");
+  }
+}
+
+/* Common Base Browser rules. */
+
+/* Hide Firefox elements. */
+#communityExperimentalDesc,
+#communityDesc,
+#contributeDesc,
+.bottom-link:not(.visible-bottom-link) {
+  /* NOTE: Anything hidden here should also be removed from the aria-describedby
+   * of the dialog element. */
+  display: none;
+}
+
+#rightBox {
+  padding-block-start: 38px;
+  background-size: auto;
+  margin-inline: 30px;
+}
+
+#bottomBox {
+  padding: 15px 10px 15px;
+}
+
+#trademark {
+  font-size: xx-small;
+  text-align: center;
+  margin-block: 10px;
+}
+
+@media not ((prefers-contrast) or (forced-colors)) {
+  #aboutDialogContainer {
+    background-color: var(--about-dialog-background-color);
+    color: var(--about-dialog-text-color);
+    color-scheme: var(--about-dialog-color-scheme);
+  }
+
+  #bottomBox {
+    background-color: var(--about-dialog-background-color-bottom);
+  }
+
+  #trademark {
+    color: var(--about-dialog-text-color-trademark);
   }
 }
