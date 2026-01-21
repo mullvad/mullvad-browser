@@ -14,7 +14,7 @@
         data-l10n-id="aboutDialog-title"
 #endif
         role="dialog"
-        aria-describedby="version distribution distributionId communityDesc contributeDesc trademark"
+        aria-describedby="version distribution distributionId trademark"
         >
 #ifdef XP_MACOSX
 #include macWindow.inc.xhtml
@@ -104,6 +104,11 @@
                 <label id="releasenotes" is="text-link" hidden="true" data-l10n-id="releaseNotes-link"/>
               </hbox>
               <description class="text-blurb">
+                <!-- Place release notes on the same line as the help and
+                   - feedback links. We do not want the release notes on the
+                   - same line as the version because it may overflow.
+                   - See tor-browerr#42720. -->
+                <label id="releasenotes" is="text-link" hidden="true" data-l10n-id="releaseNotes-link"/>
                 <label id="aboutDialogHelpLink" is="text-link" data-l10n-id="aboutdialog-help-user"/>
                 <label id="submit-feedback" is="text-link" data-l10n-id="aboutdialog-submit-feedback"/>
               </description>
