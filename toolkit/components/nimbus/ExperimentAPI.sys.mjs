@@ -501,10 +501,19 @@ export const ExperimentAPI = new (class {
   }
 
   get enabled() {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // Do not allow ExperimentsAPI (which covers either "labs", "studies" or
+      // "rollouts") in Base Browser.
+      return false;
+    }
     return this.labsEnabled || this.rolloutsEnabled || this.studiesEnabled;
   }
 
   get labsEnabled() {
+    if (AppConstants.BASE_BROWSER_VERSION) {
+      // Do not allow "Firefox Labs" in Base Browser.
+      return false;
+    }
     return Services.policies.isAllowed("FirefoxLabs");
   }
 
