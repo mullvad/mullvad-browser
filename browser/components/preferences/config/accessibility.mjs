@@ -86,6 +86,11 @@ Preferences.addSetting(
 Preferences.addSetting({
   id: "alwaysUnderlineLinks",
   pref: "layout.css.always_underline_links",
+  // Hide "always underline links" because it can be used for fingerprinting. At
+  // the time of implementation, this is the case with or without RFP, so we
+  // hide this unconditionally.
+  // tor-browser#43117.
+  visible: () => false,
 });
 
 Preferences.addSetting({
@@ -105,6 +110,12 @@ Preferences.addSetting({
 Preferences.addSetting({
   id: "useSmoothScrolling",
   pref: "general.smoothScroll",
+  deps: ["resistFingerprinting"],
+  visible: ({ resistFingerprinting }) => {
+    // Hide "smooth scrolling" when using resist fingerprinting (RFP) because
+    // the preference should be ignored. tor-browser#42070.
+    return !resistFingerprinting.value;
+  },
 });
 Preferences.addSetting({
   id: "useOverlayScrollbars",

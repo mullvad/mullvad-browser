@@ -819,7 +819,8 @@ SettingGroupManager.registerGroups({
   }),
   accountDisabled: {
     inProgress: true,
-    hidden: accountsEnabled,
+    // Hide the "disabled" banner unconditionally. tor-browser#45209.
+    hidden: true,
     items: [
       {
         id: "fxaAccountDisabled",
