@@ -175,7 +175,11 @@
         iconsrc="chrome://browser/skin/translations.svg"
         data-l10n-id="pane-languages-title2">
       </html:moz-page-nav-button>
+      <!-- We skip registering the "ai" pane (aiFeatures.mjs), which means
+         - this item is non-functional and unmanaged. We have to
+         - manually hide it instead. See tor-browser#44709. -->
       <html:moz-page-nav-button id="category-ai-features"
+        hidden="true"
         view="paneAi"
         iconsrc="chrome://global/skin/icons/highlights.svg"
         data-l10n-id="pane-ai-controls-title2">
@@ -207,7 +211,8 @@
            These keep gotoPref() routing working for sub-pages that are
            navigated to from within other panes. -->
       <html:moz-page-nav-button class="hidden-category" view="paneProfiles"/>
-      <html:moz-page-nav-button class="hidden-category" view="paneTranslations"/>
+      <!-- Hide the translations sub-pane. tor-browser#44710. -->
+      <html:moz-page-nav-button hidden="true" class="hidden-category" view="paneTranslations"/>
 
       <!-- Footer links -->
       <html:moz-page-nav-button id="addonsButton"

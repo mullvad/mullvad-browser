@@ -12,6 +12,7 @@ const { XPCOMUtils } = ChromeUtils.importESModule(
 const lazy = XPCOMUtils.declareLazy({
   AddonSearchEngine:
     "moz-src:///toolkit/components/search/AddonSearchEngine.sys.mjs",
+  AppConstants: "resource://gre/modules/AppConstants.sys.mjs",
   ConfigSearchEngine:
     "moz-src:///toolkit/components/search/ConfigSearchEngine.sys.mjs",
   CustomizableUI:
@@ -421,6 +422,11 @@ Preferences.addSetting({
   id: "urlBarSuggestionPermanentPBMessage",
   deps: ["urlBarSuggestionCheckbox", "permanentPBEnabledPref"],
   visible: deps => {
+    // Hide since the wording is misleading about the default history settings.
+    // tor-browser#44831.
+    if (lazy.AppConstants.BASE_BROWSER_VERSION) {
+      return false;
+    }
     return (
       deps.urlBarSuggestionCheckbox.visible && deps.permanentPBEnabledPref.value
     );
