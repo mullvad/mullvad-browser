@@ -452,9 +452,37 @@ Preferences.addSetting({
 Preferences.addSetting({
   id: "contrastControlSettings",
   pref: "browser.display.document_color_use",
+  // Modify the contrast setting options when resist fingerprinting (RFP) is
+  // enabled because the custom colours will not be used in this state.
+  // Instead, some fixed set of stand-in colours is used. tor-browser#43850.
+  deps: ["resistFingerprinting"],
+  getControlConfig(config, { resistFingerprinting }, setting) {
+    if (resistFingerprinting.value) {
+      // Hide the "Automatic" option under RFP if it is not already
+      // selected. We generally want to discourage this reflection of system
+      // settings if RFP is enabled.
+      // NOTE: It would be unexpected for this value to be selected under
+      // RFP since there is no visible UI to do so in this state. It would
+      // likely require some direct preference manipulation.
+      config.options[0].hidden = setting.value != config.options[0].value;
+      // Show the last option as "fixed colors".
+      config.options[2].l10nId = "preferences-contrast-control-fixed-color2";
+    } else {
+      // Set back to the default config.
+      config.options[0].hidden = false;
+      config.options[2].l10nId = "preferences-contrast-control-custom";
+    }
+    return config;
+  },
 });
 Preferences.addSetting({
   id: "colors",
+  // Hide the "colors" button and dialog when resist fingerprint (RFP) is
+  // enabled because the custom colours will not be used. tor-browser#43850.
+  deps: ["resistFingerprinting"],
+  visible: ({ resistFingerprinting }) => {
+    return !resistFingerprinting.value;
+  },
   onUserClick() {
     window.gSubDialog.open(
       "chrome://browser/content/preferences/dialogs/colors.xhtml",
