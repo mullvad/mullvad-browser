@@ -11,8 +11,9 @@ config = {
     "emulator_avd_name": "mozemulator-android34-x86_64",
     "emulator_process_name": "qemu-system-x86_64",
     "emulator_extra_args": [
-        "-gpu",
-        "on",
+        "-no-window",
+        "-no-audio",
+        "-no-boot-anim",
         "-skip-adb-auth",
         "-verbose",
         "-show-kernel",

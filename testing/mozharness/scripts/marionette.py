@@ -82,10 +82,11 @@ class MarionetteTest(TestingMixin, MercurialScript, TransferMixin, CodeCoverageM
             [
                 ["--tag"],
                 {
-                    "action": "store",
-                    "dest": "test_tag",
-                    "default": "",
-                    "help": "Tag that identifies how to filter which tests to run.",
+                    "action": "append",
+                    "default": [],
+                    "dest": "test_tags",
+                    "help": "Filter out tests that don't have the given tag. Can be used multiple "
+                    "times in which case the test must contain at least one of the given tags.",
                 },
             ],
             [
@@ -345,8 +346,8 @@ class MarionetteTest(TestingMixin, MercurialScript, TransferMixin, CodeCoverageM
 
         cmd = [python, "-u", os.path.join(dirs["abs_marionette_dir"], "runtests.py")]
 
-        if self.config.get("test_tag", ""):
-            cmd.extend(["--tag", self.config["test_tag"]])
+        if self.config["test_tags"]:
+            cmd.extend([f"--tag={t}" for t in self.config["test_tags"]])
 
         manifest = os.path.join(
             dirs["abs_marionette_tests_dir"], self.config["test_manifest"]
