@@ -639,13 +639,10 @@ class DesktopUnittest(TestingMixin, MercurialScript, MozbaseMixin, CodeCoverageM
                     symbols_url = self.installer_url.replace(
                         ext, ".crashreporter-symbols.zip"
                     )
-            if not symbols_url:
-                self.fatal(
-                    "self.installer_url was found but symbols_url could \
-                        not be determined"
-                )
-        else:
-            self.fatal("self.installer_url was not found in self.config")
+        # tor-browser-bundle-testsuite#40107: Do not error if unable to set symbols URL.
+        # We do not generate symbols for all platforms and the symbols we do generate are
+        # not at the expected places. We may enable this in the future, but it's not
+        # a priority at the moment.
         self.info("setting symbols_url as %s" % (symbols_url))
         self.symbols_url = symbols_url
         return self.symbols_url

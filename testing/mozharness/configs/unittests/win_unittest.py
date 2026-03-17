@@ -9,9 +9,9 @@ import sys
 # OS Specifics
 ABS_WORK_DIR = os.path.join(os.getcwd(), "build")
 BINARY_PATH = os.path.join(ABS_WORK_DIR, "firefox", "firefox.exe")
-INSTALLER_PATH = os.path.join(ABS_WORK_DIR, "installer.zip")
-NODEJS_PATH = None
-if "MOZ_FETCHES_DIR" in os.environ:
+INSTALLER_PATH = os.path.join(ABS_WORK_DIR, "installer.exe")
+NODEJS_PATH = os.environ.get("NODEJS_PATH")
+if NODEJS_PATH is None and "MOZ_FETCHES_DIR" in os.environ:
     NODEJS_PATH = os.path.join(os.environ["MOZ_FETCHES_DIR"], "node/node.exe")
 
 REQUIRE_GPU = False
@@ -22,7 +22,7 @@ USE_HARDWARE = False
 if "USE_HARDWARE" in os.environ:
     USE_HARDWARE = os.environ["USE_HARDWARE"] == "1"
 
-PYWIN32 = "pywin32==306"
+PYWIN32 = "pywin32==312"
 
 XPCSHELL_NAME = "xpcshell.exe"
 EXE_SUFFIX = ".exe"
@@ -222,38 +222,8 @@ config = {
             "halt_on_failure": False,
             "enabled": DISABLE_SCREEN_SAVER,
         },
-        {
-            "name": "run mouse & screen adjustment script",
-            "cmd": [
-                sys.executable,
-                os.path.join(
-                    os.getcwd(),
-                    "mozharness",
-                    "external_tools",
-                    "mouse_and_screen_resolution.py",
-                ),
-                "--configuration-file",
-                os.path.join(
-                    os.getcwd(),
-                    "mozharness",
-                    "external_tools",
-                    "machine-configuration.json",
-                ),
-                (
-                    "--platform=win10-vm"
-                    if REQUIRE_GPU and (platform.uname().version == "10.0.19045")
-                    else (
-                        "--platform=win11-hw"
-                        if REQUIRE_GPU
-                        and platform.uname().version in ("10.0.26100", "10.0.26200")
-                        else "--platform=win7"
-                    )
-                ),
-            ],
-            "architectures": ["32bit", "64bit"],
-            "halt_on_failure": True,
-            "enabled": ADJUST_MOUSE_AND_SCREEN,
-        },
+        # tor-browser-bundle-testsuite#40107: Skip environment configurations
+        # from upstream that are unnecessary in our CI setup.
         {
             "name": "enable microphone access for msix",
             "cmd": [

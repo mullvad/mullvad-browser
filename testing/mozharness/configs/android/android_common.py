@@ -9,8 +9,8 @@
 
 import os
 
-NODEJS_PATH = None
-if "MOZ_FETCHES_DIR" in os.environ:
+NODEJS_PATH = os.environ.get("NODEJS_PATH")
+if NODEJS_PATH is None and "MOZ_FETCHES_DIR" in os.environ:
     NODEJS_PATH = os.path.join(os.environ["MOZ_FETCHES_DIR"], "node/bin/node")
 
 
@@ -308,6 +308,19 @@ config = {
                 "--libxul=%(gtest_dir)s/gtest_bin/gtest/libxul.so",
                 "--package=%(app)s",
                 "--deviceSerial=%(device_serial)s",
+            ],
+        },
+        "marionette": {
+            "run_filename": "runtests.py",
+            "testsdir": "marionette/harness/marionette_harness",
+            "install": True,
+            "options": [
+                "-vv",
+                "--address=127.0.0.1:2828",
+                "--app=fennec",
+            ],
+            "tests": [
+                "%(abs_marionette_manifest_dir)s/unit-tests.toml",
             ],
         },
     },  # end suite_definitions
