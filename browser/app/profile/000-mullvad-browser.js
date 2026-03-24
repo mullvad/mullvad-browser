@@ -39,3 +39,20 @@ pref("app.update.url.manual", "https://mullvad.net/download/browser");
 pref("app.update.url.details", "https://mullvad.net/download/browser");
 // point to our feedback url rather than Mozilla's
 pref("app.feedback.baseURL", "https://mullvad.net/help/tag/browser/");
+
+// mullvad-browser#446: Default to unconfigured for selective saving mode for alpha
+// Controls what selective saving mode the browser operates in.
+// On initial startup the selective saving toolkit component sets this mode pref
+// when the user hasn't modified any of the prefs this pref controls. Otherwise,
+// the mode is set to selective saving
+//
+// 0 = mode has yet to be configured
+// 1 = always on private browsing mode (old default)
+// 2 = selective saving mode (new default)
+// 3 = normal browsing mode
+pref("browser.selectiveSavingMode", 0);
+#if MOZ_UPDATE_CHANNEL == release
+pref("browser.selectiveSavingMode.enabled", false);
+#else
+pref("browser.selectiveSavingMode.enabled", true);
+#endif
