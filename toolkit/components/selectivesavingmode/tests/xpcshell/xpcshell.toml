@@ -1,0 +1,7 @@
+[DEFAULT]
+tags = "mullvad"
+prefs = [
+  "browser.selectiveSavingMode.enabled=true"
+]
+
+["test_selective_saving_mode.js"]

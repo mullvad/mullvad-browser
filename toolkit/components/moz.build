@@ -78,6 +78,7 @@ DIRS += [
     "resistfingerprinting",
     "search",
     "securitylevel",
+    "selectivesavingmode",
     "sessionstore",
     "shell",
     "startup",
