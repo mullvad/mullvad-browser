@@ -173,7 +173,7 @@ function paramSubstitution(paramValue, searchTerms, queryCharset) {
 
     // Handle the less common OpenSearch parameters we're confident about.
     if (name == OS_PARAM_LANGUAGE) {
-      return Services.locale.requestedLocale || OS_PARAM_LANGUAGE_DEF;
+      return Services.locale.webExposedLocales[0] || OS_PARAM_LANGUAGE_DEF;
     }
     if (name == OS_PARAM_OUTPUT_ENCODING) {
       return OS_PARAM_OUTPUT_ENCODING_DEF;
