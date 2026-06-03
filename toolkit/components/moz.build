@@ -141,8 +141,9 @@ if CONFIG["MOZ_WIDGET_TOOLKIT"] not in ("android", "windows"):
 if CONFIG["MOZ_BUILD_APP"] == "browser":
     DIRS += ["messaging-system", "normandy"]
 
-if CONFIG["MOZ_BUILD_APP"] != "comm/mail":
-    DIRS += ["ipprotection"]
+# tor-browser#44528 Disable IP protection feature
+# if CONFIG["MOZ_BUILD_APP"] != "comm/mail":
+#     DIRS += ["ipprotection"]
 
 DIRS += ["nimbus"]
 
