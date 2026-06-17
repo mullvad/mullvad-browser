@@ -2,15 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import {
-  actionTypes as at,
-  actionCreators as ac,
-} from "resource://newtab/common/Actions.mjs";
-import {
-  WIDGET_REGISTRY,
-  isWidgetToggleVisible,
-  isWidgetsContainerVisible,
-} from "resource://newtab/common/WidgetsRegistry.mjs";
+// The newtab extension is not available in base browser, so we replace the
+// imports with empty objects that we do *not* expect to be used in practice.
+// See tor-browser#44830.
+const at = {};
+const ac = {};
+const WIDGET_REGISTRY = [];
+const isWidgetToggleVisible = () => {};
+const isWidgetsContainerVisible = () => {};
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -345,6 +344,23 @@ export class AboutPreferences {
 
     // Update the visibility of the Restore Defaults button based on checked prefs
     this.toggleRestoreDefaults(window.gHomePane);
+  }
+
+  /**
+   * Register the setting groups for base browser.
+   *
+   * Added for tor-browser#44830.
+   *
+   * @param {Window} window - The about:preferences window.
+   */
+  baseBrowserRegisterGroups(window) {
+    // We do not register the "home" component, since this is specific for
+    // Firefox Home. tor-browser#44830.
+    window.MozXULElement.insertFTLIfNeeded("browser/newtab/newtab.ftl");
+    window.SettingGroupManager.registerGroups({
+      homepage: this._setupHomepageGroup(window),
+      customHomepage: this._setupCustomHomepageGroup(window),
+    });
   }
 
   /** @param {Window} window */
