@@ -5,6 +5,10 @@
 import { SettingGroupManager } from "chrome://browser/content/preferences/config/SettingGroupManager.mjs";
 import { Preferences } from "chrome://global/content/preferences/Preferences.mjs";
 
+const { AboutPreferences } = ChromeUtils.importESModule(
+  "moz-src:///browser/extensions/newtab/lib/AboutPreferences.sys.mjs"
+);
+
 /*
  * Preferences:
  *
@@ -32,4 +36,7 @@ if (Services.prefs.getBoolPref("browser.settings-redesign.enabled")) {
     defaultBrowserHome: window.createDefaultBrowserConfig(),
     startupHome: window.createStartupConfig(),
   });
+  // Register the rest of the home settings using the "newtab" extension's file.
+  // tor-browser#44830.
+  new AboutPreferences().baseBrowserRegisterGroups(window);
 }

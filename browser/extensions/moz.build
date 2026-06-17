@@ -5,3 +5,8 @@
 DIRS += []
 
 JAR_MANIFESTS += ["jar.mn"]
+
+# Hack in the AboutPreferences.sys.mjs file, which is needed for the home
+# settings pane, and can more-or-less function without the rest of the "newtab"
+# extension. tor-browser#44830.
+MOZ_SRC_FILES += ["newtab/lib/AboutPreferences.sys.mjs"]
