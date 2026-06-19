@@ -11,6 +11,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.state.SessionState
+import mozilla.components.support.utils.OnEnterAnimationCompleteListener
 import mozilla.components.support.utils.SafeIntent
 import org.mozilla.fenix.HomeActivity
 import org.mozilla.fenix.ext.components
@@ -92,5 +93,14 @@ open class ExternalAppBrowserActivity : HomeActivity() {
     override fun onEnterAnimationComplete() {
         super.onEnterAnimationComplete()
         isFinishedAnimating = true
+
+        val fragments = supportFragmentManager.fragments.toMutableList()
+        while (fragments.isNotEmpty()) {
+            val fragment = fragments.removeAt(0)
+            if (fragment is OnEnterAnimationCompleteListener) {
+                fragment.onEnterAnimationComplete()
+            }
+            fragments.addAll(fragment.childFragmentManager.fragments)
+        }
     }
 }
