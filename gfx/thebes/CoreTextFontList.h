@@ -183,6 +183,10 @@ class CoreTextFontList : public gfxPlatformFontList {
   };
   void ReadSystemFontList(mozilla::dom::SystemFontList*);
 
+  static void ActivateFontsFromDir(
+      const nsACString& aDir,
+      nsTHashSet<nsCStringHashKey>* aLoadedFamilies = nullptr);
+
  protected:
   CoreTextFontList();
   virtual ~CoreTextFontList();
@@ -240,10 +244,6 @@ class CoreTextFontList : public gfxPlatformFontList {
 
   void AddFamily(const nsACString& aFamilyName, FontVisibility aVisibility)
       MOZ_REQUIRES(mLock);
-
-  static void ActivateFontsFromDir(
-      const nsACString& aDir,
-      nsTHashSet<nsCStringHashKey>* aLoadedFamilies = nullptr);
 
   already_AddRefed<gfxFontEntry> CreateFontEntry(
       mozilla::fontlist::Face* aFace,
