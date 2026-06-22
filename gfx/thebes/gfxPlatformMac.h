@@ -80,6 +80,10 @@ class gfxPlatformMac : public gfxPlatform {
 
   static bool CheckVariationFontSupport();
 
+#ifdef MOZ_BUNDLED_FONTS
+  static void ActivateFontsFromDir(const nsACString& aPath);
+#endif
+
  protected:
   bool AccelerateLayersByDefault() override;
 

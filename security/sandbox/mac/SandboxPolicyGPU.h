@@ -232,6 +232,7 @@ static const char SandboxPolicyGPU[] = R"SANDBOX_LITERAL(
   (allow file-read*
     (subpath "/Library/Fonts")
     (subpath "/Library/Application Support/Apple/Fonts")
+    (subpath (string-append appPath "/Contents/Resources/fonts"))
     (home-subpath "/Library/Fonts")
     ; Allow read access to paths allowed via sandbox extensions.
     ; This is needed for fonts in non-standard locations normally

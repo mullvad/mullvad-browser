@@ -1081,3 +1081,9 @@ nsTArray<uint8_t> gfxPlatformMac::GetPlatformCMSOutputProfileData() {
 }
 
 bool gfxPlatformMac::CheckVariationFontSupport() { return true; }
+
+#ifdef MOZ_BUNDLED_FONTS
+void gfxPlatformMac::ActivateFontsFromDir(const nsACString& aPath) {
+  CoreTextFontList::ActivateFontsFromDir(aPath);
+}
+#endif
