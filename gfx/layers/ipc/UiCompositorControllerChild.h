@@ -84,9 +84,8 @@ class UiCompositorControllerChild final
   mozilla::ipc::IPCResult RecvNotifyCompositorScrollUpdate(
       const CompositorScrollUpdate& aUpdate);
   mozilla::ipc::IPCResult RecvScreenPixels(
-      uint64_t aRequestId, Maybe<ipc::FileDescriptor>&& aHardwareBuffer,
-      Maybe<ipc::FileDescriptor>&& aAcquireFence,
-      ScreenPixelsResolver&& aResolver);
+      uint64_t aRequestId, bool aSuccess,
+      Maybe<ipc::FileDescriptor>&& aAcquireFence);
 
  private:
   explicit UiCompositorControllerChild(const uint64_t& aProcessToken,
@@ -118,8 +117,12 @@ class UiCompositorControllerChild final
   // RecvScreenPixels() altogether. Unfortunately, however, we cannot chain to a
   // promise returned from an IPDL function on the Android UI thread, as the
   // thread does not support direct task dispatch.
-  Maybe<std::pair<uint64_t, RefPtr<ScreenPixelsPromise::Private>>>
-      mScreenPixelsPromise;
+  struct ScreenPixelsRequest {
+    uint64_t mRequestId;
+    RefPtr<layers::AndroidHardwareBuffer> mHardwareBuffer;
+    RefPtr<ScreenPixelsPromise::Private> mPromise;
+  };
+  Maybe<ScreenPixelsRequest> mScreenPixelsRequest;
 #endif
 
   // Should only be set when compositor is in process.

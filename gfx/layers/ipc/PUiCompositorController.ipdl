@@ -3,9 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 using mozilla::gfx::IntRect from "mozilla/gfx/Rect.h";
-using mozilla::gfx::IntSize from "mozilla/gfx/Point.h";
 using mozilla::layers::CompositorScrollUpdate from "mozilla/layers/CompositorScrollUpdate.h";
-using mozilla::void_t from "mozilla/ipc/IPCCore.h";
 
 include "mozilla/GfxMessageUtils.h";
 include "mozilla/layers/LayersMessageUtils.h";
@@ -34,15 +32,14 @@ parent:
   async MaxToolbarHeight(int32_t aHeight);
   async FixedBottomOffset(int32_t aOffset);
   async DefaultClearColor(uint32_t aColor);
-  async RequestScreenPixels(uint64_t aRequestId, IntRect aSourceRect, IntSize aDestSize);
+  async RequestScreenPixels(uint64_t aRequestId, IntRect aSourceRect,
+                            FileDescriptor aHardwareBuffer);
   async EnableLayerUpdateNotifications(bool aEnable);
 child:
   async ToolbarAnimatorMessageFromCompositor(int32_t aMessage);
   async NotifyCompositorScrollUpdate(CompositorScrollUpdate aUpdate);
-  // Returns when the child side has finished using the HardwareBuffer,
-  // indicating that the parent side can now release it.
-  async ScreenPixels(uint64_t aRequestId, FileDescriptor? aHardwareBuffer, FileDescriptor? aAcquireFence)
-    returns (void_t ok);
+  async ScreenPixels(uint64_t aRequestId, bool aSuccess,
+                     FileDescriptor? aAcquireFence);
 };
 
 } // layers

@@ -315,7 +315,7 @@ bool RenderCompositorOGLSWGL::MaybeReadback(
 #ifdef MOZ_WIDGET_ANDROID
 bool RenderCompositorOGLSWGL::MaybeCaptureScreenPixels(
     const gfx::IntRect& aSourceRect,
-    RefPtr<layers::AndroidHardwareBuffer> aHardwareBuffer) {
+    layers::AndroidHardwareBuffer* aHardwareBuffer) {
   auto* const gl = GetGLContext();
   gl::ScopedBindFramebuffer scopedBind(gl);
 

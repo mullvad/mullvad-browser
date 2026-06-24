@@ -148,19 +148,36 @@ UiCompositorControllerChild::RequestScreenPixels(gfx::IntRect aSourceRect,
 
   // We only support one request at a time. If an old request is still
   // outstanding when a new request is made, just reject the old request.
-  if (mScreenPixelsPromise) {
-    mScreenPixelsPromise.extract().second->Reject(NS_ERROR_ABORT, __func__);
+  if (mScreenPixelsRequest) {
+    mScreenPixelsRequest.extract().mPromise->Reject(NS_ERROR_ABORT, __func__);
+  }
+
+  RefPtr<layers::AndroidHardwareBuffer> hardwareBuffer =
+      layers::AndroidHardwareBuffer::Create(aDestSize,
+                                            gfx::SurfaceFormat::R8G8B8A8);
+  if (!hardwareBuffer) {
+    return ScreenPixelsPromise::CreateAndReject(NS_ERROR_OUT_OF_MEMORY,
+                                                __func__);
+  }
+
+  UniqueFileHandle bufferFd = hardwareBuffer->SerializeToFileDescriptor();
+  if (!bufferFd) {
+    return ScreenPixelsPromise::CreateAndReject(NS_ERROR_FAILURE, __func__);
   }
 
   static uint64_t nextRequestId = 0;
   const uint64_t requestId = nextRequestId++;
   auto promise = MakeRefPtr<ScreenPixelsPromise::Private>(__func__);
-  // Using synchronous dispatch ensures we are done using the hardware buffer
-  // prior to RecvScreenPixels calling aResolver which in turn will cause the
-  // hardware buffer on the parent side to be released.
-  promise->UseSynchronousTaskDispatch(__func__);
-  mScreenPixelsPromise.emplace(requestId, promise);
-  (void)SendRequestScreenPixels(requestId, aSourceRect, aDestSize);
+  mScreenPixelsRequest.emplace(ScreenPixelsRequest{
+      .mRequestId = requestId,
+      .mHardwareBuffer = hardwareBuffer,
+      .mPromise = promise,
+  });
+  if (!SendRequestScreenPixels(requestId, aSourceRect,
+                               ipc::FileDescriptor(std::move(bufferFd)))) {
+    mScreenPixelsRequest.extract().mPromise->Reject(NS_ERROR_NOT_AVAILABLE,
+                                                    __func__);
+  }
   return promise;
 }
 #endif
@@ -213,8 +230,8 @@ void UiCompositorControllerChild::ActorDestroy(ActorDestroyReason aWhy) {
   mParent = nullptr;
 
 #ifdef MOZ_WIDGET_ANDROID
-  if (mScreenPixelsPromise) {
-    mScreenPixelsPromise->second->Reject(NS_ERROR_ABORT, __func__);
+  if (mScreenPixelsRequest) {
+    mScreenPixelsRequest->mPromise->Reject(NS_ERROR_ABORT, __func__);
   }
 #endif
   if (mProcessToken) {
@@ -258,39 +275,28 @@ UiCompositorControllerChild::RecvNotifyCompositorScrollUpdate(
 }
 
 mozilla::ipc::IPCResult UiCompositorControllerChild::RecvScreenPixels(
-    uint64_t aRequestId, Maybe<ipc::FileDescriptor>&& aHardwareBuffer,
-    Maybe<ipc::FileDescriptor>&& aAcquireFence,
-    ScreenPixelsResolver&& aResolver) {
+    uint64_t aRequestId, bool aSuccess,
+    Maybe<ipc::FileDescriptor>&& aAcquireFence) {
 #if defined(MOZ_WIDGET_ANDROID)
-  if (!mScreenPixelsPromise || mScreenPixelsPromise->first != aRequestId) {
+  if (!mScreenPixelsRequest || mScreenPixelsRequest->mRequestId != aRequestId) {
     // Response is for an outdated request whose promise will have already been
     // rejected. Just ignore it.
     return IPC_OK();
   }
 
-  RefPtr<layers::AndroidHardwareBuffer> hardwareBuffer;
-  if (aHardwareBuffer) {
-    hardwareBuffer =
-        layers::AndroidHardwareBuffer::DeserializeFromFileDescriptor(
-            aHardwareBuffer->TakePlatformHandle());
+  auto request = mScreenPixelsRequest.extract();
+  if (!aSuccess) {
+    request.mPromise->Reject(NS_ERROR_FAILURE, __func__);
+    return IPC_OK();
   }
-  if (hardwareBuffer && aAcquireFence) {
-    hardwareBuffer->SetAcquireFence(aAcquireFence->TakePlatformHandle());
+
+  if (aAcquireFence) {
+    request.mHardwareBuffer->SetAcquireFence(
+        aAcquireFence->TakePlatformHandle());
   }
-  // Note this is resolved synchronously, ensuring we have finished using the
-  // hardware buffer as soon as this call returns (and importantly before the
-  // aResolver call below).
-  mScreenPixelsPromise.extract().second->Resolve(std::move(hardwareBuffer),
-                                                 __func__);
+  request.mPromise->Resolve(std::move(request.mHardwareBuffer), __func__);
 #endif  // defined(MOZ_WIDGET_ANDROID)
 
-  // Notify the parent side that it can drop its reference to the hardware
-  // buffer. In theory this could be done as soon as we have called
-  // DeserializeFromFileDescriptor(). However, on certain Exynos devices we have
-  // seen that releasing the original hardware buffer frees the underlying
-  // resource even if a reference obtained via (de)serialization remains alive.
-  // See bug 2017901.
-  aResolver(void_t{});
   return IPC_OK();
 }
 

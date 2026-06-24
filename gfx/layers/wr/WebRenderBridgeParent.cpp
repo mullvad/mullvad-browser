@@ -1986,8 +1986,8 @@ void WebRenderBridgeParent::UpdateBoolParameters() {
 
 #if defined(MOZ_WIDGET_ANDROID)
 RefPtr<WebRenderBridgeParent::ScreenPixelsPromise>
-WebRenderBridgeParent::RequestScreenPixels(gfx::IntRect aSourceRect,
-                                           gfx::IntSize aDestSize) {
+WebRenderBridgeParent::RequestScreenPixels(
+    gfx::IntRect aSourceRect, RefPtr<AndroidHardwareBuffer> aHardwareBuffer) {
   if (mDestroyed) {
     return ScreenPixelsPromise::CreateAndReject(NS_ERROR_ABORT, __func__);
   }
@@ -2003,7 +2003,7 @@ WebRenderBridgeParent::RequestScreenPixels(gfx::IntRect aSourceRect,
   }
   mScreenPixelsRequest.emplace(ScreenPixelsRequest{
       .mSourceRect = aSourceRect,
-      .mDestSize = aDestSize,
+      .mHardwareBuffer = std::move(aHardwareBuffer),
       .mPromise = new ScreenPixelsPromise::Private(__func__),
   });
   return mScreenPixelsRequest->mPromise;
@@ -2023,7 +2023,9 @@ void WebRenderBridgeParent::MaybeCaptureScreenPixels() {
   MOZ_ASSERT(cbp && !cbp->IsPaused());
 #  endif
 
-  mLateInit->mApi->RequestScreenPixels(request.mSourceRect, request.mDestSize)
+  mLateInit->mApi
+      ->RequestScreenPixels(request.mSourceRect,
+                            std::move(request.mHardwareBuffer))
       ->ChainTo(request.mPromise.forget(), __func__);
 }
 #endif

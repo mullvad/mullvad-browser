@@ -964,12 +964,17 @@ RefPtr<WebRenderAPI::EndRecordingPromise> WebRenderAPI::EndRecording() {
 
 #ifdef MOZ_WIDGET_ANDROID
 RefPtr<WebRenderAPI::ScreenPixelsPromise> WebRenderAPI::RequestScreenPixels(
-    gfx::IntRect aSourceRect, gfx::IntSize aDestSize) {
+    gfx::IntRect aSourceRect,
+    RefPtr<layers::AndroidHardwareBuffer> aHardwareBuffer) {
   class ScreenshotEvent final : public RendererEvent {
    public:
-    explicit ScreenshotEvent(gfx::IntRect aSourceRect, gfx::IntSize aDestSize,
-                             RefPtr<ScreenPixelsPromise::Private> aPromise)
-        : mSourceRect(aSourceRect), mDestSize(aDestSize), mPromise(aPromise) {
+    explicit ScreenshotEvent(
+        gfx::IntRect aSourceRect,
+        RefPtr<layers::AndroidHardwareBuffer> aHardwareBuffer,
+        RefPtr<ScreenPixelsPromise::Private> aPromise)
+        : mSourceRect(aSourceRect),
+          mHardwareBuffer(std::move(aHardwareBuffer)),
+          mPromise(aPromise) {
       MOZ_COUNT_CTOR(ScreenshotEvent);
     }
 
@@ -979,8 +984,9 @@ RefPtr<WebRenderAPI::ScreenPixelsPromise> WebRenderAPI::RequestScreenPixels(
       RendererOGL* const renderer = aRenderThread.GetRenderer(aWindowId);
       if (!renderer) {
         mPromise->Reject(NS_ERROR_FAILURE, __func__);
+        return;
       }
-      renderer->RequestScreenPixels(mSourceRect, mDestSize)
+      renderer->RequestScreenPixels(mSourceRect, std::move(mHardwareBuffer))
           ->ChainTo(mPromise.forget(), __func__);
     }
 
@@ -988,12 +994,13 @@ RefPtr<WebRenderAPI::ScreenPixelsPromise> WebRenderAPI::RequestScreenPixels(
 
    private:
     const gfx::IntRect mSourceRect;
-    const gfx::IntSize mDestSize;
+    RefPtr<layers::AndroidHardwareBuffer> mHardwareBuffer;
     RefPtr<ScreenPixelsPromise::Private> mPromise;
   };
 
   auto promise = MakeRefPtr<ScreenPixelsPromise::Private>(__func__);
-  auto event = MakeUnique<ScreenshotEvent>(aSourceRect, aDestSize, promise);
+  auto event = MakeUnique<ScreenshotEvent>(aSourceRect,
+                                           std::move(aHardwareBuffer), promise);
 
   RenderThread::Get()->PostEvent(mId, std::move(event));
   return promise;

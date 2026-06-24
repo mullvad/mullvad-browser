@@ -327,13 +327,13 @@ class WebRenderAPI final {
   RefPtr<EndRecordingPromise> EndRecording();
 
 #ifdef MOZ_WIDGET_ANDROID
-  using ScreenPixelsPromise =
-      MozPromise<RefPtr<layers::AndroidHardwareBuffer>, nsresult, true>;
+  using ScreenPixelsPromise = MozPromise<Ok, nsresult, true>;
   // Queues a task to the render thread to capture screen pixels for the next
   // rendered frame. Returns a promise that resolves once the pixels are
   // captured.
-  RefPtr<ScreenPixelsPromise> RequestScreenPixels(gfx::IntRect aSourceRect,
-                                                  gfx::IntSize aDestSize);
+  RefPtr<ScreenPixelsPromise> RequestScreenPixels(
+      gfx::IntRect aSourceRect,
+      RefPtr<layers::AndroidHardwareBuffer> aHardwareBuffer);
 #endif
 
   layers::RemoteTextureInfoList* GetPendingRemoteTextureInfoList();
