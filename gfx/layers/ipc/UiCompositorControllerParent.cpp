@@ -139,39 +139,39 @@ mozilla::ipc::IPCResult UiCompositorControllerParent::RecvDefaultClearColor(
 }
 
 mozilla::ipc::IPCResult UiCompositorControllerParent::RecvRequestScreenPixels(
-    uint64_t aRequestId, gfx::IntRect aSourceRect, gfx::IntSize aDestSize) {
+    uint64_t aRequestId, gfx::IntRect aSourceRect,
+    ipc::FileDescriptor&& aHardwareBuffer) {
 #if defined(MOZ_WIDGET_ANDROID)
+  RefPtr<AndroidHardwareBuffer> hardwareBuffer =
+      AndroidHardwareBuffer::DeserializeFromFileDescriptor(
+          aHardwareBuffer.TakePlatformHandle());
+  if (!hardwareBuffer) {
+    (void)SendScreenPixels(aRequestId, false, Nothing());
+    return IPC_OK();
+  }
+
   LayerTreeState* state =
       CompositorBridgeParent::GetLayerTreeState(mRootLayerTreeId);
 
   if (state && state->mWrBridge) {
-    state->mWrBridge->RequestScreenPixels(aSourceRect, aDestSize)
+    state->mWrBridge->RequestScreenPixels(aSourceRect, hardwareBuffer)
         ->Then(
             GetCurrentSerialEventTarget(), __func__,
-            [target = RefPtr{this},
-             aRequestId](RefPtr<AndroidHardwareBuffer> aHardwareBuffer) {
-              UniqueFileHandle bufferFd =
-                  aHardwareBuffer->SerializeToFileDescriptor();
+            [target = RefPtr{this}, aRequestId,
+             hardwareBuffer = std::move(hardwareBuffer)](Ok) {
               UniqueFileHandle fenceFd =
-                  aHardwareBuffer->GetAndResetAcquireFence();
-              target
-                  ->SendScreenPixels(
-                      aRequestId,
-                      aHardwareBuffer
-                          ? Some(ipc::FileDescriptor(std::move(bufferFd)))
-                          : Nothing(),
-                      fenceFd ? Some(ipc::FileDescriptor(std::move(fenceFd)))
-                              : Nothing())
-                  // Ensure the hardware buffer remains alive until child side
-                  // has finished using it.
-                  ->Then(GetCurrentSerialEventTarget(), __func__,
-                         [aHardwareBuffer](
-                             ScreenPixelsPromise::ResolveOrRejectValue&&) {});
+                  hardwareBuffer->GetAndResetAcquireFence();
+              (void)target->SendScreenPixels(
+                  aRequestId, true,
+                  fenceFd ? Some(ipc::FileDescriptor(std::move(fenceFd)))
+                          : Nothing());
             },
             [target = RefPtr{this}, aRequestId](nsresult aError) {
-              (void)target->SendScreenPixels(aRequestId, Nothing(), Nothing());
+              (void)target->SendScreenPixels(aRequestId, false, Nothing());
             });
     state->mWrBridge->ScheduleForcedGenerateFrame(wr::RenderReasons::OTHER);
+  } else {
+    (void)SendScreenPixels(aRequestId, false, Nothing());
   }
 #endif  // defined(MOZ_WIDGET_ANDROID)
 
