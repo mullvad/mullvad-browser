@@ -235,7 +235,7 @@ class RenderCompositor {
 #ifdef MOZ_WIDGET_ANDROID
   virtual bool MaybeCaptureScreenPixels(
       const gfx::IntRect& aSourceRect,
-      RefPtr<layers::AndroidHardwareBuffer> aHardwareBuffer) {
+      layers::AndroidHardwareBuffer* aHardwareBuffer) {
     return false;
   }
 #endif

@@ -329,13 +329,13 @@ class WebRenderBridgeParent final : public PWebRenderBridgeParent,
   void BeginRecording(const TimeStamp& aRecordingStart);
 
 #if defined(MOZ_WIDGET_ANDROID)
-  using ScreenPixelsPromise =
-      MozPromise<RefPtr<layers::AndroidHardwareBuffer>, nsresult, true>;
+  using ScreenPixelsPromise = MozPromise<Ok, nsresult, true>;
   /**
    * Request a screengrab for android
    */
-  RefPtr<ScreenPixelsPromise> RequestScreenPixels(gfx::IntRect aSourceRect,
-                                                  gfx::IntSize aDestSize);
+  RefPtr<ScreenPixelsPromise> RequestScreenPixels(
+      gfx::IntRect aSourceRect,
+      RefPtr<layers::AndroidHardwareBuffer> aHardwareBuffer);
 #endif
 
   /**
@@ -550,7 +550,7 @@ class WebRenderBridgeParent final : public PWebRenderBridgeParent,
 #if defined(MOZ_WIDGET_ANDROID)
   struct ScreenPixelsRequest {
     gfx::IntRect mSourceRect;
-    gfx::IntSize mDestSize;
+    RefPtr<layers::AndroidHardwareBuffer> mHardwareBuffer;
     RefPtr<ScreenPixelsPromise::Private> mPromise;
   };
   Maybe<ScreenPixelsRequest> mScreenPixelsRequest;
