@@ -14,10 +14,6 @@
 
 import { AppConstants } from "resource://gre/modules/AppConstants.sys.mjs";
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
-import {
-  AboutNewTabComponentRegistry,
-  BaseAboutNewTabComponentRegistrant,
-} from "moz-src:///browser/components/newtab/AboutNewTabComponents.sys.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
   BrowserSearchTelemetry:
@@ -547,45 +543,3 @@ export var SearchUIUtils = {
     });
   },
 };
-
-/**
- * A registrant that adds the handoff search bar to about:newtab / about:home.
- */
-export class SearchNewTabComponentsRegistrant extends BaseAboutNewTabComponentRegistrant {
-  constructor() {
-    super();
-    // Wire up a lazy preference getter, primarily so that we have an easy way
-    // of updating our external component registration if the pref changes.
-    this.lazy = XPCOMUtils.declareLazy({
-      prefHandoffToAwesomebar: {
-        pref: "browser.newtabpage.activity-stream.improvesearch.handoffToAwesomebar",
-        default: true,
-        onUpdate: () => {
-          this.updated();
-        },
-      },
-    });
-  }
-
-  getComponents() {
-    const { caretBlinkCount, caretBlinkTime } = Services.appinfo;
-
-    return [
-      {
-        type: AboutNewTabComponentRegistry.TYPES.SEARCH,
-        l10nURLs: [],
-        componentURL: "chrome://browser/content/contentSearchHandoffUI.mjs",
-        tagName: "content-search-handoff-ui",
-        cssVariables: {
-          "--caret-blink-count":
-            caretBlinkCount > -1 ? caretBlinkCount : "infinite",
-          "--caret-blink-time":
-            caretBlinkTime > 0 ? `${caretBlinkTime * 2}ms` : `${1134}ms`,
-        },
-        attributes: {
-          nonhandoff: !this.lazy.prefHandoffToAwesomebar,
-        },
-      },
-    ];
-  }
-}

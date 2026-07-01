@@ -315,7 +315,9 @@ const CONFIG_PANES = Object.freeze({
   home: {
     l10nId: "home-section",
     iconSrc: "chrome://browser/skin/home.svg",
-    groupIds: ["defaultBrowserHome", "startupHome", "homepage", "home"],
+    // We drop the "home" settings entirely since they are only relevant for
+    // Firefox Home. tor-browser#44830.
+    groupIds: ["defaultBrowserHome", "startupHome", "homepage"],
     module: "chrome://browser/content/preferences/config/home-startup.mjs",
     replaces: "home",
   },
