@@ -361,7 +361,7 @@ class tags(InstanceFilter):
     """
     Removes tests that don't contain any of the given tags. This overrides
     InstanceFilter's __eq__ method, so multiple instances can be added.
-    Multiple tag filters is equivalent to joining tags with the AND operator.
+    Multiple tag filters is equivalent to joining tags with the OR operator.
 
     To define a tag in a manifest, add a `tags` attribute to a test or DEFAULT
     section. Tests can have multiple tags, in which case they should be
