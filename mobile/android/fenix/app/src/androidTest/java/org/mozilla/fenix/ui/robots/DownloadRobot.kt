@@ -29,6 +29,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
+import mozilla.components.support.ktx.util.PromptAbuserDetector
 import org.hamcrest.CoreMatchers.allOf
 import org.mozilla.fenix.R
 import org.mozilla.fenix.compose.snackbar.SNACKBAR_TEST_TAG
@@ -257,7 +258,9 @@ class DownloadRobot(private val composeTestRule: ComposeTestRule) {
     class Transition(private val composeTestRule: ComposeTestRule) {
         fun clickDownload(composeTestRule: ComposeTestRule, interact: DownloadRobot.() -> Unit): Transition {
             Log.i(TAG, "clickDownload: Trying to click the \"Download\" download prompt button")
+            PromptAbuserDetector.validationsEnabled = false
             composeTestRule.downloadButton().performClick()
+            PromptAbuserDetector.validationsEnabled = true
             Log.i(TAG, "clickDownload: Clicked the \"Download\" download prompt button")
 
             DownloadRobot(composeTestRule).interact()
