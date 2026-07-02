@@ -1281,7 +1281,7 @@ class XPCShellTests:
 
         filters = []
         if test_tags:
-            filters.extend([tags(x) for x in test_tags])
+            filters.append(tags(test_tags))
 
         path_filter = None
         if test_paths:
