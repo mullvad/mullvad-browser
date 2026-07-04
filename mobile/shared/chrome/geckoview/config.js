@@ -73,6 +73,28 @@ var NewPrefDialog = {
     this._intValue = document.getElementById("new-pref-value-int");
 
     this._positiveButton = document.getElementById("positive-button");
+
+    document
+      .getElementById("new-pref-toggle-button")
+      .addEventListener("click", () => this.toggleShowHide());
+    document
+      .getElementById("pref-toggle-button")
+      .addEventListener("click", () => this.toggleBoolValue());
+    document
+      .getElementById("negative-button")
+      .addEventListener("click", () => this.hide());
+    this._positiveButton.addEventListener("click", () => this.create());
+
+    this._prefNameInputElt.addEventListener("focus", event =>
+      this.focusName(event)
+    );
+    this._prefNameInputElt.addEventListener("input", event =>
+      this.updateName(event)
+    );
+
+    this._prefTypeSelectElt.addEventListener("change", event => {
+      this.type = event.target.value;
+    });
   },
 
   // Called to update positive button to display text ("Create"/"Change), and enabled/disabled status
@@ -235,6 +257,21 @@ var AboutConfig = {
 
     // Setup the prefs observers
     Services.prefs.addObserver("", this);
+
+    this.filterInput.addEventListener("input", () =>
+      AboutConfig.bufferFilterInput()
+    );
+
+    document.getElementById("content").addEventListener("touchstart", () => {
+      this.filterInput.blur();
+    });
+
+    document
+      .getElementById("copy-pref-name")
+      .addEventListener("click", () => this.clipboardCopy("name"));
+    document
+      .getElementById("copy-pref-value")
+      .addEventListener("click", () => this.clipboardCopy("value"));
   },
 
   // Uninit the main AboutConfig dialog
@@ -711,3 +748,12 @@ Pref.prototype = {
     }
   },
 };
+
+window.addEventListener("load", () => {
+  NewPrefDialog.init();
+  AboutConfig.init();
+});
+
+window.addEventListener("unload", () => {
+  AboutConfig.uninit();
+});
