@@ -161,6 +161,10 @@ abstract class AddonPopupBaseFragment :
                 onNeedToRequestPermissions = { permissions ->
                     requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
                 },
+                dismissCustomFirstPartyDownloadDialog = {
+                    dismissRenameDialog()
+                    downloadDialog?.dismiss()
+                },
                 customFirstPartyDownloadDialog = { currentDownloadState, _, positiveAction, negativeAction, _ ->
                     run {
                         if (canShowDownloadDialog()) {
@@ -392,6 +396,13 @@ abstract class AddonPopupBaseFragment :
         ) != null
 
         return downloadDialog == null && !isRenameFragmentShowing
+    }
+
+    private fun dismissRenameDialog() {
+        val renameDialog = childFragmentManager.findFragmentByTag(
+            RenameAndChangeLocationDialogFragment.RENAME_AND_CHANGE_LOCATION_DIALOG_TAG,
+        ) as? RenameAndChangeLocationDialogFragment
+        renameDialog?.dismissAllowingStateLoss()
     }
 
     /**

@@ -1461,6 +1461,64 @@ class DownloadsFeatureTest {
     }
 
     @Test
+    fun `GIVEN a custom download dialog is used WHEN dismissAllDownloadDialogs is called THEN the dialog is dismissed`() = runTest(testDispatcher) {
+        val dismissCustomDialog = mock<() -> Unit>()
+        val feature = DownloadsFeature(
+            testContext,
+            store,
+            useCases = DownloadsUseCases(store, mock()),
+            downloadFileUtils = FakeDownloadFileUtils(),
+            downloadManager = mock(),
+            mainDispatcher = testDispatcher,
+            dismissCustomFirstPartyDownloadDialog = dismissCustomDialog,
+        )
+
+        feature.dismissAllDownloadDialogs()
+
+        verify(dismissCustomDialog).invoke()
+    }
+
+    @Test
+    fun `GIVEN a custom download dialog is used WHEN navigating to another website THEN the dialog is dismissed`() = runTest(testDispatcher) {
+        val dismissCustomDialog = mock<() -> Unit>()
+        val downloadsUseCases = spy(DownloadsUseCases(store, mock()))
+        val cancelDownloadRequestUseCase = mock<CancelDownloadRequestUseCase>()
+        val download = DownloadState(url = "https://www.mozilla.org", sessionId = "test-tab")
+        store.dispatch(ContentAction.UpdateDownloadAction("test-tab", download = download))
+
+        doReturn(cancelDownloadRequestUseCase).`when`(downloadsUseCases).cancelDownloadRequest
+
+        val feature = spy(
+            DownloadsFeature(
+                testContext,
+                store,
+                useCases = downloadsUseCases,
+                downloadFileUtils = FakeDownloadFileUtils(),
+                downloadManager = mock(),
+                mainDispatcher = testDispatcher,
+                dismissCustomFirstPartyDownloadDialog = dismissCustomDialog,
+            ),
+        )
+
+        doReturn(true).`when`(feature).processDownload(any(), any())
+
+        feature.start()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        store.dispatch(ContentAction.UpdateDownloadAction("test-tab", download = download))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        grantPermissions()
+
+        val tab = createTab("https://www.firefox.com")
+        store.dispatch(TabListAction.AddTabAction(tab, select = true))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify(feature).dismissAllDownloadDialogs()
+        verify(dismissCustomDialog).invoke()
+    }
+
+    @Test
     fun `ResolveInfo to DownloaderApps`() = runTest(testDispatcher) {
         val spyContext = spy(testContext)
         val download = DownloadState(url = "https://www.mozilla.org/file.txt", sessionId = "test-tab")
