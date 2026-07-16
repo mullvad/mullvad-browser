@@ -1701,7 +1701,7 @@ class MochitestDesktop:
 
             if options.testingModulesDir is not None:
                 manifestFile.write(
-                    f"resource testing-common file:///{options.testingModulesDir}\n"
+                    f"resource testing-common {Path(options.testingModulesDir).as_uri()}/\n"
                 )
         if options.store_chrome_manifest:
             shutil.copyfile(manifest, options.store_chrome_manifest)
@@ -2603,6 +2603,23 @@ toolbar#nav-bar {
 
         if getattr(self, "testRootAbs", None):
             prefs["mochitest.testRoot"] = self.testRootAbs
+
+        # 001-base-profile.js forces HTTPS-Only mode on, which upgrades
+        # requests to the (plain http) mochitest web server and breaks test
+        # content loading. Unlike a real Tor Browser install, that hardening
+        # has nothing to do with what these tests exercise, and it applies
+        # regardless of whether --tor-bootstrap is used.
+        prefs["dom.security.https_only_mode"] = False
+        prefs["dom.security.https_only_mode_pbm"] = False
+
+        # 001-base-profile.js sets security.nocertdb, so NSS never loads the
+        # on-disk cert DB that fillCertificateDB() populates with mochitest's
+        # test CA, and any HTTPS test content would fail with an
+        # untrusted-issuer error. Persisting a cert DB is exactly what
+        # nocertdb exists to prevent in a real Tor Browser profile for
+        # privacy, but that doesn't apply here: this profile is thrown away
+        # after the run, so there's nothing to leak.
+        prefs["security.nocertdb"] = False
 
         # See if we should use fake media devices.
         if options.useTestMediaDevices:

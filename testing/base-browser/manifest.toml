@@ -1,0 +1,4 @@
+[DEFAULT]
+tags = "base-browser"
+
+["test_new_window.py"]
