@@ -575,7 +575,7 @@ open class FenixApplication : Application(), Provider, ThemeProvider {
         }
         runOnVisualCompleteness(queue) {
             GlobalScope.launch(IO) {
-                components.integrityClient.warmUp()
+                components.warmUpIntegrityClient()
             }
         }
     }

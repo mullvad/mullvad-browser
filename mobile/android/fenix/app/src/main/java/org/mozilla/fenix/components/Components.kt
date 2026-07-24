@@ -19,6 +19,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
 import mozilla.components.concept.ai.controls.AIFeatureBlock
 import mozilla.components.concept.ai.controls.AIFeatureRegistry
+import mozilla.components.concept.integrity.IntegrityClient
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.amo.AMOAddonsProvider
 import mozilla.components.feature.addons.migration.DefaultSupportedAddonsChecker
@@ -32,6 +33,8 @@ import mozilla.components.lib.ai.controls.default
 import mozilla.components.lib.crash.store.CrashAction
 import mozilla.components.lib.crash.store.CrashMiddleware
 import mozilla.components.lib.integrity.googleplay.GooglePlayIntegrityClient
+import mozilla.components.lib.integrity.googleplay.IntegrityConsumer
+import mozilla.components.lib.integrity.googleplay.RequestHashProvider
 import mozilla.components.lib.llm.mlpa.MlpaTokenStorage
 import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 import mozilla.components.service.fxrelay.eligibility.RelayEligibilityStore
@@ -434,13 +437,24 @@ class Components(private val context: Context) {
         )
     }
 
-    val integrityClient by lazyMonitored {
+    private val googlePlayIntegrityClient by lazyMonitored {
         GooglePlayIntegrityClient.create(
             context = context,
             projectNumberToken = BuildConfig.GPS_INTEGRITY_TOKEN,
-            requestHashProvider = clientUUID,
+            requestHashProvider = RequestHashProvider { clientUUID.generateHash() },
         )
     }
+
+    val integrityClient: IntegrityClient by lazyMonitored {
+        googlePlayIntegrityClient.forConsumer(IntegrityConsumer.Summarize)
+    }
+
+    /**
+     * Eagerly initializes the underlying Play Integrity token provider. This is exposed
+     * separately from [integrityClient] because warm-up is specific to the Google
+     * Play-backed implementation and isn't part of the [IntegrityClient] concept.
+     */
+    suspend fun warmUpIntegrityClient(): Boolean = googlePlayIntegrityClient.warmUp()
 
     val termsOfUsePromptRepository by lazyMonitored {
         DefaultTermsOfUsePromptRepository(settings)
