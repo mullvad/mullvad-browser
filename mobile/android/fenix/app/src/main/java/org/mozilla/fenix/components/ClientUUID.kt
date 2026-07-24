@@ -7,7 +7,6 @@ package org.mozilla.fenix.components
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import mozilla.components.lib.integrity.googleplay.RequestHashProvider
 import mozilla.components.lib.llm.mlpa.UserIdProvider
 import mozilla.components.lib.llm.mlpa.service.UserId
 import mozilla.components.support.ktx.kotlin.toHexString
@@ -39,9 +38,15 @@ fun interface Hasher {
 
 /**
  * Generates and persists a stable per-install UUID, used to identify this client
- * consistently across [UserIdProvider] and [RequestHashProvider] consumers.
+ * consistently across [UserIdProvider] consumers and other callers that need a
+ * stable per-request hash derived from that UUID.
  */
-interface ClientUUID : UserIdProvider, RequestHashProvider {
+interface ClientUUID : UserIdProvider {
+    /**
+     * Generates a hash derived from the client's stable UUID.
+     */
+    fun generateHash(): String
+
     companion object {
         /**
          * Convenience initializer that creates a [SharedPreferences] to be used by [ClientUUID].

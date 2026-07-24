@@ -5,8 +5,7 @@
 package org.mozilla.fenix.components.llm
 
 import mozilla.components.concept.fetch.Client
-import mozilla.components.lib.integrity.googleplay.GooglePlayIntegrityClient
-import mozilla.components.lib.integrity.googleplay.IntegrityConsumer
+import mozilla.components.concept.integrity.IntegrityClient
 import mozilla.components.lib.llm.mlpa.MlpaLlmProvider
 import mozilla.components.lib.llm.mlpa.MlpaTokenProvider
 import mozilla.components.lib.llm.mlpa.MlpaTokenStorage
@@ -25,7 +24,7 @@ class Llm(
     private val client: Client,
     private val storage: MlpaTokenStorage,
     private val fxaTokenProvider: FxaAccessTokenProvider,
-    private val integrityClient: GooglePlayIntegrityClient,
+    private val integrityClient: IntegrityClient,
     private val userIdProvider: UserIdProvider,
 ) {
 
@@ -36,7 +35,7 @@ class Llm(
             MlpaTokenProvider.choose(
                 MlpaTokenProvider.fxaTokenProvider(fxaTokenProvider),
                 MlpaTokenProvider.mlpaIntegrityHandshake(
-                    integrityClient = integrityClient.forConsumer(IntegrityConsumer.Summarize),
+                    integrityClient = integrityClient,
                     authenticationService = fenixMlpaService,
                     userIdProvider = userIdProvider,
                     storage = storage,
