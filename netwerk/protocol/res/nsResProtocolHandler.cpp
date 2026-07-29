@@ -14,6 +14,10 @@
 
 #include "mozilla/Omnijar.h"
 
+#ifdef MOZ_WIDGET_ANDROID
+#  include "mozilla/java/GeckoAppShellWrappers.h"
+#endif
+
 using mozilla::LogLevel;
 using mozilla::dom::ContentParent;
 
@@ -68,29 +72,12 @@ nsresult nsResProtocolHandler::Init() {
 
 #ifdef ANDROID
 nsresult nsResProtocolHandler::GetApkURI(nsACString& aResult) {
-  nsCString::const_iterator start, iter;
-  mGREURI.BeginReading(start);
-  mGREURI.EndReading(iter);
-  nsCString::const_iterator start_iter = start;
-
-  // This is like jar:jar:file://path/to/apk/base.apk!/path/to/omni.ja!/
-  bool found = FindInReadable("!/"_ns, start_iter, iter);
-  NS_ENSURE_TRUE(found, NS_ERROR_UNEXPECTED);
-
-  // like jar:jar:file://path/to/apk/base.apk!/
-  const nsDependentCSubstring& withoutPath = Substring(start, iter);
-  NS_ENSURE_TRUE(withoutPath.Length() >= 4, NS_ERROR_UNEXPECTED);
-
-  // Let's make sure we're removing what we expect to remove
-  NS_ENSURE_TRUE(Substring(withoutPath, 0, 4).EqualsLiteral("jar:"),
-                 NS_ERROR_UNEXPECTED);
-
-  // like jar:file://path/to/apk/base.apk!/
-  aResult = ToNewCString(Substring(withoutPath, 4));
-
-  // Remove the trailing /
-  NS_ENSURE_TRUE(aResult.Length() >= 1, NS_ERROR_UNEXPECTED);
-  aResult.Truncate(aResult.Length() - 1);
+  mozilla::jni::String::LocalRef path =
+      mozilla::java::GeckoAppShell::GetPackageResourcePath();
+  if (!path) {
+    return NS_ERROR_UNEXPECTED;
+  }
+  aResult = "jar:file://"_ns + path->ToCString() + "!"_ns;
   return NS_OK;
 }
 #endif
