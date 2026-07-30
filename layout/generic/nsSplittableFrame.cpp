@@ -215,7 +215,7 @@ void nsSplittableFrame::UpdateFirstContinuationAndFirstInFlowCache() {
     if (oldCachedFirstContinuation != newFirstContinuation) {
       // Update the first-continuation cache for us and our next-continuations.
       for (nsSplittableFrame* f = this; f;
-           f = reinterpret_cast<nsSplittableFrame*>(f->GetNextContinuation())) {
+           f = static_cast<nsSplittableFrame*>(f->GetNextContinuation())) {
         f->mFirstContinuation = newFirstContinuation;
       }
     }
@@ -228,7 +228,7 @@ void nsSplittableFrame::UpdateFirstContinuationAndFirstInFlowCache() {
       // behavior when a frame list is destroyed from the front. To avoid that
       // pathological behavior, we simply purge the cached values.
       for (nsSplittableFrame* f = this; f;
-           f = reinterpret_cast<nsSplittableFrame*>(f->GetNextContinuation())) {
+           f = static_cast<nsSplittableFrame*>(f->GetNextContinuation())) {
         f->mFirstContinuation = nullptr;
       }
     }
@@ -240,7 +240,7 @@ void nsSplittableFrame::UpdateFirstContinuationAndFirstInFlowCache() {
     if (oldCachedFirstInFlow != newFirstInFlow) {
       // Update the first-in-flow cache for us and our next-in-flows.
       for (nsSplittableFrame* f = this; f;
-           f = reinterpret_cast<nsSplittableFrame*>(f->GetNextInFlow())) {
+           f = static_cast<nsSplittableFrame*>(f->GetNextInFlow())) {
         f->mFirstInFlow = newFirstInFlow;
       }
     }
@@ -252,7 +252,7 @@ void nsSplittableFrame::UpdateFirstContinuationAndFirstInFlowCache() {
       // behavior when a frame list is destroyed from the front. To avoid that
       // pathological behavior, we simply purge the cached values.
       for (nsSplittableFrame* f = this; f;
-           f = reinterpret_cast<nsSplittableFrame*>(f->GetNextInFlow())) {
+           f = static_cast<nsSplittableFrame*>(f->GetNextInFlow())) {
         f->mFirstInFlow = nullptr;
       }
     }
