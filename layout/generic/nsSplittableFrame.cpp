@@ -9,6 +9,7 @@
 
 #include "nsSplittableFrame.h"
 
+#include "mozilla/DebugOnly.h"
 #include "mozilla/ReflowInput.h"
 #include "nsContainerFrame.h"
 #include "nsFieldSetFrame.h"
@@ -244,17 +245,36 @@ void nsSplittableFrame::UpdateFirstContinuationAndFirstInFlowCache() {
       }
     }
   } else {
-    // We become the new first-in-flow due to our prev-in-flow being removed.
-    if (oldCachedFirstInFlow) {
-      // It's tempting to update the first-in-flow cache for our
-      // next-in-flows here, but that would result in overall O(n^2)
-      // behavior when a frame list is destroyed from the front. To avoid that
-      // pathological behavior, we simply purge the cached values.
+    if (GetPrevContinuation()) {
+      // We become the new first-in-flow after changing from fluid to non-fluid.
+      // Update the stale first-in-flow cache for us and all next-in-flows.
+      //
+      // Note that this has no counterpart in the above mFirstContinuation cache
+      // since GetPrevContinuation() does not depend on the
+      // NS_FRAME_IS_FLUID_CONTINUATION bit.
       for (nsSplittableFrame* f = this; f;
            f = static_cast<nsSplittableFrame*>(f->GetNextInFlow())) {
-        f->mFirstInFlow = nullptr;
+        f->mFirstInFlow = this;
+      }
+    } else {
+      // We become the new first-in-flow due to our prev-in-flow being removed.
+      if (oldCachedFirstInFlow) {
+        // It's tempting to update the first-in-flow cache for our
+        // next-in-flows here, but that would result in overall O(n^2)
+        // behavior when a frame list is destroyed from the front. To avoid that
+        // pathological behavior, we simply purge the cached values.
+        for (nsSplittableFrame* f = this; f;
+             f = static_cast<nsSplittableFrame*>(f->GetNextInFlow())) {
+          f->mFirstInFlow = nullptr;
+        }
       }
     }
+
+    DebugOnly<nsSplittableFrame*> nextInFlow =
+        static_cast<nsSplittableFrame*>(GetNextInFlow());
+    MOZ_ASSERT(!nextInFlow || !nextInFlow->mFirstInFlow ||
+                   nextInFlow->mFirstInFlow == this,
+               "Our next-in-flow caches a stale first-in-flow!");
   }
 }
 
