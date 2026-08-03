@@ -159,6 +159,11 @@ bool GeckoViewContentChannelParent::Init(
 
   nsCOMPtr<nsIURI> uri = ipc::DeserializeURI(aArgs.uri());
 
+  if (!uri || !uri->SchemeIs("content")) {
+    rv = NS_ERROR_UNKNOWN_PROTOCOL;
+    return false;
+  }
+
   nsAutoCString remoteType;
   rv = GetRemoteType(remoteType);
   if (MOZ_UNLIKELY(NS_FAILED(rv))) {
