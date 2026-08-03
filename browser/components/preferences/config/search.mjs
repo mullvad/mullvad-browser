@@ -272,6 +272,11 @@ Preferences.addSetting({
   pref: "browser.urlbar.trending.featureGate",
 });
 
+// Add a warning banner. tor-browser#44629.
+Preferences.addSetting({
+  id: "searchSuggestionsWarningBanner",
+});
+
 // The show search suggestion box behaves differently depending on whether the
 // separate search bar is shown. When the separate search bar is shown, it
 // controls just the search suggestion preference, and the
@@ -1156,6 +1161,16 @@ SettingGroupManager.registerGroups({
     l10nId: "search-suggestions-header-2",
     headingLevel: 2,
     items: [
+      // Add a warning banner. tor-browser#44629.
+      {
+        id: "searchSuggestionsWarningBanner",
+        l10nId: "search-suggestions-warning-banner",
+        control: "moz-message-bar",
+        controlAttrs: {
+          role: "status",
+          type: "warning",
+        },
+      },
       {
         id: "suggestionsInSearchFieldsCheckbox",
         l10nId: "search-show-suggestions-option",
