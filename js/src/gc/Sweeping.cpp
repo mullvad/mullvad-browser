@@ -1387,6 +1387,13 @@ void GCRuntime::sweepRealmGlobals() {
   }
 }
 
+void GCRuntime::sweepWasmInstances() {
+  for (SweepGroupRealmsIter r(this); !r.done(); r.next()) {
+    AutoSetThreadIsSweeping threadIsSweeping(r->zone());
+    r->wasm.traceWeakInstances();
+  }
+}
+
 void GCRuntime::sweepMisc() {
   SweepingTracer trc(rt);
   for (SweepGroupRealmsIter r(this); !r.done(); r.next()) {
@@ -1742,6 +1749,11 @@ IncrementalProgress GCRuntime::beginSweepingSweepGroup(JS::GCContext* gcx,
 
   // This must happen before updating embedding weak pointers.
   sweepRealmGlobals();
+
+  // Prune dying wasm instances from each realm's weak instance list now, at the
+  // start of sweeping, before the mutator can observe them via the (now no-op)
+  // instances() read barrier during later incremental slices.
+  sweepWasmInstances();
 
   sweepEmbeddingWeakPointers(gcx);
 
