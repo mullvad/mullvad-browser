@@ -16,6 +16,7 @@
 
 #include "wasm/WasmRealm.h"
 
+#include "gc/Marking.h"
 #include "vm/GlobalObject.h"
 #include "vm/Realm.h"
 #include "wasm/WasmDebug.h"
@@ -109,6 +110,19 @@ void wasm::Realm::unregisterInstance(Instance& instance) {
                      &index)) {
     runtimeInstances->erase(runtimeInstances->begin() + index);
   }
+}
+
+void wasm::Realm::traceWeakInstances() {
+  // Registration/unregistration of instances_ is tied to Instance lifetime, so
+  // an instance whose owning object is about to be finalized is still present
+  // here until ~Instance runs. Remove such entries now, at the start of zone
+  // sweeping, because the instances() read barrier that otherwise protects
+  // readers is a no-op once the zone is being swept. erase order is preserved,
+  // so the pointer-sorted invariant used by BinarySearchIf holds.
+  instances_.eraseIf([](Instance* instance) {
+    return js::gc::IsAboutToBeFinalizedUnbarriered(
+        instance->objectUnbarriered());
+  });
 }
 
 void wasm::Realm::ensureProfilingLabels(bool profilingEnabled) {
