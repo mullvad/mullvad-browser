@@ -1104,14 +1104,9 @@ SettingGroupManager.registerGroups({
         control: "moz-radio-group",
         options: [
           {
-            id: "dohRadioDefault",
-            value: "default",
-            l10nId: "preferences-doh-radio-default",
-          },
-          {
             id: "dohRadioCustom",
             value: "custom",
-            l10nId: "preferences-doh-radio-custom",
+            l10nId: "mullvad-preferences-doh-radio-always-on",
             items: [
               {
                 id: "dohFallbackIfCustom",
@@ -1132,7 +1127,7 @@ SettingGroupManager.registerGroups({
           {
             id: "dohRadioOff",
             value: "off",
-            l10nId: "preferences-doh-radio-off",
+            l10nId: "mullvad-preferences-doh-radio-off",
           },
         ],
       },
@@ -3210,14 +3205,13 @@ Preferences.addSetting({
   id: "dohModeBoxItem",
   deps: ["dohMode"],
   getControlConfig: (config, deps) => {
-    let l10nId = "preferences-doh-overview-off";
+    let l10nId = "mullvad-preferences-doh-overview-off";
     if (deps.dohMode.value == Ci.nsIDNSService.MODE_NATIVEONLY) {
       l10nId = "preferences-doh-overview-default";
-    } else if (
-      deps.dohMode.value == Ci.nsIDNSService.MODE_TRRFIRST ||
-      deps.dohMode.value == Ci.nsIDNSService.MODE_TRRONLY
-    ) {
+    } else if (deps.dohMode.value == Ci.nsIDNSService.MODE_TRRFIRST) {
       l10nId = "preferences-doh-overview-custom";
+    } else if (deps.dohMode.value == Ci.nsIDNSService.MODE_TRRONLY) {
+      l10nId = "mullvad-preferences-doh-overview-always-on";
     }
     return {
       ...config,
@@ -3428,6 +3422,7 @@ Preferences.addSetting({
   // for the mismatch of control-to-pref.
   deps: ["dohMode"],
   disabled: ({ dohMode }) => dohMode.locked,
+  visible: () => false,
   onUserChange: val => {
     if (val) {
       Glean.securityDohSettings.modeChangedButton.record({
