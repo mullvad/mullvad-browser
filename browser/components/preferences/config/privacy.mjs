@@ -7,6 +7,11 @@
 import { SettingGroupManager } from "chrome://browser/content/preferences/config/SettingGroupManager.mjs";
 import { Preferences } from "chrome://global/content/preferences/Preferences.mjs";
 
+ChromeUtils.importESModule(
+  "chrome://browser/content/preferences/config/protections-from-apps.mjs",
+  { global: "current" }
+);
+
 const XPCOMUtils = ChromeUtils.importESModule(
   "resource://gre/modules/XPCOMUtils.sys.mjs"
 ).XPCOMUtils;

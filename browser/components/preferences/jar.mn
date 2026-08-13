@@ -71,6 +71,7 @@ browser.jar:
    content/browser/preferences/widgets/update-state.mjs          (widgets/update-state/update-state.mjs)
    content/browser/preferences/widgets/update-state.css          (widgets/update-state/update-state.css)
 
+   content/browser/preferences/config/protections-from-apps.mjs         (config/protections-from-apps.mjs)
    content/browser/preferences/config/letterboxing.mjs                  (config/letterboxing.mjs)
    content/browser/preferences/letterboxing.css                         (letterboxing.css)
    content/browser/preferences/letterboxing-middle.svg                  (letterboxing-middle.svg)

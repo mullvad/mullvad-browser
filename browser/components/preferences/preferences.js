@@ -274,6 +274,7 @@ const CONFIG_PANES = Object.freeze({
       "networkProxy",
       "privacyPanel",
       "browsingProtection",
+      "protectionsFromThirdParty",
       "certificates",
     ],
     replaces: "privacy",
