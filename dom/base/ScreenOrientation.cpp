@@ -562,6 +562,15 @@ already_AddRefed<Promise> ScreenOrientation::LockInternal(
     return p.forget();
   }
 
+#  if defined(XP_WIN)
+  // The actual configurations supporting this on Windows are very few, so it
+  // makes sense to disable screen locking under RFP.
+  if (doc->ShouldResistFingerprinting(RFPTarget::ScreenOrientation)) {
+    p->MaybeReject(NS_ERROR_DOM_NOT_SUPPORTED_ERR);
+    return p.forget();
+  }
+#  endif
+
   RefPtr<BrowsingContext> bc = docShell->GetBrowsingContext();
   bc = bc ? bc->Top() : nullptr;
   if (!bc) {
