@@ -498,3 +498,24 @@ internal fun String.extractBase6RawString(): String? {
         contentString
     }
 }
+
+/**
+ * Truncates the string from the middle if it exceeds [maxLength].
+ *
+ * @param maxLength The maximum length of the string.
+ * @param ellipsis The string to use as ellipsis, defaults to "…".
+ * @return The truncated string.
+ */
+fun String.truncateMiddle(maxLength: Int, ellipsis: String = "…"): String {
+    if (length <= maxLength) {
+        return this
+    }
+    if (maxLength <= ellipsis.length) {
+        return take(maxLength)
+    }
+
+    val half = (maxLength - ellipsis.length) / 2
+    val start = take(half)
+    val end = takeLast(maxLength - ellipsis.length - half)
+    return "$start$ellipsis$end"
+}

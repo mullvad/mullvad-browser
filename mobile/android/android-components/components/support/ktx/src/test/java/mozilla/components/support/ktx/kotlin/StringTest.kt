@@ -307,6 +307,16 @@ class StringTest {
     }
 
     @Test
+    fun truncateMiddle() {
+        assertEquals("123…890", "1234567890".truncateMiddle(7))
+        assertEquals("1234567890", "1234567890".truncateMiddle(10))
+        assertEquals("1234567890", "1234567890".truncateMiddle(20))
+        assertEquals("1…0", "1234567890".truncateMiddle(3))
+        assertEquals("1", "1234567890".truncateMiddle(1))
+        assertEquals("123...890", "1234567890".truncateMiddle(9, "..."))
+    }
+
+    @Test
     fun `WHEN a string contains utf 8 encoded characters or illegal filename characters decode decodes it`() {
         // List of pairs of encoded strings or illegal filename characters and their expected decoded results
         val testCases = listOf(

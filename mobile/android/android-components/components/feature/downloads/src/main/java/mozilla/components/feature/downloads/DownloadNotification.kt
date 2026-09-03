@@ -28,6 +28,7 @@ import mozilla.components.feature.downloads.AbstractFetchDownloadService.Compani
 import mozilla.components.feature.downloads.AbstractFetchDownloadService.Companion.ACTION_RESUME
 import mozilla.components.feature.downloads.AbstractFetchDownloadService.Companion.ACTION_TRY_AGAIN
 import mozilla.components.feature.downloads.AbstractFetchDownloadService.DownloadJobState
+import mozilla.components.support.ktx.kotlin.truncateMiddle
 import mozilla.components.support.utils.DownloadFileUtils
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
@@ -40,6 +41,7 @@ internal object DownloadNotification {
     internal const val NOTIFICATION_DOWNLOAD_GROUP_ID = 100
     private const val LEGACY_NOTIFICATION_CHANNEL_ID = "Downloads"
     internal const val PERCENTAGE_MULTIPLIER = 100
+    private const val MAX_FILENAME_LENGTH = 25
 
     @VisibleForTesting
     internal fun createDownloadGroupNotification(
@@ -89,11 +91,12 @@ internal object DownloadNotification {
         val channelId = ensureChannelExists(context)
         val isIndeterminate = downloadState.isIndeterminate()
         val percentCopied = downloadState.getPercent() ?: -1
+        val fileName = downloadState.fileName?.truncateMiddle(MAX_FILENAME_LENGTH).orEmpty()
 
         return NotificationCompat.Builder(context, channelId)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .setBigContentTitle(downloadState.fileName.orEmpty())
+                    .setBigContentTitle(fileName)
                     .setSummaryText(
                         formatDownloadTimeRemaining(
                             context = context,
@@ -105,10 +108,8 @@ internal object DownloadNotification {
                     ),
             )
             .setSmallIcon(R.drawable.mozac_feature_download_ic_ongoing_download)
-            .setContentTitle(downloadState.fileName.orEmpty())
-            .setContentText(
-                downloadState.getProgress(fileSizeFormatter = fileSizeFormatter),
-            )
+            .setContentTitle(fileName)
+            .setContentText(downloadState.getProgress(fileSizeFormatter = fileSizeFormatter))
             .setColor(ContextCompat.getColor(context, notificationAccentColor))
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setProgress(PERCENTAGE_MULTIPLIER, percentCopied, isIndeterminate)
@@ -132,10 +133,11 @@ internal object DownloadNotification {
         notificationAccentColor: Int,
     ): Notification {
         val channelId = ensureChannelExists(context)
+        val fileName = downloadState.fileName?.truncateMiddle(MAX_FILENAME_LENGTH).orEmpty()
 
         return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.mozac_feature_download_ic_download)
-            .setContentTitle(downloadState.fileName)
+            .setContentTitle(fileName)
             .setContentText(
                 context.applicationContext.getString(R.string.mozac_feature_downloads_paused_notification_text),
             )
@@ -163,10 +165,11 @@ internal object DownloadNotification {
         contentIntent: PendingIntent = createOpenFilePendingIntent(context, downloadState, downloadFileUtils),
     ): Notification {
         val channelId = ensureChannelExists(context)
+        val fileName = downloadState.fileName?.truncateMiddle(MAX_FILENAME_LENGTH).orEmpty()
 
         return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.mozac_feature_download_ic_download_complete)
-            .setContentTitle(downloadState.fileName)
+            .setContentTitle(fileName)
             .setWhen(createdTime)
             .setOnlyAlertOnce(true)
             .setContentText(
@@ -191,10 +194,11 @@ internal object DownloadNotification {
         notificationAccentColor: Int,
     ): Notification {
         val channelId = ensureChannelExists(context)
+        val fileName = downloadState.fileName?.truncateMiddle(MAX_FILENAME_LENGTH).orEmpty()
 
         return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.mozac_feature_download_ic_download_failed)
-            .setContentTitle(downloadState.fileName)
+            .setContentTitle(fileName)
             .setContentText(
                 context.applicationContext.getString(R.string.mozac_feature_downloads_failed_notification_text2),
             )
@@ -217,7 +221,8 @@ internal object DownloadNotification {
         notifications: List<DownloadJobState>,
     ): List<String> {
         return notifications.take(2).map { downloadState ->
-            "${downloadState.state.fileName} ${downloadState.state.getStatusDescription(
+            val fileName = downloadState.state.fileName.orEmpty().truncateMiddle(MAX_FILENAME_LENGTH)
+            "$fileName ${downloadState.state.getStatusDescription(
                 context = context,
                 fileSizeFormatter = fileSizeFormatter,
             )}"
