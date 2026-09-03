@@ -4,6 +4,7 @@
 
 package mozilla.components.feature.downloads
 
+import android.app.Notification
 import android.app.PendingIntent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.EXTRA_PROGRESS
@@ -305,6 +306,32 @@ class DownloadNotificationTest {
         )
 
         assertEquals(true, notificationDownloadWithNoSize.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE))
+    }
+
+    @Test
+    fun `createOngoingDownloadNotification with long filename truncates from middle`() {
+        val longFileName = "this_is_a_very_long_filename_that_exceeds_forty_characters_to_test_truncation.pdf"
+        val downloadState =
+            DownloadState(
+                fileName = longFileName,
+                url = "mozilla.org/file.pdf",
+                contentLength = 100L,
+                currentBytesCopied = 10,
+                status = DownloadState.Status.DOWNLOADING,
+            )
+        val style = AbstractFetchDownloadService.Style()
+
+        val notification =
+            DownloadNotification.createOngoingDownloadNotification(
+                context = testContext,
+                downloadState = downloadState,
+                fileSizeFormatter = fakeFileSizeFormatter,
+                notificationAccentColor = style.notificationAccentColor,
+                downloadEstimator = DownloadEstimator(dateTimeProvider = FakeDateTimeProvider()),
+            )
+
+        val expectedTitle = "this_is_a_ve…uncation.pdf"
+        assertEquals(expectedTitle, notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
     }
 
     @Test
