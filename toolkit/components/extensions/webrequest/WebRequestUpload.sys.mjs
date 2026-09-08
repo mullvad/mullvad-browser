@@ -118,22 +118,6 @@ class Headers extends Map {
 }
 
 /**
- * Creates a new Object with a corresponding property for every
- * key-value pair in the given Map.
- *
- * @param {Map} map
- *        The map to convert.
- * @returns {object}
- */
-function mapToObject(map) {
-  let result = {};
-  for (let [key, value] of map) {
-    result[key] = value;
-  }
-  return result;
-}
-
-/**
  * Rewinds the given seekable input stream to its beginning, and catches
  * any resulting errors.
  *
@@ -446,7 +430,7 @@ function createFormData(stream, channel, lenient) {
   try {
     let formData = parseFormData(stream, channel, lenient);
     if (formData) {
-      return mapToObject(formData);
+      return Object.fromEntries(formData);
     }
   } catch (e) {
     Cu.reportError(e);
