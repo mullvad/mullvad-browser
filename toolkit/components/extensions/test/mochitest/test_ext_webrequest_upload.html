@@ -27,6 +27,7 @@
   enctype="multipart/form-data"
   >
 <input type="text" name="textInput2" value="value2">
+<input type="text" name="__proto__" value="regression test for bug 2061470">
 <input type="file" name="testFile">
 <input type="file" name="emptyFile">
 </form>
@@ -161,11 +162,19 @@ add_task(async function test_xhr_forms() {
     }
     let action = new URL(form.action);
     let formData = new FormData(form);
-    let webRequestFD = {};
 
     let updateActionURL = () => {
+      let webRequestFD = {};
       for (let name of formData.keys()) {
-        webRequestFD[name] = name in uploads ? [uploads[name].fileName] : formData.getAll(name);
+        if (Object.hasOwn(webRequestFD, name)) {
+          // Ignore duplicate keys; formData.getAll already read all values.
+          continue;
+        }
+        const value = Object.hasOwn(uploads, name) ? [uploads[name].fileName] : formData.getAll(name);
+        // Cannot use webRequestFD[name] = value, because for "__proto__" as
+        // name, that would trigger the Object.prototype.__proto__ setter
+        // instead of defining a data property.
+        Object.defineProperty(webRequestFD, name, { value, enumerable: true });
       }
       action.searchParams.set("upload", JSON.stringify(webRequestFD));
       action.searchParams.set("enctype", form.enctype);
