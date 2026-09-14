@@ -1,0 +1,6 @@
+[DEFAULT]
+subsuite = "base-browser"
+
+["test_auth.py"]
+
+["test_common.py"]
