@@ -5,4 +5,6 @@ subsuite = "base-browser"
 
 ["test_upload.py"]
 
+["test_remote.py"]
+
 ["test_common.py"]

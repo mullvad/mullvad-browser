@@ -2,10 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import sys
-from os import path
-
 from mach.decorators import Command, CommandArgument, SubCommand  # noqa: I001
+
+from yeet import remote
 
 
 @Command(
@@ -18,6 +17,109 @@ def yeet(command_context):
     # test remotely from the current state of the local repo, rather than
     # requiring an already-published build like `yeet remote` does.
     pass
+
+
+@SubCommand(
+    "yeet",
+    "remote",
+    description="Trigger a tor-browser-bundle-testsuite CI job against an "
+    "already-published build, for a single platform.",
+)
+@CommandArgument(
+    "--platform",
+    default=None,
+    choices=remote.PLATFORMS,
+    help="Platform to test. Prompted for if not provided.",
+)
+@CommandArgument(
+    "--channel",
+    default=None,
+    choices=remote.ANDROID_CHANNELS,
+    help="Android build channel/flavor to install (only used with "
+    "--platform android_x86_64). Prompted for if not provided.",
+)
+@CommandArgument(
+    "installer_url",
+    help="URL of the installer to test, or a local file path to upload first.",
+)
+@CommandArgument(
+    "--sha256sums-url", default=None, help="URL of the build's sha256sums file."
+)
+@CommandArgument(
+    "--artifacts-url",
+    default=None,
+    help="URL of the build's artifacts directory. Inferred from the "
+    "in-tree browser version and --platform if not provided.",
+)
+@CommandArgument(
+    "--mozharness-url",
+    default=None,
+    help="URL of the mozharness.zip to use. Inferred from the in-tree "
+    "browser version and --platform if not provided.",
+)
+@CommandArgument(
+    "--version",
+    default=None,
+    help="Browser version to use when inferring --artifacts-url and "
+    "--mozharness-url. Defaults to the in-tree version "
+    "(browser/config/version.txt).",
+)
+@CommandArgument(
+    "--ref",
+    default="main",
+    help="tor-browser-bundle-testsuite ref to run on. Must have a "
+    ".gitlab-ci.yml, which the default branch may not.",
+)
+@CommandArgument(
+    "--tag",
+    dest="tags",
+    action="append",
+    default=["tor", "base-browser"],
+    help="Test tag to filter tests by (can be passed multiple times, e.g. "
+    "--tag tor --tag base-browser). Defaults to 'tor'.",
+)
+@CommandArgument(
+    "--dry-run",
+    action="store_true",
+    default=False,
+    help="Print the curl command instead of triggering the pipeline.",
+)
+@CommandArgument(
+    "--yes",
+    "-y",
+    dest="assume_yes",
+    action="store_true",
+    default=False,
+    help="Upload a local installer without asking for confirmation.",
+)
+def yeet_remote(
+    command_context,
+    platform,
+    channel,
+    installer_url,
+    sha256sums_url,
+    artifacts_url,
+    mozharness_url,
+    version,
+    ref,
+    tags,
+    dry_run,
+    assume_yes,
+):
+    return remote.run(
+        command_context,
+        platform,
+        channel,
+        installer_url,
+        sha256sums_url,
+        artifacts_url,
+        mozharness_url,
+        version,
+        ref,
+        tags,
+        dry_run,
+        assume_yes=assume_yes,
+    )
 
 
 @SubCommand(
@@ -55,9 +157,6 @@ def yeet_auth(
     gitlab_token=None,
     ssh_user=None,
 ):
-    # tools/yeet is a package (tools/yeet/__init__.py), but mach loads
-    # this file standalone, so tools/ isn't on sys.path by default.
-    sys.path.append(path.dirname(path.dirname(__file__)))
     from yeet import auth
 
     return auth.run(
