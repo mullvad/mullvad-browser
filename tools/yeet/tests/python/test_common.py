@@ -49,5 +49,32 @@ def test_prompt_skips_flush_when_not_a_tty(monkeypatch):
     assert common.prompt("Q: ") == "piped"
 
 
+@pytest.mark.parametrize(
+    "answers,expected",
+    [
+        (["y"], True),
+        (["YES"], True),
+        ([" yes "], True),
+        ([""], False),
+        (["n"], False),
+        (["No"], False),
+        (["maybe", "y"], True),
+    ],
+)
+def test_confirm(monkeypatch, answers, expected):
+    answers = iter(answers)
+    monkeypatch.setattr("builtins.input", lambda message="": next(answers))
+
+    assert common.confirm("Go?") is expected
+
+
+def test_confirm_reprompts_on_invalid_answer(monkeypatch, capsys):
+    answers = iter(["maybe", "sure", "n"])
+    monkeypatch.setattr("builtins.input", lambda message="": next(answers))
+
+    assert common.confirm("Go?") is False
+    assert capsys.readouterr().out.count("ERROR!") == 2
+
+
 if __name__ == "__main__":
     mozunit.main()

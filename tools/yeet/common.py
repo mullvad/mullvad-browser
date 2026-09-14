@@ -3,7 +3,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import getpass
+import json
 import sys
+from pathlib import Path
 
 from mozterm import Terminal
 
@@ -40,3 +42,25 @@ def prompt(message, secret=False):
         return getpass.getpass(message)
     return input(message)
 
+
+def confirm(message):
+    """Ask a yes/no question, defaulting to no, until a valid answer is given."""
+    while True:
+        answer = prompt(f"{message} [y/N]: ").strip().lower()
+        if answer in ("y", "yes"):
+            return True
+        if answer in ("", "n", "no"):
+            return False
+        print(TERM.red("ERROR! Please answer 'y' or 'n'."))
+
+
+def read_config(command_context):
+    """Read the project/token/ssh_* config saved by `mach yeet auth`, or
+    None if it hasn't been run yet.
+    """
+    config_path = Path(command_context.topsrcdir) / YEET_CONFIG_FILENAME
+    if not config_path.is_file():
+        return None
+
+    with open(config_path) as f:
+        return json.load(f)
