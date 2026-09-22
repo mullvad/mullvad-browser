@@ -1,0 +1,14 @@
+<html>
+<body>
+<iframe id="f" src="2073692-frame.xml"></iframe>
+<script>
+document.getElementById("f").onload = function() {
+  var xmlDoc = this.contentDocument;
+  var oldRoot = xmlDoc.documentElement;
+  var newRoot = xmlDoc.createElementNS("http://www.w3.org/1999/xhtml", "html");
+  xmlDoc.replaceChild(newRoot, oldRoot);
+  document.documentElement.getBoundingClientRect();
+};
+</script>
+</body>
+</html>
