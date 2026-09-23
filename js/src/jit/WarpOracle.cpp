@@ -347,13 +347,26 @@ AbortReasonOr<WarpScriptSnapshot*> WarpScriptOracle::createScriptSnapshot() {
       }
 
       case JSOp::FunctionThis:
-        if (!script_->strict() && script_->hasNonSyntacticScope()) {
-          // Abort because MBoxNonStrictThis doesn't support non-syntactic
-          // scopes (a deprecated SpiderMonkey mechanism). If this becomes an
-          // issue we could support it by refactoring GetFunctionThis to not
-          // take a frame pointer and then call that.
-          return abort(AbortReason::Disable,
-                       "JSOp::FunctionThis with non-syntactic scope");
+        if (!script_->strict()) {
+          if (script_->hasNonSyntacticScope()) {
+            // Abort because MBoxNonStrictThis doesn't support non-syntactic
+            // scopes (a deprecated SpiderMonkey mechanism). If this becomes an
+            // issue we could support it by refactoring GetFunctionThis to not
+            // take a frame pointer and then call that.
+            return abort(AbortReason::Disable,
+                         "JSOp::FunctionThis with non-syntactic scope");
+          }
+
+          // Ensure that all constructors called by PrimitiveToObject are
+          // already resolved.
+          Handle<GlobalObject*> global = cx_->global();
+          if (!GlobalObject::ensureConstructor(cx_, global, JSProto_Number) ||
+              !GlobalObject::ensureConstructor(cx_, global, JSProto_Boolean) ||
+              !GlobalObject::ensureConstructor(cx_, global, JSProto_String) ||
+              !GlobalObject::ensureConstructor(cx_, global, JSProto_Symbol) ||
+              !GlobalObject::ensureConstructor(cx_, global, JSProto_BigInt)) {
+            return abort(AbortReason::Error);
+          }
         }
         break;
 

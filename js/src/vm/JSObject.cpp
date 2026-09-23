@@ -2533,6 +2533,9 @@ bool js::IsPrototypeOf(JSContext* cx, HandleObject protoObj, JSObject* obj,
 JSObject* js::PrimitiveToObject(JSContext* cx, const Value& v) {
   MOZ_ASSERT(v.isPrimitive());
 
+  // Note: if a new primitive type is added here, its constructor
+  // should also be resolved in the JSOp::FunctionThis case in
+  // WarpScriptOracle::createScriptSnapshot.
   switch (v.type()) {
     case ValueType::String: {
       Rooted<JSString*> str(cx, v.toString());
