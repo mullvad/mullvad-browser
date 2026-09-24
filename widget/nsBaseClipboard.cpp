@@ -6,6 +6,7 @@
 #include "nsBaseClipboard.h"
 
 #include "ContentAnalysis.h"
+#include "mozilla/AutoRestore.h"
 #include "mozilla/Components.h"
 #include "mozilla/dom/BindingUtils.h"
 #include "mozilla/dom/CanonicalBrowsingContext.h"
@@ -376,6 +377,17 @@ NS_IMETHODIMP nsBaseClipboard::SetData(
     }
   }
 
+  // A clipboard write may still be on the stack, having spun a nested event
+  // loop or pumped the native message queue while rendering its data.
+  // Overwriting the native clipboard now would free state that the other
+  // commit is still using.  We fail the new request now rather than clearing
+  // the clipboard and queueing the incoming clipboard write.  This only covers
+  // the step of a write that can nest an event loop.
+  if (mMutatingNativeClipboard) {
+    MOZ_CLIPBOARD_LOG("%s: rejecting re-entrant write.", __FUNCTION__);
+    return NS_ERROR_IN_PROGRESS;
+  }
+
   const auto& clipboardCache = mCaches[aWhichClipboard];
   MOZ_ASSERT(clipboardCache);
   if (aTransferable == clipboardCache->GetTransferable() &&
@@ -391,7 +403,11 @@ NS_IMETHODIMP nsBaseClipboard::SetData(
     mIgnoreEmptyNotification = true;
     // Reject existing pending asyncSetData request if any.
     RejectPendingAsyncSetDataRequestIfAny(aWhichClipboard);
-    rv = SetNativeClipboardData(aTransferable, aWhichClipboard);
+    {
+      mozilla::AutoRestore<bool> mutating(mMutatingNativeClipboard);
+      mMutatingNativeClipboard = true;
+      rv = SetNativeClipboardData(aTransferable, aWhichClipboard);
+    }
     mIgnoreEmptyNotification = false;
   }
   if (NS_FAILED(rv)) {
@@ -745,7 +761,18 @@ NS_IMETHODIMP nsBaseClipboard::EmptyClipboard(ClipboardType aWhichClipboard) {
     return NS_ERROR_FAILURE;
   }
 
-  EmptyNativeClipboardData(aWhichClipboard);
+  if (mMutatingNativeClipboard) {
+    // We are in the middle of a clipboard operation.  Don't cancel/empty.
+    // See SetData.
+    MOZ_CLIPBOARD_LOG("%s: rejecting re-entrant empty.", __FUNCTION__);
+    return NS_ERROR_IN_PROGRESS;
+  }
+
+  {
+    mozilla::AutoRestore<bool> mutating(mMutatingNativeClipboard);
+    mMutatingNativeClipboard = true;
+    EmptyNativeClipboardData(aWhichClipboard);
+  }
 
   const auto& clipboardCache = mCaches[aWhichClipboard];
   MOZ_ASSERT(clipboardCache);
