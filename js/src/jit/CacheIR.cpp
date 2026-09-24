@@ -4615,7 +4615,9 @@ AttachDecision SetPropIRGenerator::tryAttachNativeSetSlot(HandleObject obj,
   maybeEmitIdGuard(id);
 
   NativeObject* nobj = &obj->as<NativeObject>();
-  if (!IsGlobalLexicalSetGName(JSOp(*pc_), nobj, *prop)) {
+  if (IsGlobalLexicalSetGName(JSOp(*pc_), nobj, *prop)) {
+    writer.guardSpecificObject(objId, nobj);
+  } else {
     TestMatchingNativeReceiver(writer, nobj, objId);
   }
   EmitStoreSlotAndReturn(writer, objId, nobj, *prop, rhsId);
