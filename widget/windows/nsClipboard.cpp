@@ -219,6 +219,9 @@ nsresult nsClipboard::SetupNativeDataObject(
   nsTArray<nsCString> flavors;
   aTransferable->FlavorsTransferableCanExport(flavors);
 
+  bool hasText = false;
+  bool hasFilePromise = false;
+
   // Walk through flavors that contain data and register them
   // into the DataObj as supported flavors
   for (uint32_t i = 0; i < flavors.Length(); i++) {
@@ -235,6 +238,11 @@ nsresult nsClipboard::SetupNativeDataObject(
     SET_FORMATETC(fe, format, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
     dObj->AddDataFlavor(flavorStr.get(), &fe);
 
+    if (flavorStr.EqualsLiteral(kFilePromiseMime) ||
+        flavorStr.EqualsLiteral(kFilePromiseURLMime)) {
+      hasFilePromise = true;
+    }
+
     // Do various things internal to the implementation, like map one
     // flavor to another or add additional flavors based on what's required
     // for the win32 impl.
@@ -244,9 +252,7 @@ nsresult nsClipboard::SetupNativeDataObject(
       FORMATETC textFE;
       SET_FORMATETC(textFE, CF_TEXT, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
       dObj->AddDataFlavor(kTextMime, &textFE);
-      if (aMightNeedToFlush) {
-        *aMightNeedToFlush = MightNeedToFlush::Yes;
-      }
+      hasText = true;
     } else if (flavorStr.EqualsLiteral(kHTMLMime)) {
       // if we find text/html, also advertise win32's html flavor (which we will
       // convert on our own in nsDataObj::GetText().
@@ -320,6 +326,18 @@ nsresult nsClipboard::SetupNativeDataObject(
     }
   }
 
+  if (aMightNeedToFlush) {
+    // We flush in order to stop Windows Suggested Actions walking the a11y
+    // tree, which it only does for text (bug 1774285).  Rendering a file
+    // promise, however, fetches the promised URL under a nested event loop, so
+    // a transferable carrying both would trade the tree walk for a main-thread
+    // network fetch.  We choose the tree-walk penalty instead, in this case.
+    // This means that bug 1774285 reappears for that combination.  However,
+    // the combination would naturally be very rare (clipboard ops including
+    *aMightNeedToFlush = hasText && !hasFilePromise ? MightNeedToFlush::Yes
+                                                    : MightNeedToFlush::No;
+  }
+
   if (!mozilla::StaticPrefs::
           clipboard_copyPrivateDataToClipboardCloudOrHistory()) {
     // Let Clipboard know that data is sensitive and must not be copied to
@@ -329,7 +347,6 @@ nsresult nsClipboard::SetupNativeDataObject(
       nsresult rv =
           StoreValueInDataObject(dObj, TEXT("CanUploadToCloudClipboard"), 0);
       NS_ENSURE_SUCCESS(rv, rv);
-      rv =
           StoreValueInDataObject(dObj, TEXT("CanIncludeInClipboardHistory"), 0);
       NS_ENSURE_SUCCESS(rv, rv);
       rv = StoreValueInDataObject(
