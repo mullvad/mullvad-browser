@@ -151,3 +151,6 @@ Finally, apply the patches:
 - vp9-flush-unref-next-refs.patch to clear VP9 frame-thread references on
   flush. Cherry-pick of FFmpeg commit a024f8c5413d, which is not in the 9.0
   release branch; drop this patch once ffvpx is updated past it.
+- vp8-reference-row-clamp.patch to clamp the VP8 reference row await.
+  Cherry-pick of FFmpeg commit b772f5033c72, which is not in the 9.0 release
+  branch; drop this patch once ffvpx is updated past it.
