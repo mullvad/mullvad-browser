@@ -11,6 +11,8 @@
 #include "mozilla/IntegerRange.h"
 #include "mozilla/Maybe.h"
 #include "mozilla/PresShell.h"
+#include "mozilla/ScopeExit.h"
+#include "mozilla/Utf16.h"
 #include "mozilla/dom/Text.h"
 
 #include "gfxContext.h"
@@ -345,8 +347,8 @@ struct MOZ_STACK_CLASS BidiParagraphData {
     }
   }
 
-  nsresult SetPara() {
-    if (mPresContext->BidiEngine().SetParagraph(mBuffer, mParaLevel).isErr()) {
+  nsresult SetPara(BidiEngine& aBidiEngine) {
+    if (aBidiEngine.SetParagraph(mBuffer, mParaLevel).isErr()) {
       return NS_ERROR_FAILURE;
     };
     return NS_OK;
@@ -359,21 +361,22 @@ struct MOZ_STACK_CLASS BidiParagraphData {
    * which is always either BidiDirection::LTR or
    * BidiDirection::RTL
    */
-  BidiEmbeddingLevel GetParagraphEmbeddingLevel() {
+  BidiEmbeddingLevel GetParagraphEmbeddingLevel(BidiEngine& aBidiEngine) {
     BidiEmbeddingLevel paraLevel = mParaLevel;
     if (paraLevel == BidiEmbeddingLevel::DefaultLTR() ||
         paraLevel == BidiEmbeddingLevel::DefaultRTL()) {
-      paraLevel = mPresContext->BidiEngine().GetParagraphEmbeddingLevel();
+      paraLevel = aBidiEngine.GetParagraphEmbeddingLevel();
     }
     return paraLevel;
   }
 
-  BidiEngine::ParagraphDirection GetParagraphDirection() {
-    return mPresContext->BidiEngine().GetParagraphDirection();
+  BidiEngine::ParagraphDirection GetParagraphDirection(
+      BidiEngine& aBidiEngine) {
+    return aBidiEngine.GetParagraphDirection();
   }
 
-  nsresult CountRuns(int32_t* runCount) {
-    auto result = mPresContext->BidiEngine().CountRuns();
+  nsresult CountRuns(int32_t* runCount, BidiEngine& aBidiEngine) {
+    auto result = aBidiEngine.CountRuns();
     if (result.isErr()) {
       return NS_ERROR_FAILURE;
     }
@@ -382,11 +385,10 @@ struct MOZ_STACK_CLASS BidiParagraphData {
   }
 
   void GetLogicalRun(int32_t aLogicalStart, int32_t* aLogicalLimit,
-                     BidiEmbeddingLevel* aLevel) {
-    mPresContext->BidiEngine().GetLogicalRun(aLogicalStart, aLogicalLimit,
-                                             aLevel);
+                     BidiEmbeddingLevel* aLevel, BidiEngine& aBidiEngine) {
+    aBidiEngine.GetLogicalRun(aLogicalStart, aLogicalLimit, aLevel);
     if (mIsVisual) {
-      *aLevel = GetParagraphEmbeddingLevel();
+      *aLevel = GetParagraphEmbeddingLevel(aBidiEngine);
     }
   }
 
@@ -889,12 +891,19 @@ nsresult nsBidiPresUtils::ResolveParagraph(BidiParagraphData* aBpd) {
 
   int32_t runCount;
 
-  nsresult rv = aBpd->SetPara();
+  UniquePtr<BidiEngine> bidiEngine = aBpd->mPresContext->GetBidiEngine();
+  ScopeExit e([aBpd, &bidiEngine]() {
+    aBpd->mPresContext->ReleaseBidiEngine(std::move(bidiEngine));
+  });
+
+  BidiEngine& bidi = *bidiEngine;
+
+  nsresult rv = aBpd->SetPara(bidi);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  BidiEmbeddingLevel embeddingLevel = aBpd->GetParagraphEmbeddingLevel();
+  BidiEmbeddingLevel embeddingLevel = aBpd->GetParagraphEmbeddingLevel(bidi);
 
-  rv = aBpd->CountRuns(&runCount);
+  rv = aBpd->CountRuns(&runCount, bidi);
   NS_ENSURE_SUCCESS(rv, rv);
 
   int32_t runLength = 0;     // the length of the current run of text
@@ -925,8 +934,9 @@ nsresult nsBidiPresUtils::ResolveParagraph(BidiParagraphData* aBpd) {
 #endif
 
   if (runCount == 1 && frameCount == 1 &&
-      aBpd->GetParagraphDirection() == BidiEngine::ParagraphDirection::LTR &&
-      aBpd->GetParagraphEmbeddingLevel() == 0) {
+      aBpd->GetParagraphDirection(bidi) ==
+          BidiEngine::ParagraphDirection::LTR &&
+      aBpd->GetParagraphEmbeddingLevel(bidi) == 0) {
     // We have a single left-to-right frame in a left-to-right paragraph,
     // without bidi isolation from the surrounding text.
     // Make sure that the embedding level and base level frame properties aren't
@@ -954,7 +964,7 @@ nsresult nsBidiPresUtils::ResolveParagraph(BidiParagraphData* aBpd) {
   auto storeBidiDataToFrame = [&]() {
     FrameBidiData bidiData;
     bidiData.embeddingLevel = embeddingLevel;
-    bidiData.baseLevel = aBpd->GetParagraphEmbeddingLevel();
+    bidiData.baseLevel = aBpd->GetParagraphEmbeddingLevel(bidi);
     // If a control character doesn't have a lower embedding level than
     // both the preceding and the following frame, it isn't something
     // needed for getting the correct result. This optimization should
@@ -1018,7 +1028,7 @@ nsresult nsBidiPresUtils::ResolveParagraph(BidiParagraphData* aBpd) {
         break;
       }
       int32_t lineOffset = logicalLimit;
-      aBpd->GetLogicalRun(lineOffset, &logicalLimit, &embeddingLevel);
+      aBpd->GetLogicalRun(lineOffset, &logicalLimit, &embeddingLevel, bidi);
       runLength = logicalLimit - lineOffset;
     }  // if (runLength <= 0)
 
@@ -2510,18 +2520,24 @@ nsresult nsBidiPresUtils::ProcessTextForRenderingContext(
   nsDependentSubstring text(aText, aLength);
   auto separatorIndex = text.FindCharInSet(kSeparators);
   if (separatorIndex == kNotFound) {
-    return ProcessText(text.BeginReading(), text.Length(), aBaseLevel,
-                       aPresContext, processor, aMode, aPosResolve,
-                       aPosResolveCount, aWidth, aPresContext->BidiEngine());
+    UniquePtr bidiEngine = aPresContext->GetBidiEngine();
+    auto rv = ProcessText(text.BeginReading(), text.Length(), aBaseLevel,
+                          aPresContext, processor, aMode, aPosResolve,
+                          aPosResolveCount, aWidth, *bidiEngine);
+    aPresContext->ReleaseBidiEngine(std::move(bidiEngine));
+    return rv;
   }
 
   // We need to replace any block or segment separators with space for bidi
   // processing, so make a local copy.
   nsAutoString localText(text);
   ReplaceSeparators(localText, separatorIndex);
-  return ProcessText(localText.BeginReading(), localText.Length(), aBaseLevel,
-                     aPresContext, processor, aMode, aPosResolve,
-                     aPosResolveCount, aWidth, aPresContext->BidiEngine());
+  UniquePtr bidiEngine = aPresContext->GetBidiEngine();
+  auto rv = ProcessText(localText.BeginReading(), localText.Length(),
+                        aBaseLevel, aPresContext, processor, aMode, aPosResolve,
+                        aPosResolveCount, aWidth, *bidiEngine);
+  aPresContext->ReleaseBidiEngine(std::move(bidiEngine));
+  return rv;
 }
 
 /* static */

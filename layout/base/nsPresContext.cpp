@@ -2900,13 +2900,13 @@ uint64_t nsPresContext::GetUndisplayedRestyleGeneration() const {
   return mRestyleManager->GetUndisplayedRestyleGeneration();
 }
 
-mozilla::intl::Bidi& nsPresContext::BidiEngine() {
+UniquePtr<intl::Bidi> nsPresContext::GetBidiEngine() {
   MOZ_ASSERT(NS_IsMainThread());
 
-  if (!mBidiEngine) {
-    mBidiEngine = MakeUnique<mozilla::intl::Bidi>();
+  if (mBidiEngine) {
+    return std::move(mBidiEngine);
   }
-  return *mBidiEngine;
+  return MakeUnique<mozilla::intl::Bidi>();
 }
 
 void nsPresContext::FlushFontFeatureValues() {
