@@ -164,7 +164,7 @@ bool HttpChannelParent::Init(const HttpChannelCreationArgs& aArgs) {
           a.uri(), a.original(), a.doc(), a.referrerInfo(), a.apiRedirectTo(),
           a.topWindowURI(), a.loadFlags(), a.requestHeaders(),
           a.requestMethod(), a.uploadStream(), a.uploadStreamHasHeaders(),
-          a.priority(), a.classOfService(), a.redirectionLimit(), a.allowSTS(),
+          a.priority(), a.classOfService(), a.redirectionLimit(),
           a.thirdPartyFlags(), a.resumeAt(), a.startPos(), a.entityID(),
           a.allowSpdy(), a.allowHttp3(), a.allowAltSvc(), a.beConservative(),
           a.bypassProxy(), a.tlsFlags(), a.loadInfo(), a.cacheKey(),
@@ -428,13 +428,12 @@ bool HttpChannelParent::DoAsyncOpen(
     const RequestHeaderTuples& requestHeaders, const nsCString& requestMethod,
     const Maybe<IPCStream>& uploadStream, const bool& uploadStreamHasHeaders,
     const int16_t& priority, const ClassOfService& classOfService,
-    const uint8_t& redirectionLimit, const bool& allowSTS,
-    const uint32_t& thirdPartyFlags, const bool& doResumeAt,
-    const uint64_t& startPos, const nsCString& entityID, const bool& allowSpdy,
-    const bool& allowHttp3, const bool& allowAltSvc, const bool& beConservative,
-    const bool& bypassProxy, const uint32_t& tlsFlags,
-    const LoadInfoArgs& aLoadInfoArgs, const uint32_t& aCacheKey,
-    const uint64_t& aRequestContextID,
+    const uint8_t& redirectionLimit, const uint32_t& thirdPartyFlags,
+    const bool& doResumeAt, const uint64_t& startPos, const nsCString& entityID,
+    const bool& allowSpdy, const bool& allowHttp3, const bool& allowAltSvc,
+    const bool& beConservative, const bool& bypassProxy,
+    const uint32_t& tlsFlags, const LoadInfoArgs& aLoadInfoArgs,
+    const uint32_t& aCacheKey, const uint64_t& aRequestContextID,
     const Maybe<CorsPreflightArgs>& aCorsPreflightArgs,
     const uint32_t& aInitialRwin, const bool& aBlockAuthPrompt,
     const bool& aAllowStaleCacheContent, const bool& aPreferCacheLoadOverBypass,
@@ -638,7 +637,6 @@ bool HttpChannelParent::DoAsyncOpen(
     httpChannel->SetClassOfService(classOfService);
   }
   httpChannel->SetRedirectionLimit(redirectionLimit);
-  httpChannel->SetAllowSTS(allowSTS);
   httpChannel->SetThirdPartyFlags(thirdPartyFlags);
   httpChannel->SetAllowSpdy(allowSpdy);
   httpChannel->SetAllowHttp3(allowHttp3);

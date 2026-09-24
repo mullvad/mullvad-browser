@@ -2143,6 +2143,12 @@ HttpBaseChannel::GetAllowSTS(bool* value) {
 
 NS_IMETHODIMP
 HttpBaseChannel::SetAllowSTS(bool value) {
+  // This controls whether the parent process honors HSTS for this channel, so
+  // it must not be settable from a content process.
+  if (!XRE_IsParentProcess()) {
+    MOZ_ASSERT(value == true, "allowSTS = false is parent process only");
+    return NS_OK;
+  }
   ENSURE_CALLED_BEFORE_CONNECT();
   StoreAllowSTS(value);
   return NS_OK;
@@ -5144,7 +5150,6 @@ nsresult HttpBaseChannel::SetupReplacementChannel(nsIURI* newURI,
     }
   }
 
-  // convey the LoadAllowSTS() flags
   rv = httpChannel->SetAllowSTS(LoadAllowSTS());
   MOZ_ASSERT(NS_SUCCEEDED(rv));
 

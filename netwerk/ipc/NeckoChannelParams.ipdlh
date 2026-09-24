@@ -383,7 +383,6 @@ struct HttpChannelOpenArgs
   uint32_t                    redirectMode;
   int16_t                     priority;
   bool                        uploadStreamHasHeaders;
-  bool                        allowSTS;
   bool                        resumeAt;
   bool                        allowSpdy;
   bool                        allowHttp3;

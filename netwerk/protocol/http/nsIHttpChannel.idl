@@ -213,7 +213,8 @@ interface nsIHttpChannel : nsIIdentChannel
      * OCSP to bootstrap the HTTPs is the likely use case for setting it to
      * false.
      *
-     * This attribute may only be set before the channel is opened.
+     * This attribute may only be set in the parent process, and only before
+     * the channel is opened.
      *
      * @throws NS_ERROR_IN_PROGRESS or NS_ERROR_ALREADY_OPENED
      *         if called after the channel has been opened.
