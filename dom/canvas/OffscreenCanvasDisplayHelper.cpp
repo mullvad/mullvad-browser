@@ -118,6 +118,22 @@ RefPtr<layers::ImageContainer> OffscreenCanvasDisplayHelper::GetImageContainer()
   return mImageContainer;
 }
 
+bool OffscreenCanvasDisplayHelper::MayUpdateContext(WorkerPrivate* aWorker, ErrorResult& aRv) {
+  MutexAutoLock lock(mMutex);
+  if (!mOffscreenCanvas) {
+    return true;
+  }
+  if (aWorker) {
+    if (mWorkerRef && mWorkerRef->Private() == aWorker) {
+      return true;
+    }
+  } else if (!mWorkerRef) {
+    return true;
+  }
+  aRv.ThrowInvalidStateError("Cannot update created context to different thread");
+  return false;
+}
+
 void OffscreenCanvasDisplayHelper::UpdateContext(
     OffscreenCanvas* aOffscreenCanvas, RefPtr<ThreadSafeWorkerRef>&& aWorkerRef,
     CanvasContextType aType, const Maybe<mozilla::ipc::ActorId>& aChildId) {
