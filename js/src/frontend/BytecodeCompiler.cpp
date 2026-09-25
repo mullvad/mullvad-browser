@@ -1523,6 +1523,7 @@ static bool DelazifyCanonicalScriptedFunctionImpl(JSContext* cx,
       .setNoScriptRval(false)
       .setSelfHostingMode(false)
       .setEagerDelazificationStrategy(lazy->delazificationMode());
+  options.allowHTMLComments = !lazy->hasModuleGoal();
 
   Rooted<CompilationInput> input(cx, CompilationInput(options));
   input.get().initFromLazy(cx, lazy, ss);
@@ -1630,6 +1631,7 @@ static const CompilationStencil* DelazifyCanonicalScriptedFunctionImpl(
       .setScriptSourceOffset(sourceStart)
       .setNoScriptRval(false)
       .setSelfHostingMode(false);
+  options.allowHTMLComments = !extra.hasModuleGoal();
 
   // CompilationInput initialized with initFromStencil only reference
   // information from the CompilationStencil context and the ref-counted
