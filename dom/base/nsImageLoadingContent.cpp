@@ -1844,9 +1844,10 @@ Element* nsImageLoadingContent::FindImageMap() {
 
   nsAutoString mapName(Substring(start, end));
 
-  uint32_t i, n = imageMapList->Length(true);
-  for (i = 0; i < n; ++i) {
-    nsIContent* map = imageMapList->Item(i);
+  const bool kFlush = false;
+  const uint32_t n = imageMapList->Length(kFlush);
+  for (uint32_t i = 0; i < n; ++i) {
+    nsIContent* map = imageMapList->Item(i, kFlush);
     if (map->AsElement()->AttrValueIs(kNameSpaceID_None, nsGkAtoms::id, mapName,
                                       eCaseMatters) ||
         map->AsElement()->AttrValueIs(kNameSpaceID_None, nsGkAtoms::name,
