@@ -43,7 +43,7 @@ Result<FileId, QMResult> GetFileId002(const FileSystemConnection& aConnection,
   QM_TRY(QM_TO_RESULT(stmt.BindEntryIdByName("entryId"_ns, aEntryId)));
   QM_TRY_UNWRAP(bool moreResults, stmt.ExecuteStep());
 
-  if (!moreResults) {
+  if (!moreResults || stmt.IsNullByColumn(/* Column */ 0u)) {
     return Err(QMResult(NS_ERROR_DOM_NOT_FOUND_ERR));
   }
 
@@ -95,7 +95,11 @@ nsresult RehashFile(const FileSystemConnection& aConnection,
                                        : insertNewFileAndTypeQuery;
 
   const nsLiteralCString updateFileMappingsQuery =
-      "UPDATE FileIds SET handle = :newId WHERE handle = :handle ;"_ns;
+      "UPDATE FileIds SET handle = :newId "
+      "FROM MainFiles WHERE MainFiles.handle = :handle "
+      "AND FileIds.fileId = MainFiles.fileId "
+      "AND FileIds.handle = :handle "
+      ";"_ns;
 
   const nsLiteralCString updateMainFilesQuery =
       "UPDATE MainFiles SET handle = :newId WHERE handle = :handle ;"_ns;
@@ -204,14 +208,14 @@ nsresult RehashDirectory(const FileSystemConnection& aConnection,
 
   const nsLiteralCString updateFileMappingsQuery =
       "UPDATE FileIds "
-      "SET handle = CASE WHEN replacement.isMain IS NULL THEN NULL "
-      "ELSE replacement.hash END "
+      "SET handle = replacement.hash "
       "FROM ( SELECT ParentChildHash.handle AS handle, "
       "ParentChildHash.hash AS hash, "
-      "MainFiles.handle AS isMain "
-      "FROM ParentChildHash LEFT JOIN MainFiles "
+      "MainFiles.fileId AS mainFileId "
+      "FROM ParentChildHash INNER JOIN MainFiles "
       "ON ParentChildHash.handle = MainFiles.handle ) AS replacement "
       "WHERE FileIds.handle = replacement.handle "
+      "AND FileIds.fileId = replacement.mainFileId "
       ";"_ns;
 
   const nsLiteralCString updateMainFilesQuery =
@@ -666,6 +670,7 @@ Result<FileId, QMResult> FileSystemDatabaseManagerVersion002::EnsureFileId(
                     })));
 
   if (maybeMainFileId) {
+    MOZ_ASSERT(!maybeMainFileId->IsEmpty());
     return *maybeMainFileId;
   }
 
