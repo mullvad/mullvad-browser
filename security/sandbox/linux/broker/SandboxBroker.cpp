@@ -575,29 +575,22 @@ nsCString SandboxBroker::ReverseSymlinks(const nsACString& aPath) {
   }
 }
 
-int SandboxBroker::SymlinkPermissions(const char* aPath,
-                                      const size_t aPathLen) {
-  // Work on a temporary copy, so we can reverse it.
-  // Because we bail on a writable dir, SymlinkPath
-  // might not restore the callers' path exactly.
-  char pathBufSymlink[kMaxPathLen + 1];
-  strcpy(pathBufSymlink, aPath);
-
-  nsCString orig =
-      ReverseSymlinks(nsDependentCString(pathBufSymlink, aPathLen));
-  if (!orig.IsEmpty()) {
+int SandboxBroker::SymlinkPermissions(const nsACString& aPath) {
+  nsCString path = ReverseSymlinks(aPath);
+  if (path.IsEmpty()) {
+    path = aPath;
+  } else {
     if (SandboxInfo::Get().Test(SandboxInfo::kVerbose)) {
-      SANDBOX_LOG("Reversing %s -> %s", aPath, orig.get());
+      SANDBOX_LOG("Reversing %s -> %s", PromiseFlatCString(aPath).get(), path.get());
     }
-    base::strlcpy(pathBufSymlink, orig.get(), sizeof(pathBufSymlink));
   }
 
   int perms = 0;
   // Resolve relative paths, propagate permissions and
   // fail if a symlink is in a writable path. The output is in perms.
-  char* result =
-      SandboxBroker::SymlinkPath(mPolicy.get(), pathBufSymlink, NULL, &perms);
-  if (result != NULL) {
+  char* result = SandboxBroker::SymlinkPath(mPolicy.get(), path.get(),
+                                            nullptr, &perms);
+  if (result != nullptr) {
     free(result);
     // We finished the translation, so we have a usable return in "perms".
     return perms;
@@ -747,7 +740,7 @@ void SandboxBroker::ThreadMain(void) {
         // Then try to figure out the original path and see if that is
         // readable. Work on the original path, this reverses
         // ConvertRelative above.
-        int symlinkPerms = SymlinkPermissions(recvBuf, first_len);
+        int symlinkPerms = SymlinkPermissions(nsDependentCString(recvBuf, first_len));
         if (symlinkPerms > 0) {
           perms = symlinkPerms;
         }

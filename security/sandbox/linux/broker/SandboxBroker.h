@@ -163,7 +163,7 @@ class SandboxBroker final : private SandboxBrokerCommon,
   size_t RealPath(char* aPath, size_t aBufSize, size_t aPathLen);
   nsCString ReverseSymlinks(const nsACString& aPath);
   // Retrieves permissions for the path the original symlink sits in.
-  int SymlinkPermissions(const char* aPath, const size_t aPathLen);
+  int SymlinkPermissions(const nsACString& aPath);
   // In SandboxBrokerRealPath.cpp
   char* SymlinkPath(const Policy* aPolicy, const char* __restrict aPath,
                     char* __restrict aResolved, int* aPermission);
