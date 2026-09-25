@@ -79,16 +79,14 @@ class MOZ_STACK_CLASS ServoCSSAnimationBuilder final {
     MOZ_ASSERT(aComputedStyle);
   }
 
+  const ComputedStyle* Style() const { return mComputedStyle; }
+
   bool BuildKeyframes(const Element& aElement, nsPresContext* aPresContext,
                       nsAtom* aName,
                       const StyleComputedTimingFunction& aTimingFunction,
                       nsTArray<Keyframe>& aKeyframes) {
     return aPresContext->StyleSet()->GetKeyframesForName(
         aElement, *mComputedStyle, aName, aTimingFunction, aKeyframes);
-  }
-  void SetKeyframes(KeyframeEffect& aEffect, nsTArray<Keyframe>&& aKeyframes,
-                    const dom::AnimationTimeline* aTimeline) {
-    aEffect.SetKeyframes(std::move(aKeyframes), mComputedStyle, aTimeline);
   }
 
   // Currently all the animation building code in this file is based on
@@ -137,15 +135,13 @@ static void UpdateOldAnimationPropertiesWithNew(
     CSSAnimation& aOld, TimingParams&& aNewTiming,
     nsTArray<Keyframe>&& aNewKeyframes, bool aNewIsStylePaused,
     CSSAnimationProperties aOverriddenProperties,
-    ServoCSSAnimationBuilder& aBuilder, dom::AnimationTimeline* aTimeline,
-    dom::CompositeOperation aNewComposite) {
+    ServoCSSAnimationBuilder& aBuilder, const NonOwningAnimationTarget& aTarget,
+    dom::AnimationTimeline* aTimeline, dom::CompositeOperation aNewComposite) {
   bool animationChanged = false;
 
   // Update the old from the new so we can keep the original object
   // identity (and any expando properties attached to it).
-  if (aOld.GetEffect()) {
-    dom::AnimationEffect* oldEffect = aOld.GetEffect();
-
+  if (dom::AnimationEffect* oldEffect = aOld.GetEffect()) {
     // Copy across the changes that are not overridden
     TimingParams updatedTiming = oldEffect->SpecifiedTiming();
     if (~aOverriddenProperties & CSSAnimationProperties::Duration) {
@@ -169,8 +165,13 @@ static void UpdateOldAnimationPropertiesWithNew(
 
     if (KeyframeEffect* oldKeyframeEffect = oldEffect->AsKeyframeEffect()) {
       if (~aOverriddenProperties & CSSAnimationProperties::Keyframes) {
-        aBuilder.SetKeyframes(*oldKeyframeEffect, std::move(aNewKeyframes),
-                              aTimeline);
+        // FIXME(emilio): Should we update the effect target on top if different
+        // or something?
+        auto* style = oldKeyframeEffect->GetAnimationTarget() == aTarget
+                          ? aBuilder.Style()
+                          : nullptr;
+        oldKeyframeEffect->SetKeyframes(std::move(aNewKeyframes), style,
+                                        aTimeline);
       }
 
       if (~aOverriddenProperties & CSSAnimationProperties::Composition) {
@@ -330,7 +331,8 @@ static already_AddRefed<CSSAnimation> BuildAnimation(
     // In order to honor what the spec said, we'd copy more data over.
     UpdateOldAnimationPropertiesWithNew(
         *oldAnim, std::move(timing), std::move(keyframes), isStylePaused,
-        oldAnim->GetOverriddenProperties(), aBuilder, timeline, composition);
+        oldAnim->GetOverriddenProperties(), aBuilder, aTarget, timeline,
+        composition);
     return oldAnim.forget();
   }
 
@@ -339,8 +341,8 @@ static already_AddRefed<CSSAnimation> BuildAnimation(
       aPresContext->Document(),
       OwningAnimationTarget(aTarget.mElement, aTarget.mPseudoRequest),
       std::move(timing), effectOptions);
-
-  aBuilder.SetKeyframes(*effect, std::move(keyframes), timeline);
+  effect->KeyframeEffect::SetKeyframes(std::move(keyframes), aBuilder.Style(),
+                                       timeline);
 
   auto animation = MakeRefPtr<CSSAnimation>(
       aPresContext->Document()->GetScopeObject(), animationName);
