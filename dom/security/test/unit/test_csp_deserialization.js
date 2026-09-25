@@ -45,9 +45,32 @@ add_task(function () {
     )
   );
 
+  // The pref is read while deserializing, so each case has to re-read the blob
+  // after setting it.
+  const REPARSE_PREF = "network.ipc.reparse_deserialized_uri";
+  registerCleanupFunction(() => Services.prefs.clearUserPref(REPARSE_PREF));
+
+  Services.prefs.setBoolPref(REPARSE_PREF, false);
   Assert.equal(
-    E10SUtils.serializeCSP(v136),
+    E10SUtils.serializeCSP(E10SUtils.deserializeCSP(DATA_v136)),
     DATA_v136,
+    "DANGER: serialization format might have changed!"
+  );
+
+  // nsStandardURL::Deserialize re-parses the spec when this pref is set, which
+  // recomputes every segment. An absent segment has no text to point at, so a
+  // re-parse leaves it where it would start rather than where the stored blob
+  // put it, and the bytes differ even though the CSP and the URL do not.
+  //
+  // DATA_v136 with the offsets a re-parse of "https://example.org/" gives the
+  // absent username (8), password (8), extension (20), query (19) and ref (19)
+  // segments, in place of the zeroes Firefox 136 wrote.
+  const DATA_v136_REPARSED =
+    "CdntGuXUQAS/4CfOuSPZrAAAAAAAAAAAwAAAAAAAAEYB3pRy0IA0EdOTmQAQS6D9QJIHOlRteE8wkTq4cYEyCMYAAAAC/////wAAAbsBAAAAFGh0dHBzOi8vZXhhbXBsZS5vcmcvAAAAAAAAAAUAAAAIAAAACwAAAAj/////AAAACP////8AAAAIAAAACwAAABMAAAABAAAAEwAAAAEAAAATAAAAAQAAABQAAAAAAAAAFP////8AAAAA/////wAAABP/////AAAAE/////8BAAAAAAAAAAAAInsiMSI6eyIwIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy8ifX0AAAACAAAAEgBkAGUAZgBhAHUAbAB0AC0AcwByAGMAIAAnAHMAZQBsAGYAJwABAAAAAA4AaQBtAGcALQBzAHIAYwAgACcAbgBvAG4AZQAnAAEA";
+  Services.prefs.setBoolPref(REPARSE_PREF, true);
+  Assert.equal(
+    E10SUtils.serializeCSP(E10SUtils.deserializeCSP(DATA_v136)),
+    DATA_v136_REPARSED,
     "DANGER: serialization format might have changed!"
   );
 });
