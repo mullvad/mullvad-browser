@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  canvas {
+    break-before: page;
+  }
+  .fl {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+  }
+  .fl::first-letter {
+    font-size: 3em;
+  }
+</style>
+</head>
+<body>
+<iframe name="pf" srcdoc="<p>x</p>"></iframe>
+<p class="fl" id="fp">                                                          aaa</p>
+
+<canvas></canvas>
+<script>
+function cb(state) {
+  const orig = document.querySelector("iframe[name=pf]");
+  // Brush aside the live page's browsing context for the iframe.
+  orig.name = "renamed";
+  // Printing context is still named `pf`, look for it.
+  const w = window.open("", "pf");
+  try {
+    w.parent.document.getElementById("fp").firstChild.data = "X";
+  } finally {
+    // Clean up for testing purposes.
+    w.close();
+    state.done();
+  }
+}
+
+document.querySelector("canvas").mozPrintCallback = cb;
+window.onload = () => { SpecialPowers.wrap(window).printPreview()?.close(); }
+</script>
+</body>
+</html>
+
