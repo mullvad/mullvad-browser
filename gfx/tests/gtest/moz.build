@@ -14,6 +14,7 @@ UNIFIED_SOURCES += [
     "TestBufferRotation.cpp",
     "TestConfigManager.cpp",
     "TestCoord.cpp",
+    "TestFilterNodeSoftware.cpp",
     "TestGfxWidgets.cpp",
     "TestMatrix.cpp",
     "TestMoz2D.cpp",

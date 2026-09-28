@@ -1636,9 +1636,7 @@ int32_t FilterNodeTileSoftware::InputIndex(uint32_t aInputEnumIndex) {
 void FilterNodeTileSoftware::SetAttribute(uint32_t aIndex,
                                           const IntRect& aSourceRect) {
   MOZ_ASSERT(aIndex == ATT_TILE_SOURCE_RECT);
-  mSourceRect.SetRect(int32_t(aSourceRect.X()), int32_t(aSourceRect.Y()),
-                      int32_t(aSourceRect.Width()),
-                      int32_t(aSourceRect.Height()));
+  mSourceRect = aSourceRect;
   Invalidate();
 }
 
@@ -1676,14 +1674,24 @@ already_AddRefed<DataSourceSurface> FilterNodeTileSoftware::Render(
       InputMap;
   InputMap inputs;
 
+  auto IntRectToInt64Rect = [](const IntRect& aRect) {
+    return RectTyped<UnknownUnits, int64_t>(aRect.X(), aRect.Y(), aRect.Width(),
+                                            aRect.Height());
+  };
+
   IntPoint startIndex = TileIndex(mSourceRect, aRect.TopLeft());
   IntPoint endIndex = TileIndex(mSourceRect, aRect.BottomRight());
   for (int32_t ix = startIndex.x; ix <= endIndex.x; ix++) {
     for (int32_t iy = startIndex.y; iy <= endIndex.y; iy++) {
-      IntPoint sourceToDestOffset(ix * mSourceRect.Width(),
-                                  iy * mSourceRect.Height());
-      IntRect destRect = aRect.Intersect(mSourceRect + sourceToDestOffset);
-      IntRect srcRect = destRect - sourceToDestOffset;
+      auto sourceToDestOffset = PointTyped<UnknownUnits, int64_t>(
+          ix * mSourceRect.Width(), iy * mSourceRect.Height());
+      auto destRect64 = IntRectToInt64Rect(aRect).Intersect(
+          IntRectToInt64Rect(mSourceRect) + sourceToDestOffset);
+      auto srcRect64 = destRect64 - sourceToDestOffset;
+      IntRect destRect, srcRect;
+      if (!destRect64.ToIntRect(&destRect) || !srcRect64.ToIntRect(&srcRect)) {
+        return nullptr;
+      }
       if (srcRect.IsEmpty()) {
         continue;
       }
