@@ -14,6 +14,8 @@ from yeet.common import GITLAB_API_BASE, TERM, prompt, read_config
 
 PLATFORMS = ["debian_x86_64", "windows_x86_64", "macos_x86_64", "android_x86_64"]
 
+GITLAB_REQUEST_TIMEOUT_SECONDS = 30
+
 TOOLCHAINS_URL_BASE = "https://nightlies.tbb.torproject.org/nightly-builds/toolchains"
 
 PLATFORM_TOOLCHAIN_DIR = {
@@ -73,21 +75,19 @@ def _curl_command(url, headers, data):
     return shlex.join(args)
 
 
-def _resolve_installer_url(command_context, installer, assume_yes, dry_run):
+def _resolve_installer_url(command_context, installer, platform, assume_yes, dry_run):
     """Accept either an installer URL directly, or a local file path to
     upload first. On a dry run a local file is not uploaded, and a
-    placeholder URL is returned instead. Returns (url, error).
+    placeholder URL is returned instead. Raises whatever
+    `upload.run` raises on failure.
     """
     if urllib.parse.urlparse(installer).scheme in ("http", "https"):
-        return installer, None
+        return installer
     if dry_run:
-        file_path, error = upload.resolve_file(installer)
-        if error:
-            print(TERM.red(f"ERROR! {error}"))
-            return None, error
+        file_path = upload.resolve_file(installer)
         print(TERM.yellow(f"Dry run: not uploading {file_path}."))
-        return f"<URL of uploaded {file_path.name}>", None
-    return upload.run(command_context, installer, assume_yes=assume_yes)
+        return f"<URL of uploaded {file_path.name}>"
+    return upload.run(command_context, installer, platform, assume_yes=assume_yes)
 
 
 def _prompt_platform():
@@ -128,49 +128,50 @@ def _prompt_channel():
         )
 
 
-def run(
-    command_context,
-    platform,
-    channel,
-    installer_url,
-    sha256sums_url,
-    artifacts_url,
-    mozharness_url,
-    version,
-    ref,
-    tags,
-    dry_run,
-    assume_yes=False,
-):
-    # TODO: this runs whatever the pipeline runs, indiscriminately -- fine
-    # for now since marionette is the only suite it has, but once others
-    # (xpcshell, cppunittest, mochitest, ...) exist, add a --suite argument
-    # here and thread it into `inputs` so a run can be scoped to just one.
+def run(command_context, **kwargs):
+    # TODO(tor-browser-bundle-testsuite#40120): this runs whatever the pipeline
+    # runs, indiscriminately -- fine for now since marionette is the only suite
+    # it has, but once others (xpcshell, cppunittest, mochitest, ...) exist, add
+    # a --suite argument here and thread it into `inputs` so a run can be scoped
+    # to just one.
     config = read_config(command_context)
     if config is None:
         print(TERM.red("No GitLab fork/token found, run `mach yeet auth` first."))
         return 1
 
-    installer_url, error = _resolve_installer_url(
-        command_context, installer_url, assume_yes, dry_run
-    )
-    if error:
+    installer_url = kwargs["installer_url"].strip()
+    if not installer_url:
+        print(TERM.red("ERROR! The installer URL or path was empty."))
         return 1
 
-    if not platform:
-        platform = _prompt_platform()
+    platform = kwargs.get("platform") or _prompt_platform()
+    dry_run = kwargs.get("dry_run", False)
+
+    try:
+        installer_url = _resolve_installer_url(
+            command_context,
+            installer_url,
+            platform,
+            kwargs.get("assume_yes", False),
+            dry_run,
+        )
+    except (FileNotFoundError, RuntimeError) as e:
+        print()
+        print(TERM.red(f"ERROR! {e}"))
+        return 1
 
     package_name = None
     if platform == "android_x86_64":
-        if not channel:
-            channel = _prompt_channel()
+        channel = kwargs.get("channel") or _prompt_channel()
         if channel not in ANDROID_CHANNEL_PACKAGE_NAMES:
             print(TERM.red(f"ERROR! Unknown channel {channel!r}."))
             return 1
         package_name = ANDROID_CHANNEL_PACKAGE_NAMES[channel]
 
+    artifacts_url = kwargs.get("artifacts_url")
+    mozharness_url = kwargs.get("mozharness_url")
     if not artifacts_url or not mozharness_url:
-        version = _resolve_version(command_context, version)
+        version = _resolve_version(command_context, kwargs.get("version"))
     if not artifacts_url:
         artifacts_url = _artifacts_url(version, platform)
     if not mozharness_url:
@@ -183,17 +184,19 @@ def run(
     }
     if package_name:
         inputs[f"{platform}_package_name"] = package_name
-    if sha256sums_url:
+    if sha256sums_url := kwargs.get("sha256sums_url"):
         inputs[f"{platform}_sha256sums_url"] = sha256sums_url
-    if tags:
+    if tags := kwargs.get("tags"):
         inputs["tags"] = shlex.join(arg for tag in tags for arg in ("--tag", tag))
 
     project_id = urllib.parse.quote(config["project"], safe="")
     url = f"{GITLAB_API_BASE}/projects/{project_id}/trigger/pipeline"
     headers = {"Content-Type": "application/json"}
-    data = json.dumps({"token": config["token"], "ref": ref, "inputs": inputs}).encode(
-        "utf-8"
-    )
+    data = json.dumps({
+        "token": config["token"],
+        "ref": kwargs.get("ref", "main"),
+        "inputs": inputs,
+    }).encode("utf-8")
 
     if dry_run:
         print()
@@ -204,7 +207,9 @@ def run(
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
 
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(
+            request, timeout=GITLAB_REQUEST_TIMEOUT_SECONDS
+        ) as response:
             result = json.load(response)
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", "replace")

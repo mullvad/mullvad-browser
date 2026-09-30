@@ -14,7 +14,7 @@ def write_config(tmp_path, **overrides):
     config = {
         "project": "bea/tor-browser-bundle-testsuite",
         "token": "s3cr3t",
-        "ssh_host": common.SSH_HOST,
+        "ssh_host": common.DEFAULT_SSH_HOST,
         "ssh_user": "bea",
     }
     config.update(overrides)

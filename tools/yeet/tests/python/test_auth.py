@@ -29,33 +29,34 @@ def _forbid_prompts(monkeypatch):
 
 @pytest.mark.parametrize("value", ["bea", "  bea  ", "bea.b", "bea_b-1"])
 def test_resolve_project_accepts_username(value):
-    project, error = auth._resolve_project(value)
+    project = auth._resolve_project(value)
 
-    assert error is None
     assert project == f"{value.strip()}/{common.CANONICAL_GITLAB_REPO_NAME}"
 
 
 @pytest.mark.parametrize(
     "value",
     [
-        "",
-        "bea/tor-browser-bundle-testsuite",
-        "https://gitlab.torproject.org/bea/tor-browser-bundle-testsuite",
-        "/bea/",
-        "-bea",
-        "bea x",
-        "bea?x",
+        common.CANONICAL_GITLAB_NAMESPACE,
+        common.CANONICAL_GITLAB_NAMESPACE.upper(),
+        f"  {common.CANONICAL_GITLAB_NAMESPACE}  ",
     ],
 )
-def test_resolve_project_rejects_non_username(value):
-    project, error = auth._resolve_project(value)
+def test_resolve_project_rejects_canonical_namespace(value):
+    with pytest.raises(ValueError, match="canonical"):
+        auth._resolve_project(value)
 
-    assert project is None
-    assert error
+
+def test_resolve_project_accepts_top_level_group_of_canonical_namespace():
+    group = common.CANONICAL_GITLAB_NAMESPACE.split("/", 1)[0]
+
+    assert auth._resolve_project(group) == (
+        f"{group}/{common.CANONICAL_GITLAB_REPO_NAME}"
+    )
 
 
 def test_prompt_fork_rejects_canonical_namespace(monkeypatch, capsys):
-    canonical_namespace = common.CANONICAL_GITLAB_PROJECT.split("/", 1)[0]
+    canonical_namespace = common.CANONICAL_GITLAB_NAMESPACE
     _set_inputs(monkeypatch, canonical_namespace, "bea")
 
     project = auth._prompt_fork()
@@ -64,8 +65,14 @@ def test_prompt_fork_rejects_canonical_namespace(monkeypatch, capsys):
     assert "not a" in capsys.readouterr().out.lower()
 
 
+@pytest.mark.parametrize("value", ["", "   ", "\t\n"])
+def test_resolve_project_rejects_blank_username(value):
+    with pytest.raises(ValueError):
+        auth._resolve_project(value)
+
+
 def test_prompt_fork_rejects_empty_username(monkeypatch):
-    _set_inputs(monkeypatch, "", "bea")
+    _set_inputs(monkeypatch, "", " \t ", "bea")
 
     project = auth._prompt_fork()
 
@@ -138,7 +145,7 @@ def test_verify_ssh_missing_binary(monkeypatch, capsys):
 
 
 def test_run_saves_config_and_skips_verification(tmp_path, monkeypatch):
-    _set_inputs(monkeypatch, "bea", "bea")
+    _set_inputs(monkeypatch, "bea", "", "bea")
     monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "s3cr3t")
     command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
@@ -151,39 +158,38 @@ def test_run_saves_config_and_skips_verification(tmp_path, monkeypatch):
     assert saved == {
         "project": f"bea/{common.CANONICAL_GITLAB_REPO_NAME}",
         "token": "s3cr3t",
-        "ssh_host": common.SSH_HOST,
+        "ssh_host": common.DEFAULT_SSH_HOST,
         "ssh_user": "bea",
     }
     assert (config_path.stat().st_mode & 0o777) == 0o600
 
 
-@pytest.mark.parametrize("value", ["bea", "_bea", "bea_1", "bea-b"])
-def test_ssh_username_error_accepts_valid(value):
-    assert auth._ssh_username_error(value) is None
+def test_prompt_ssh_username_reprompts_until_non_empty(monkeypatch, capsys):
+    _set_inputs(monkeypatch, "", "  ", "bea")
 
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        "",
-        "bea@evil.example.com",
-        "-oProxyCommand=true",
-        "bea:x",
-        "bea/x",
-        "bea x",
-        "1bea",
-        "Bea",
-    ],
-)
-def test_ssh_username_error_rejects_invalid(value):
-    assert auth._ssh_username_error(value)
-
-
-def test_prompt_ssh_username_reprompts_until_valid(monkeypatch, capsys):
-    _set_inputs(monkeypatch, "", "bea@evil.example.com", "bea")
-
-    assert auth._prompt_ssh_username() == "bea"
+    assert auth._prompt_ssh_username(common.DEFAULT_SSH_HOST) == "bea"
     assert capsys.readouterr().out.count("ERROR!") == 2
+
+
+def test_prompt_ssh_host_defaults_when_empty(monkeypatch):
+    _set_inputs(monkeypatch, "  ")
+
+    assert auth._prompt_ssh_host() == common.DEFAULT_SSH_HOST
+
+
+def test_run_prompts_for_ssh_host(tmp_path, monkeypatch):
+    _set_inputs(monkeypatch, "build.example.com", "bea")
+    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
+
+    result = auth.run(
+        command_context, verify=False, gitlab_username="bea", gitlab_token="s3cr3t"
+    )
+
+    assert result == 0
+    with open(tmp_path / common.YEET_CONFIG_FILENAME) as f:
+        saved = json.load(f)
+    assert saved["ssh_host"] == "build.example.com"
+    assert saved["ssh_user"] == "bea"
 
 
 def test_prompt_token_reprompts_until_non_empty(monkeypatch, capsys):
@@ -194,24 +200,8 @@ def test_prompt_token_reprompts_until_non_empty(monkeypatch, capsys):
     assert capsys.readouterr().out.count("ERROR!") == 2
 
 
-def test_run_rejects_empty_cli_gitlab_token(tmp_path, monkeypatch):
-    _forbid_prompts(monkeypatch)
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
-
-    result = auth.run(
-        command_context,
-        verify=False,
-        gitlab_username="bea",
-        gitlab_token="   ",
-        ssh_username="bea",
-    )
-
-    assert result == 1
-    assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
-
-
-def test_run_aborts_when_gitlab_verification_fails(tmp_path, monkeypatch):
-    _set_inputs(monkeypatch, "bea", "bea")
+def test_run_aborts_when_gitlab_verification_fails(tmp_path, monkeypatch, capsys):
+    _set_inputs(monkeypatch, "bea", "", "bea")
     monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "s3cr3t")
     monkeypatch.setattr(auth, "_verify_auth", lambda project, token: False)
     command_context = SimpleNamespace(topsrcdir=str(tmp_path))
@@ -220,10 +210,14 @@ def test_run_aborts_when_gitlab_verification_fails(tmp_path, monkeypatch):
 
     assert result == 1
     assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
+    assert (
+        "ERROR! GitLab rejected that project/token combination."
+        in capsys.readouterr().out
+    )
 
 
-def test_run_aborts_when_gitlab_unreachable(tmp_path, monkeypatch):
-    _set_inputs(monkeypatch, "bea", "bea")
+def test_run_aborts_when_gitlab_unreachable(tmp_path, monkeypatch, capsys):
+    _set_inputs(monkeypatch, "bea", "", "bea")
     monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "s3cr3t")
 
     def raise_url_error(project, token):
@@ -236,10 +230,14 @@ def test_run_aborts_when_gitlab_unreachable(tmp_path, monkeypatch):
 
     assert result == 1
     assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
+    assert (
+        "ERROR! Could not reach GitLab: <urlopen error unreachable>"
+        in capsys.readouterr().out
+    )
 
 
-def test_run_aborts_when_ssh_verification_fails(tmp_path, monkeypatch):
-    _set_inputs(monkeypatch, "bea", "bea")
+def test_run_aborts_when_ssh_verification_fails(tmp_path, monkeypatch, capsys):
+    _set_inputs(monkeypatch, "bea", "", "bea")
     monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "s3cr3t")
     monkeypatch.setattr(auth, "_verify_auth", lambda project, token: True)
     monkeypatch.setattr(auth, "_verify_ssh", lambda target: False)
@@ -249,10 +247,14 @@ def test_run_aborts_when_ssh_verification_fails(tmp_path, monkeypatch):
 
     assert result == 1
     assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
+    assert (
+        f"ERROR! Could not SSH into bea@{common.DEFAULT_SSH_HOST}."
+        in capsys.readouterr().out
+    )
 
 
 def test_run_saves_config_when_verification_succeeds(tmp_path, monkeypatch):
-    _set_inputs(monkeypatch, "bea", "bea")
+    _set_inputs(monkeypatch, "bea", "", "bea")
     monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "s3cr3t")
     monkeypatch.setattr(auth, "_verify_auth", lambda project, token: True)
     monkeypatch.setattr(auth, "_verify_ssh", lambda target: True)
@@ -261,12 +263,19 @@ def test_run_saves_config_when_verification_succeeds(tmp_path, monkeypatch):
     result = auth.run(command_context, verify=True)
 
     assert result == 0
-    assert (tmp_path / common.YEET_CONFIG_FILENAME).exists()
+    with open(tmp_path / common.YEET_CONFIG_FILENAME) as f:
+        assert json.load(f) == {
+            "project": f"bea/{common.CANONICAL_GITLAB_REPO_NAME}",
+            "token": "s3cr3t",
+            "ssh_host": common.DEFAULT_SSH_HOST,
+            "ssh_user": "bea",
+        }
 
 
 def test_run_uses_cli_gitlab_username_and_still_prompts_for_rest(tmp_path, monkeypatch):
-    # ssh username isn't given via CLI, so it's the only thing prompted for.
-    _set_inputs(monkeypatch, "bea")
+    # ssh host and username aren't given via CLI, so they're the only things
+    # prompted for.
+    _set_inputs(monkeypatch, "", "bea")
     monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "s3cr3t")
     command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
@@ -281,7 +290,7 @@ def test_run_uses_cli_gitlab_username_and_still_prompts_for_rest(tmp_path, monke
 
 def test_run_rejects_invalid_cli_gitlab_username(tmp_path, monkeypatch, capsys):
     _forbid_prompts(monkeypatch)
-    canonical_namespace = common.CANONICAL_GITLAB_PROJECT.split("/", 1)[0]
+    canonical_namespace = common.CANONICAL_GITLAB_NAMESPACE
     command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
     result = auth.run(
@@ -291,28 +300,6 @@ def test_run_rejects_invalid_cli_gitlab_username(tmp_path, monkeypatch, capsys):
     assert result == 1
     assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
     assert "not a" in capsys.readouterr().out.lower()
-
-
-def test_run_rejects_empty_cli_gitlab_username(tmp_path, monkeypatch):
-    _forbid_prompts(monkeypatch)
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
-
-    result = auth.run(command_context, verify=False, gitlab_username="   ")
-
-    assert result == 1
-    assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
-
-
-@pytest.mark.parametrize("ssh_username", ["   ", "bea@evil.example.com"])
-def test_run_rejects_invalid_cli_ssh_user(tmp_path, monkeypatch, ssh_username):
-    _set_inputs(monkeypatch, "bea")
-    monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "s3cr3t")
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
-
-    result = auth.run(command_context, verify=False, ssh_username=ssh_username)
-
-    assert result == 1
-    assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
 
 
 def test_run_fully_noninteractive_with_all_cli_args(tmp_path, monkeypatch):
@@ -325,6 +312,7 @@ def test_run_fully_noninteractive_with_all_cli_args(tmp_path, monkeypatch):
         gitlab_username="bea",
         gitlab_token="s3cr3t",
         ssh_username="bea",
+        ssh_host=common.DEFAULT_SSH_HOST,
     )
 
     assert result == 0
@@ -333,9 +321,33 @@ def test_run_fully_noninteractive_with_all_cli_args(tmp_path, monkeypatch):
     assert saved == {
         "project": f"bea/{common.CANONICAL_GITLAB_REPO_NAME}",
         "token": "s3cr3t",
-        "ssh_host": common.SSH_HOST,
+        "ssh_host": common.DEFAULT_SSH_HOST,
         "ssh_user": "bea",
     }
+
+
+def test_run_saves_cli_ssh_host(tmp_path, monkeypatch):
+    _forbid_prompts(monkeypatch)
+    targets = []
+    monkeypatch.setattr(auth, "_verify_auth", lambda project, token: True)
+    monkeypatch.setattr(
+        auth, "_verify_ssh", lambda target: targets.append(target) or True
+    )
+    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
+
+    result = auth.run(
+        command_context,
+        verify=True,
+        gitlab_username="bea",
+        gitlab_token="s3cr3t",
+        ssh_username="bea",
+        ssh_host="build.example.com",
+    )
+
+    assert result == 0
+    assert targets == ["bea@build.example.com"]
+    with open(tmp_path / common.YEET_CONFIG_FILENAME) as f:
+        assert json.load(f)["ssh_host"] == "build.example.com"
 
 
 def test_run_fully_noninteractive_with_verification(tmp_path, monkeypatch):
@@ -350,10 +362,73 @@ def test_run_fully_noninteractive_with_verification(tmp_path, monkeypatch):
         gitlab_username="bea",
         gitlab_token="s3cr3t",
         ssh_username="bea",
+        ssh_host=common.DEFAULT_SSH_HOST,
     )
 
     assert result == 0
-    assert (tmp_path / common.YEET_CONFIG_FILENAME).exists()
+    with open(tmp_path / common.YEET_CONFIG_FILENAME) as f:
+        assert json.load(f) == {
+            "project": f"bea/{common.CANONICAL_GITLAB_REPO_NAME}",
+            "token": "s3cr3t",
+            "ssh_host": common.DEFAULT_SSH_HOST,
+            "ssh_user": "bea",
+        }
+
+
+_CLI_ARGS = {
+    "gitlab_username": "bea",
+    "gitlab_token": "s3cr3t",
+    "ssh_username": "bea",
+    "ssh_host": "build.example.com",
+}
+
+_SAVED_CONFIG = {
+    "project": f"bea/{common.CANONICAL_GITLAB_REPO_NAME}",
+    "token": "s3cr3t",
+    "ssh_host": "build.example.com",
+    "ssh_user": "bea",
+}
+
+
+@pytest.mark.parametrize("padding", [" ", "\t", "\n", " \t\n "])
+def test_run_trims_cli_args(tmp_path, monkeypatch, padding):
+    _forbid_prompts(monkeypatch)
+    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
+
+    result = auth.run(
+        command_context,
+        verify=False,
+        **{name: f"{padding}{value}{padding}" for name, value in _CLI_ARGS.items()},
+    )
+
+    assert result == 0
+    with open(tmp_path / common.YEET_CONFIG_FILENAME) as f:
+        assert json.load(f) == _SAVED_CONFIG
+
+
+def test_run_trims_prompted_values(tmp_path, monkeypatch):
+    _set_inputs(monkeypatch, "  bea\t", " build.example.com\n", "\tbea  ")
+    monkeypatch.setattr(common.getpass, "getpass", lambda prompt="": "  s3cr3t\t")
+    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
+
+    result = auth.run(command_context, verify=False)
+
+    assert result == 0
+    with open(tmp_path / common.YEET_CONFIG_FILENAME) as f:
+        assert json.load(f) == _SAVED_CONFIG
+
+
+@pytest.mark.parametrize("arg", list(_CLI_ARGS))
+@pytest.mark.parametrize("blank", ["", "   ", "\t\n"])
+def test_run_rejects_blank_cli_arg(tmp_path, monkeypatch, capsys, arg, blank):
+    _forbid_prompts(monkeypatch)
+    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
+
+    result = auth.run(command_context, verify=False, **{**_CLI_ARGS, arg: blank})
+
+    assert result == 1
+    assert not (tmp_path / common.YEET_CONFIG_FILENAME).exists()
+    assert "ERROR!" in capsys.readouterr().out
 
 
 if __name__ == "__main__":

@@ -74,9 +74,9 @@ def yeet(command_context):
     "--tag",
     dest="tags",
     action="append",
-    default=["tor", "base-browser"],
+    default=None,
     help="Test tag to filter tests by (can be passed multiple times, e.g. "
-    "--tag tor --tag base-browser). Defaults to 'tor'.",
+    "--tag tor --tag base-browser). Defaults to '--tag tor --tag base-browser'.",
 )
 @CommandArgument(
     "--dry-run",
@@ -92,34 +92,12 @@ def yeet(command_context):
     default=False,
     help="Upload a local installer without asking for confirmation.",
 )
-def yeet_remote(
-    command_context,
-    platform,
-    channel,
-    installer_url,
-    sha256sums_url,
-    artifacts_url,
-    mozharness_url,
-    version,
-    ref,
-    tags,
-    dry_run,
-    assume_yes,
-):
-    return remote.run(
-        command_context,
-        platform,
-        channel,
-        installer_url,
-        sha256sums_url,
-        artifacts_url,
-        mozharness_url,
-        version,
-        ref,
-        tags,
-        dry_run,
-        assume_yes=assume_yes,
-    )
+def yeet_remote(command_context, **kwargs):
+    # With action="append", argparse appends to a non-None default instead of
+    # replacing it, so the default tags are applied here only if none were given.
+    if kwargs["tags"] is None:
+        kwargs["tags"] = ["tor", "base-browser"]
+    return remote.run(command_context, **kwargs)
 
 
 @SubCommand(
@@ -129,7 +107,8 @@ def yeet_remote(
 )
 @CommandArgument(
     "--no-verify",
-    action="store_true",
+    dest="verify",
+    action="store_false",
     help="Skip checking the GitLab and SSH credentials before saving them.",
 )
 @CommandArgument(
@@ -147,22 +126,16 @@ def yeet_remote(
 )
 @CommandArgument(
     "--ssh-user",
+    dest="ssh_username",
     default=None,
     help="Username on the build server, skipping that prompt.",
 )
-def yeet_auth(
-    command_context,
-    no_verify=False,
-    gitlab_username=None,
-    gitlab_token=None,
-    ssh_user=None,
-):
+@CommandArgument(
+    "--ssh-host",
+    default=None,
+    help="Build server to upload to and run commands on over SSH, skipping that prompt.",
+)
+def yeet_auth(command_context, **kwargs):
     from yeet import auth
 
-    return auth.run(
-        command_context,
-        verify=not no_verify,
-        gitlab_username=gitlab_username,
-        gitlab_token=gitlab_token,
-        ssh_username=ssh_user,
-    )
+    return auth.run(command_context, **kwargs)

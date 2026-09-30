@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,85 +13,69 @@ from yeet.common import TERM, YEET_CONFIG_FILENAME, confirm, read_config
 def resolve_file(file_arg):
     path = Path(file_arg).resolve()
     if not path.is_file():
-        return None, f"No such file: {path}"
-    return path, None
+        raise FileNotFoundError(f"No such file: {path}")
+    return path
 
 
-def _timestamped_name(file_path):
-    """Name the upload after the current time instead of its local
-    filename, so repeated uploads never collide or overwrite each other.
+def _remote_dir_name(platform):
+    """Name the upload's directory after the current time and `platform`,
+    so repeated uploads never collide or overwrite each other.
     """
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    return f"{timestamp}{file_path.suffix}"
+    return f"{timestamp}-{platform}"
 
 
-def _upload(file_path, ssh_user, ssh_host, remote_name):
-    """scp `file_path` into ~/public_html/yeet on ssh_user@ssh_host as
-    `remote_name`, creating that directory first if needed. Both commands
+def _upload(file_path, ssh_user, ssh_host, remote_dir):
+    """scp `file_path` into ~/public_html/yeet/`remote_dir` on
+    ssh_user@ssh_host, keeping its name (with characters unsafe in a URL or
+    shell replaced by `_`) and creating that directory first
+    if needed. Both commands
     get /dev/null as stdin so they can't swallow input buffered for us;
     their touch/PIN/passphrase prompts go through /dev/tty and still reach
     the user.
 
-    Returns (url, error): the file's final https:// URL on success, or
-    (None, message) on failure.
+    Returns the file's final https:// URL. Raises RuntimeError on failure.
     """
     ssh_target = f"{ssh_user}@{ssh_host}"
-    dest_dir = "~/public_html/yeet"
+    remote_name = re.sub(r"[^A-Za-z0-9._-]", "_", file_path.name)
+    dest_dir = f"~/public_html/yeet/{remote_dir}"
     dest_path = f"{dest_dir}/{remote_name}"
-    html_path = f"~{ssh_user}/yeet/{remote_name}"
+    html_path = f"~{ssh_user}/yeet/{remote_dir}/{remote_name}"
 
     mkdir = subprocess.run(
-        [
-            "ssh",
-            "-o",
-            "ConnectTimeout=15",
-            ssh_target,
-            "mkdir",
-            "-p",
-            dest_dir,
-        ],
+        ["ssh", ssh_target, "mkdir", "-p", dest_dir],
         stdin=subprocess.DEVNULL,
         check=False,
     )
     if mkdir.returncode != 0:
-        return None, f"Could not create {dest_dir} on {ssh_target}."
+        raise RuntimeError(f"Could not create {dest_dir} on {ssh_target}.")
 
     scp = subprocess.run(
-        [
-            "scp",
-            "-o",
-            "ConnectTimeout=15",
-            str(file_path),
-            f"{ssh_target}:{dest_path}",
-        ],
+        ["scp", str(file_path), f"{ssh_target}:{dest_path}"],
         stdin=subprocess.DEVNULL,
         check=False,
     )
     if scp.returncode != 0:
-        return None, f"Upload to {ssh_target} failed."
+        raise RuntimeError(f"Upload to {ssh_target} failed.")
 
-    return f"https://{ssh_host}/{html_path}", None
+    return f"https://{ssh_host}/{html_path}"
 
 
-def run(command_context, file, assume_yes=False):
-    """Upload `file` to the configured server, asking for confirmation first
-    unless `assume_yes`. Returns (url, error): the file's final https:// URL
-    on success, or (None, message) on failure.
+def run(command_context, file, platform, assume_yes=False):
+    """Upload `file` for `platform` to the configured server, asking for
+    confirmation first unless `assume_yes`. Returns the file's final https:// URL. Raises
+    FileNotFoundError if `file` or the config is missing, and RuntimeError
+    if the upload fails or is cancelled.
     """
     config = read_config(command_context)
     if config is None:
-        error = f"No {YEET_CONFIG_FILENAME} found. Run `mach yeet auth` first."
-        print()
-        print(TERM.red(f"ERROR! {error}"))
-        return None, error
+        raise FileNotFoundError(
+            f"No {YEET_CONFIG_FILENAME} found. Run `mach yeet auth` first."
+        )
 
-    file_path, error = resolve_file(file)
-    if error:
-        print()
-        print(TERM.red(f"ERROR! {error}"))
-        return None, error
+    file_path = resolve_file(file)
 
-    remote_name = _timestamped_name(file_path)
+    remote_dir = _remote_dir_name(platform)
 
     if not assume_yes:
         print()
@@ -101,18 +86,12 @@ def run(command_context, file, assume_yes=False):
             )
         )
         if not confirm("Upload it?"):
-            error = "Upload cancelled."
-            print(TERM.red(error))
-            return None, error
+            raise RuntimeError("Upload cancelled.")
 
     print()
-    print(f"Uploading {file_path.name} as {remote_name}...")
-    url, error = _upload(file_path, config["ssh_user"], config["ssh_host"], remote_name)
-    if error:
-        print()
-        print(TERM.red(f"ERROR! {error}"))
-        return None, error
+    print(f"Uploading {file_path.name} to {remote_dir}/...")
+    url = _upload(file_path, config["ssh_user"], config["ssh_host"], remote_dir)
 
     print()
     print(TERM.green(f"Uploaded: {url}"))
-    return url, None
+    return url

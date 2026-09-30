@@ -4,7 +4,6 @@
 
 import json
 import os
-import re
 import subprocess
 import urllib.error
 import urllib.parse
@@ -14,38 +13,30 @@ from pathlib import Path
 from yeet.common import (
     CANONICAL_GITLAB_PROJECT,
     CANONICAL_GITLAB_REPO_NAME,
+    DEFAULT_SSH_HOST,
     GITLAB_API_BASE,
-    SSH_HOST,
     TERM,
     YEET_CONFIG_FILENAME,
     prompt,
 )
 
-_GITLAB_USERNAME_RE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*")
-
 
 def _resolve_project(raw_username):
-    """Build a fork project path out of a GitLab username, or return an
-    error message if it's empty, malformed or the canonical repo's own
-    namespace.
+    """Build a fork project path out of a GitLab username. Raises ValueError
+    if it's empty or the canonical repo's own namespace.
     """
     username = raw_username.strip()
     if not username:
-        return None, "A GitLab username is required."
+        raise ValueError("A GitLab username is required.")
 
-    if not _GITLAB_USERNAME_RE.fullmatch(username):
-        return None, (
-            f"Invalid GitLab username {username!r}. Enter just the username, "
-            "not a URL or project path."
-        )
-
-    if username.lower() == CANONICAL_GITLAB_PROJECT.split("/", 1)[0].lower():
-        return None, (
+    project = f"{username}/{CANONICAL_GITLAB_REPO_NAME}"
+    if project.lower() == CANONICAL_GITLAB_PROJECT.lower():
+        raise ValueError(
             "That's the canonical repo's namespace, not a fork. Use your "
             "own GitLab username instead."
         )
 
-    return f"{username}/{CANONICAL_GITLAB_REPO_NAME}", None
+    return project
 
 
 def _prompt_fork():
@@ -69,11 +60,10 @@ empty."""
     print()
 
     while True:
-        project, error = _resolve_project(prompt("Your GitLab username: "))
-        if error:
-            print(TERM.red(f"ERROR! {error}"))
-            continue
-        return project
+        try:
+            return _resolve_project(prompt("Your GitLab username: "))
+        except ValueError as e:
+            print(TERM.red(f"ERROR! {e}"))
 
 
 def _gitlab_token_instructions(project):
@@ -96,28 +86,15 @@ and are not committed to it.
 """.strip()
 
 
-_SSH_USERNAME_RE = re.compile(r"[a-z_][a-z0-9_-]*")
-
-
-def _ssh_username_error(username):
-    if not username:
-        return "Username cannot be empty."
-    if not _SSH_USERNAME_RE.fullmatch(username):
-        return (
-            f"Invalid username {username!r}. Use only lowercase letters, "
-            "digits, '_' and '-', not starting with a digit or '-'."
-        )
-    return None
-
-
-def _prompt_ssh_username():
+def _print_ssh_instructions():
     print()
     print(
         TERM.yellow(
-            f"""`mach yeet` also uploads to and runs commands on
-{SSH_HOST} over SSH. Uploaded files are served from
-your account's public_html there, at:
-  https://{SSH_HOST}/~<username>
+            f"""`mach yeet` also uploads to and runs commands on a
+build server over SSH ({DEFAULT_SSH_HOST} by
+default). Uploaded files are served from your
+account's public_html there, at:
+  https://<host>/~<username>
 
 Anything special about the connection -- port, jump
 host, a hardware key's PKCS11 provider, agent
@@ -129,12 +106,17 @@ too."""
     )
     print()
 
+
+def _prompt_ssh_host():
+    return prompt(f"SSH host [{DEFAULT_SSH_HOST}]: ").strip() or DEFAULT_SSH_HOST
+
+
+def _prompt_ssh_username(ssh_host):
     while True:
-        username = prompt(f"Your username on {SSH_HOST}: ").strip()
-        error = _ssh_username_error(username)
-        if not error:
+        username = prompt(f"Your username on {ssh_host}: ").strip()
+        if username:
             return username
-        print(TERM.red(f"ERROR! {error}"))
+        print(TERM.red("ERROR! Username cannot be empty."))
 
 
 def _prompt_token():
@@ -149,13 +131,10 @@ def _verify_ssh(target):
     """Try an actual SSH connection. stdin is /dev/null so ssh can't swallow
     input buffered for us; its touch/PIN/passphrase prompts go through
     /dev/tty and still reach the user.
-
-    A short ConnectTimeout only bounds the initial TCP connection, so it
-    won't cut off someone who's slow to respond to that prompt.
     """
     try:
         result = subprocess.run(
-            ["ssh", "-o", "ConnectTimeout=15", target, "true"],
+            ["ssh", target, "true"],
             stdin=subprocess.DEVNULL,
             check=False,
         )
@@ -189,21 +168,18 @@ def _verify_auth(project, token):
         return True
 
 
-def run(
-    command_context,
-    verify=True,
-    gitlab_username=None,
-    gitlab_token=None,
-    ssh_username=None,
-):
+def run(command_context, **kwargs):
+    gitlab_username = kwargs.get("gitlab_username")
     if gitlab_username is not None:
-        project, error = _resolve_project(gitlab_username)
-        if error:
-            print(TERM.red(f"ERROR! --gitlab-username: {error}"))
+        try:
+            project = _resolve_project(gitlab_username)
+        except ValueError as e:
+            print(TERM.red(f"ERROR! --gitlab-username: {e}"))
             return 1
     else:
         project = _prompt_fork()
 
+    gitlab_token = kwargs.get("gitlab_token")
     if gitlab_token is not None:
         token = gitlab_token.strip()
         if not token:
@@ -216,6 +192,7 @@ def run(
         print()
         token = _prompt_token()
 
+    verify = kwargs.get("verify", True)
     if verify:
         print()
         print("Verifying credentials with GitLab...")
@@ -237,18 +214,31 @@ def run(
             return 1
         print(TERM.green("Credentials verified."))
 
-    if ssh_username is not None:
-        ssh_username = ssh_username.strip()
-        error = _ssh_username_error(ssh_username)
-        if error:
+    ssh_host = kwargs.get("ssh_host")
+    ssh_username = kwargs.get("ssh_username")
+    if ssh_host is None or ssh_username is None:
+        _print_ssh_instructions()
+
+    if ssh_host is not None:
+        ssh_host = ssh_host.strip()
+        if not ssh_host:
             print()
-            print(TERM.red(f"ERROR! --ssh-user: {error}"))
+            print(TERM.red("ERROR! --ssh-host was empty."))
             return 1
     else:
-        ssh_username = _prompt_ssh_username()
+        ssh_host = _prompt_ssh_host()
+
+    if ssh_username is not None:
+        ssh_username = ssh_username.strip()
+        if not ssh_username:
+            print()
+            print(TERM.red("ERROR! --ssh-user was empty."))
+            return 1
+    else:
+        ssh_username = _prompt_ssh_username(ssh_host)
 
     if verify:
-        ssh_target = f"{ssh_username}@{SSH_HOST}"
+        ssh_target = f"{ssh_username}@{ssh_host}"
         print()
         print(f"Verifying SSH access to {ssh_target}...")
         if not _verify_ssh(ssh_target):
@@ -271,7 +261,7 @@ def run(
             {
                 "project": project,
                 "token": token,
-                "ssh_host": SSH_HOST,
+                "ssh_host": ssh_host,
                 "ssh_user": ssh_username,
             },
             f,

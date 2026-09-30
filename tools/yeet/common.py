@@ -15,16 +15,16 @@ GITLAB_API_BASE = "https://gitlab.torproject.org/api/v4"
 
 # The canonical repo. `mach yeet remote` must never target this directly --
 # only a fork of it, so CI runs don't pile up on the shared project.
-CANONICAL_GITLAB_PROJECT = "tpo/applications/tor-browser-bundle-testsuite"
-CANONICAL_GITLAB_REPO_NAME = CANONICAL_GITLAB_PROJECT.rsplit("/", 1)[-1]
+CANONICAL_GITLAB_NAMESPACE = "tpo/applications"
+CANONICAL_GITLAB_REPO_NAME = "tor-browser-bundle-testsuite"
+CANONICAL_GITLAB_PROJECT = f"{CANONICAL_GITLAB_NAMESPACE}/{CANONICAL_GITLAB_REPO_NAME}"
 
 # Project and token saved by `mach yeet auth`.
 YEET_CONFIG_FILENAME = ".yeet.json"
 
-# The server `mach yeet` uploads to and runs commands on over SSH. Not
-# user-configurable -- uploaded files are served from this host's
-# public_html, so it can't be swapped out per-user.
-SSH_HOST = "tb-build-03.torproject.org"
+# The default server `mach yeet` uploads to and runs commands on over SSH.
+# Uploaded files are served from the user's public_html on it.
+DEFAULT_SSH_HOST = "tb-build-03.torproject.org"
 
 
 def prompt(message, secret=False):
