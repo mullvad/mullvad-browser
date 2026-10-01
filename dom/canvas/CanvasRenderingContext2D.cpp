@@ -4277,6 +4277,8 @@ bool CanvasRenderingContext2D::SetFontInternalDisconnected(
     fontFaceSetImpl->FlushUserFontSet();
   }
 
+  auto& state = CurrentState();
+
   // In the OffscreenCanvas case we don't have the context necessary to call
   // GetFontStyleForServo(), as we do in the main-thread canvas context, so
   // instead we borrow ParseFontShorthandForMatching to parse the attribute.
@@ -4295,7 +4297,7 @@ bool CanvasRenderingContext2D::SetFontInternalDisconnected(
   fontStyle.allowForceGDIClassic = false;
 #endif
 
-  switch (CurrentState().fontStretch) {
+  switch (state.fontStretch) {
     case CanvasFontStretch::Normal:
       // Leave whatever the shorthand set.
       break;
@@ -4333,7 +4335,7 @@ bool CanvasRenderingContext2D::SetFontInternalDisconnected(
   // XXX(jfkthame) The interaction between the shorthand and the separate attr
   // here is not clearly spec'd, and we may want to reconsider it (or revise
   // the available values); see https://github.com/whatwg/html/issues/8103.
-  switch (CurrentState().fontVariantCaps) {
+  switch (state.fontVariantCaps) {
     case CanvasFontVariantCaps::Normal:
       fontStyle.variantCaps = smallCaps ? NS_FONT_VARIANT_CAPS_SMALLCAPS
                                         : NS_FONT_VARIANT_CAPS_NORMAL;
@@ -4366,7 +4368,7 @@ bool CanvasRenderingContext2D::SetFontInternalDisconnected(
 
   // Set the kerning feature, if required by the fontKerning attribute.
   gfxFontFeature setting{TRUETYPE_TAG('k', 'e', 'r', 'n'), 0};
-  switch (CurrentState().fontKerning) {
+  switch (state.fontKerning) {
     case CanvasFontKerning::None:
       setting.mValue = 0;
       fontStyle.featureSettings.AppendElement(setting);
@@ -4407,15 +4409,15 @@ bool CanvasRenderingContext2D::SetFontInternalDisconnected(
                        fontFaceSetImpl,   // aUserFontSet
                        1.0,               // aDevToCssSize
                        StyleFontVariantEmoji::Normal);
-  CurrentState().fontGroup = fontGroup;
-  SerializeFontForCanvas(list, fontStyle, CurrentState().font);
-  CurrentState().fontFont = nsFont(StyleFontFamily{list, false, false},
+  state.fontGroup = fontGroup;
+  SerializeFontForCanvas(list, fontStyle, state.font);
+  state.fontFont = nsFont(StyleFontFamily{list, false, false},
                                    StyleCSSPixelLength::FromPixels(size));
-  CurrentState().fontFont.variantCaps = fontStyle.variantCaps;
-  CurrentState().fontLanguage = nullptr;
-  CurrentState().fontExplicitLanguage = false;
+  state.fontFont.variantCaps = fontStyle.variantCaps;
+  state.fontLanguage = nullptr;
+  state.fontExplicitLanguage = false;
   // We don't have any computed style, assume normal height.
-  CurrentState().fontLineHeight = StyleLineHeight::Normal();
+  state.fontLineHeight = StyleLineHeight::Normal();
   return true;
 }
 
