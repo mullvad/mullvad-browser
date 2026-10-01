@@ -10,13 +10,12 @@ import urllib.parse
 import urllib.request
 
 from yeet import upload
-from yeet.common import GITLAB_API_BASE, TERM, prompt, read_config
-
-PLATFORMS = ["debian_x86_64", "windows_x86_64", "macos_x86_64", "android_x86_64"]
-
-GITLAB_REQUEST_TIMEOUT_SECONDS = 30
-
-TOOLCHAINS_URL_BASE = "https://nightlies.tbb.torproject.org/nightly-builds/toolchains"
+from yeet.common import (
+    GITLAB_API_BASE,
+    TERM,
+    prompt,
+    read_config,
+)
 
 PLATFORM_TOOLCHAIN_DIR = {
     "debian_x86_64": "linux-x86_64",
@@ -24,6 +23,12 @@ PLATFORM_TOOLCHAIN_DIR = {
     "macos_x86_64": "macos-x86_64",
     "android_x86_64": "android-x86_64",
 }
+
+PLATFORMS = list(PLATFORM_TOOLCHAIN_DIR.keys())
+
+GITLAB_REQUEST_TIMEOUT_SECONDS = 30
+
+TOOLCHAINS_URL_BASE = "https://nightlies.tbb.torproject.org/nightly-builds/toolchains"
 
 # Each Android build channel/flavor ships under its own package name, so the
 # pipeline needs to be told which one to install.
@@ -36,24 +41,21 @@ ANDROID_CHANNEL_PACKAGE_NAMES = {
 ANDROID_CHANNELS = list(ANDROID_CHANNEL_PACKAGE_NAMES)
 
 
-def _read_browser_version(command_context):
-    version_path = os.path.join(
-        command_context.topsrcdir, "browser", "config", "version.txt"
-    )
+def _read_browser_version(topsrcdir):
+    version_path = os.path.join(topsrcdir, "browser", "config", "version.txt")
     with open(version_path) as f:
         return f.read().strip()
 
 
-def _resolve_version(command_context, version):
+def _resolve_version(topsrcdir, version):
     if version:
         return version
 
-    version = _read_browser_version(command_context)
+    version = _read_browser_version(topsrcdir)
     print(
         TERM.yellow(
-            f"""Inferred platform version {version} from
-browser/config/version.txt. Pass --version if
-this isn't the version you want to test."""
+            f"""Inferred platform version {version} from browser/config/version.txt.
+Pass --version if this isn't the version you want to test."""
         )
     )
     return version
@@ -75,7 +77,7 @@ def _curl_command(url, headers, data):
     return shlex.join(args)
 
 
-def _resolve_installer_url(command_context, installer, platform, assume_yes, dry_run):
+def _resolve_installer_url(topsrcdir, installer, platform, assume_yes, dry_run):
     """Accept either an installer URL directly, or a local file path to
     upload first. On a dry run a local file is not uploaded, and a
     placeholder URL is returned instead. Raises whatever
@@ -87,7 +89,7 @@ def _resolve_installer_url(command_context, installer, platform, assume_yes, dry
         file_path = upload.resolve_file(installer)
         print(TERM.yellow(f"Dry run: not uploading {file_path}."))
         return f"<URL of uploaded {file_path.name}>"
-    return upload.run(command_context, installer, platform, assume_yes=assume_yes)
+    return upload.run(topsrcdir, installer, platform, assume_yes=assume_yes)
 
 
 def _prompt_platform():
@@ -134,7 +136,7 @@ def run(command_context, **kwargs):
     # it has, but once others (xpcshell, cppunittest, mochitest, ...) exist, add
     # a --suite argument here and thread it into `inputs` so a run can be scoped
     # to just one.
-    config = read_config(command_context)
+    config = read_config(command_context.topsrcdir)
     if config is None:
         print(TERM.red("No GitLab fork/token found, run `mach yeet auth` first."))
         return 1
@@ -149,7 +151,7 @@ def run(command_context, **kwargs):
 
     try:
         installer_url = _resolve_installer_url(
-            command_context,
+            command_context.topsrcdir,
             installer_url,
             platform,
             kwargs.get("assume_yes", False),
@@ -171,7 +173,7 @@ def run(command_context, **kwargs):
     artifacts_url = kwargs.get("artifacts_url")
     mozharness_url = kwargs.get("mozharness_url")
     if not artifacts_url or not mozharness_url:
-        version = _resolve_version(command_context, kwargs.get("version"))
+        version = _resolve_version(command_context.topsrcdir, kwargs.get("version"))
     if not artifacts_url:
         artifacts_url = _artifacts_url(version, platform)
     if not mozharness_url:

@@ -54,11 +54,11 @@ def confirm(message):
         print(TERM.red("ERROR! Please answer 'y' or 'n'."))
 
 
-def read_config(command_context):
+def read_config(topsrcdir):
     """Read the project/token/ssh_* config saved by `mach yeet auth`, or
     None if it hasn't been run yet.
     """
-    config_path = Path(command_context.topsrcdir) / YEET_CONFIG_FILENAME
+    config_path = Path(topsrcdir) / YEET_CONFIG_FILENAME
     if not config_path.is_file():
         return None
 

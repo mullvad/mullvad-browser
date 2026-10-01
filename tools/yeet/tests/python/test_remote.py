@@ -35,22 +35,19 @@ def _write_version(tmp_path, version="153.2.0"):
 
 def test_read_browser_version(tmp_path):
     _write_version(tmp_path, "1.2.3")
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
-    assert remote._read_browser_version(command_context) == "1.2.3"
+    assert remote._read_browser_version(tmp_path) == "1.2.3"
 
 
 def test_resolve_version_prefers_given_value(tmp_path):
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
-    assert remote._resolve_version(command_context, "9.9.9") == "9.9.9"
+    assert remote._resolve_version(tmp_path, "9.9.9") == "9.9.9"
 
 
 def test_resolve_version_falls_back_to_in_tree_version(tmp_path, capsys):
     _write_version(tmp_path, "1.2.3")
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
-    assert remote._resolve_version(command_context, None) == "1.2.3"
+    assert remote._resolve_version(tmp_path, None) == "1.2.3"
     assert "1.2.3" in capsys.readouterr().out
 
 
@@ -82,15 +79,14 @@ def test_curl_command_includes_header_data_and_url():
     ]
 
 
-def _failing_upload_run(cc, file, platform, assume_yes):
+def _failing_upload_run(topsrcdir, file, platform, assume_yes):
     raise RuntimeError("boom")
 
 
 def test_resolve_installer_url_passes_through_a_url(tmp_path):
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
     url = remote._resolve_installer_url(
-        command_context,
+        tmp_path,
         "https://example.org/app.apk",
         "android_x86_64",
         assume_yes=False,
@@ -101,17 +97,16 @@ def test_resolve_installer_url_passes_through_a_url(tmp_path):
 
 
 def test_resolve_installer_url_uploads_a_local_path(tmp_path, monkeypatch):
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
     calls = []
 
-    def fake_upload_run(cc, file, platform, assume_yes):
-        calls.append((cc, file, platform, assume_yes))
+    def fake_upload_run(topsrcdir, file, platform, assume_yes):
+        calls.append((topsrcdir, file, platform, assume_yes))
         return "https://tb-build-03.torproject.org/~bea/yeet/ts.apk"
 
     monkeypatch.setattr(remote.upload, "run", fake_upload_run)
 
     url = remote._resolve_installer_url(
-        command_context,
+        tmp_path,
         "/tmp/app.apk",
         "android_x86_64",
         assume_yes=True,
@@ -119,16 +114,15 @@ def test_resolve_installer_url_uploads_a_local_path(tmp_path, monkeypatch):
     )
 
     assert url == "https://tb-build-03.torproject.org/~bea/yeet/ts.apk"
-    assert calls == [(command_context, "/tmp/app.apk", "android_x86_64", True)]
+    assert calls == [(tmp_path, "/tmp/app.apk", "android_x86_64", True)]
 
 
 def test_resolve_installer_url_propagates_upload_error(tmp_path, monkeypatch):
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
     monkeypatch.setattr(remote.upload, "run", _failing_upload_run)
 
     with pytest.raises(RuntimeError, match="boom"):
         remote._resolve_installer_url(
-            command_context,
+            tmp_path,
             "/tmp/app.apk",
             "android_x86_64",
             assume_yes=False,
@@ -358,7 +352,7 @@ def test_run_uploads_a_local_path_before_triggering(
     )
     uploads = []
 
-    def fake_upload_run(cc, file, platform, assume_yes):
+    def fake_upload_run(topsrcdir, file, platform, assume_yes):
         uploads.append((file, platform))
         return uploaded_url
 
@@ -389,7 +383,7 @@ def test_run_prompts_for_platform_before_uploading(tmp_path, monkeypatch):
     monkeypatch.setattr(remote, "_prompt_platform", lambda: "debian_x86_64")
     seen = []
 
-    def fake_upload_run(cc, file, platform, assume_yes):
+    def fake_upload_run(topsrcdir, file, platform, assume_yes):
         seen.append(platform)
         raise RuntimeError("stop here")
 
@@ -408,7 +402,7 @@ def test_run_forwards_assume_yes_to_upload(tmp_path, monkeypatch, assume_yes):
     command_context = SimpleNamespace(topsrcdir=str(tmp_path))
     seen = []
 
-    def fake_upload_run(cc, file, platform, assume_yes):
+    def fake_upload_run(topsrcdir, file, platform, assume_yes):
         seen.append(assume_yes)
         raise RuntimeError("stop here")
 

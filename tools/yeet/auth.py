@@ -43,18 +43,15 @@ def _prompt_fork():
     print()
     print(
         TERM.yellow(
-            f"""`mach yeet remote` runs against your own fork
-of {CANONICAL_GITLAB_PROJECT}, never against the
-canonical repo directly -- that keeps CI runs off
-the shared project.
+            f"""`mach yeet remote` runs against your own fork of
+{CANONICAL_GITLAB_PROJECT}, never against the canonical repo
+directly -- that keeps CI runs off the shared project.
 
 If you haven't forked it yet, fork it first at:
   https://gitlab.torproject.org/{CANONICAL_GITLAB_PROJECT}/-/forks/new
 
-Keep your fork up to date too. An outdated fork's
-.gitlab-ci.yml may be missing pieces this command
-relies on, so pipelines could fail or come back
-empty."""
+Keep your fork up to date too. An outdated fork's .gitlab-ci.yml may be missing
+pieces this command relies on, so pipelines could fail or come back empty."""
         )
     )
     print()
@@ -71,17 +68,14 @@ def _gitlab_token_instructions(project):
 Now you need a pipeline trigger token for your fork:
   {project}
 
-This is NOT a personal access token -- it's
-specific to this one project, and it's the only
-kind that can actually run CI jobs here (their
-rules require it):
+This is NOT a personal access token -- it's specific to this one project, and
+it's the only kind that can actually run CI jobs here (their rules require it):
 
   1. Go to https://gitlab.torproject.org/{project}/-/settings/ci_cd#js-pipeline-triggers
   2. Expand "Pipeline trigger tokens" and add a new one.
   3. Paste the token below.
 
-The project and token will be saved to
-{YEET_CONFIG_FILENAME} at the root of the repository
+The project and token will be saved to {YEET_CONFIG_FILENAME} at the root of the repository
 and are not committed to it.
 """.strip()
 
@@ -90,18 +84,15 @@ def _print_ssh_instructions():
     print()
     print(
         TERM.yellow(
-            f"""`mach yeet` also uploads to and runs commands on a
-build server over SSH ({DEFAULT_SSH_HOST} by
-default). Uploaded files are served from your
+            f"""`mach yeet` also uploads to and runs commands on a build server over SSH
+({DEFAULT_SSH_HOST} by default). Uploaded files are served from your
 account's public_html there, at:
   https://<host>/~<username>
 
-Anything special about the connection -- port, jump
-host, a hardware key's PKCS11 provider, agent
-forwarding -- belongs in your ~/.ssh/config, not
-here: we just shell out to `ssh`. Whatever already
-works on your command line works for `mach yeet`
-too."""
+Anything special about the connection -- port, jump host, a hardware key's
+PKCS11 provider, agent forwarding -- belongs in your ~/.ssh/config, not here:
+we just shell out to `ssh`. Whatever already works on your command line works
+for `mach yeet` too."""
         )
     )
     print()

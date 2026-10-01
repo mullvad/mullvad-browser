@@ -28,10 +28,9 @@ def _remote_dir_name(platform):
 def _upload(file_path, ssh_user, ssh_host, remote_dir):
     """scp `file_path` into ~/public_html/yeet/`remote_dir` on
     ssh_user@ssh_host, keeping its name (with characters unsafe in a URL or
-    shell replaced by `_`) and creating that directory first
-    if needed. Both commands
-    get /dev/null as stdin so they can't swallow input buffered for us;
-    their touch/PIN/passphrase prompts go through /dev/tty and still reach
+    shell replaced by `_`) and creating that directory first if needed. Both
+    commands get /dev/null as stdin so they can't swallow input buffered for
+    us; their touch/PIN/passphrase prompts go through /dev/tty and still reach
     the user.
 
     Returns the file's final https:// URL. Raises RuntimeError on failure.
@@ -61,15 +60,15 @@ def _upload(file_path, ssh_user, ssh_host, remote_dir):
     return f"https://{ssh_host}/{html_path}"
 
 
-def run(command_context, file, platform, assume_yes=False):
+def run(topsrcdir, file, platform, assume_yes=False):
     """Upload `file` for `platform` to the configured server, asking for
-    confirmation first unless `assume_yes`. Returns the file's final https:// URL. Raises
-    FileNotFoundError if `file` or the config is missing, and RuntimeError
-    if the upload fails or is cancelled.
+    confirmation first unless `assume_yes`. Returns the file's final https://
+    URL. Raises FileNotFoundError if `file` or the config is missing, and
+    RuntimeError if the upload fails or is cancelled.
     """
-    config = read_config(command_context)
+    config = read_config(topsrcdir)
     if config is None:
-        raise FileNotFoundError(
+        raise RuntimeError(
             f"No {YEET_CONFIG_FILENAME} found. Run `mach yeet auth` first."
         )
 

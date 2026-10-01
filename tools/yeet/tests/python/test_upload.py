@@ -124,18 +124,16 @@ def test_upload_fails_if_scp_fails(monkeypatch):
 def test_run_aborts_without_config(tmp_path):
     apk = tmp_path / "app.apk"
     apk.touch()
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
-    with pytest.raises(FileNotFoundError, match="mach yeet auth"):
-        upload.run(command_context, str(apk), "android_x86_64")
+    with pytest.raises(RuntimeError, match="mach yeet auth"):
+        upload.run(tmp_path, str(apk), "android_x86_64")
 
 
 def test_run_aborts_when_file_missing(tmp_path):
     write_config(tmp_path)
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
     with pytest.raises(FileNotFoundError):
-        upload.run(command_context, str(tmp_path / "missing.apk"), "android_x86_64")
+        upload.run(tmp_path, str(tmp_path / "missing.apk"), "android_x86_64")
 
 
 def _write_apk(tmp_path):
@@ -153,7 +151,6 @@ def test_run_uploads_into_timestamped_dir_and_prints_url(tmp_path, monkeypatch, 
     config = write_config(tmp_path)
     apk = tmp_path / "app.apk"
     apk.write_bytes(b"not really an apk")
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
     _freeze_time(monkeypatch, datetime(2026, 9, 14, 12, 34, 56, tzinfo=timezone.utc))
 
     calls = []
@@ -164,7 +161,7 @@ def test_run_uploads_into_timestamped_dir_and_prints_url(tmp_path, monkeypatch, 
 
     monkeypatch.setattr(upload, "_upload", fake_upload)
 
-    url = upload.run(command_context, str(apk), "android_x86_64", assume_yes=True)
+    url = upload.run(tmp_path, str(apk), "android_x86_64", assume_yes=True)
 
     assert url == (
         f"https://{config['ssh_host']}/~{config['ssh_user']}/yeet/20260914-123456-android_x86_64/app.apk"
@@ -184,7 +181,6 @@ def test_run_reports_upload_failure(tmp_path, monkeypatch):
     write_config(tmp_path)
     apk = tmp_path / "app.apk"
     apk.write_bytes(b"not really an apk")
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
 
     def fake_upload(file_path, ssh_user, ssh_host, remote_dir):
         raise RuntimeError("boom")
@@ -192,14 +188,13 @@ def test_run_reports_upload_failure(tmp_path, monkeypatch):
     monkeypatch.setattr(upload, "_upload", fake_upload)
 
     with pytest.raises(RuntimeError, match="boom"):
-        upload.run(command_context, str(apk), "android_x86_64", assume_yes=True)
+        upload.run(tmp_path, str(apk), "android_x86_64", assume_yes=True)
 
 
 @pytest.mark.parametrize("answer", ["y", "yes", "Y"])
 def test_run_uploads_after_confirmation(tmp_path, monkeypatch, answer):
     write_config(tmp_path)
     apk = _write_apk(tmp_path)
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
     _set_confirm_answers(monkeypatch, answer)
     monkeypatch.setattr(
         upload,
@@ -207,14 +202,13 @@ def test_run_uploads_after_confirmation(tmp_path, monkeypatch, answer):
         lambda file_path, ssh_user, ssh_host, remote_dir: "https://x/y",
     )
 
-    assert upload.run(command_context, str(apk), "android_x86_64") == "https://x/y"
+    assert upload.run(tmp_path, str(apk), "android_x86_64") == "https://x/y"
 
 
 @pytest.mark.parametrize("answers", [("",), ("n",), ("no",), ("maybe", "n")])
 def test_run_does_not_upload_when_declined(tmp_path, monkeypatch, answers):
     write_config(tmp_path)
     apk = _write_apk(tmp_path)
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
     _set_confirm_answers(monkeypatch, *answers)
     monkeypatch.setattr(
         upload,
@@ -223,13 +217,12 @@ def test_run_does_not_upload_when_declined(tmp_path, monkeypatch, answers):
     )
 
     with pytest.raises(RuntimeError, match="cancelled"):
-        upload.run(command_context, str(apk), "android_x86_64")
+        upload.run(tmp_path, str(apk), "android_x86_64")
 
 
 def test_run_skips_confirmation_with_assume_yes(tmp_path, monkeypatch):
     write_config(tmp_path)
     apk = _write_apk(tmp_path)
-    command_context = SimpleNamespace(topsrcdir=str(tmp_path))
     monkeypatch.setattr(
         "builtins.input", lambda prompt="": pytest.fail("unexpected prompt")
     )
@@ -240,7 +233,7 @@ def test_run_skips_confirmation_with_assume_yes(tmp_path, monkeypatch):
     )
 
     assert (
-        upload.run(command_context, str(apk), "android_x86_64", assume_yes=True)
+        upload.run(tmp_path, str(apk), "android_x86_64", assume_yes=True)
         == "https://x/y"
     )
 
