@@ -267,11 +267,13 @@ sweep_line_init (sweep_line_t	 *sweep_line,
     sweep_line->head.x = INT32_MIN;
     sweep_line->head.right = NULL;
     sweep_line->head.dir = 0;
+    sweep_line->head.prev = NULL;
     sweep_line->head.next = &sweep_line->tail;
     sweep_line->tail.x = INT32_MAX;
     sweep_line->tail.right = NULL;
     sweep_line->tail.dir = 0;
     sweep_line->tail.prev = &sweep_line->head;
+    sweep_line->tail.next = NULL;
 
     sweep_line->insert_left = &sweep_line->tail;
     sweep_line->insert_right = &sweep_line->tail;
@@ -475,6 +477,8 @@ sweep_line_insert (sweep_line_t	*sweep, rectangle_t	*rectangle)
     pos = sweep->insert_left;
     if (pos->x > sweep->insert_right->x)
 	pos = sweep->insert_right->prev;
+    if (pos == &sweep->head)
+	pos = pos->next;
     insert_edge (&rectangle->left, pos);
     sweep->insert_left = &rectangle->left;
 

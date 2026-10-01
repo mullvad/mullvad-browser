@@ -95,6 +95,7 @@ vendoring:
     - patches/0049-Bug-2054627-skip-token-check.patch
     - patches/0050-Bug-2065397-array-bounds-check.patch
     - patches/0051-Bug-2068367-bitmap-surface-tmp-buffer.patch
+    - patches/0052-Bug-2068420-skip-head-sentinel.patch
 
 updatebot:
   maintainer-phab: "#gfx-reviewers"
