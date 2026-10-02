@@ -8110,6 +8110,12 @@ AttachDecision InlinableNativeIRGenerator::tryAttachStringSplitString() {
   MOZ_ASSERT(args_[0].isString());
   MOZ_ASSERT(args_[1].isString());
 
+  // Ensure Array is resolved on the global object for MStringSplit in Ion.
+  if (!GlobalObject::getArrayShapeWithDefaultProto(cx_)) {
+    cx_->clearPendingException();
+    return AttachDecision::NoAction;
+  }
+
   // Initialize the input operand.
   initializeInputOperand();
 
