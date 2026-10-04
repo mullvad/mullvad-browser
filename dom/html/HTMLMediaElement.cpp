@@ -5849,6 +5849,7 @@ void HTMLMediaElement::UpdateSrcStreamReportPlaybackEnded() {
 void HTMLMediaElement::SeekStarted() { QueueEvent(u"seeking"_ns); }
 
 void HTMLMediaElement::SeekCompleted() {
+  RefPtr<HTMLMediaElement> kungFuDeathGrip(this);
   mPlayingBeforeSeek = false;
   SetPlayedOrSeeked(true);
   if (mTextTrackManager) {
