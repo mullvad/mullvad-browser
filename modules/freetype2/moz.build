@@ -24,6 +24,7 @@ SOURCES += [
     'src/bdf/bdf.c',            # BDF font driver.
     'src/cff/cff.c',            # CFF/OpenType font driver.
     'src/cid/type1cid.c',       # Type 1 CID-keyed font driver.
+    'src/hvf/hvf.c',            # Apple Hierarchical Variable Font driver.
     'src/pcf/pcf.c',            # PCF font driver.
     'src/pfr/pfr.c',            # PFR/TrueDoc font driver.
     'src/sdf/sdf.c',            # SDF font driver.

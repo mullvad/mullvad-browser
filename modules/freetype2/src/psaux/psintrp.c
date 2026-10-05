@@ -415,7 +415,7 @@
   /* Blend numOperands on the stack,                */
   /* store results into the first numBlends values, */
   /* then pop remaining arguments.                  */
-  static void
+  static FT_Error
   cf2_doBlend( const CFF_Blend  blend,
                CF2_Stack        opStack,
                CF2_UInt         numBlends )
@@ -424,9 +424,13 @@
     CF2_UInt  base;
     CF2_UInt  i, j;
     CF2_UInt  numOperands = (CF2_UInt)( numBlends * blend->lenBV );
+    CF2_UInt  count       = cf2_stack_count( opStack );
 
 
-    base  = cf2_stack_count( opStack ) - numOperands;
+    if ( numOperands > count )
+      return FT_THROW( Stack_Underflow );
+
+    base  = count - numOperands;
     delta = base + numBlends;
 
     FT_TRACE6(( " (" ));
@@ -455,6 +459,8 @@
 
     /* leave only `numBlends' results on stack */
     cf2_stack_pop( opStack, numOperands - numBlends );
+
+    return FT_Err_Ok;
   }
 
 
@@ -769,13 +775,10 @@
 
           /* do the blend */
           numBlends = (FT_UInt)cf2_stack_popInt( opStack );
-          if ( numBlends > stackSize )
-          {
-            lastError = FT_THROW( Invalid_Glyph_Format );
-            goto exit;
-          }
 
-          cf2_doBlend( &font->blend, opStack, numBlends );
+          lastError = cf2_doBlend( &font->blend, opStack, numBlends );
+          if ( lastError )
+            goto exit;
 
           font->blend.usedBV = TRUE;
         }
@@ -985,8 +988,8 @@
           FT_TRACE4(( "%s", op1 == cf2_cmdCALLGSUBR ? " callgsubr"
                                                     : " callsubr" ));
 
-          if ( ( !font->isT1 && charstringIndex > CF2_MAX_SUBR )       ||
-               (  font->isT1 && charstringIndex > T1_MAX_SUBRS_CALLS ) )
+          if ( ( !font->isT1 && charstringIndex >= CF2_MAX_SUBR )       ||
+               (  font->isT1 && charstringIndex >= T1_MAX_SUBRS_CALLS ) )
           {
             /* max subr plus one for charstring */
             lastError = FT_THROW( Invalid_Glyph_Format );
