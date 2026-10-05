@@ -85,6 +85,7 @@
     FT_COLR_PAINTFORMAT_INTERNAL_VAR_SKEW                 = 29,
     FT_COLR_PAINTFORMAT_INTERNAL_SKEW_CENTER              = 30,
     FT_COLR_PAINTFORMAT_INTERNAL_VAR_SKEW_CENTER          = 31,
+    FT_COLR_PAINTFORMAT_INTERNAL_GLYPH2                   = 33,
 
   } FT_PaintFormat_Internal;
 
@@ -645,7 +646,9 @@
 
     apaint->format = (FT_PaintFormat)FT_NEXT_BYTE( p );
 
-    if ( apaint->format >= FT_COLR_PAINT_FORMAT_MAX )
+    if ( apaint->format >= FT_COLR_PAINT_FORMAT_MAX &&
+         (FT_PaintFormat_Internal)apaint->format !=
+           FT_COLR_PAINTFORMAT_INTERNAL_GLYPH2      )
       return 0;
 
     if ( apaint->format == FT_COLR_PAINTFORMAT_COLR_LAYERS )
@@ -879,12 +882,21 @@
       return 1;
     }
 
-    if ( apaint->format == FT_COLR_PAINTFORMAT_GLYPH )
+    if ( apaint->format == FT_COLR_PAINTFORMAT_GLYPH ||
+         (FT_PaintFormat_Internal)apaint->format ==
+           FT_COLR_PAINTFORMAT_INTERNAL_GLYPH2       )
     {
-      ENSURE_READ_BYTES( 2 );
+      FT_Bool  is_glyph2 = (FT_PaintFormat_Internal)apaint->format ==
+                             FT_COLR_PAINTFORMAT_INTERNAL_GLYPH2;
+
+
+      ENSURE_READ_BYTES( ( is_glyph2 ? 3 : 2 ) );
       apaint->u.glyph.paint.p                     = child_table_p;
       apaint->u.glyph.paint.insert_root_transform = 0;
-      apaint->u.glyph.glyphID                     = FT_NEXT_USHORT( p );
+      apaint->u.glyph.glyphID = is_glyph2 ? FT_NEXT_UOFF3( p )
+                                          : FT_NEXT_USHORT( p );
+
+      apaint->format = FT_COLR_PAINTFORMAT_GLYPH;
 
       return 1;
     }
