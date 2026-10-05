@@ -70,6 +70,7 @@
 #include "gc/GC-inl.h"
 #include "gc/StableCellHasher-inl.h"
 #include "jit/InlineScriptTree-inl.h"
+#include "jit/JSJitFrameIter-inl.h"
 #include "jit/MacroAssembler-inl.h"
 #include "jit/SafepointIndex-inl.h"
 #include "vm/GeckoProfiler-inl.h"
@@ -448,6 +449,34 @@ void JitRuntime::TraceWeakJitcodeGlobalTable(JSRuntime* rt, JSTracer* trc) {
   if (rt->hasJitRuntime() && rt->jitRuntime()->hasJitcodeGlobalTable()) {
     rt->jitRuntime()->getJitcodeGlobalTable()->traceWeak(rt, trc);
   }
+}
+
+void JitRuntime::handleGrowSlotsForPureCall(JSContext* cx) {
+  MOZ_ASSERT(inPureCall());
+
+  // We only set the inPureCall flag for calls in Ion code with alias
+  // sets that claim not to have arbitrary side-effects. Therefore, we
+  // should not have re-entered JIT code, and the call that set the
+  // flag should be the innermost frame (aside from the exit frame).
+  MOZ_RELEASE_ASSERT(cx->activation()->isJit());
+  JitActivation* activation = cx->activation()->asJit();
+  MOZ_RELEASE_ASSERT(activation->hasExitFP());
+
+  JSJitFrameIter frame(activation);
+  // We currently only set this flag for DOM calls.
+  MOZ_RELEASE_ASSERT(frame.isExitFrameLayout<IonDOMExitFrameLayout>());
+  ++frame;
+  MOZ_RELEASE_ASSERT(frame.isIonJS());
+
+  // If we've already invalidated, we've cleared the IonScript
+  // pointer, so we can't invalidate again.
+  if (frame.checkInvalidation()) {
+    return;
+  }
+
+  JitSpew(JitSpew_IonInvalidate,
+          "Invalidating frame: slots reallocated during pure call");
+  Invalidate(cx, frame.script());
 }
 
 bool JitZone::addInlinedCompilation(const RecompileInfo& info,

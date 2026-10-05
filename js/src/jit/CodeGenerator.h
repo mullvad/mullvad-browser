@@ -402,6 +402,7 @@ class CodeGenerator final : public CodeGeneratorSpecific {
 #define LIR_OP(op) void visit##op(L##op* ins);
   LIR_OPCODE_LIST(LIR_OP)
 #undef LIR_OP
+  void maybeEmitSetInPureCall(MInstruction* mir, bool value, Register scratch);
 
   // In debug mode, we need to validate that we've not made a mistake with the
   // fuse.

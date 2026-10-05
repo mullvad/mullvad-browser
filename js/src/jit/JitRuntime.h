@@ -247,6 +247,11 @@ class JitRuntime {
   MainThreadData<uint32_t> disallowArbitraryCode_{false};
 #endif
 
+  // Flag that can be set from JIT code to indicate that we're calling
+  // a function whose alias set does not include stores to ObjectFields.
+  // See handleGrowSlotsForPureCall.
+  MainThreadData<uint32_t> inPureCall_{false};
+
   bool generateTrampolines(JSContext* cx);
   bool generateBaselineICFallbackCode(JSContext* cx);
 
@@ -346,6 +351,9 @@ class JitRuntime {
     return &disallowArbitraryCode_.refNoCheck();
   }
 #endif
+
+  bool inPureCall() const { return inPureCall_; }
+  const void* addressOfInPureCall() const { return &inPureCall_.refNoCheck(); }
 
   uint8_t* allocateIonOsrTempData(size_t size);
   void freeIonOsrTempData();
@@ -512,6 +520,8 @@ class JitRuntime {
 
   void ionLazyLinkListRemove(JSRuntime* rt, js::jit::IonCompileTask* task);
   void ionLazyLinkListAdd(JSRuntime* rt, js::jit::IonCompileTask* task);
+
+  void handleGrowSlotsForPureCall(JSContext* cx);
 };
 
 }  // namespace jit
