@@ -1660,6 +1660,27 @@
     zone->org[point].y = ADD_LONG( zone->org[point].y, distance );
   }
 
+
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+
+  static void
+  Update_Native_ClearType_X_State( TT_ExecContext  exc )
+  {
+    /* `backward_compatibility' is also zero in v35, the CVT program, */
+    /* monochrome rendering, and tricky-font execution.               */
+    exc->native_cleartype_x = FT_BOOL(
+      !exc->backward_compatibility        &&
+      exc->GS.projVector.y == 0           &&
+      exc->GS.freeVector.y == 0           &&
+      SUBPIXEL_HINTING_MINIMAL            &&
+      exc->iniRange == tt_coderange_glyph &&
+      exc->mode != FT_RENDER_MODE_MONO    &&
+      !FT_IS_TRICKY( (FT_Face)exc->face ) );
+  }
+
+#endif /* TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL */
+
+
   /**************************************************************************
    *
    * @Function:
@@ -2250,9 +2271,12 @@
       exc->moveVector.x = exc->GS.freeVector.x * 4;
       exc->moveVector.y = exc->GS.freeVector.y * 4;
     }
-    else if ( -0x400L < F_dot_P && F_dot_P < 0x400L )
+    else if ( -0x1555L < F_dot_P && F_dot_P < 0x1555L )
     {
-      /* prohibitively orthogonal */
+      /* prohibitively near-orthogonal; the empirical limit avoids */
+      /* bad rendering in Palatino without negative consequences   */
+      FT_TRACE3(( "F_dot_P = %.2f, too small for valid movement.\n",
+                   F_dot_P / 16384.));
       exc->moveVector.x = 0;
       exc->moveVector.y = 0;
     }
@@ -2291,6 +2315,12 @@
       exc->func_dualproj = (TT_Project_Func)Project_y;
     else
       exc->func_dualproj = (TT_Project_Func)Dual_Project;
+
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+    /* Projection/freedom-vector changes can enter or leave the */
+    /* native ClearType direction.                              */
+    Update_Native_ClearType_X_State( exc );
+#endif
 
     /* Disable cached aspect ratio */
     exc->tt_metrics.ratio = 0;
@@ -2914,8 +2944,19 @@
   Ins_ROUND( TT_ExecContext  exc,
              FT_Long*        args )
   {
-    args[0] = exc->func_round( exc, args[0],
-                               exc->GS.compensation[exc->opcode & 3] );
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+    /*
+     * Native ClearType applies ROUND to the 1/16-pixel virtual
+     * grid in the ClearType direction.  Approximate this in v40
+     * by leaving the result unrounded.
+     */
+    if ( exc->native_cleartype_x )
+      args[0] = Round_None( exc, args[0],
+                            exc->GS.compensation[exc->opcode & 3] );
+    else
+#endif
+      args[0] = exc->func_round( exc, args[0],
+                                 exc->GS.compensation[exc->opcode & 3] );
   }
 
 
@@ -4728,7 +4769,13 @@
       /* compatibility hacks and lets them program points to the grid like */
       /* it's 1996.  They might sign a waiver for just one glyph, though.  */
       if ( SUBPIXEL_HINTING_MINIMAL )
+      {
         exc->backward_compatibility = ( L & 4 ) ^ 4;
+
+        /* A glyph can temporarily switch between backward-compatible */
+        /* and native ClearType, so update the native-X state too.    */
+        Update_Native_ClearType_X_State( exc );
+      }
 #endif
     }
     else if ( exc->pedantic_hinting )
@@ -5312,7 +5359,12 @@
     if ( ( exc->opcode & 1 ) != 0 )
     {
       cur_dist = FAST_PROJECT( &exc->zp0.cur[point] );
-      distance = SUB_LONG( exc->func_round( exc, cur_dist, 0 ), cur_dist );
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+      if ( exc->native_cleartype_x )
+        distance = 0;
+      else
+#endif
+        distance = SUB_LONG( exc->func_round( exc, cur_dist, 0 ), cur_dist );
     }
     else
       distance = 0;
@@ -5390,6 +5442,13 @@
       FT_F26Dot6  delta;
 
 
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+      /* Native ClearType reduces CVT cut-in to 1/16 in the */
+      /* ClearType direction.                               */
+      if ( exc->native_cleartype_x )
+        control_value_cutin >>= 4;
+#endif
+
       delta = SUB_LONG( distance, org_dist );
       if ( delta < 0 )
         delta = NEG_LONG( delta );
@@ -5397,7 +5456,10 @@
       if ( delta > control_value_cutin )
         distance = org_dist;
 
-      distance = exc->func_round( exc, distance, 0 );
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+      if ( !exc->native_cleartype_x )
+#endif
+        distance = exc->func_round( exc, distance, 0 );
     }
 
     exc->func_move( exc, &exc->zp0, point, SUB_LONG( distance, org_dist ) );
@@ -5491,7 +5553,14 @@
     compensation = exc->GS.compensation[exc->opcode & 3];
 
     if ( ( exc->opcode & 4 ) != 0 )
-      distance = exc->func_round( exc, org_dist, compensation );
+    {
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+      if ( exc->native_cleartype_x )
+        distance = Round_None( exc, org_dist, compensation );
+      else
+#endif
+        distance = exc->func_round( exc, org_dist, compensation );
+    }
     else
       distance = Round_None( exc, org_dist, compensation );
 
@@ -5501,6 +5570,13 @@
     {
       FT_F26Dot6  minimum_distance = exc->GS.minimum_distance;
 
+
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+      /* Native ClearType reduces minimum distance to 1/2 in the */
+      /* ClearType direction.                                    */
+      if ( exc->native_cleartype_x )
+        minimum_distance >>= 1;
+#endif
 
       if ( org_dist >= 0 )
       {
@@ -5624,6 +5700,13 @@
         FT_F26Dot6  control_value_cutin = exc->GS.control_value_cutin;
 
 
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+        /* Native ClearType reduces CVT cut-in to 1/16 in the */
+        /* ClearType direction.                               */
+        if ( exc->native_cleartype_x )
+          control_value_cutin >>= 4;
+#endif
+
         /* XXX: According to Greg Hitchcock, the following wording is */
         /*      the right one:                                        */
         /*                                                            */
@@ -5644,7 +5727,12 @@
           cvt_dist = org_dist;
       }
 
-      distance = exc->func_round( exc, cvt_dist, compensation );
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+      if ( exc->native_cleartype_x )
+        distance = Round_None( exc, cvt_dist, compensation );
+      else
+#endif
+        distance = exc->func_round( exc, cvt_dist, compensation );
     }
     else
       distance = Round_None( exc, cvt_dist, compensation );
@@ -5655,6 +5743,13 @@
     {
       FT_F26Dot6  minimum_distance = exc->GS.minimum_distance;
 
+
+#ifdef TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+      /* Native ClearType reduces minimum distance to 1/2 in the */
+      /* ClearType direction.                                    */
+      if ( exc->native_cleartype_x )
+        minimum_distance >>= 1;
+#endif
 
       if ( org_dist >= 0 )
       {
@@ -6585,11 +6680,23 @@
        * Selector Bit:  11
        * Return Bit(s): 18
        *
-       * The only smoothing method FreeType supports unless someone sets
-       * FT_LOAD_TARGET_MONO.
+       * Report the smoothing mode selected by the DirectWrite-style
+       * ClearType policy for this face and PPEM.
        */
-      if ( ( args[0] & 2048 ) != 0 && exc->mode != FT_RENDER_MODE_MONO )
-        K |= 1 << 18;
+      if ( ( args[0] & 2048 ) != 0          &&
+           exc->mode != FT_RENDER_MODE_MONO )
+      {
+        FT_Bool  symmetric_smoothing;
+
+
+        tt_face_get_cleartype_policy( exc->face,
+                                      exc->metrics.y_ppem,
+                                      &symmetric_smoothing,
+                                      NULL );
+
+        if ( symmetric_smoothing )
+          K |= 1 << 18;
+      }
 
       /*********************************
        * CLEARTYPE HINTING AND

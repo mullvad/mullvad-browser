@@ -10,8 +10,8 @@ origin:
 
   url: https://gitlab.freedesktop.org/freetype/freetype
 
-  release: VER-2-14-2 (2026-03-01T14:55:17+01:00).
-  revision: VER-2-14-2
+  release: d1f916a65eb13d5cd44b711cfd24cf8d5949b2d2 (2026-10-03T09:41:48.000+02:00).
+  revision: d1f916a65eb13d5cd44b711cfd24cf8d5949b2d2
 
   license: FTL
   license-file: LICENSE.TXT
@@ -32,6 +32,7 @@ vendoring:
     - Makefile
     - meson.build
     - meson_options.txt
+    - mkfile
     - MSBuild.rsp
     - MSBuild.sln
     - objs
@@ -41,3 +42,6 @@ vendoring:
 
   keep:
     - moz.build
+
+  patches:
+    - patches/0001-Bug-2032039-colr-blend-layer-mono-source.patch
