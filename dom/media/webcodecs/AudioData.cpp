@@ -20,6 +20,7 @@
 #include "AudioSampleFormat.h"
 #include "WebCodecsUtils.h"
 #include "js/StructuredClone.h"
+#include "jsapi.h"
 #include "mozilla/Maybe.h"
 #include "mozilla/Result.h"
 

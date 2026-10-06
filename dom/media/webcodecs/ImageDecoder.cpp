@@ -10,6 +10,9 @@
 #include "ImageContainer.h"
 #include "ImageDecoderReadRequest.h"
 #include "MediaResult.h"
+#include "jsapi.h"
+#include "mozilla/Logging.h"
+#include "mozilla/StaticPrefs_dom.h"
 #include "mozilla/dom/ImageTrack.h"
 #include "mozilla/dom/ImageTrackList.h"
 #include "mozilla/dom/Promise.h"
@@ -531,6 +534,11 @@ void ImageDecoder::CheckOutstandingDecodes() {
   // 10.2.2.19.1. Perform DetachArrayBuffer on transferable
   for (const auto& buffer : aInit.mTransfer) {
     JS::Rooted<JSObject*> obj(aGlobal.Context(), buffer.Obj());
+    if (!JS_WrapObject(aGlobal.Context(), &obj)) {
+      aRv.MightThrowJSException();
+      aRv.StealExceptionFromJSContext(aGlobal.Context());
+      return nullptr;
+    }
     JS::DetachArrayBuffer(aGlobal.Context(), obj);
   }
 

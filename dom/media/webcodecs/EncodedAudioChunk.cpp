@@ -11,6 +11,7 @@
 
 #include "MediaData.h"
 #include "TimeUnits.h"
+#include "jsapi.h"
 #include "mozilla/CheckedInt.h"
 #include "mozilla/Logging.h"
 #include "mozilla/PodOperations.h"
