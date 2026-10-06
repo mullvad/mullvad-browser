@@ -263,13 +263,28 @@ nsresult nsHttpTransaction::Init(
     mHasRequestBody = false;
   }
 
+  // The originating channel keeps its own reference to this upload stream and
+  // may seek or clone it on the main thread (to rewind for a 307/308 redirect
+  // or an auth retry) while this transaction reads it on the socket thread.
+  // Input streams are not safe for concurrent access from multiple threads, so
+  // read from a private clone and leave the channel's stream untouched by the
+  // socket thread. Parent-process upload streams are normalized to be cloneable
+  // (see HttpBaseChannel's NormalizeUploadStream).
+  nsCOMPtr<nsIInputStream> requestBodyClone;
+  if (mHasRequestBody && NS_SUCCEEDED(NS_CloneInputStream(
+                             requestBody, getter_AddRefs(requestBodyClone)))) {
+    requestBody = requestBodyClone;
+  }
+
   // Bug 2059211: cap the body stream at the declared Content-Length.  A body
   // stream whose backing data grew after the size was declared (e.g. a
   // FileBlobImpl whose file was extended via OPFS) could otherwise push excess
   // bytes onto a keep-alive connection, enabling HTTP request smuggling.
   nsCOMPtr<nsIInputStream> cappedRequestBody;
   if (mHasRequestBody && requestContentLength) {
-    nsCOMPtr<nsIInputStream> bodyToWrap(requestBody);
+    nsCOMPtr<nsIInputStream> bodyToWrap =
+        requestBodyClone ? requestBodyClone.forget()
+                         : nsCOMPtr<nsIInputStream>(requestBody);
     cappedRequestBody =
         new SlicedInputStream(bodyToWrap.forget(), 0, requestContentLength);
     requestBody = cappedRequestBody;
