@@ -1,0 +1,12 @@
+gczeal(0);
+const {object, transplant} = transplantableObject();
+const holder = newGlobal({newCompartment: true});
+const destination = newGlobal({newCompartment: true});
+holder.target = object;
+holder.eval('grayRoot().push(target); target = undefined;');
+gc();
+schedulezone(destination);
+startgc(1);
+while (gcstate() === 'Prepare' || gcstate() === 'MarkRoots') gcslice(1);
+transplant(destination);
+finishgc();
