@@ -242,22 +242,11 @@ template void CheckTracedThing<wasm::AnyRef>(JSTracer*, const wasm::AnyRef&);
 
 static inline bool ShouldMarkCrossCompartment(GCMarker* marker, JSObject* src,
                                               Cell* dstCell, const char* name) {
-#ifdef DEBUG
-  if (src->isMarkedGray() && !dstCell->isTenured()) {
-    // Bug 1743098: This shouldn't be possible but it does seem to happen. Log
-    // some useful information in debug builds.
-    SEprinter printer;
-    printer.printf(
-        "ShouldMarkCrossCompartment: cross compartment edge '%s' from gray "
-        "object to nursery thing\n",
-        name);
-    printer.put("src: ");
-    src->dump(printer);
-    printer.put("dst: ");
-    dstCell->dump(printer);
-    MOZ_CRASH("Found cross compartment edge from gray object to nursery thing");
-  }
-#endif
+  // Note that we can observe gray to nursery edges here. This does not normally
+  // happen because of the invariant that the JS engine does not operate on gray
+  // GC things. However there are cases where we ignore this: for example when a
+  // proxy is transplanted wrappers in all zones are remapped and this may write
+  // a nursery pointer into a gray proxy. See uses of AutoTouchingGrayThings.
 
   CellColor targetColor = AsCellColor(marker->markColor());
   CellColor currentColor = dstCell->color();
