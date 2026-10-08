@@ -10,10 +10,10 @@
 # See Cargo.toml.orig for the original contents.
 
 [package]
-edition = "2021"
+edition = "2024"
 rust-version = "1.88.0"
 name = "quinn-udp"
-version = "0.6.2"
+version = "0.6.3"
 build = "build.rs"
 autolib = false
 autobins = false
@@ -29,6 +29,7 @@ categories = [
 ]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/quinn-rs/quinn"
+resolver = "2"
 
 [package.metadata.docs.rs]
 all-features = true
