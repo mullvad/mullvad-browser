@@ -73,5 +73,15 @@
       data.push(getData(key, value));
       return Promise.all(data);
     };
+
+    window.getIframeValue = function (key) {
+      const value = new Promise(resolve =>
+        window.addEventListener("message", event => resolve(event.data), {
+          once: true,
+        })
+      );
+      iframe.postMessage({ type: "getValue", key }, "*");
+      return value;
+    };
   </script>
 </html>
