@@ -325,8 +325,19 @@ impl OverlappedOperation {
         Self::sched_recv_internal(handle, None, expected_size)
     }
 
-    pub(crate) fn collect_recv(mut self) -> Vec<u8> {
-        self.buffer.take().expect("Missing receive buffer")
+    pub(crate) fn collect_recv(mut self, len: usize) -> Vec<u8> {
+        let mut buffer = self.buffer.take().expect("Missing receive buffer");
+
+        // We assert here because if this happens then we've hit a logic bug in
+        // our code. The size of the receive operation and buffer length are
+        // tied together so this should never happen.
+        assert!(
+            len <= buffer.len(),
+            "More bytes received than the buffer would allow"
+        );
+
+        buffer.truncate(len);
+        buffer
     }
 
     pub(crate) fn send(

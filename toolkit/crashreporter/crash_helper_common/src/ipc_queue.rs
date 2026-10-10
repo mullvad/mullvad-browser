@@ -30,6 +30,8 @@ pub enum IPCQueueError {
     IPCListenerError(#[from] IPCListenerError),
     #[error("Underlying message error: {0}")]
     MessageError(#[from] MessageError),
+    #[error("Unexpected event: {0}")]
+    UnexpectedEvent(&'static str),
 }
 
 /*****************************************************************************

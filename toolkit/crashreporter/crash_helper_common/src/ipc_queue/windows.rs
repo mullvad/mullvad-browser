@@ -181,27 +181,8 @@ impl IPCQueue {
                 )
             };
 
-            if number_of_bytes_transferred == 0 {
-                // This is an event on the listener
-                debug_assert!(
-                    self.listener.as_raw() as IPCConnectorKey == completion_key,
-                    "Completion event doesn't match the listener"
-                );
-                let operation = self.listen_operation.take();
-                if let Some(operation) = operation {
-                    operation
-                        .accept()
-                        .map_err(|_e| IPCQueueError::RegistrationFailure(0))?;
-                }
-                let connector = Rc::new(self.listener.replace_pipe()?);
-                self.insert_connector(&connector);
-
-                // After the pipe is connected the listener handle will have been
-                // replaced with a new one, so associate the new handle with the
-                // completion queue.
-                self.add_handle(self.listener.as_raw())?;
-
-                events.push(IPCEvent::Connect(connector));
+            if self.is_listener(completion_key) {
+                events.push(self.handle_listener_event(number_of_bytes_transferred)?);
             } else {
                 let element = self
                     .connectors
@@ -211,7 +192,7 @@ impl IPCQueue {
                     .operation
                     .take()
                     .expect("No pending receive operation");
-                let buffer = &operation.collect_recv();
+                let buffer = operation.collect_recv(number_of_bytes_transferred as usize);
                 let header = Header::decode(buffer)?;
                 let payload = element.connector.recv(header.size);
                 match payload {
@@ -234,6 +215,36 @@ impl IPCQueue {
         }
 
         Ok(events)
+    }
+
+    fn is_listener(&self, completion_key: IPCConnectorKey) -> bool {
+        self.listener.as_raw() as IPCConnectorKey == completion_key
+    }
+
+    fn handle_listener_event(
+        &mut self,
+        number_of_bytes_transferred: u32,
+    ) -> Result<IPCEvent, IPCQueueError> {
+        // A connection event will have 0 bytes transferred
+        if number_of_bytes_transferred != 0 {
+            return Err(IPCQueueError::UnexpectedEvent(
+                "Non-zero transfer received on the listener",
+            ));
+        }
+
+        let operation = self.listen_operation.take();
+        if let Some(operation) = operation {
+            operation.accept().map_err(|_e| IPCQueueError::RegistrationFailure(0))?;
+        }
+        let connector = Rc::new(self.listener.replace_pipe()?);
+        self.insert_connector(&connector);
+
+        // After the pipe is connected the listener handle will have been
+        // replaced with a new one, so associate the new handle with the
+        // completion queue.
+        self.add_handle(self.listener.as_raw())?;
+
+        Ok(IPCEvent::Connect(connector))
     }
 }
 
