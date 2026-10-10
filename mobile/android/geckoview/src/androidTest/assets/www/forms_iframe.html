@@ -52,6 +52,10 @@
 
     window.addEventListener("message", async event => {
       const { data, source, origin } = event;
+      if (data.type == "getValue") {
+        source.postMessage(document.querySelector(data.key).value, origin);
+        return;
+      }
       source.postMessage(await getData(data.key, data.value), origin);
     });
   </script>

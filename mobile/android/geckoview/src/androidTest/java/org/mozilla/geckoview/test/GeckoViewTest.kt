@@ -336,21 +336,24 @@ class GeckoViewTest : BaseSessionTest() {
         val autofills =
             mapOf(
                 "#user1" to "username@example.com",
-                "#user2" to "username@example.com",
                 "#pass1" to "test-password",
-                "#pass2" to "test-password",
             )
+        val notFilled = listOf("#user2", "#pass2")
 
-        // Set up promises to monitor the values changing.
-        val promises =
-            autofills.map { entry ->
-                // Repeat each test with both the top document and the iframe document.
-                mainSession.evaluatePromiseJS(
-                    """
-                window.getDataForAllFrames('${entry.key}', '${entry.value}')
-                """,
-                )
-            }
+        // Only the form containing the focused field is filled.
+        val promises = autofills.map { entry ->
+            mainSession.evaluatePromiseJS(
+                """
+                getData('${entry.key}', '${entry.value}')
+                """
+            )
+        }
+
+        mainSession.evaluateJS("document.querySelector('#user1').focus()")
+        UiThreadUtils.waitForCondition(
+            { mainSession.autofillSession.focused != null },
+            env.defaultTimeoutMillis,
+        )
 
         activityRule.scenario.onActivity {
             val root = MockViewStructure(View.NO_ID)
@@ -374,18 +377,32 @@ class GeckoViewTest : BaseSessionTest() {
             it.view.setSession(session)
 
             // Wait on the promises and check for correct values.
-            for (values in promises.map { p -> p.value.asJsonArray() }) {
-                for (i in 0 until values.length()) {
-                    val (key, actual, expected, eventInterface) = values.get(i).asJSList<String>()
+            for (values in promises.map { p -> p.value.asJSList<String>() }) {
+                val (key, actual, expected, eventInterface) = values
 
-                    assertThat("Auto-filled value must match ($key)", actual, equalTo(expected))
-                    assertThat(
-                        "input event should be dispatched with InputEvent interface",
-                        eventInterface,
-                        equalTo("InputEvent"),
-                    )
-                }
+                assertThat("Auto-filled value must match ($key)", actual, equalTo(expected))
+                assertThat(
+                    "input event should be dispatched with InputEvent interface",
+                    eventInterface,
+                    equalTo("InputEvent"),
+                )
             }
+        }
+
+        for (key in autofills.keys + notFilled) {
+            assertThat(
+                "Field in the unfocused iframe must not be filled ($key)",
+                mainSession.evaluatePromiseJS("window.getIframeValue('$key')").value as String,
+                equalTo("foo"),
+            )
+        }
+
+        for (key in notFilled) {
+            assertThat(
+                "Field outside the focused form must not be filled ($key)",
+                mainSession.evaluateJS("document.querySelector('$key').value") as String,
+                equalTo("foo"),
+            )
         }
     }
 

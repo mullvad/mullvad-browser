@@ -466,7 +466,9 @@ public class Autofill {
     public void fillViewStructure(
         @NonNull final View view, @NonNull final ViewStructure structure, final int flags) {
       ThreadUtils.assertOnUiThread();
-      fillViewStructure(getRoot(), view, structure, flags);
+      final Node focused = getFocused();
+      final Node root = focused != null ? focused.getRoot() : null;
+      fillViewStructure(root != null ? root : getRoot(), view, structure, flags);
     }
 
     /**
