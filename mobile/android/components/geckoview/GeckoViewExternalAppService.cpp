@@ -8,6 +8,9 @@
 #include "mozilla/dom/CanonicalBrowsingContext.h"
 #include "mozilla/dom/WindowGlobalParent.h"
 #include "nsIChannel.h"
+#include "nsIMIMEService.h"
+#include "nsMimeTypes.h"
+#include "nsServiceManagerUtils.h"
 
 #include "mozilla/widget/EventDispatcher.h"
 #include "mozilla/widget/nsWindow.h"
@@ -17,16 +20,28 @@
 
 class StreamListener final : public mozilla::GeckoViewStreamListener {
  public:
-  explicit StreamListener(nsWindow* aWindow)
-      : GeckoViewStreamListener(), mWindow(aWindow) {
+  StreamListener(nsWindow* aWindow, const nsAString& aFileName)
+      : GeckoViewStreamListener(), mWindow(aWindow), mFileName(aFileName) {
     MOZ_ASSERT(aWindow);
   }
 
-  void SendWebResponse(mozilla::java::WebResponse::Param aResponse) {
+  void AmendWebResponse(
+      mozilla::java::WebResponse::Builder::Param aBuilder) override {
+    if (mFileName.IsEmpty()) {
+      return;
+    }
+    nsAutoString disposition(u"attachment; filename=\""_ns);
+    disposition.Append(mFileName);
+    disposition.Append(u'"');
+    aBuilder->Header(mozilla::jni::StringParam(u"content-disposition"_ns),
+                     mozilla::jni::StringParam(disposition));
+  }
+
+  void SendWebResponse(mozilla::java::WebResponse::Param aResponse) override {
     mWindow->PassExternalResponse(aResponse);
   }
 
-  void CompleteWithError(nsresult aStatus, nsIChannel* aChannel) {
+  void CompleteWithError(nsresult aStatus, nsIChannel* aChannel) override {
     // Currently we don't do anything about errors here
   }
 
@@ -34,6 +49,8 @@ class StreamListener final : public mozilla::GeckoViewStreamListener {
 
  private:
   RefPtr<nsWindow> mWindow;
+  // Filename validated by the MIME service, or empty if none was found.
+  nsString mFileName;
 };
 
 mozilla::StaticRefPtr<GeckoViewExternalAppService>
@@ -82,7 +99,19 @@ NS_IMETHODIMP GeckoViewExternalAppService::CreateListener(
     return NS_ERROR_ABORT;
   }
 
-  RefPtr<StreamListener> listener = new StreamListener(window);
+  nsAutoString fileName;
+  nsCOMPtr<nsIMIMEService> mimeService = do_GetService("@mozilla.org/mime;1");
+  if (mimeService) {
+    uint32_t flags = nsIMIMEService::VALIDATE_ALLOW_EMPTY;
+    if (aMimeContentType.Equals(APPLICATION_GUESS_FROM_EXT,
+                                nsCaseInsensitiveCStringComparator)) {
+      flags |= nsIMIMEService::VALIDATE_GUESS_FROM_EXTENSION;
+    }
+    mimeService->GetValidFileName(aChannel, aMimeContentType, nullptr, flags,
+                                  fileName);
+  }
+
+  RefPtr<StreamListener> listener = new StreamListener(window, fileName);
 
   nsresult rv;
   rv = aChannel->SetNotificationCallbacks(listener);

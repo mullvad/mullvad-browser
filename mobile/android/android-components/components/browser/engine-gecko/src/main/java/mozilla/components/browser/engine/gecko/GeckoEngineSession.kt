@@ -63,7 +63,6 @@ import mozilla.components.support.ktx.kotlin.isEmail
 import mozilla.components.support.ktx.kotlin.isExtensionUrl
 import mozilla.components.support.ktx.kotlin.isGeoLocation
 import mozilla.components.support.ktx.kotlin.isPhone
-import mozilla.components.support.ktx.kotlin.sanitizeFileName
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 import mozilla.components.support.utils.CertificateUtils
 import mozilla.components.support.utils.DownloadUtils
@@ -1407,7 +1406,7 @@ class GeckoEngineSession(
                         url = url,
                         contentLength = contentLength,
                         contentType = DownloadUtils.sanitizeMimeType(contentType),
-                        fileName = fileName?.sanitizeFileName(),
+                        fileName = fileName,
                         response = response,
                         isPrivate = privateMode,
                         openInApp = webResponse.requestExternalApp,
