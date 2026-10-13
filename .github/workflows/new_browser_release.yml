@@ -34,8 +34,16 @@ jobs:
         env:
           WEBHOOK: ${{ secrets.SLACK_BROWSER_ALPHA_WEBHOOK }}
 
+      - name: Trigger slack webhook for release candidate
+        if: ${{ contains(inputs.version, 'rc') }}
+        run: ./scripts/trigger_slack_webhook.sh
+        env:
+          WEBHOOK: ${{ secrets.SLACK_BROWSER_STABLE_WEBHOOK }}
+          RELEASE_CHANNEL: "RC"
+
       - name: Trigger slack webhook for stable release
         if: ${{ ! contains(inputs.version, 'a') }}
         run: ./scripts/trigger_slack_webhook.sh
         env:
           WEBHOOK: ${{ secrets.SLACK_BROWSER_STABLE_WEBHOOK }}
+          RELEASE_CHANNEL: "Stable"

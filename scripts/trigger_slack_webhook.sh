@@ -10,7 +10,7 @@ error_var_unset() {
 
 required_arguments=(VERSION WEBHOOK)
 for argument in "${required_arguments[@]}"; do
-    if [ -z "${!argument}" ]; then
+    if [ -z "${!argument:-}" ]; then
         error_var_unset "$argument"
     fi
 done
@@ -27,17 +27,29 @@ error_reason() {
 }
 
 url="https://dist.torproject.org/mullvadbrowser/$VERSION"
-update_response_commit=$(
-    curl 'https://gitlab.torproject.org/tpo/applications/mullvad-browser-update-responses/-/refs/main/logs_tree/?format=json&offset=0' 2>/dev/null | 
-        jq -r '.[0] | .commit .id')
 
 # send a message to a channel and tag the user in that message
+update_response_commit_hash=$(
+    curl 'https://gitlab.torproject.org/tpo/applications/mullvad-browser-update-responses/-/refs/main/logs_tree/?format=json&offset=0' 2>/dev/null |
+        jq -r '.[0] | .commit .id'
+)
+
+payload=$(
+    jq -n \
+        --arg commit_hash "$update_response_commit_hash" \
+        --arg version "$VERSION" \
+        --arg url "$url" \
+        --arg release_channel "${RELEASE_CHANNEL:-}" \
+        '{
+            update_response_commit: $commit_hash,
+            version: $version,
+            url: $url,
+            release_channel: (if $release_channel then $release_channel else null end)
+        }'
+)
+
 msg=$(
-    curl -X POST --data "{\
-        \"update_response_commit\": \"$update_response_commit\", \
-        \"version\": \"$VERSION\", \
-        \"url\": \"$url\" \
-    }" "$WEBHOOK"
+    curl -X POST --json "$payload" "$WEBHOOK"
 )
 
 if is_error "$msg"; then
