@@ -122,6 +122,39 @@ class ContentDelegateTest : BaseSessionTest() {
         })
     }
 
+    private fun assertDownloadFileName(contentDisposition: String, expected: String) {
+        // torbrowser#45407: comment out next line, withContentDisposition() missing in TB 16.0
+        // mainSession.loadTestPath(withContentDisposition(HELLO_HTML_PATH, contentDisposition))
+
+        sessionRule.waitUntilCalled(
+            object : ContentDelegate {
+                @AssertCalled(count = 1)
+                override fun onExternalResponse(session: GeckoSession, response: WebResponse) {
+                    assertThat(
+                        "Content-Disposition filename is validated by Gecko",
+                        response.headers["content-disposition"],
+                        equalTo("attachment; filename=\"$expected\""),
+                    )
+                }
+            }
+        )
+    }
+
+    @Test
+    fun downloadFileNameReplacesBidiOverride() {
+        assertDownloadFileName("attachment; filename*=UTF-8''file%E2%80%AEtxt.html", "file_txt.html")
+    }
+
+    @Test
+    fun downloadFileNameReplacesPathSeparators() {
+        assertDownloadFileName("attachment; filename=\"dir/sub\\\\name.html\"", "dir_sub_name.html")
+    }
+
+    @Test
+    fun downloadFileNameReplacesIllegalCharacters() {
+        assertDownloadFileName("attachment; filename=\"a:b*c?d.html\"", "a_b_c_d.html")
+    }
+
     @IgnoreCrash
     @Test
     fun crashContent() {

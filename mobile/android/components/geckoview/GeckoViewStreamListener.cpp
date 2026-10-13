@@ -258,6 +258,8 @@ nsresult GeckoViewStreamListener::HandleWebResponse(nsIRequest* aRequest) {
     }
   }
 
+  AmendWebResponse(builder);
+
   java::WebResponse::GlobalRef response = builder->Build();
 
   SendWebResponse(response);
