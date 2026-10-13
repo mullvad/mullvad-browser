@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 error_var_unset() {
     echo "Environment variable \"$1\" needs to be set."
@@ -8,7 +8,7 @@ error_var_unset() {
     exit 1
 }
 
-required_arguments=( VERSION WEBHOOK )
+required_arguments=(VERSION WEBHOOK)
 for argument in "${required_arguments[@]}"; do
     if [ -z "${!argument}" ]; then
         error_var_unset "$argument"
@@ -16,18 +16,20 @@ for argument in "${required_arguments[@]}"; do
 done
 
 is_error() {
-    if [ "$(echo "$1" | jq ".[\"ok\"]")" = false ]; then
+    if [ "$(echo "$1" | jq '.["ok"]')" = false ]; then
         return 0
     fi
     return 1
 }
 
 error_reason() {
-    echo "$1" | jq ".[\"error\"]"
+    echo "$1" | jq '.["error"]'
 }
 
 url="https://dist.torproject.org/mullvadbrowser/$VERSION"
-update_response_commit=$(curl 'https://gitlab.torproject.org/tpo/applications/mullvad-browser-update-responses/-/refs/main/logs_tree/?format=json&offset=0' 2>/dev/null | jq -r '.[0] | .commit .id')
+update_response_commit=$(
+    curl 'https://gitlab.torproject.org/tpo/applications/mullvad-browser-update-responses/-/refs/main/logs_tree/?format=json&offset=0' 2>/dev/null | 
+        jq -r '.[0] | .commit .id')
 
 # send a message to a channel and tag the user in that message
 msg=$(
