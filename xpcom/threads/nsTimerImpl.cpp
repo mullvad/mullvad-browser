@@ -356,7 +356,8 @@ static void myNS_MeanAndStdDev(double n, double sumOfValues,
 }
 
 NS_IMPL_QUERY_INTERFACE(nsTimer, nsITimer)
-NS_IMPL_ADDREF(nsTimer)
+NS_IMPL_ADDREF_INHERITED(nsTimer, mozilla::SupportsThreadSafeWeakPtr<nsTimer>)
+NS_IMPL_RELEASE_INHERITED(nsTimer, mozilla::SupportsThreadSafeWeakPtr<nsTimer>)
 
 NS_IMPL_ISUPPORTS(nsTimerManager, nsITimerManager)
 
@@ -364,22 +365,7 @@ NS_IMETHODIMP nsTimerManager::GetTimers(nsTArray<RefPtr<nsITimer>>& aRetVal) {
   return gThreadWrapper.GetTimers(aRetVal);
 }
 
-NS_IMETHODIMP_(MozExternalRefCountType)
-nsTimer::Release(void) {
-  nsrefcnt count = --mRefCnt;
-  NS_LOG_RELEASE(this, count, "nsTimer");
-
-  if (count == 1) {
-    // Last ref, in nsTimerImpl::mITimer. Make sure the cycle is broken.
-    mImpl->CancelImpl(true);
-  } else if (count == 0) {
-    delete this;
-  }
-
-  return count;
-}
-
-nsTimerImpl::nsTimerImpl(nsITimer* aTimer, nsIEventTarget* aTarget)
+nsTimerImpl::nsTimerImpl(nsTimer* aTimer, nsIEventTarget* aTarget)
     : mEventTarget(aTarget),
       mIsInTimerThread(false),
       mType(0),
@@ -518,13 +504,7 @@ nsresult nsTimerImpl::InitWithClosureCallback(
 }
 
 nsresult nsTimerImpl::Cancel() {
-  CancelImpl(false);
-  return NS_OK;
-}
-
-void nsTimerImpl::CancelImpl(bool aClearITimer) {
   Callback cbTrash{UnknownCallback{}};
-  RefPtr<nsITimer> timerTrash;
 
   {
     MutexAutoLock lock(mMutex);
@@ -534,17 +514,9 @@ void nsTimerImpl::CancelImpl(bool aClearITimer) {
     // unlocked.
     std::swap(cbTrash, mCallback);
     mTimerSeq = 0;
-
-    // Don't clear this if we're firing; once Fire returns, we'll get this call
-    // again.
-    if (aClearITimer && !mFiring) {
-      MOZ_RELEASE_ASSERT(
-          mITimer,
-          "mITimer was nulled already! "
-          "This indicates that someone has messed up the refcount on nsTimer!");
-      timerTrash.swap(mITimer);
-    }
   }
+
+  return NS_OK;
 }
 
 nsresult nsTimerImpl::SetDelay(uint32_t aDelay) {
@@ -684,10 +656,10 @@ void nsTimerImpl::Fire(uint64_t aTimerSeq) {
   uint32_t oldDelay;
   TimeStamp oldTimeout;
   Callback callbackDuringFire{UnknownCallback{}};
-  nsCOMPtr<nsITimer> timer;
+  RefPtr<nsTimer> timer;
 
   {
-    // Don't fire callbacks or fiddle with refcounts when the mutex is locked.
+    // Don't fire callbacks or release references while the mutex is locked.
     // If some other thread Cancels/Inits after this, they're just too late.
     MutexAutoLock lock(mMutex);
     if (aTimerSeq != mTimerSeq) {
@@ -700,15 +672,19 @@ void nsTimerImpl::Fire(uint64_t aTimerSeq) {
     // mTimers list.
     MOZ_ASSERT(!mIsInTimerThread);
 
+    // Keep the nsITimer alive during Fire, so the callback can use it even if
+    // its owner drops its reference meanwhile. If the owner already dropped
+    // its last reference, the nsTimer is being destroyed and will cancel us.
+    timer = RefPtr<nsTimer>(mITimer);
+    if (!timer) {
+      return;
+    }
+
     ++mFiring;
     callbackDuringFire = mCallback;
     oldType = mType;
     oldDelay = mDelay.ToMilliseconds();
     oldTimeout = mTimeout;
-    // Ensure that the nsITimer does not unhook from the nsTimerImpl during
-    // Fire; this will cause null pointer crashes if the user of the timer drops
-    // its reference, and then uses the nsITimer* passed in the callback.
-    timer = mITimer;
   }
 
   AUTO_PROFILER_LABEL("nsTimerImpl::Fire", OTHER);
@@ -833,7 +809,7 @@ nsresult nsTimerImpl::GetName(nsACString& aName) {
   return NS_OK;
 }
 
-nsTimer::~nsTimer() = default;
+nsTimer::~nsTimer() { mImpl->Cancel(); }
 
 size_t nsTimer::SizeOfIncludingThis(mozilla::MallocSizeOf aMallocSizeOf) {
   return aMallocSizeOf(this);

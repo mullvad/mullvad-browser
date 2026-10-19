@@ -14,6 +14,7 @@
 
 #include "mozilla/Mutex.h"
 #include "mozilla/StaticMutex.h"
+#include "mozilla/ThreadSafeWeakPtr.h"
 #include "mozilla/TimeStamp.h"
 #include "mozilla/Variant.h"
 #include "mozilla/Logging.h"
@@ -28,6 +29,7 @@ extern mozilla::LogModule* GetTimerLog();
    {0x84, 0x27, 0xfb, 0xab, 0x44, 0xf2, 0x9b, 0xc8}}
 
 class nsIObserver;
+class nsTimer;
 
 namespace mozilla {
 class LogModule;
@@ -46,10 +48,9 @@ class nsTimerImpl {
     // and used the timer.
     //
     // Further, note that this should never fail even with a misbehaving user,
-    // because nsTimer::Release checks for a refcount of 1 with an armed timer
-    // (a timer whose only reference is from the timer thread) and when it hits
-    // this will remove the timer from the timer thread and thus destroy the
-    // last reference, preventing this situation from occurring.
+    // because nsTimer's destructor cancels the timer, which removes it from the
+    // timer thread and drops the callback, preventing this situation from
+    // occurring.
     MOZ_ASSERT(
         mCallback.is<UnknownCallback>() || mEventTarget->IsOnCurrentThread(),
         "Must not release mCallback off-target without canceling");
@@ -58,7 +59,7 @@ class nsTimerImpl {
  public:
   typedef mozilla::TimeStamp TimeStamp;
 
-  nsTimerImpl(nsITimer* aTimer, nsIEventTarget* aTarget);
+  nsTimerImpl(nsTimer* aTimer, nsIEventTarget* aTarget);
   NS_INLINE_DECL_THREADSAFE_REFCOUNTING(nsTimerImpl)
   NS_DECL_NON_VIRTUAL_NSITIMER
 
@@ -66,7 +67,6 @@ class nsTimerImpl {
   static void Shutdown();
 
   void SetDelayInternal(uint32_t aDelay, TimeStamp aBase = TimeStamp::Now());
-  void CancelImpl(bool aClearITimer);
 
   void Fire(uint64_t aTimerSeq);
 
@@ -159,7 +159,7 @@ class nsTimerImpl {
   // been removed from the TimerThread's list.
   mozilla::TimeStamp mTimeout MOZ_GUARDED_BY(mMutex);
 
-  RefPtr<nsITimer> mITimer MOZ_GUARDED_BY(mMutex);
+  const mozilla::ThreadSafeWeakPtr<nsTimer> mITimer;
   mozilla::Mutex mMutex;
   nsCString mName MOZ_GUARDED_BY(mMutex);
   Callback mCallback MOZ_GUARDED_BY(mMutex);
@@ -172,17 +172,21 @@ class nsTimerImpl {
   static double sDeltaNum MOZ_GUARDED_BY(sDeltaMutex);
 };
 
-class nsTimer final : public nsITimer {
+class nsTimer final : public mozilla::SupportsThreadSafeWeakPtr<nsTimer>,
+                      public nsITimer {
   explicit nsTimer(nsIEventTarget* aTarget)
       : mImpl(new nsTimerImpl(this, aTarget)) {}
 
   virtual ~nsTimer();
 
+  friend class mozilla::SupportsThreadSafeWeakPtr<nsTimer>;
+
  public:
   friend class TimerThread;
   friend class nsTimerEvent;
 
-  NS_DECL_THREADSAFE_ISUPPORTS
+  MOZ_DECLARE_REFCOUNTED_TYPENAME(nsTimer)
+  NS_DECL_ISUPPORTS_INHERITED
   NS_FORWARD_SAFE_NSITIMER(mImpl);
 
   // NOTE: This constructor is not exposed on `nsITimer` as NS_FORWARD_SAFE_
@@ -203,8 +207,6 @@ class nsTimer final : public nsITimer {
   static nsresult XPCOMConstructor(REFNSIID aIID, void** aResult);
 
  private:
-  // nsTimerImpl holds a strong ref to us. When our refcount goes to 1, we will
-  // null this to break the cycle.
   RefPtr<nsTimerImpl> mImpl;
 };
 
