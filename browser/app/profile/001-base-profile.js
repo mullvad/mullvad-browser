@@ -425,10 +425,6 @@ pref("network.trr.default_provider_uri", "");
 // Vice-versa, if it is false, TRR will override any /etc/hosts customization.
 pref("network.trr.exclude-etc-hosts", false);
 
-// Disable crlite
-pref("security.remote_settings.crlite_filters.enabled", false);
-pref("security.pki.crlite_mode", 0);
-
 // Disable website password breach alerts
 pref("signon.management.page.breach-alerts.enabled", false, locked);
 // tor-browser#42814: Opt out from Firefox relay by default.
@@ -504,8 +500,6 @@ pref("dom.vr.enabled", false); // Bug 21607: Disable WebVR for now
 pref("security.webauth.webauthn", false); // Bug 26614: Disable Web Authentication API for now
 // Disable SAB, no matter if the sites are cross-origin isolated.
 pref("dom.postMessage.sharedArrayBuffer.withCOOP_COEP", false);
-// Disable intermediate preloading (Bug 30682)
-pref("security.remote_settings.intermediates.enabled", false);
 // Bug 2874: Block Components.interfaces from content
 pref("dom.use_components_shim", false);
 // Enable letterboxing
