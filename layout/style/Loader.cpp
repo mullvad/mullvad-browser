@@ -1548,14 +1548,13 @@ Loader::Completed Loader::ParseSheet(
 
 void Loader::AddPerformanceEntryForCachedSheet(SheetLoadData& aLoadData) {
   MOZ_ASSERT(aLoadData.mURI);
-
-  if (!aLoadData.mNetworkMetadata) {
+  if (!mDocument || !aLoadData.mNetworkMetadata) {
     return;
   }
-  if (!mDocument) {
+  if (aLoadData.mParentData &&
+      !aLoadData.mParentData->mSheet->IsOriginClean()) {
     return;
   }
-
   nsAutoCString name;
   aLoadData.mURI->GetSpec(name);
   NS_ConvertUTF8toUTF16 entryName(name);
