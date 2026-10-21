@@ -329,12 +329,12 @@ export class MarionetteCommandsChild extends JSWindowActorChild {
    * Click an element.
    */
   async clickElement(options = {}) {
-    const { capabilities, elem } = options;
+    const { accessibilityChecks, elem, webdriverClick } = options;
 
     return lazy.interaction.clickElement(
       elem,
-      capabilities["moz:accessibilityChecks"],
-      capabilities["moz:webdriverClick"]
+      accessibilityChecks,
+      webdriverClick
     );
   }
 
@@ -623,48 +623,45 @@ export class MarionetteCommandsChild extends JSWindowActorChild {
    * Determine the element displayedness of the given web element.
    */
   async isElementDisplayed(options = {}) {
-    const { capabilities, elem } = options;
+    const { accessibilityChecks, elem } = options;
 
-    return lazy.interaction.isElementDisplayed(
-      elem,
-      capabilities["moz:accessibilityChecks"]
-    );
+    return lazy.interaction.isElementDisplayed(elem, accessibilityChecks);
   }
 
   /**
    * Check if element is enabled.
    */
   async isElementEnabled(options = {}) {
-    const { capabilities, elem } = options;
+    const { accessibilityChecks, elem } = options;
 
-    return lazy.interaction.isElementEnabled(
-      elem,
-      capabilities["moz:accessibilityChecks"]
-    );
+    return lazy.interaction.isElementEnabled(elem, accessibilityChecks);
   }
 
   /**
    * Determine whether the referenced element is selected or not.
    */
   async isElementSelected(options = {}) {
-    const { capabilities, elem } = options;
+    const { accessibilityChecks, elem } = options;
 
-    return lazy.interaction.isElementSelected(
-      elem,
-      capabilities["moz:accessibilityChecks"]
-    );
+    return lazy.interaction.isElementSelected(elem, accessibilityChecks);
   }
 
   /*
    * Send key presses to element after focusing on it.
    */
   async sendKeysToElement(options = {}) {
-    const { capabilities, elem, text } = options;
+    const {
+      accessibilityChecks,
+      elem,
+      strictFileInteractability,
+      text,
+      webdriverClick,
+    } = options;
 
     const opts = {
-      strictFileInteractability: capabilities.strictFileInteractability,
-      accessibilityChecks: capabilities["moz:accessibilityChecks"],
-      webdriverClick: capabilities["moz:webdriverClick"],
+      strictFileInteractability,
+      accessibilityChecks,
+      webdriverClick,
     };
 
     return lazy.interaction.sendKeysToElement(elem, text, opts);

@@ -164,8 +164,9 @@ export class MarionetteCommandsParent extends JSWindowActorParent {
 
   clickElement(webEl, capabilities) {
     return this.sendQuery("MarionetteCommandsParent:clickElement", {
+      accessibilityChecks: capabilities.get("moz:accessibilityChecks"),
       elem: webEl,
-      capabilities: capabilities.toJSON(),
+      webdriverClick: capabilities.get("moz:webdriverClick"),
     });
   }
 
@@ -288,30 +289,32 @@ export class MarionetteCommandsParent extends JSWindowActorParent {
 
   async isElementDisplayed(webEl, capabilities) {
     return this.sendQuery("MarionetteCommandsParent:isElementDisplayed", {
-      capabilities: capabilities.toJSON(),
+      accessibilityChecks: capabilities.get("moz:accessibilityChecks"),
       elem: webEl,
     });
   }
 
   async isElementEnabled(webEl, capabilities) {
     return this.sendQuery("MarionetteCommandsParent:isElementEnabled", {
-      capabilities: capabilities.toJSON(),
+      accessibilityChecks: capabilities.get("moz:accessibilityChecks"),
       elem: webEl,
     });
   }
 
   async isElementSelected(webEl, capabilities) {
     return this.sendQuery("MarionetteCommandsParent:isElementSelected", {
-      capabilities: capabilities.toJSON(),
+      accessibilityChecks: capabilities.get("moz:accessibilityChecks"),
       elem: webEl,
     });
   }
 
   async sendKeysToElement(webEl, text, capabilities) {
     return this.sendQuery("MarionetteCommandsParent:sendKeysToElement", {
-      capabilities: capabilities.toJSON(),
+      accessibilityChecks: capabilities.get("moz:accessibilityChecks"),
       elem: webEl,
+      strictFileInteractability: capabilities.get("strictFileInteractability"),
       text,
+      webdriverClick: capabilities.get("moz:webdriverClick"),
     });
   }
 
