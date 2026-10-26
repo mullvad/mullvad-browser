@@ -831,6 +831,9 @@ pref("dom.text-recognition.enabled", false);
 // tor-browser#45243: Disable taskbar tabs, as they need more polish from us.
 pref("browser.taskbarTabs.enabled", false);
 
+// tor-browser#45411: Remove Firefox's mascot from about:neterror.
+pref("browser.netError.illustration.enabled", false);
+
 #ifdef XP_WIN
 pref("browser.taskbar.lists.enabled", false);
 pref("browser.taskbar.lists.frequent.enabled", false);
