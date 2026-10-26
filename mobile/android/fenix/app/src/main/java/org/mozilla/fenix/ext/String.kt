@@ -6,9 +6,12 @@ package org.mozilla.fenix.ext
 
 import android.text.Editable
 import androidx.compose.runtime.Composable
+import androidx.core.net.toUri
 import mozilla.components.compose.base.utils.inComposePreview
 import mozilla.components.lib.publicsuffixlist.PublicSuffixList
 import mozilla.components.support.base.utils.MAX_URI_LENGTH
+import mozilla.components.support.ktx.android.net.isHttpOrHttps
+import mozilla.components.support.ktx.kotlin.isIpv4OrIpv6
 import mozilla.components.support.ktx.kotlin.toShortUrl
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 import org.mozilla.fenix.components.components
@@ -81,4 +84,25 @@ internal suspend fun String.getBaseDomainUrl(publicSuffixList: PublicSuffixList)
         .await()
 
     return registrableDomain ?: host
+}
+
+/**
+ * Returns a label identifying where a download came from, for display in the downloads list.
+ *
+ * For http(s) URLs (including blob: URLs wrapping them) this is the registrable domain or IP address, e.g.
+ * "https://www.mozilla.org/a/b" returns "mozilla.org". data: and blob: URLs without a trustworthy host return "(data)"
+ * as a localized string. Anything else returns the host on fallback, or an empty string if no host can be determined.
+ *
+ * @param publicSuffixList The [PublicSuffixList] used to resolve the registrable domain.
+ * @param dataLabel A localized label to display for data origin URLs - e.g. (data)
+ * @return A url formatted for display for downloads.
+ */
+internal suspend fun String.toDownloadDisplayUrl(publicSuffixList: PublicSuffixList, dataLabel: String): String {
+    val uri = removePrefix("blob:").toUri()
+    val host = uri.host?.lowercase()?.takeIf { uri.isHttpOrHttps && it.isNotEmpty() }
+    if (host?.removeSurrounding("[", "]")?.isIpv4OrIpv6() == true) {
+        return host
+    }
+    val baseUrl = host?.let { publicSuffixList.getPublicSuffixPlusOne(host).await() ?: host }
+    return baseUrl ?: toUri().scheme?.lowercase()?.takeIf { it == "data" || it == "blob" }?.let { dataLabel }.orEmpty()
 }

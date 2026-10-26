@@ -87,6 +87,7 @@ class DownloadUIMapperMiddleware(
         fileName = fileName,
         filePath = filePath,
         directoryPath = directoryPath,
+        // this is used for search, not display
         displayedShortUrl = url.getBaseDomainUrl(publicSuffixList),
         contentType = contentType,
         status = status.toFileItemStatus(progress = progress),

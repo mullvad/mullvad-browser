@@ -71,6 +71,7 @@ internal object DownloadUIMiddlewareProvider {
             context = applicationContext,
             fileSizeFormatter = applicationContext.components.core.fileSizeFormatter,
             downloadEstimator = applicationContext.components.core.downloadEstimator,
+            publicSuffixList = applicationContext.components.publicSuffixList,
         ),
     )
 
