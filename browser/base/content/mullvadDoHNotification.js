@@ -13,6 +13,11 @@ window.addEventListener("load", () => {
 
     init() {
       Services.prefs.addObserver(this.showPref, this);
+      window.addEventListener("unload", () => {
+        if (!this.shown) {
+          Services.prefs.removeObserver(this.showPref, this);
+        }
+      });
       this.maybeShow();
     },
 
