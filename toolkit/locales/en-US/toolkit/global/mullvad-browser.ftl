@@ -55,3 +55,8 @@ mullvad-preferences-doh-radio-off =
 mullvad-doh-notification-body = <strong>Your default DNS Over HTTPS settings have been changed.</strong> Mullvad secure DNS service is being discontinued.
 mullvad-doh-notification-settings-button =
     .label = Review settings
+
+## DNS over HTTPS migration notification for french quad9 users
+
+# The first sentence should be wrapped in '<strong>' and '</strong>'.
+mullvad-quad9-france-dns-error-warning = 🇫🇷 <strong>Are you in France?</strong> You might need to change your DNS provider to Cloudflare in the DNS settings.
