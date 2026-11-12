@@ -12,7 +12,7 @@ pref("browser.toolbars.bookmarks.visibility", "never");
 pref("network.trr.uri", "https://doh-mullvad.quad9.net/dns-query");
 pref("network.trr.default_provider_uri", "https://doh-mullvad.quad9.net/dns-query");
 pref("network.trr.mode", 3);
-pref("doh-rollout.provider-list", "[{\"uri\":\"https://doh-mullvad.quad9.net/dns-query\",\"UIName\":\"Quad9 - no threat blocking\",\"schema\":0,\"autoDefault\":false,\"canonicalName\":\"\",\"id\":\"quad9-no-threat-blocking\",\"last_modified\":0},{\"uri\":\"https://dns.quad9.net/dns-query\",\"UIName\":\"Quad9 - secure: threat blocking\",\"schema\":0,\"autoDefault\":true,\"canonicalName\":\"\",\"id\":\"quad9-threat-blocking\",\"last_modified\":0}]");
+pref("doh-rollout.provider-list", "[{\"uri\":\"https://doh-mullvad.quad9.net/dns-query\",\"UIName\":\"Quad9 - no threat blocking\",\"schema\":0,\"autoDefault\":false,\"canonicalName\":\"\",\"id\":\"quad9-no-threat-blocking\",\"last_modified\":0},{\"uri\":\"https://dns.quad9.net/dns-query\",\"UIName\":\"Quad9 - secure: threat blocking\",\"schema\":0,\"autoDefault\":true,\"canonicalName\":\"\",\"id\":\"quad9-threat-blocking\",\"last_modified\":0},{\"uri\":\"https://cloudflare-dns.com/dns-query\",\"UIName\":\"Cloudflare\",\"schema\":0,\"autoDefault\":false,\"canonicalName\":\"\",\"id\":\"cloudflare\",\"last_modified\":0}]");
 // mullvad-browser#122: Audit DoH heuristics
 pref("doh-rollout.disable-heuristics", true);
 // mullvad-browser#537: migrate users from Mullvad DoH service.
