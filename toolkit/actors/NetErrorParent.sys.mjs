@@ -280,6 +280,17 @@ export class NetErrorParent extends EscapablePageParent {
         win.openPreferences("privacy-doh");
         break;
       }
+      // mullvad-browser#594: Send user directly to the advanced settings to configure their DoH server
+      case "OpenTRRAdvancedSettings": {
+        let browser = this.browsingContext.top.embedderElement;
+        if (!browser) {
+          break;
+        }
+
+        let win = browser.documentGlobal;
+        win.openPreferences("dnsOverHttps");
+        break;
+      }
     }
   }
 }

@@ -108,6 +108,8 @@ export let RemotePageAccessManager = {
         "Browser:ResetEnterpriseRootsPref",
         "DisplayOfflineSupportPage",
         "OpenTRRPreferences",
+        // mullvad-browser#594: new async message to go directly to advanced DoH settings
+        "OpenTRRAdvancedSettings",
       ],
       RPMCheckAlternateHostAvailable: ["*"],
       RPMRecordGleanEvent: [
