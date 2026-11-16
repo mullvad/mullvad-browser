@@ -525,7 +525,9 @@ function initPage() {
       }
       let trrSettingsButton = document.getElementById("trrSettingsButton");
       trrSettingsButton.addEventListener("click", () => {
-        RPMSendAsyncMessage("OpenTRRPreferences");
+        // mullvad-browser#594: Send user directly to the advanced settings rather than the parent page
+        // since users will need to click thorugh advanced to make changes anyway
+        RPMSendAsyncMessage("OpenTRRAdvancedSettings");
       });
       trrSettingsButton.hidden = false;
       let message = document.getElementById("trrOnlyMessage");
