@@ -14,4 +14,22 @@ ignore = [
   "RUSTSEC-2026-0367",
   "RUSTSEC-2026-0368",
   "RUSTSEC-2026-0369",
+  # zip <https://bugzilla.mozilla.org/show_bug.cgi?id=2088053>
+  "RUSTSEC-2026-0429",
+  # zip <https://bugzilla.mozilla.org/show_bug.cgi?id=2094051>
+  # We don't enable aes-crypto nor use ZipStreamReader.
+  "RUSTSEC-2026-0545",
+  "RUSTSEC-2026-0548",
+  # unmaintained warnings <https://bugzilla.mozilla.org/show_bug.cgi?id=2089569>
+  "RUSTSEC-2026-0374",
+  "RUSTSEC-2026-0441",
+  "RUSTSEC-2024-0449",
+  "RUSTSEC-2026-0542",
+  "RUSTSEC-2026-0543",
+  # tokio soundness bug <https://bugzilla.mozilla.org/show_bug.cgi?id=2089569>
+  # we don't deploy tokio, so this is low priority
+  "RUSTSEC-2026-0386",
+  # libsqlite3-sys bundled SQLite <https://bugzilla.mozilla.org/show_bug.cgi?id=2090944>
+  # we build with in_gecko and link third_party/sqlite3, not the bundled copy
+  "RUSTSEC-2026-0459",
 ]
