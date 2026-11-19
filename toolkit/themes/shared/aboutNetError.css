@@ -185,6 +185,12 @@ button:disabled {
   margin-block-end: var(--space-large);
 }
 
+#mullvadQuad9DNSInfo {
+  --message-bar-background-color: var(--background-color-information);
+  --message-bar-icon-background-color: var(--background-color-information);
+  --message-bar-icon-color: var(--icon-color-information);
+}
+
 /* Felt Privacy v1 LARGER SCREEN! */
 @media -moz-pref("security.certerrors.felt-privacy-v1") {
   .felt-privacy-body {
