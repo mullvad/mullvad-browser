@@ -58,5 +58,6 @@ mullvad-doh-notification-settings-button =
 
 ## DNS over HTTPS migration notification for french quad9 users
 
-# The first sentence should be wrapped in '<strong>' and '</strong>'.
-mullvad-quad9-france-dns-error-warning = 🇫🇷 <strong>Are you in France?</strong> You might need to change your DNS provider to Cloudflare in the DNS settings.
+mullvad-quad9-france-dns-error-warning =
+  .heading = 🇫🇷 Are you in France?
+  .message = You might need to change your DNS provider to Cloudflare in the DNS settings.
